@@ -1,0 +1,14 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+namespace Adv{
+    [CreateAsetMenu(menuName = (""), fileName = (""))]
+    public class #SCRIPTNAME# : ScriptableObject
+    {
+        
+        #NOTRIM#
+    }
+}
+#ROOTNAMESPACEEND#
