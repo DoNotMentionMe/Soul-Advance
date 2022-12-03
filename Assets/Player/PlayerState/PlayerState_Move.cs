@@ -11,7 +11,7 @@ namespace Adv
         {
             base.Enter();
             //anim.Play("Walk");
-            apPortrait.CrossFade("Walk", 0.1f);
+            animManager.CrossFade(AnimName.Walk);
             NotGroundedTime = 0f;
         }
 

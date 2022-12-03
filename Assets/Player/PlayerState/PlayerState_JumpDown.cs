@@ -10,7 +10,7 @@ namespace Adv
         {
             base.Enter();
             // anim.Play("JumpDown");
-            apPortrait.CrossFade("JumpDown", 0.1f);
+            animManager.CrossFade(AnimName.JumpDown, 0f);
             if (ctler.ChangeableJump)
                 ctler.DecelerationWhenChangeableJump();
         }

@@ -6,16 +6,13 @@ namespace Adv
 {
     public class PlayerState_Roll : PlayerState
     {
-        private float endTimer;
         private float NotGroundedTime = -100f;
 
         public override void Enter()
         {
             base.Enter();
 
-            endTimer = 0;
-            //anim.Play("Roll");
-            apPortrait.CrossFade("Roll");
+            animManager.CrossFade(AnimName.Roll);
             NotGroundedTime = 0f;
         }
 
@@ -39,6 +36,14 @@ namespace Adv
                 else if (NotGroundedTime > ctler.LeaveGroundJumpBufferTime)
                     FSM.SwitchState(typeof(PlayerState_JumpDown));
             }
+            //翻滚结束，进入站立状态
+            else if (animManager.IsAnimEnded(AnimName.Roll2))
+            {
+                if (input.Move)
+                    FSM.SwitchState(typeof(PlayerState_Move));
+                else
+                    FSM.SwitchState(typeof(PlayerState_Idle));
+            }
         }
 
         public override void PhysicUpdate()
@@ -47,16 +52,6 @@ namespace Adv
 
             //翻滚移速判定
             ctler.Rolling(input.AxesX);
-
-            //翻滚结束，进入站立状态
-            endTimer += Time.fixedDeltaTime;
-            if (endTimer >= ctler.RollLength)
-            {
-                if (input.Move)
-                    FSM.SwitchState(typeof(PlayerState_Move));
-                else
-                    FSM.SwitchState(typeof(PlayerState_Idle));
-            }
         }
     }
 }

@@ -6,16 +6,11 @@ namespace Adv
 {
     public class PlayerState_JumpUp : PlayerState_OnAir
     {
-        public AnyPortrait.apAnimPlayData JumpUp;
-
         public override void Enter()
         {
             base.Enter();
             //anim.Play("JumpUp");
-            if (JumpUp != null)
-                apPortrait.Play(JumpUp);
-            else
-                JumpUp = apPortrait.Play("JumpUp");
+            animManager.CrossFade(AnimName.JumpUp);
             ctler.Jump();
         }
 

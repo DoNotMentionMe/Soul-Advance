@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,9 +14,11 @@ namespace Adv
         public Bool JumpFrame = new Bool(false);//只有按下瞬间那一帧为true
         public Bool MoveFrame = new Bool(false);//只有按下瞬间那一帧为true
         public Bool RollFrame = new Bool(false);//只有按下瞬间那一帧为true
+        public Bool AttackFrame = new Bool(false);
 
         public bool Jump { get; set; }//记录按键状态
         public bool Roll { get; set; }
+        public bool Attack { get; set; }
         public bool Move => AxesX != 0;
 
         public float AxesX => axes.x;
@@ -83,6 +86,20 @@ namespace Adv
             else if (context.canceled)
             {
                 Roll = false;
+            }
+        }
+
+        public void OnAttack(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                Attack = true;
+                AttackFrame.Value = true;
+                StartSetBoolFalse(AttackFrame);
+            }
+            else if (context.canceled)
+            {
+                Attack = false;
             }
         }
 

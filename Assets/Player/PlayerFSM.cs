@@ -15,6 +15,7 @@ namespace Adv
         private PlayerController ctler;
         private PlayerInput input;
         [SerializeField] apPortrait apPortrait;
+        [SerializeField] PlayerAnimManager animManager;
 
 
         private void Awake()
@@ -41,6 +42,7 @@ namespace Adv
             Register(new PlayerState_WallClimb());
             Register(new PlayerState_HasWallClimbed());
             Register(new PlayerState_Roll());
+            Register(new PlayerState_Attack());
         }
 
         private void OnEnable()
@@ -60,6 +62,7 @@ namespace Adv
                 ctler,
                 input,
                 apPortrait,
+                animManager,
                 this);
             stateTable.Add(newState.GetType(), newState);
         }

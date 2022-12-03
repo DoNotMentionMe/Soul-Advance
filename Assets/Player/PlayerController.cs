@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 namespace Adv
 {
@@ -15,9 +16,7 @@ namespace Adv
         public float ClimbUpJumpBufferTime => climbUpJumpBufferTime;
         public float WallJumpBufferTimeWithnOnAir => wallJumpBufferTimeWithOnAir;
         public float WallJumpBufferTimeWithWallSlide => wallJumpBufferTimeWithWallSlide;
-        public float RollLength => RollClip.length;
-        public float WallClimbLength => WallClimbClip.length;
-        public float WallClimbedUpLength => WallClimbedUpClip.length;
+        public bool IsAttacking => isAttacking;
         public bool ChangeableJump => changeableJump;
         public bool JumpDown => mRigidbody.velocity.y <= 0;
         public bool Grounded => GroundCheck.IsTriggered;
@@ -35,6 +34,10 @@ namespace Adv
         [Header("基本物理属性")]
         [SerializeField] float Gravity;
         [SerializeField] float MaxFallSpeed;
+        [Header("玩家物理属性：攻击")]
+        [SerializeField] float pauseBeforeAttack;
+        [SerializeField] float attackDashSpeed;
+        [SerializeField] float attackDashTime;
         [Header("玩家物理属性：移动，翻滚")]
         [SerializeField] float MoveSpeed;
         [SerializeField] float MoveAcceleration;
@@ -42,7 +45,6 @@ namespace Adv
         [SerializeField] float RollSpeed;
         [SerializeField] float RollAcceleration;
         [SerializeField] float rollBufferTime;
-        [SerializeField] AnimationClip RollClip;
         [Header("玩家物理属性：普通跳跃")]
         [SerializeField] float JumpForce;
         [SerializeField, Range(0, 1)] float ScaleChangeableJump;
@@ -50,6 +52,7 @@ namespace Adv
         [SerializeField] float leaveGroundJumpBufferTime;
         [SerializeField] float climbUpJumpBufferTime;
         [Header("玩家物理属性：滑墙、跳墙、爬墙")]
+        [SerializeField] bool DebugWallClimbPos;
         [SerializeField] Vector2 WallJumpSpeed;
         [SerializeField] Vector2 WallLeaveSpeed;
         [SerializeField] float WallSlideSpeed;
@@ -61,8 +64,6 @@ namespace Adv
         [SerializeField] float WallClimbYOffset1;
         [SerializeField] float WallClimbXOffset2;
         [SerializeField] float WallClimbYOffset2;
-        [SerializeField] AnimationClip WallClimbClip;
-        [SerializeField] AnimationClip WallClimbedUpClip;
         [Header("检测器")]
         [SerializeField] Trigger2D GroundCheck;
         [SerializeField] Trigger2D WallClimbCheck_Font;
@@ -76,13 +77,17 @@ namespace Adv
         private Transform mTransform;
         private Vector2 WallClimbPos;
         private Vector2 EndWallClimbPos;
+        private Vector2 attackDirection;
         private bool IsStop;
+        private bool isAttacking;
         private enum SetCoord { X, Y }
+        private WaitForSeconds waitForFixedDeltatime;
 
         private void Awake()
         {
             mRigidbody = GetComponent<Rigidbody2D>();
             mTransform = transform;
+            waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
         }
 
         private void Update()
@@ -108,9 +113,26 @@ namespace Adv
 
         #region 对外API
 
+        public void Attack()
+        {
+            isAttacking = true;
+            StartCoroutine(PauseAndReadDirection(() =>
+            {
+                StartCoroutine(AttackDash(() =>
+                {
+                    isAttacking = false;
+                }));
+            }));
+        }
+
         public void Move(float AxesX)
         {
             Move(AxesX, MoveSpeed);
+        }
+
+        public void MoveWhenClimbUp(float AxesX)
+        {
+            MoveNoFlip(AxesX, ClimbUpMoveSpeed);
         }
 
         public void Rolling(float AxesX)
@@ -124,11 +146,6 @@ namespace Adv
                 Speed = RollSpeed;
             var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, mTransform.localScale.x * Speed, MoveAcceleration * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
-        }
-
-        public void MoveWhenClimbUp(float AxesX)
-        {
-            Move(AxesX, ClimbUpMoveSpeed);
         }
 
         public void Jump()
@@ -154,6 +171,13 @@ namespace Adv
                                             Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset2);
             }
             IsStop = true;
+#if UNITY_EDITOR
+            if (DebugWallClimbPos)
+            {
+                Debug.Log("WallClimbPos: " + WallClimbPos);
+                Debug.Log("EndWallClimbPos" + EndWallClimbPos);
+            }
+#endif
         }
         public void EndWallClimb()
         {
@@ -218,6 +242,25 @@ namespace Adv
             }
         }
 
+        private void MoveNoFlip(float AxesX, float Speed)
+        {
+            float direction = 0;
+            if (AxesX != 0)//加速
+            {
+                direction = Mathf.Sign(AxesX);
+
+                //SetScale((int)direction);
+
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * Time.fixedDeltaTime);
+                SetVelocity(SetCoord.X, VelocityX);
+            }
+            else
+            {
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * Time.fixedDeltaTime);
+                SetVelocity(SetCoord.X, VelocityX);
+            }
+        }
+
         /// <summary>
         /// 设置单个坐标方向的速度
         /// </summary>
@@ -242,6 +285,39 @@ namespace Adv
             {
                 mTransform.localScale *= Vector2.left + Vector2.up;
             }
+        }
+
+        IEnumerator PauseAndReadDirection(System.Action Callback)
+        {
+            Time.timeScale = 0;
+
+            float timer = 0f;
+            while (timer < pauseBeforeAttack)
+            {
+                timer += Time.unscaledDeltaTime;
+                //TODO 读取方向
+                yield return Time.unscaledDeltaTime;
+            }
+
+            Time.timeScale = 1;
+
+            Callback?.Invoke();
+        }
+
+        IEnumerator AttackDash(System.Action Callback)
+        {
+            float timer = 0f;
+
+            while (timer < attackDashTime)
+            {
+                timer += Time.fixedDeltaTime;
+                SetVelocity(SetCoord.X, mTransform.localScale.x * attackDashSpeed);
+                yield return waitForFixedDeltatime;
+            }
+
+            SetVelocity(SetCoord.X, 0);
+
+            Callback?.Invoke();
         }
     }
 }

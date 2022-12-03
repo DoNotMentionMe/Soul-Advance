@@ -6,24 +6,31 @@ namespace Adv
 {
     public class PlayerState_HasWallClimbed : PlayerState
     {
-        private float endTimer;
-        private AnyPortrait.apAnimPlayData HasWallClimbed;
 
         public override void Enter()
         {
             base.Enter();
 
-            endTimer = 0;
-            HasWallClimbed = apPortrait.CrossFade("HasWallClimbed", 0f);
+            animManager.Play(AnimName.HasWallClimbed);
+            ctler.EndWallClimb();
         }
 
         public override void LogicUpdate()
         {
             base.LogicUpdate();
-            if (input.JumpFrame.Value
-                || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime)
+
+            // else 
+            if (animManager.IsAnimEnded(AnimName.HasWallClimbed))
             {
-                FSM.SwitchState(typeof(PlayerState_JumpUp));
+                if (input.JumpFrame.Value
+                || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime)
+                {
+                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                }
+                else if (input.Move)
+                    FSM.SwitchState(typeof(PlayerState_Move));
+                else
+                    FSM.SwitchState(typeof(PlayerState_Idle));
             }
             // else if (!ctler.Grounded)
             // {
@@ -35,17 +42,8 @@ namespace Adv
         {
             base.PhysicUpdate();
 
-            ctler.MoveWhenClimbUp(input.AxesX);
+            //ctler.MoveWhenClimbUp(input.AxesX);
 
-            endTimer += Time.fixedDeltaTime;
-            //if (endTimer >= 0.5f)//HasWallClimbed动画长度
-            if (HasWallClimbed.PlaybackStatus == AnyPortrait.apAnimPlayData.AnimationPlaybackStatus.Ended)
-            {
-                if (input.Move)
-                    FSM.SwitchState(typeof(PlayerState_Move));
-                else
-                    FSM.SwitchState(typeof(PlayerState_Idle));
-            }
         }
     }
 }

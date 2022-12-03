@@ -16,7 +16,7 @@ namespace Adv
             FaceWhenEnterWallJump = ctler.PlayerFace;
             base.Enter();
             //anim.Play("JumpUp");
-            apPortrait.CrossFade("WallJump", 0f);
+            animManager.CrossFade(AnimName.WallJump, 0f);
             if (WallSlideObj == null)
                 WallSlideObj = FSM.stateTable[typeof(PlayerState_WallSlide)];
         }

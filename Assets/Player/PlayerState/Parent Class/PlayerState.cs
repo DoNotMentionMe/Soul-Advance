@@ -20,6 +20,7 @@ namespace Adv
         protected PlayerInput input;
         protected PlayerFSM FSM;
         protected AnyPortrait.apPortrait apPortrait;
+        protected PlayerAnimManager animManager;
 
         protected float stateFixedFrameCount = 0;
 
@@ -29,11 +30,13 @@ namespace Adv
                                 PlayerController playerController,
                                 PlayerInput playerInput,
                                 AnyPortrait.apPortrait apPortrait,
+                                PlayerAnimManager animManager,
                                 PlayerFSM FSM)
         {
             this.ctler = playerController;
             this.input = playerInput;
             this.apPortrait = apPortrait;
+            this.animManager = animManager;
             this.FSM = FSM;
         }
 

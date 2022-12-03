@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,12 +8,8 @@ namespace Adv
 {
     public class Action_PlayAnim : MonoBehaviour
     {
-        private apPortrait mApPortrait;
-
-        private void Awake()
-        {
-            mApPortrait = GetComponent<apPortrait>();
-        }
+        [SerializeField, TextArea(3, 8)] string commet;
+        [SerializeField] apPortrait mApPortrait;
 
         public void PlayAnim(string AnimName)
         {

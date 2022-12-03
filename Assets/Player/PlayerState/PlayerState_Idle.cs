@@ -15,7 +15,7 @@ namespace Adv
 
             //anim.Play("Idle");
             if (!FirstOnEnable)
-                apPortrait?.CrossFade("Idle", 0.1f);
+                animManager.CrossFade(AnimName.Idle);
             FirstOnEnable = false;
             NotGroundedTime = 0f;
 
@@ -43,6 +43,11 @@ namespace Adv
                 }
                 else if (NotGroundedTime > ctler.LeaveGroundJumpBufferTime)
                     FSM.SwitchState(typeof(PlayerState_JumpDown));
+            }
+            //攻击
+            else if (input.AttackFrame.Value)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
             }
             //翻滚
             else if (input.RollFrame.Value

@@ -14,7 +14,7 @@ namespace Adv
         {
             base.Enter();
             //anim.Play("WallSlide");
-            apPortrait.CrossFade("WallSlide", 0.1f);
+            animManager.CrossFade(AnimName.WallSlide);
             LeaveWallTimer = 0f;
             ReadyWallLeave = false;
             if (ctler.WallSlided_Font)
@@ -64,7 +64,6 @@ namespace Adv
 
             if (input.Jump && LeaveWallTimer <= ctler.WallJumpBufferTimeWithWallSlide)//缓冲时间内按跳跃，判定为WallJump
             {
-                Debug.Log("111");
                 FSM.SwitchState(typeof(PlayerState_WallJump));
             }
             else if (LeaveWallTimer > ctler.WallJumpBufferTimeWithWallSlide)

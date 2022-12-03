@@ -57,6 +57,7 @@ SpriteAtlas:
     - {fileID: 2998399236134586537, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 2924035223021205613, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -1890048837927716402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
+    - {fileID: -6459842044654494750, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 7274943532012348871, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 742301980862235905, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -2772278794834598402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
@@ -92,6 +93,7 @@ SpriteAtlas:
   - {fileID: -8135490077335551086, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -9155529020257638349, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 8000140162142989883, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
+  - {fileID: -6459842044654494750, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 742301980862235905, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 4580826509752286931, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 7113797731430264967, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
@@ -119,6 +121,7 @@ SpriteAtlas:
   - TilesTest_96_128_16_16
   - TilesTest_128_96_16_16
   - TilesTest_96_80_16_16
+  - TilesTest_64_48_16_16
   - TilesTest_64_96_16_16
   - TilesTest_128_64_16_16
   - TilesTest_16_112_16_16
