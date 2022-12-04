@@ -4,7 +4,7 @@ using UnityEngine;
 
 #ROOTNAMESPACEBEGIN#
 namespace Adv{
-    [CreateAsetMenu(menuName = (""), fileName = (""))]
+    [CreateAssetMenu(menuName = (""), fileName = (""))]
     public class #SCRIPTNAME# : ScriptableObject
     {
         

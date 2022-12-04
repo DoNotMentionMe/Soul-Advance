@@ -90,6 +90,12 @@ namespace Adv
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
         }
 
+        private void OnDestroy()
+        {
+            mTransform = null;
+            mRigidbody = null;
+        }
+
         private void Update()
         {
             if (IsStop)

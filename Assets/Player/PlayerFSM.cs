@@ -54,6 +54,8 @@ namespace Adv
         {
             stateTable.Clear();
             lastState = null;
+            input = null;
+            ctler = null;
         }
 
         public void Register(PlayerState newState)

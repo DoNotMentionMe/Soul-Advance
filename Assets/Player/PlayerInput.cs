@@ -38,6 +38,10 @@ namespace Adv
         private void OnDestroy()
         {
             DisableAllInputs();
+            JumpFrame = null;
+            MoveFrame = null;
+            RollFrame = null;
+            AttackFrame = null;
         }
 
         public void EnableGameplayInput() => playerInput.Gameplay.Enable();
