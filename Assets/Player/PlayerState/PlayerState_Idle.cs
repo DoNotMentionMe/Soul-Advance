@@ -15,7 +15,7 @@ namespace Adv
 
             //anim.Play("Idle");
             if (!FirstOnEnable)
-                animManager.CrossFade(AnimName.Idle);
+                animManager.Play(AnimName.Idle);
             FirstOnEnable = false;
             NotGroundedTime = 0f;
 

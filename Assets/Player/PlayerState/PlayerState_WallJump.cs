@@ -6,16 +6,18 @@ namespace Adv
 {
     public class PlayerState_WallJump : PlayerState_OnAir
     {
-        private bool HasWallJump;
+        //private bool HasWallJump;
         private float FaceWhenEnterWallJump;
         private IState WallSlideObj;
 
         public override void Enter()
         {
-            HasWallJump = false;
+            //HasWallJump = false;
             FaceWhenEnterWallJump = ctler.PlayerFace;
             base.Enter();
             //anim.Play("JumpUp");
+            effect.Release落地灰尘();
+            ctler.WallJump();
             animManager.Play(AnimName.WallJump);
             if (WallSlideObj == null)
                 WallSlideObj = FSM.stateTable[typeof(PlayerState_WallSlide)];
@@ -24,11 +26,11 @@ namespace Adv
         public override void LogicUpdate()
         {
             base.LogicUpdate();
-            if (!HasWallJump)//不知名物理BUG或状态转换问题，导致Enter执行WallJump会失效
-            {
-                HasWallJump = true;
-                ctler.WallJump();
-            }
+            // if (!HasWallJump)//不知名物理BUG或状态转换问题，导致Enter执行WallJump会失效
+            // {
+            //     HasWallJump = true;
+            //     //ctler.WallJump();
+            // }
 
             //爬上墙
             if (ctler.canWallClimb_Font && ctler.WallSlided_Font)

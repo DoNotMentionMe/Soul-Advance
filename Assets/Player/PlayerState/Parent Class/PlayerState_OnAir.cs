@@ -6,20 +6,22 @@ namespace Adv
 {
     public class PlayerState_OnAir : PlayerState
     {
-        protected bool BtnJumpInThisState;
+        //protected bool BtnJumpInThisState;
 
         public override void Enter()
         {
             base.Enter();
-            BtnJumpInThisState = false;
+            //BtnJumpInThisState = false;
         }
 
         public override void LogicUpdate()
         {
             base.LogicUpdate();
 
-            if (input.JumpFrame.Value && StateDuration > 0.1f) BtnJumpInThisState = true;
+            //if (input.JumpFrame.Value && StateDuration > 0.1f) BtnJumpInThisState = true;
 
+            if (input.RollFrame.Value)
+                FSM.SwitchState(typeof(PlayerState_Roll));
 
 
         }

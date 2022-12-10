@@ -7,6 +7,7 @@ using UnityEngine;
 namespace Adv
 {
     [TaskCategory("Custom/Rigidbody2D")]
+    [TaskDescription("以direction为横向方向设置速度")]
     public class MoveHorizontal : Action
     {
         [SerializeField] SharedRigidbody2D mRigidbody;

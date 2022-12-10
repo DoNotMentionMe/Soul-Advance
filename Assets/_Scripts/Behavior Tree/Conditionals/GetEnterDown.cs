@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace Adv
 {
-    [TaskCategory("Custom/Input")]
+    [TaskCategory("Custom/Conditional")]
     [TaskDescription("检测回车键的输入")]
     public class GetEnterDown : Conditional
     {

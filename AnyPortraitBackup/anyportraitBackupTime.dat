@@ -1,11 +1,11 @@
 ﻿Backup Table
-3
+4
 SampleScene
 animController
-16
+2
 2022
 12
-3
+10
 SampleScene
 剑盾兵
 9
@@ -17,4 +17,10 @@ SampleScene
 10
 2022
 12
-4
+9
+SampleScene
+PlayerAnim
+0
+2022
+12
+10

@@ -11,7 +11,7 @@ namespace Adv
         {
             base.Enter();
             //anim.Play("Walk");
-            animManager.CrossFade(AnimName.Walk);
+            animManager.Play(AnimName.Walk);
             NotGroundedTime = 0f;
         }
 
@@ -36,6 +36,11 @@ namespace Adv
                 }
                 else if (NotGroundedTime > ctler.LeaveGroundJumpBufferTime)
                     FSM.SwitchState(typeof(PlayerState_JumpDown));
+            }
+            //攻击
+            else if (input.AttackFrame.Value)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
             }
             //翻滚
             else if (input.RollFrame.Value

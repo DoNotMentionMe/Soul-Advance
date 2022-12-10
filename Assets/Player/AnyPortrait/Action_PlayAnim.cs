@@ -10,6 +10,7 @@ namespace Adv
     {
         [SerializeField, TextArea(3, 8)] string commet;
         [SerializeField] apPortrait mApPortrait;
+        [SerializeField] PlayerAnimManager playerAnimManager;
 
         public void PlayAnim(string AnimName)
         {

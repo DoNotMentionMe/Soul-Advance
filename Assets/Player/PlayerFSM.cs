@@ -8,18 +8,21 @@ namespace Adv
 {
     public class PlayerFSM : StateMachine
     {
-        //public static GameObject player;
+        public static PlayerFSM Player;
 
         public PlayerState lastState;
 
         private PlayerController ctler;
         private PlayerInput input;
-        [SerializeField] apPortrait apPortrait;
-        [SerializeField] PlayerAnimManager animManager;
+        private PlayerEffectPerformance effect;
+        public apPortrait apPortrait;
+        public PlayerAnimManager animManager;
 
 
         private void Awake()
         {
+            Player = this;
+
             // if (player == null)
             // {
             //     player = this.gameObject;
@@ -32,6 +35,7 @@ namespace Adv
 
             ctler = GetComponent<PlayerController>();
             input = GetComponent<PlayerInput>();
+            effect = GetComponent<PlayerEffectPerformance>();
 
             Register(new PlayerState_Idle());
             Register(new PlayerState_Move());
@@ -56,6 +60,7 @@ namespace Adv
             lastState = null;
             input = null;
             ctler = null;
+            effect = null;
         }
 
         public void Register(PlayerState newState)
@@ -63,6 +68,7 @@ namespace Adv
             newState.Initialize(
                 ctler,
                 input,
+                effect,
                 apPortrait,
                 animManager,
                 this);
@@ -79,7 +85,7 @@ namespace Adv
         private void OnGUI()
         {
 #if UNITY_EDITOR
-            //GUILayout.Label(currentState.GetType().ToString());
+            GUILayout.Label(currentState.GetType().ToString());
             //GUILayout.Label(playerInput.axesX.ToString());
 #endif
         }

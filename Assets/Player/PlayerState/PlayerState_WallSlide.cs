@@ -14,7 +14,7 @@ namespace Adv
         {
             base.Enter();
             //anim.Play("WallSlide");
-            animManager.CrossFade(AnimName.WallSlide);
+            animManager.Play(AnimName.WallSlide);
             LeaveWallTimer = 0f;
             ReadyWallLeave = false;
             if (ctler.WallSlided_Font)

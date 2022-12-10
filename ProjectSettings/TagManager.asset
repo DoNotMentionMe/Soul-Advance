@@ -15,7 +15,7 @@ TagManager:
   - Player
   - Enemy
   - EnemyAttack
-  - 
+  - PlayerAttack
   - 
   - 
   - 
@@ -41,4 +41,22 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 723934289
+    locked: 0
+  - name: Ground
+    uniqueID: 3077697661
+    locked: 0
+  - name: Enemy
+    uniqueID: 1559257001
+    locked: 0
+  - name: Player
+    uniqueID: 2081969501
+    locked: 0
+  - name: FontEffect
+    uniqueID: 363293955
+    locked: 0
+  - name: Fontgound
+    uniqueID: 726568869
     locked: 0

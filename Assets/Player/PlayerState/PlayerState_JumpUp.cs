@@ -10,7 +10,8 @@ namespace Adv
         {
             base.Enter();
             //anim.Play("JumpUp");
-            animManager.CrossFade(AnimName.JumpUp);
+            effect.Release落地灰尘();
+            animManager.Play(AnimName.JumpUp);
             ctler.Jump();
         }
 

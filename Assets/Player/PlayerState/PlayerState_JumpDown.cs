@@ -10,7 +10,7 @@ namespace Adv
         {
             base.Enter();
             // anim.Play("JumpDown");
-            animManager.CrossFade(AnimName.JumpDown, 0f);
+            animManager.CrossFade(AnimName.JumpDown);
             if (ctler.ChangeableJump)
                 ctler.DecelerationWhenChangeableJump();
         }
@@ -48,6 +48,7 @@ namespace Adv
             //落地
             else if (ctler.Grounded)
             {
+                effect.Release落地灰尘();
                 if (input.Move)
                     FSM.SwitchState(typeof(PlayerState_Move));
                 else

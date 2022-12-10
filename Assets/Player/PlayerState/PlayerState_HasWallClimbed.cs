@@ -13,6 +13,7 @@ namespace Adv
 
             animManager.Play(AnimName.HasWallClimbed);
             ctler.EndWallClimb();
+            effect.Release落地灰尘();
         }
 
         public override void LogicUpdate()
@@ -32,10 +33,10 @@ namespace Adv
                 else
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
-            // else if (!ctler.Grounded)
-            // {
-            //     FSM.SwitchState(typeof(PlayerState_JumpDown));
-            // }
+            else if (!ctler.Grounded)
+            {
+                FSM.SwitchState(typeof(PlayerState_JumpDown));
+            }
         }
 
         public override void PhysicUpdate()
@@ -43,6 +44,7 @@ namespace Adv
             base.PhysicUpdate();
 
             //ctler.MoveWhenClimbUp(input.AxesX);
+            ctler.Move(input.AxesX);
 
         }
     }

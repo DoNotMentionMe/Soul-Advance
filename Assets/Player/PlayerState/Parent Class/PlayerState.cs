@@ -18,9 +18,10 @@ namespace Adv
 
         protected PlayerController ctler;
         protected PlayerInput input;
-        protected PlayerFSM FSM;
+        protected PlayerEffectPerformance effect;
         protected AnyPortrait.apPortrait apPortrait;
         protected PlayerAnimManager animManager;
+        protected PlayerFSM FSM;
 
         protected float stateFixedFrameCount = 0;
 
@@ -29,12 +30,14 @@ namespace Adv
         public virtual void Initialize(
                                 PlayerController playerController,
                                 PlayerInput playerInput,
+                                PlayerEffectPerformance effect,
                                 AnyPortrait.apPortrait apPortrait,
                                 PlayerAnimManager animManager,
                                 PlayerFSM FSM)
         {
             this.ctler = playerController;
             this.input = playerInput;
+            this.effect = effect;
             this.apPortrait = apPortrait;
             this.animManager = animManager;
             this.FSM = FSM;
