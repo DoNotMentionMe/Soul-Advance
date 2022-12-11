@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using AnyPortrait;
+using DG.Tweening;
 
 namespace Adv
 {
@@ -20,6 +21,7 @@ namespace Adv
         private List<apAnimPlayData> animList = new List<apAnimPlayData>();
         private apAnimPlayData lastAnim;
         private apAnimPlayData currentAnim;
+        private bool ControlAnimSpeeding;
 
         private void Start()
         {
@@ -27,6 +29,28 @@ namespace Adv
             mApPortrait.Initialize();
         }
 
+        #region 控制函数
+
+        public void CurrentAnimSpeedSlowDownForAWhile(float speed, float controlTime)
+        {
+            if (ControlAnimSpeeding) return;
+            ControlAnimSpeeding = true;
+            CurrentAnimSpeedSlowDown(speed);
+            DOVirtual.DelayedCall(controlTime, () =>
+            {
+                CurrentAnimSpeedSlowDown(1);
+                ControlAnimSpeeding = false;
+            });
+        }
+
+        public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed);
+        public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
+        public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;
+
+        #endregion
+
+
+        #region 播放函数
         public void Play(AnimName animName)
         {
             GetLastAnim();
@@ -51,10 +75,6 @@ namespace Adv
             currentAnim = mApPortrait.CrossFadeQueued(animList[((int)animName)], fadeTime);
         }
 
-        public void CurrentAnimSpeedSlowDown(float speed) => currentAnim?.SetSpeed(speed);
-        public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
-        public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;
-
         private void GetLastAnim()
         {
             CurrentAnimSpeedSlowDown(1);
@@ -62,6 +82,8 @@ namespace Adv
             lastAnim = currentAnim;
             IsAttacking = false;
         }
+
+        #endregion
 
         #region 动画事件
         private void SlideToSlide2()

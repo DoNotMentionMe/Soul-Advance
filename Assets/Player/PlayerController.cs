@@ -87,9 +87,10 @@ namespace Adv
         private Vector2 EndWallClimbPos;
         private Vector2 attackDirection;
         private bool IsStop;
+        private bool FullControlVelocitying = false;
+        private float speedRatio = 1;//用来控制所有速度的比例
         private enum SetCoord { X, Y }
         private WaitForSeconds waitForFixedDeltatime;
-        private Tween AttackTween;
 
         private void Awake()
         {
@@ -97,24 +98,6 @@ namespace Adv
             mTransform = transform;
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
-            // AttackTween = DOVirtual.DelayedCall(pauseBeforeAttack, () =>
-            // {
-            //     effect.PlayAttackSound();
-            //     Time.timeScale = 1;
-            //     this.RunCoroutine(AttackDash()).OnCompleted += (attackDashCor) =>
-            //     {
-            //         isAttacking = false;
-            //         攻击碰撞体.SetCollEnable(false);
-            //     };
-            // })
-            // .OnPlay(() =>
-            // {
-            //     isAttacking = true;
-            //     攻击碰撞体.SetCollEnable(true);
-            //     Time.timeScale = 0;
-            // })
-            // .SetAutoKill(false)
-            // .Pause();
         }
 
         private void OnDestroy()
@@ -122,8 +105,6 @@ namespace Adv
             mTransform = null;
             mRigidbody = null;
             effect = null;
-            AttackTween.Kill();
-            AttackTween = null;
         }
 
         private void Update()
@@ -134,6 +115,8 @@ namespace Adv
 
         private void FixedUpdate()
         {
+            //重力计算
+            if (FullControlVelocitying) return;
             if (mRigidbody.velocity.y > -MaxFallSpeed)
             {
                 mRigidbody.velocity += Vector2.down * Gravity * Time.fixedDeltaTime;
@@ -149,38 +132,28 @@ namespace Adv
 
         #region 对外API
 
+        /// <summary>
+        /// 用于顿帧使用，该函数将使玩家速度按ratio比例降低ControlTime时间后恢复原速
+        /// </summary>
+        public void FullControlVelocity(float ratio, float ControlTime)
+        {
+            if (FullControlVelocitying) return;
+
+            FullControlVelocitying = true;
+            speedRatio = ratio;
+            mRigidbody.velocity *= ratio;
+            DOVirtual.DelayedCall(ControlTime, () =>
+            {
+                mRigidbody.velocity /= ratio;
+                speedRatio = 1;
+                FullControlVelocitying = false;
+            });
+        }
+
         public void Attack()
         {
             float direction = mTransform.localScale.x;
             SetVelocity(SetCoord.X, direction * attackMoveSpeed);
-            // StartCoroutine(PauseAndReadDirection(() =>
-            // {
-            //     StartCoroutine(AttackDash(() =>
-            //     {
-            //         isAttacking = false;
-            //         攻击碰撞体.SetCollEnable(false);
-            //     }));
-            // }));
-
-            // DOVirtual.DelayedCall(pauseBeforeAttack, () =>
-            // {
-            //     effect.PlayAttackSound();
-            //     Time.timeScale = 1;
-            //     this.RunCoroutine(AttackDash()).OnCompleted += (attackDashCor) =>
-            //     {
-            //         isAttacking = false;
-            //         攻击碰撞体.SetCollEnable(false);
-            //     };
-            // })
-            // .OnStart(() =>
-            // {
-            //     isAttacking = true;
-            //     攻击碰撞体.SetCollEnable(true);
-            //     Time.timeScale = 0;
-            // })
-            // .SetAutoKill(false);
-
-            //AttackTween.Restart();
         }
 
         public void Move(float AxesX)
@@ -190,22 +163,8 @@ namespace Adv
 
         public void MoveWhenAttack(float AxesX)
         {
-            // float direction = mTransform.localScale.x;
-            // float newDirection = AxesX * direction;
-            // if (newDirection > 0)//加速
-            // {
-            //     direction = Mathf.Sign(AxesX);
-
-            //SetScale((int)direction);
-
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * Time.fixedDeltaTime);
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * speedRatio * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
-            // }
-            // else if (newDirection == 0)
-            // {
-            //     var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * Time.fixedDeltaTime);
-            //     SetVelocity(SetCoord.X, direction * attackMoveSpeed);
-            // }
         }
 
         public void Rolling(float AxesX)
@@ -217,7 +176,7 @@ namespace Adv
                 Speed = RollSpeed - RollAcceleration;
             else
                 Speed = RollSpeed;
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, mTransform.localScale.x * Speed, MoveAcceleration * Time.fixedDeltaTime);
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, mTransform.localScale.x * Speed, MoveAcceleration * speedRatio * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
         }
 
@@ -269,14 +228,14 @@ namespace Adv
             mRigidbody.velocity = Vector2.zero;
             var wallJumpSpeed = WallJumpSpeed;
             wallJumpSpeed.x *= mTransform.localScale.x;
-            mRigidbody.velocity += wallJumpSpeed;
+            mRigidbody.velocity += wallJumpSpeed * speedRatio;
         }
 
         public void WallLeave()
         {
             var wallLeaveSpeed = WallLeaveSpeed;
             wallLeaveSpeed.x *= mTransform.localScale.x;
-            mRigidbody.velocity = wallLeaveSpeed;
+            mRigidbody.velocity = wallLeaveSpeed * speedRatio;
         }
 
         public void WallSlide()
@@ -305,12 +264,12 @@ namespace Adv
 
                 SetScale((int)direction);
 
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * speedRatio * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
             else
             {
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * speedRatio * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
         }
@@ -324,9 +283,9 @@ namespace Adv
         {
             var velocity = mRigidbody.velocity;
             if (coord == SetCoord.X)
-                velocity.x = value;
+                velocity.x = value * speedRatio;
             else
-                velocity.y = value;
+                velocity.y = value * speedRatio;
             mRigidbody.velocity = velocity;
         }
 
@@ -342,45 +301,5 @@ namespace Adv
                 mTransform.localScale *= Vector2.left + Vector2.up;
             }
         }
-
-        // IEnumerator PauseAndReadDirection(System.Action Callback)
-        // {
-        //     Time.timeScale = 0;
-
-        //     float timer = 0f;
-        //     while (timer < pauseBeforeAttack)
-        //     {
-        //         timer += Time.unscaledDeltaTime;
-        //         //TODO 读取方向
-        //         yield return Time.unscaledDeltaTime;
-        //     }
-
-        //     Time.timeScale = 1;
-
-        //     Callback?.Invoke();
-        // }
-
-        // IEnumerator AttackDash()
-        // {
-        //     if (isAttacking)
-        //     {
-        //         SetVelocity(SetCoord.X, mTransform.localScale.x * attackDashSpeed);
-        //         float timer = 0f;
-
-        //         while (timer < attackDashTime)
-        //         {
-        //             timer += Time.fixedDeltaTime;
-        //             //减速
-        //             if (Mathf.Abs(mRigidbody.velocity.x) > 0.01f)
-        //             {
-        //                 mRigidbody.velocity -= mTransform.localScale.x * Attacldeceleration * Time.fixedDeltaTime * Vector2.right;
-        //                 //Debug.Log($"{mRigidbody.velocity.x}");
-        //             }
-        //             yield return waitForFixedDeltatime;
-        //         }
-
-        //         SetVelocity(SetCoord.X, 0);
-        //     }
-        // }
     }
 }

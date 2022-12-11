@@ -12,7 +12,7 @@ namespace Adv
 
         public PlayerState lastState;
 
-        private PlayerController ctler;
+        public PlayerController ctler;
         private PlayerInput input;
         private PlayerEffectPerformance effect;
         public apPortrait apPortrait;

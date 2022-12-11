@@ -33,7 +33,7 @@ namespace Adv
         public override void LogicUpdate()
         {
             base.LogicUpdate();
-            Debug.Log($"{ctler.PlayerVectoryX}");
+            //Debug.Log($"{ctler.PlayerVectoryX}");
             if (!animManager.IsAttacking)
             {
                 ctler.SetScale(input.AxesX);
