@@ -9,6 +9,8 @@ namespace Adv
         private float animSwitchCD = 1;
         private float AttackTime;
         private bool HasAttack1;
+        private const string Attack1 = "Attack1";
+        private const string Attack2 = "Attack2";
 
         public override void Enter()
         {
@@ -19,13 +21,15 @@ namespace Adv
             {
                 HasAttack1 = true;
                 animManager.Play(AnimName.Attack1);
+                animManager.effectAnim.Play(Attack1);
             }
             else if (HasAttack1 && Time.time - AttackTime <= animSwitchCD)
             {
                 HasAttack1 = false;
                 animManager.Play(AnimName.Attack2);
+                animManager.effectAnim.Play(Attack2);
             }
-            ctler.Attack();
+            ctler.Attack(input.AxesX);
             //停顿一下，然后冲出
             //effect.AttackEffect();
         }
@@ -34,10 +38,10 @@ namespace Adv
         {
             base.LogicUpdate();
             //Debug.Log($"{ctler.PlayerVectoryX}");
-            if (!animManager.IsAttacking)
-            {
-                ctler.SetScale(input.AxesX);
-            }
+            // if (!animManager.IsAttacking)
+            // {
+            //     ctler.SetScale(input.AxesX);
+            // }
 
             if (input.RollFrame.Value)
             {

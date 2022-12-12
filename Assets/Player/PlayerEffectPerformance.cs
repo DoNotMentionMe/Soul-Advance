@@ -44,8 +44,8 @@ namespace Adv
             //DOVirtual.DelayedCall(0.1f, () => { animManager.CurrentAnimSpeedSlowDown(1); }).OnPlay(() => { animManager.CurrentAnimSpeedSlowDown(0.1f); });
 
             AudioManager.Instance.PlayRandomSFX(AttackHittedSound);
-            ImpulseController.Instance.ProduceImpulse(mTransform.position, 0.2f, 1.2f);
-            GameController.Instance.StartTimePause();
+            ImpulseController.Instance.ProduceImpulse(mTransform.position, 0.3f, 0.7f);
+            //GameController.Instance.StartTimePause();
 
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace Adv
         public string CurrentAnimName => currentAnim.Name;
         public bool IsAttacking { get; set; }
 
+        public Animator effectAnim;
         [SerializeField] apPortrait mApPortrait;
         [SerializeField] SpriteRenderer WeaponSpriteRenderer;
-        [SerializeField] TrailRenderer 刀光;
         [SerializeField] Transform playerTransform;
         [SerializeField] Trigger2D 攻击碰撞体;
 
@@ -36,9 +37,11 @@ namespace Adv
             if (ControlAnimSpeeding) return;
             ControlAnimSpeeding = true;
             CurrentAnimSpeedSlowDown(speed);
+            effectAnim.speed = speed;
             DOVirtual.DelayedCall(controlTime, () =>
             {
                 CurrentAnimSpeedSlowDown(1);
+                effectAnim.speed = 1;
                 ControlAnimSpeeding = false;
             });
         }
@@ -78,6 +81,7 @@ namespace Adv
         private void GetLastAnim()
         {
             CurrentAnimSpeedSlowDown(1);
+            攻击碰撞体.SetCollEnable(false);
             WeaponSpriteRenderer.sortingOrder = 15;
             lastAnim = currentAnim;
             IsAttacking = false;
@@ -103,32 +107,28 @@ namespace Adv
 
         private void Attack1Start()
         {
-            攻击碰撞体.SetCollEnable(true);
+            //攻击碰撞体.SetCollEnable(true);
             WeaponSpriteRenderer.sortingOrder = 15;
             IsAttacking = true;
-            刀光.emitting = true;
         }
 
         private void Attack1End()
         {
-            攻击碰撞体.SetCollEnable(false);
+            //攻击碰撞体.SetCollEnable(false);
             WeaponSpriteRenderer.sortingOrder = 0;
-            刀光.emitting = false;
         }
 
         private void Attack2Start()
         {
-            攻击碰撞体.SetCollEnable(true);
+            //攻击碰撞体.SetCollEnable(true);
             WeaponSpriteRenderer.sortingOrder = 0;
             IsAttacking = true;
-            刀光.emitting = true;
         }
 
         private void Attack2End()
         {
-            攻击碰撞体.SetCollEnable(false);
+            //攻击碰撞体.SetCollEnable(false);
             WeaponSpriteRenderer.sortingOrder = 15;
-            刀光.emitting = false;
         }
         #endregion
     }

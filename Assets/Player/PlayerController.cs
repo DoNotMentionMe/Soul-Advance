@@ -46,8 +46,10 @@ namespace Adv
         [SerializeField] float MoveSpeed;
         [SerializeField] float MoveAcceleration;
         [SerializeField] float Movedeceleration;
-        [SerializeField] float RollSpeed;
-        [SerializeField] float RollAcceleration;
+        [SerializeField] float RollStartSpeed;
+        [SerializeField] float RollDeceleration;
+        [SerializeField] float RollExtraAcceleration;
+        [SerializeField] float RollExtraDeceleration;
         [SerializeField] float rollBufferTime;
         [Header("玩家物理属性：普通跳跃")]
         [SerializeField] float JumpForce;
@@ -88,7 +90,7 @@ namespace Adv
         private Vector2 attackDirection;
         private bool IsStop;
         private bool FullControlVelocitying = false;
-        private float speedRatio = 1;//用来控制所有速度的比例
+        private float speedRatio = 1;//用来控制攻击时移动减速度的比例
         private enum SetCoord { X, Y }
         private WaitForSeconds waitForFixedDeltatime;
 
@@ -141,24 +143,28 @@ namespace Adv
 
             FullControlVelocitying = true;
             speedRatio = ratio;
+            var velocity = mRigidbody.velocity;
             mRigidbody.velocity *= ratio;
             DOVirtual.DelayedCall(ControlTime, () =>
             {
-                mRigidbody.velocity /= ratio;
+                if (animManager.IsAttacking)
+                    mRigidbody.velocity = velocity;
                 speedRatio = 1;
                 FullControlVelocitying = false;
             });
         }
 
-        public void Attack()
-        {
-            float direction = mTransform.localScale.x;
-            SetVelocity(SetCoord.X, direction * attackMoveSpeed);
-        }
-
         public void Move(float AxesX)
         {
             Move(AxesX, MoveSpeed);
+        }
+
+        public void Attack(float AxesX)
+        {
+            if (AxesX == 0)
+                SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
+            else
+                SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed + attackExtraMoveSpeed));
         }
 
         public void MoveWhenAttack(float AxesX)
@@ -167,16 +173,21 @@ namespace Adv
             SetVelocity(SetCoord.X, VelocityX);
         }
 
+        public void RollStart(float AxesX)
+        {
+            SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed);
+        }
+
         public void Rolling(float AxesX)
         {
-            float Speed;
+            float acceleration = 0;
             if (mTransform.localScale.x * AxesX > 0)
-                Speed = RollAcceleration + RollSpeed;
+                acceleration = RollDeceleration - RollExtraAcceleration;
             else if (mTransform.localScale.x * AxesX < 0)
-                Speed = RollSpeed - RollAcceleration;
+                acceleration = RollDeceleration + RollExtraDeceleration;
             else
-                Speed = RollSpeed;
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, mTransform.localScale.x * Speed, MoveAcceleration * speedRatio * Time.fixedDeltaTime);
+                acceleration = RollDeceleration;
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, acceleration * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
         }
 
@@ -228,14 +239,14 @@ namespace Adv
             mRigidbody.velocity = Vector2.zero;
             var wallJumpSpeed = WallJumpSpeed;
             wallJumpSpeed.x *= mTransform.localScale.x;
-            mRigidbody.velocity += wallJumpSpeed * speedRatio;
+            mRigidbody.velocity += wallJumpSpeed;
         }
 
         public void WallLeave()
         {
             var wallLeaveSpeed = WallLeaveSpeed;
             wallLeaveSpeed.x *= mTransform.localScale.x;
-            mRigidbody.velocity = wallLeaveSpeed * speedRatio;
+            mRigidbody.velocity = wallLeaveSpeed;
         }
 
         public void WallSlide()
@@ -264,12 +275,12 @@ namespace Adv
 
                 SetScale((int)direction);
 
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * speedRatio * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
             else
             {
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * speedRatio * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
         }
@@ -283,23 +294,25 @@ namespace Adv
         {
             var velocity = mRigidbody.velocity;
             if (coord == SetCoord.X)
-                velocity.x = value * speedRatio;
+                velocity.x = value;
             else
-                velocity.y = value * speedRatio;
+                velocity.y = value;
             mRigidbody.velocity = velocity;
         }
 
         /// <summary>
         /// 根据输入方向设置玩家面向
         /// </summary>
-        /// <param name="direction">只能是1，-1</param>
-        public void SetScale(float direction)
+        /// <param name="direction">需要玩家朝向的方向</param>
+        /// <returns>返回当前玩家朝向</returns>
+        public float SetScale(float direction)
         {
-            if (direction == 0) return;
+            if (direction == 0) return mTransform.localScale.x;
             if (mTransform.localScale.x * direction < 0)
             {
                 mTransform.localScale *= Vector2.left + Vector2.up;
             }
+            return mTransform.localScale.x;
         }
     }
 }

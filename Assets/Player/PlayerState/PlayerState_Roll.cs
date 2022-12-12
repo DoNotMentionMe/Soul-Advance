@@ -11,7 +11,8 @@ namespace Adv
         public override void Enter()
         {
             base.Enter();
-
+            effect.Release落地灰尘();
+            ctler.RollStart(input.AxesX);
             animManager.CrossFade(AnimName.Roll);
             //NotGroundedTime = 0f;
         }

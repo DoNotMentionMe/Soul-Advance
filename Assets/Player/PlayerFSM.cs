@@ -33,7 +33,6 @@ namespace Adv
             // }
             // DontDestroyOnLoad(gameObject);
 
-            ctler = GetComponent<PlayerController>();
             input = GetComponent<PlayerInput>();
             effect = GetComponent<PlayerEffectPerformance>();
 
