@@ -30,7 +30,7 @@ namespace Adv
             //释放占用和区域
             if (!regionIsNull)
             {
-                selfRegion.ReleaseOccupation(occupation);
+                selfRegion.ReleaseOccupation(this);
                 selfRegion = null;
                 regionIsNull = true;
             }

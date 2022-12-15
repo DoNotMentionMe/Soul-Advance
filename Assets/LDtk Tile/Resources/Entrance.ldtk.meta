@@ -12,7 +12,7 @@ ScriptedImporter:
   _jsonFile: {fileID: -164016180542632921, guid: 1a75be09211932a4cb2b32f26ba37572, type: 3}
   _pixelsPerUnit: 16
   _atlas: {fileID: 4343727234628468602, guid: f81b6c8247caffa4a97f40635a02578e, type: 2}
-  _customLevelPrefab: {fileID: 2846521388032451929, guid: bd79f2f54e168c4418edd29d743df5c1, type: 3}
+  _customLevelPrefab: {fileID: 4562718168686626172, guid: fd7d3effa734ed94fbe0848c02aea375, type: 3}
   _deparentInRuntime: 0
   _intGridValueColorsVisible: 0
   _useCompositeCollider: 1

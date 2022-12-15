@@ -77,6 +77,9 @@ namespace Adv
             }
         }
 
+        /// <summary>
+        /// 根据输入预制体动态生成对象池
+        /// </summary>
         public GameObject ReleaseLDtkLevel(LDtkLevel prefab)
         {
             if (!dictionary.ContainsKey(prefab.gameObject))
@@ -84,7 +87,7 @@ namespace Adv
                 Array.Resize(ref LDtkLevel, LDtkLevel.Length + 1);//扩容
                 Pool pool = new Pool();
                 pool.Prefab = prefab.gameObject;//将预制体添加到对象池中
-                pool.Size = 1;
+                pool.Size = 1;//TODO 建议设置为自定义初始数量
                 LDtkLevel[LDtkLevel.Length - 1] = pool;
                 dictionary.Add(pool.Prefab, pool);
 
@@ -94,6 +97,25 @@ namespace Adv
                 pool.Initialize(poolParent);
             }
             return dictionary[prefab.gameObject].PreparedObject();
+        }
+
+        public GameObject ReleaseLDtkLevel(LDtkLevel prefab, Vector3 position)
+        {
+            if (!dictionary.ContainsKey(prefab.gameObject))
+            {
+                Array.Resize(ref LDtkLevel, LDtkLevel.Length + 1);//扩容
+                Pool pool = new Pool();
+                pool.Prefab = prefab.gameObject;//将预制体添加到对象池中
+                pool.Size = 1;//TODO 建议设置为自定义初始数量
+                LDtkLevel[LDtkLevel.Length - 1] = pool;
+                dictionary.Add(pool.Prefab, pool);
+
+                Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
+
+                poolParent.parent = transform;
+                pool.Initialize(poolParent);
+            }
+            return dictionary[prefab.gameObject].PreparedObject(position);
         }
 
         /// <summary>
@@ -142,19 +164,6 @@ namespace Adv
             return dictionary[prefab].PreparedObject(position);
         }
 
-        //         public GameObject Release(GameObject prefab, Vector2 positionOffset)
-        //         {
-        // #if UNITY_EDITOR
-        //             if (!dictionary.ContainsKey(prefab))
-        //             {
-        //                 Debug.LogError("Pool Manager could NOT find prefab: " + prefab.name);
-
-        //                 return null;
-        //             }
-        // #endif
-
-        //             return dictionary[prefab].PreparedObject(positionOffset);
-        //         }
         /// <summary>
         /// <para>函数描述：根据传入的prefab参数，在postion参数位置返回对象池中预备好的旋转角度为rotation参数的游戏对象。</para>
         /// </summary>
@@ -212,10 +221,10 @@ namespace Adv
         }
 
 
-        public void ReturnPool(GameObject prefab, GameObject clone)
-        {
-            dictionary[prefab].Return(clone);
-        }
+        // public void ReturnPool(GameObject prefab, GameObject clone)
+        // {
+        //     dictionary[prefab].Return(clone);
+        // }
 
     }
 }

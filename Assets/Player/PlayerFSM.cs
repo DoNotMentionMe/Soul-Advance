@@ -21,8 +21,6 @@ namespace Adv
 
         private void Awake()
         {
-            Player = this;
-
             // if (player == null)
             // {
             //     player = this.gameObject;
@@ -47,6 +45,7 @@ namespace Adv
 
         private void OnEnable()
         {
+            Player = this;
             SwitchOn(typeof(PlayerState_Idle));
         }
 

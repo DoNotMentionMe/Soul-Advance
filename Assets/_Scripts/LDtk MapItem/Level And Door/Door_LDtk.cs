@@ -8,8 +8,8 @@ namespace Adv
     {
         public abstract LDtkDoorType DoorType { get; set; }
 
-        public Vector2 levelPositionOffset;
-        protected bool HasBeUsed = false;
+        public Vector3 levelPositionOffset;
+        public bool HasBeUsed = false;
 
         protected virtual void Awake()
         {
