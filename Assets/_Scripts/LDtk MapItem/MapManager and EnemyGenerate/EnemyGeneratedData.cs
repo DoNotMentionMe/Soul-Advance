@@ -15,13 +15,14 @@ namespace Adv
         /// 获取敌人所在区域
         /// </summary>
         /// <param name="region"></param>
-        public void GetRegion(EnemyGenerationRegion region)
+        public bool GetRegion(EnemyGenerate region)
         {
             selfRegion = region;
             regionIsNull = false;
+            return true;
         }
 
-        private EnemyGenerationRegion selfRegion;
+        private EnemyGenerate selfRegion;
         private bool regionIsNull = true;
 
         private void OnDisable()
@@ -32,8 +33,6 @@ namespace Adv
                 selfRegion.ReleaseOccupation(occupation);
                 selfRegion = null;
                 regionIsNull = true;
-                //测试
-                EnemyGenerator.Instance.startGenerate.Invoke();
             }
 
 

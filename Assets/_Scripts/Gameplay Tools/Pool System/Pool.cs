@@ -15,10 +15,10 @@ namespace Adv
         //     }
         // }
 
-        public GameObject Prefab => prefab;
+        public GameObject Prefab { get => prefab; set => prefab = value; }
 
         //public GameObject Prefab { get => prefab};
-        public int Size => size;
+        public int Size { get => size; set => size = value; }
         public int RuntimeSize => queue.Count;
 
         [SerializeField] GameObject prefab;

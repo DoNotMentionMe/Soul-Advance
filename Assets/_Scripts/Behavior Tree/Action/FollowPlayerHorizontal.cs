@@ -47,7 +47,6 @@ namespace Adv
         {
             var velocity = mRigidbody.Value.velocity;
             velocity.x = mTransform.Value.localScale.x * FollowSpeed;
-            velocity.y = 0;
             mRigidbody.Value.velocity = velocity;
         }
 

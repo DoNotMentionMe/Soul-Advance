@@ -24,7 +24,7 @@ namespace Adv
                 playerNull = false;
             }
 
-            direction = Mathf.Sign(player.localScale.x);
+            direction = player.position.x - mTransform.Value.position.x;
         }
 
         public override TaskStatus OnUpdate()

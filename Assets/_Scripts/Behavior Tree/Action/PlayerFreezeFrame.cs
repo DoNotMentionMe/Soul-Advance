@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Adv
 {
     [TaskCategory("Custom")]
-    [TaskDescription("降低玩家的动画速度和移速，并在若干时间后恢复")]
+    [TaskDescription("玩家攻击命中表现,特效、降低玩家的动画速度和移速,FreezeFrameTime时间后恢复")]
     public class PlayerFreezeFrame : Action
     {
         [SerializeField] SharedFloat FreezeFrameTime;
@@ -16,17 +16,20 @@ namespace Adv
 
         private PlayerAnimManager playerAnim;
         private PlayerController playerController;
+        private PlayerEffectPerformance playerEffect;
 
         public override void OnAwake()
         {
             playerAnim = PlayerFSM.Player.animManager;
             playerController = PlayerFSM.Player.ctler;
+            playerEffect = PlayerFSM.Player.effect;
         }
 
         public override TaskStatus OnUpdate()
         {
             playerAnim.CurrentAnimSpeedSlowDownForAWhile(AnimFreezeFrameRange.Value, FreezeFrameTime.Value);
             playerController.FullControlVelocity(VelocityFreezeFrameRange.Value, FreezeFrameTime.Value);
+            playerEffect.AttackHittedEffect(FreezeFrameTime.Value);
             return TaskStatus.Success;
         }
 

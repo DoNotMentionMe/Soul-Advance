@@ -44,94 +44,13 @@ SpriteAtlas:
       enableAlphaDilation: 0
     secondaryTextureSettings: {}
     variantMultiplier: 1
-    packables:
-    - {fileID: -8483764272835389729, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 5682357356620948773, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 3285717132134418245, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 7113797731430264967, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -5218035502613387822, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 2511385961929179105, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 8383981605399811039, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 3803666207860471203, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 2183172079206245118, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 2998399236134586537, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 2924035223021205613, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -1890048837927716402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -6459842044654494750, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 7274943532012348871, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 742301980862235905, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -2772278794834598402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -4109064250675032987, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 3858137332091919724, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 8445639519776392242, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 8000140162142989883, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -6081738206612519357, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -8135490077335551086, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 6296011574945053910, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 4580826509752286931, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -9155529020257638349, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 5878768230655680482, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -2097805152322938986, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
+    packables: []
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites:
-  - {fileID: -2772278794834598402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -2097805152322938986, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -5218035502613387822, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 3858137332091919724, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 3285717132134418245, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -1890048837927716402, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 8445639519776392242, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 8383981605399811039, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 5878768230655680482, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -8483764272835389729, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 7274943532012348871, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 6296011574945053910, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 2998399236134586537, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -8135490077335551086, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -9155529020257638349, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 8000140162142989883, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -6459842044654494750, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 742301980862235905, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 4580826509752286931, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 7113797731430264967, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 3803666207860471203, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 2924035223021205613, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -6081738206612519357, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 2183172079206245118, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 5682357356620948773, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 2511385961929179105, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -4109064250675032987, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  m_PackedSpriteNamesToIndex:
-  - TilesTest_64_112_16_16
-  - TilesTest_160_64_16_16
-  - TilesTest_16_128_16_16
-  - TilesTest_96_48_16_16
-  - TilesTest_16_96_16_16
-  - TilesTest_48_128_16_16
-  - TilesTest_96_64_16_16
-  - TilesTest_32_80_16_16
-  - TilesTest_128_128_16_16
-  - TilesTest_16_48_16_16
-  - TilesTest_64_80_16_16
-  - TilesTest_112_128_16_16
-  - TilesTest_48_48_16_16
-  - TilesTest_96_128_16_16
-  - TilesTest_128_96_16_16
-  - TilesTest_96_80_16_16
-  - TilesTest_64_48_16_16
-  - TilesTest_64_96_16_16
-  - TilesTest_128_64_16_16
-  - TilesTest_16_112_16_16
-  - TilesTest_32_112_16_16
-  - TilesTest_48_80_16_16
-  - TilesTest_96_96_16_16
-  - TilesTest_32_128_16_16
-  - TilesTest_16_80_16_16
-  - TilesTest_32_48_16_16
-  - TilesTest_64_128_16_16
+  m_PackedSprites: []
+  m_PackedSpriteNamesToIndex: []
   m_RenderDataMap: {}
   m_Tag: Test1_Atlas
   m_IsVariant: 0

@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2211b62b40cfae444bb097a592c02216, type: 3}
-  m_Name: EnemyGenerationRegionEventChannel_SendEnemyGenerationRegion
+  m_Script: {fileID: 11500000, guid: 45537bd4b04499c4d94ad4d2da743881, type: 3}
+  m_Name: SetPosprocessLevel
   m_EditorClassIdentifier: 
-  comment: 
+  UnityDefaultUnlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  OrderInLayer: 0

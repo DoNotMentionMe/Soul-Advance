@@ -78,7 +78,7 @@ namespace Adv
         [SerializeField] Trigger2D WallSlideCheck_Back;
         [SerializeField] Trigger2D m攻击碰撞体;
         [Header("组件")]
-        [SerializeField] PlayerAnimManager animManager;
+        [SerializeField] PlayerFSM playerFSM;
 
         #region 私有变量声明和获取、周期函数
 
@@ -92,6 +92,9 @@ namespace Adv
         private bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
         private enum SetCoord { X, Y }
+        private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
+        private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
+        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
         private WaitForSeconds waitForFixedDeltatime;
 
         private void Awake()
@@ -136,22 +139,16 @@ namespace Adv
 
         /// <summary>
         /// 用于顿帧使用，该函数将使玩家速度按ratio比例降低ControlTime时间后恢复原速
+        /// 同时调用顺序执行
         /// </summary>
         public void FullControlVelocity(float ratio, float ControlTime)
         {
-            if (FullControlVelocitying) return;
-
-            FullControlVelocitying = true;
-            speedRatio = ratio;
-            var velocity = mRigidbody.velocity;
-            mRigidbody.velocity *= ratio;
-            DOVirtual.DelayedCall(ControlTime, () =>
+            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectCorotine == null)
             {
-                if (animManager.IsAttacking)
-                    mRigidbody.velocity = velocity;
-                speedRatio = 1;
-                FullControlVelocitying = false;
-            });
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio));
+            }
+
         }
 
         public void Move(float AxesX)
@@ -313,6 +310,38 @@ namespace Adv
                 mTransform.localScale *= Vector2.left + Vector2.up;
             }
             return mTransform.localScale.x;
+        }
+
+        /// <summary>
+        /// 顺序执行特效协程
+        /// </summary>
+        IEnumerator ExecuteAttackHittedEvent(float ratio)
+        {
+            while (AttackHittedEffectList.Count > 0)
+            {
+                var controltime = AttackHittedEffectList[0];
+                AttackHittedEffectList.RemoveAt(0);
+                yield return StartCoroutine(AttackHittedEvent(ratio, controltime));
+            }
+            AttackHittedEffectCorotine = null;
+        }
+        /// <summary>
+        /// 特效协程
+        /// </summary>
+        IEnumerator AttackHittedEvent(float ratio, float ControlTime)
+        {
+            FullControlVelocitying = true;
+            speedRatio = ratio;
+            var velocity = mRigidbody.velocity;
+            mRigidbody.velocity *= ratio;
+            DOVirtual.DelayedCall(ControlTime, () =>
+            {
+                if (playerFSM.animManager.IsAttacking)
+                    mRigidbody.velocity = velocity;
+                speedRatio = 1;
+                FullControlVelocitying = false;
+            });
+            yield return new WaitForSeconds(ControlTime + playerFSM.effect.IntervalOfHittedEffect);
         }
     }
 }

@@ -13,8 +13,8 @@ namespace Adv
         public PlayerState lastState;
 
         public PlayerController ctler;
-        private PlayerInput input;
-        private PlayerEffectPerformance effect;
+        public PlayerInput input;
+        public PlayerEffectPerformance effect;
         public apPortrait apPortrait;
         public PlayerAnimManager animManager;
 
@@ -32,9 +32,6 @@ namespace Adv
             //     Destroy(gameObject);
             // }
             // DontDestroyOnLoad(gameObject);
-
-            input = GetComponent<PlayerInput>();
-            effect = GetComponent<PlayerEffectPerformance>();
 
             Register(new PlayerState_Idle());
             Register(new PlayerState_Move());

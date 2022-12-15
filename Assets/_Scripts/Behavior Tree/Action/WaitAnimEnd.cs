@@ -11,11 +11,15 @@ namespace Adv
         [SerializeField] SharedApPortrait anim;
         [SerializeField] string animName;
         private apAnimPlayData animPlayData;
+        private bool GetPlayData = false;
 
         public override void OnStart()
         {
-            if (animPlayData == null)
+            if (!GetPlayData)
+            {
                 animPlayData = anim.Value.GetAnimationPlayData(animName);
+                GetPlayData = true;
+            }
         }
 
         public override TaskStatus OnUpdate()
@@ -26,6 +30,7 @@ namespace Adv
         public override void OnReset()
         {
             animPlayData = null;
+            GetPlayData = false;
         }
     }
 }

@@ -1,9 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Adv
 {
+    /// <summary>
+    /// 目前对象池有一个缺点，东西只会不断增多堆积在内存里，需要想办法减少多余对象
+    /// </summary>
     public class PoolManager : PersistentSingleton<PoolManager>
     {
         //每次增加新的对象池数组都需要在Awake()中初始化，在OnDestroy()中检查是否超出预定数量
@@ -11,6 +15,7 @@ namespace Adv
         [SerializeField] Pool[] Enemy;
         [SerializeField] Pool[] EnemyItem;
         [SerializeField] Pool[] Effect;
+        [SerializeField] Pool[] LDtkLevel;
 
         static Dictionary<GameObject, Pool> dictionary;
 
@@ -18,6 +23,7 @@ namespace Adv
         {
             base.Awake();
             dictionary = new Dictionary<GameObject, Pool>();
+            LDtkLevel = new Pool[0];
 
             //2
             Initialize(Enemy);
@@ -70,6 +76,26 @@ namespace Adv
                 pool.Initialize(poolParent);
             }
         }
+
+        public GameObject ReleaseLDtkLevel(LDtkLevel prefab)
+        {
+            if (!dictionary.ContainsKey(prefab.gameObject))
+            {
+                Array.Resize(ref LDtkLevel, LDtkLevel.Length + 1);//扩容
+                Pool pool = new Pool();
+                pool.Prefab = prefab.gameObject;//将预制体添加到对象池中
+                pool.Size = 1;
+                LDtkLevel[LDtkLevel.Length - 1] = pool;
+                dictionary.Add(pool.Prefab, pool);
+
+                Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
+
+                poolParent.parent = transform;
+                pool.Initialize(poolParent);
+            }
+            return dictionary[prefab.gameObject].PreparedObject();
+        }
+
         /// <summary>
         /// <para>函数描述：根据传入的<paramref name="prefab"></paramref>参数，返回对象池中预备好的游戏对象。</para>
         /// </summary>

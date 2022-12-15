@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using BehaviorDesigner.Runtime;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Adv
 {
@@ -9,16 +10,23 @@ namespace Adv
     {
         [Header("敌人组件")]
         [SerializeField] BehaviorTree mTree;
-
-
+        [SerializeField] string 受伤事件 = "BeAttacked";
+        [SerializeField] string 死亡事件 = "Died";
+        [SerializeField] UnityEvent BeHittedEvent;//被命中时调用EnemyBattleEffect.BeHittedEffect
 
         public override void BeAttacked()
         {
             base.BeAttacked();
             if (HP <= 0)
-                mTree.SendEvent("Died");
+            {
+                BeHittedEvent.Invoke();
+                mTree.SendEvent(死亡事件);
+            }
             else
-                mTree.SendEvent("BeAttacked");
+            {
+                BeHittedEvent.Invoke();
+                mTree.SendEvent(受伤事件);
+            }
         }
 
     }

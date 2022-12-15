@@ -18,32 +18,37 @@ namespace Adv
         [SerializeField] SpriteRenderer WeaponSpriteRenderer;
         [SerializeField] Transform playerTransform;
         [SerializeField] Trigger2D 攻击碰撞体;
+        [SerializeField] PlayerFSM playerFSM;
 
         private List<apAnimPlayData> animList = new List<apAnimPlayData>();
+        private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
+        private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
+        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
         private apAnimPlayData lastAnim;
         private apAnimPlayData currentAnim;
         private bool ControlAnimSpeeding;
 
-        private void Start()
+        private void Awake()
         {
-            animList = mApPortrait.AnimationPlayDataList;
             mApPortrait.Initialize();
+            animList = mApPortrait.AnimationPlayDataList;
         }
 
         #region 控制函数
 
-        public void CurrentAnimSpeedSlowDownForAWhile(float speed, float controlTime)
+        /// <summary>
+        /// 控制玩家动画，用于命中顿帧，同时调用顺序执行
+        /// </summary>
+        /// <param name="speed"></param>
+        /// <param name="ControlTime"></param>
+        public void CurrentAnimSpeedSlowDownForAWhile(float speed, float ControlTime)
         {
-            if (ControlAnimSpeeding) return;
-            ControlAnimSpeeding = true;
-            CurrentAnimSpeedSlowDown(speed);
-            effectAnim.speed = speed;
-            DOVirtual.DelayedCall(controlTime, () =>
+            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectCorotine == null)
             {
-                CurrentAnimSpeedSlowDown(1);
-                effectAnim.speed = 1;
-                ControlAnimSpeeding = false;
-            });
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed));
+            }
+
         }
 
         public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed);
@@ -131,6 +136,36 @@ namespace Adv
             WeaponSpriteRenderer.sortingOrder = 15;
         }
         #endregion
+
+        /// <summary>
+        /// 顺序执行特效协程
+        /// </summary>
+        IEnumerator ExecuteAttackHittedEvent(float speed)
+        {
+            while (AttackHittedEffectList.Count > 0)
+            {
+                var controltime = AttackHittedEffectList[0];
+                AttackHittedEffectList.RemoveAt(0);
+                yield return StartCoroutine(AttackHittedEvent(speed, controltime));
+            }
+            AttackHittedEffectCorotine = null;
+        }
+        /// <summary>
+        /// 特效协程
+        /// </summary>
+        IEnumerator AttackHittedEvent(float speed, float ControlTime)
+        {
+            ControlAnimSpeeding = true;
+            CurrentAnimSpeedSlowDown(speed);
+            effectAnim.speed = speed;
+            DOVirtual.DelayedCall(ControlTime, () =>
+            {
+                CurrentAnimSpeedSlowDown(1);
+                effectAnim.speed = 1;
+                ControlAnimSpeeding = false;
+            });
+            yield return new WaitForSeconds(ControlTime + playerFSM.effect.IntervalOfHittedEffect);
+        }
     }
 
     public enum AnimName

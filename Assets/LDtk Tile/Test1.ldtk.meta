@@ -22,8 +22,8 @@ ScriptedImporter:
   - _key: IntGrid_1
     _asset: {fileID: 11400000, guid: 7e4c28b393299d7459aee6d43f673f48, type: 2}
   _entities:
-  - _key: Entity
-    _asset: {instanceID: 0}
+  - _key: EnemyGenerate
+    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
   _enumGenerate: 0
   _enumPath: 
   _enumNamespace: 

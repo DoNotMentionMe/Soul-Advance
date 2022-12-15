@@ -7,10 +7,11 @@ namespace Adv
 {
     public class PlayerEffectPerformance : MonoBehaviour
     {
-        [SerializeField] TrailRenderer 手部尾迹;
-        [SerializeField] ParticleSystem 手部粒子效果;
+        public float IntervalOfHittedEffect => intervalOfHittedEffect;
+        [SerializeField] float intervalOfHittedEffect;//控制攻击命中特效播放间隔
+        [SerializeField] float 攻击命中震幅 = 0.2f;
         [SerializeField] GameObject 落地灰尘;
-        [SerializeField] PlayerAttackShadow AttackShadow;
+        [SerializeField] PlayerAttackShadow AttackShadow;//预制
         [SerializeField] float ReleaseIntervalOfAttackShadow;
         [SerializeField] AudioData AttackSound;
         [SerializeField] AudioData AttackHittedSound;
@@ -24,7 +25,6 @@ namespace Adv
         {
             //ImpulseController.Instance.ProduceImpulse(mTransform.position, 0.2f, 1);
             //手部尾迹.enabled = true;
-            手部粒子效果.Play();
             //ReleaseAttackShadowCor = StartCoroutine(nameof(ReleaseAttackShadow));
 
         }
@@ -35,18 +35,16 @@ namespace Adv
             //StopCoroutine(ReleaseAttackShadowCor);
         }
         /// <summary>
-        /// 攻击命中事件
-        /// 拖拽到AttackBox的Action调用
+        /// 攻击命中特效，同时调用顺序执行
+        /// 行为属Action：PlayerFreezeFrame调用
         /// </summary>
-        public void AttackHittedEffect()
+        public void AttackHittedEffect(float ControlTime)
         {
-            //动画播放变慢
-            //DOVirtual.DelayedCall(0.1f, () => { animManager.CurrentAnimSpeedSlowDown(1); }).OnPlay(() => { animManager.CurrentAnimSpeedSlowDown(0.1f); });
-
-            AudioManager.Instance.PlayRandomSFX(AttackHittedSound);
-            ImpulseController.Instance.ProduceImpulse(mTransform.position, 0.3f, 0.7f);
-            //GameController.Instance.StartTimePause();
-
+            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectCorotine == null)
+            {
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent());
+            }
         }
 
         #endregion
@@ -57,21 +55,43 @@ namespace Adv
         #endregion
 
         private Transform mTransform;
-        private Tween 手部尾迹SetFalse;
         private WaitForSecondsRealtime waitForIntervalShadow;
-        private Coroutine ReleaseAttackShadowCor;
+        private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
+        private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
+        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
 
         private void Awake()
         {
             mTransform = transform;
-            //手部尾迹SetFalse = DOVirtual.DelayedCall(0.2f, () => { 手部尾迹.enabled = false; }).SetAutoKill(false);
             waitForIntervalShadow = new WaitForSecondsRealtime(ReleaseIntervalOfAttackShadow);
         }
 
         private void OnDestroy()
         {
             mTransform = null;
-            //手部尾迹SetFalse.Kill();
+        }
+
+        /// <summary>
+        /// 顺序执行特效协程
+        /// </summary>
+        IEnumerator ExecuteAttackHittedEvent()
+        {
+            while (AttackHittedEffectList.Count > 0)
+            {
+                var controltime = AttackHittedEffectList[0];
+                AttackHittedEffectList.RemoveAt(0);
+                yield return StartCoroutine(AttackHittedEvent(controltime));
+            }
+            AttackHittedEffectCorotine = null;
+        }
+        /// <summary>
+        /// 特效协程
+        /// </summary>
+        IEnumerator AttackHittedEvent(float controlTime)
+        {
+            AudioManager.Instance.PlayRandomSFX(AttackHittedSound);
+            ImpulseController.Instance.ProduceImpulse(mTransform.position, 攻击命中震幅, 0.7f);
+            yield return new WaitForSeconds(controlTime + IntervalOfHittedEffect);
         }
 
         IEnumerator ReleaseAttackShadow()

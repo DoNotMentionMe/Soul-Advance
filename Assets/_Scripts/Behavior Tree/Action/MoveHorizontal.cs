@@ -10,6 +10,12 @@ namespace Adv
     [TaskDescription("以direction为横向方向设置速度")]
     public class MoveHorizontal : Action
     {
+        private enum MoveModes
+        {
+            WithLocalScaleX,
+            WithDirection,
+        }
+        [SerializeField] MoveModes MoveMode;
         [SerializeField] SharedRigidbody2D mRigidbody;
         [SerializeField] SharedTransform mTransform;
         [SerializeField] SharedInt direction;
@@ -17,16 +23,24 @@ namespace Adv
 
         public override void OnStart()
         {
-            var velocity = mRigidbody.Value.velocity;
-            velocity.x = direction.Value * Speed;
-            velocity.y = 0;
-            mRigidbody.Value.velocity = velocity;
-
-            if (mTransform.Value.localScale.x * direction.Value < 0)
+            if (MoveMode == MoveModes.WithDirection)
             {
-                var localScale = mTransform.Value.localScale;
-                localScale.x *= -1;
-                mTransform.Value.localScale = localScale;
+                var velocity = mRigidbody.Value.velocity;
+                velocity.x = direction.Value * Speed;
+                mRigidbody.Value.velocity = velocity;
+
+                if (mTransform.Value.localScale.x * direction.Value < 0)
+                {
+                    var localScale = mTransform.Value.localScale;
+                    localScale.x *= -1;
+                    mTransform.Value.localScale = localScale;
+                }
+            }
+            else
+            {
+                var velocity = mRigidbody.Value.velocity;
+                velocity.x = mTransform.Value.localScale.x * Speed;
+                mRigidbody.Value.velocity = velocity;
             }
         }
 

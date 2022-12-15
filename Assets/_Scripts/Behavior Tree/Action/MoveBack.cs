@@ -38,7 +38,7 @@ namespace Adv
         {
             //减速
             var velocity = mRigidBody.Value.velocity;
-            velocity.x = direction * Mathf.Lerp(StartSpeed, 0, (Time.time - startTime) / LifeTime);
+            velocity.x = -direction * Mathf.Lerp(StartSpeed, 0, (Time.time - startTime) / LifeTime);
             mRigidBody.Value.velocity = velocity;
         }
     }

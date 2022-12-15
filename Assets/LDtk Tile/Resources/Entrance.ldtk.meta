@@ -1,0 +1,41 @@
+fileFormatVersion: 2
+guid: 1a75be09211932a4cb2b32f26ba37572
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: aaa16bfc62c086f4fb45da87b6acf9b1, type: 3}
+  _reimportOnDependencyChange: 1
+  _jsonFile: {fileID: -164016180542632921, guid: 1a75be09211932a4cb2b32f26ba37572, type: 3}
+  _pixelsPerUnit: 16
+  _atlas: {fileID: 4343727234628468602, guid: f81b6c8247caffa4a97f40635a02578e, type: 2}
+  _customLevelPrefab: {fileID: 2846521388032451929, guid: bd79f2f54e168c4418edd29d743df5c1, type: 3}
+  _deparentInRuntime: 0
+  _intGridValueColorsVisible: 0
+  _useCompositeCollider: 1
+  _createBackgroundColor: 0
+  _createLevelBoundsTrigger: 0
+  _intGridValues:
+  - _key: IntGrid_1
+    _asset: {fileID: 11400000, guid: 7e4c28b393299d7459aee6d43f673f48, type: 2}
+  _entities:
+  - _key: EnemyGenerate
+    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
+  - _key: EnemyGenerate2
+    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
+  - _key: DoorLeft
+    _asset: {fileID: 1354659135677703109, guid: 34771450517333c4e8a7d81e591a2c7c, type: 3}
+  - _key: DoorRight
+    _asset: {fileID: 7952948588881294292, guid: 11d7ef91372dd244bb4683e57d571701, type: 3}
+  - _key: DoorUp
+    _asset: {instanceID: 0}
+  - _key: DoorDown
+    _asset: {instanceID: 0}
+  - _key: Player
+    _asset: {fileID: 9117152492469156086, guid: b8931331d07366e46bf491069e88a25b, type: 3}
+  _enumGenerate: 0
+  _enumPath: 
+  _enumNamespace: 
