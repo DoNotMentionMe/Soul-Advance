@@ -28,9 +28,17 @@ namespace Adv
         private void Start()
         {
             FreezeFrameing = (SharedBool)mBehaviorTree.GetVariable("FreezeFrameing");
-            playerAnim = PlayerFSM.Player.animManager;
-            playerController = PlayerFSM.Player.ctler;
-            playerEffect = PlayerFSM.Player.effect;
+            // playerAnim = PlayerFSM.Player.animManager;
+            // playerController = PlayerFSM.Player.ctler;
+            // playerEffect = PlayerFSM.Player.effect;
+        }
+
+        private void OnEnable()
+        {
+            //需要先生成玩家，在生成敌人
+            playerAnim = PlayerFSM.Player?.animManager;
+            playerController = PlayerFSM.Player?.ctler;
+            playerEffect = PlayerFSM.Player?.effect;
         }
 
         /// <summary>

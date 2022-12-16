@@ -41,6 +41,7 @@ namespace Adv
             Register(new PlayerState_HasWallClimbed());
             Register(new PlayerState_Roll());
             Register(new PlayerState_Attack());
+            //Register(new PlayerState_StabAttack());
         }
 
         private void OnEnable()

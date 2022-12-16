@@ -30,8 +30,13 @@ namespace Adv
         /// </summary>
         public virtual void ClearLevel()
         {
-            GenerateList.ForEach((generate) => { generate.Clear(); });
+            Debug.Log($"--开始清空地块");
+            foreach (var generate in GenerateList)
+            {
+                generate.Clear();
+            }
             gameObject.SetActive(false);
+            Debug.Log($"--地块清空完毕");
         }
 
         /// <summary>
@@ -40,7 +45,10 @@ namespace Adv
         public void SetLevelPositionAndStartGenerateEnemy(Vector2 position)
         {
             transform.position = position;
-            GenerateList.ForEach((generate) => { generate.StartGenerateEnemy(); });
+            foreach (var generate in GenerateList)
+            {
+                generate.StartGenerateEnemy();
+            }
         }
 
         /// <summary>

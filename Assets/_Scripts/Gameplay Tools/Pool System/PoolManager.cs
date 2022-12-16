@@ -2,31 +2,38 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Adv
 {
     /// <summary>
-    /// 目前对象池有一个缺点，东西只会不断增多堆积在内存里，需要想办法减少多余对象
+    /// 缺点1，东西只会不断增多堆积在内存里，需要想办法减少多余对象
+    /// 缺点2，如果不是特效类对象，像敌人这种可能存在很久的对象，会让对象池不断生成新对象而不会使用旧对象
     /// </summary>
     public class PoolManager : PersistentSingleton<PoolManager>
     {
         //每次增加新的对象池数组都需要在Awake()中初始化，在OnDestroy()中检查是否超出预定数量
         //1
-        [SerializeField] Pool[] Enemy;
+        [SerializeField] EnemyPool[] Enemy;
         [SerializeField] Pool[] EnemyItem;
         [SerializeField] Pool[] Effect;
         [SerializeField] Pool[] LDtkLevel;
 
         static Dictionary<GameObject, Pool> dictionary;
+        private Dictionary<string, EnemyPool> enemyPools;
+
+        private const string Clone = "(Clone)";
+        private Coroutine OrderReleaseEnemyCoroutine;
 
         protected override void Awake()
         {
             base.Awake();
             dictionary = new Dictionary<GameObject, Pool>();
+            enemyPools = new Dictionary<string, EnemyPool>();
             LDtkLevel = new Pool[0];
 
             //2
-            Initialize(Enemy);
+            InitializeEnemy(Enemy);
             Initialize(EnemyItem);
             Initialize(Effect);
         }
@@ -55,6 +62,22 @@ namespace Adv
                 }
             }
         }
+        void CheckPoolSize(EnemyPool[] pools)
+        {
+            foreach (var pool in pools)
+            {
+                if (pool.RuntimeSize > pool.Size)
+                {
+                    Debug.LogWarning(
+                            string.Format("Pool: {0} has a runtime size {1} bigger than it initial size {2}",
+                            pool.Prefab.name,
+                            pool.RuntimeSize,
+                            pool.Size)
+                        );
+                }
+            }
+        }
+
 
         void Initialize(Pool[] pools)
         {
@@ -69,6 +92,27 @@ namespace Adv
 #endif
 
                 dictionary.Add(pool.Prefab, pool);
+
+                Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
+
+                poolParent.parent = transform;
+                pool.Initialize(poolParent);
+            }
+        }
+
+        void InitializeEnemy(EnemyPool[] pools)
+        {
+            foreach (var pool in pools)
+            {
+#if UNITY_EDITOR
+                if (enemyPools.ContainsKey(pool.Key))
+                {
+                    Debug.LogError("Same prefab in multiple pools! Prefab: " + pool.Prefab.name);
+                    continue;
+                }
+#endif
+
+                enemyPools.Add(pool.Key, pool);
 
                 Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
 
@@ -116,6 +160,17 @@ namespace Adv
                 pool.Initialize(poolParent);
             }
             return dictionary[prefab.gameObject].PreparedObject(position);
+        }
+
+        /// <summary>
+        /// 敌人专属对象池：释放敌人
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public EnemyGeneratedData ReleaseEnemy(EnemyGeneratedData prefab, Vector3 position)
+        {
+            return enemyPools[string.Concat(prefab.name, Clone)].PreparedEnemy(position);
         }
 
         /// <summary>
@@ -225,6 +280,11 @@ namespace Adv
         // {
         //     dictionary[prefab].Return(clone);
         // }
+
+        public void EnemyReturnPool(EnemyGeneratedData clone)
+        {
+            enemyPools[clone.name].EnemyReturn(clone);
+        }
 
     }
 }

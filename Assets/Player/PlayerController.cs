@@ -313,7 +313,7 @@ namespace Adv
         }
 
         /// <summary>
-        /// 顺序执行特效协程
+        /// 顺序执行减速效果协程
         /// </summary>
         IEnumerator ExecuteAttackHittedEvent(float ratio)
         {
@@ -326,7 +326,7 @@ namespace Adv
             AttackHittedEffectCorotine = null;
         }
         /// <summary>
-        /// 特效协程
+        /// 减速效果协程
         /// </summary>
         IEnumerator AttackHittedEvent(float ratio, float ControlTime)
         {

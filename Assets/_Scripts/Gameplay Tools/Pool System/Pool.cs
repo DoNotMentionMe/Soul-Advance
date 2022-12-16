@@ -23,24 +23,21 @@ namespace Adv
 
         //public GameObject Prefab { get => prefab};
         public int Size { get => size; set => size = value; }
-        public int RuntimeSize => objectList.Count;
+        public int RuntimeSize => queue.Count;
 
         [SerializeField] GameObject prefab;
         [SerializeField] int size = 1;
-        //Queue<GameObject> queue;//跟列表一样，但是有一些特别的函数
-        List<GameObject> objectList;
+        Queue<GameObject> queue;//跟列表一样，但是有一些特别的函数
 
         Transform parent;
 
         public void Initialize(Transform parent)
         {
-            //queue = new Queue<GameObject>();
-            objectList = new List<GameObject>();
+            queue = new Queue<GameObject>();
             this.parent = parent;
             for (var i = 0; i < size; i++)
             {
-                //queue.Enqueue(Copy());
-                objectList.Add(Copy());
+                queue.Enqueue(Copy());
             }
         }
 
@@ -57,29 +54,17 @@ namespace Adv
         {
             GameObject availableObject = null;
 
-            //if (queue.Count > 0 && !queue.Peek().activeSelf)//这里检查第一个元素是否为启动状态来解决下面文字说到的问题
-            // {
-            //     //availableObject = queue.Dequeue();
-            // }
-            // else
-            // {
-            //     availableObject = Copy();
-            // }
-            //如果数量没有规划好，可能出现列头对象激活状态，后面的对象闲置状态，但是取不出来导致无限生成新的对象的情况
-            //queue.Enqueue(availableObject);//提前入列，不需要在对象使用后调用一次入列的方法，但是有个弊端，如果对象池调用过快，这个提前入列的会再被调用到新的地方，比如子弹飞一半被重新调用道枪口的位置
-
-            availableObject = objectList.GetGameObjectWithFalse();
-            if (availableObject == null)//新对象加入列表
+            if (queue.Count > 0 && !queue.Peek().activeSelf)//这里检查第一个元素是否为启动状态来解决下面文字说到的问题
+            {
+                availableObject = queue.Dequeue();
+            }
+            else
             {
                 availableObject = Copy();
-                objectList.Add(availableObject);
             }
-            else//旧对象在列表里循环
-            {
-                //放到最后去
-                objectList.Remove(availableObject);
-                objectList.Add(availableObject);
-            }
+            //如果数量没有规划好，可能出现列头对象激活状态，后面的对象闲置状态，但是取不出来导致无限生成新的对象的情况
+            queue.Enqueue(availableObject);//提前入列，不需要在对象使用后调用一次入列的方法，但是有个弊端，如果对象池调用过快，这个提前入列的会再被调用到新的地方，比如子弹飞一半被重新调用道枪口的位置
+
 
             return availableObject;
 
@@ -137,41 +122,10 @@ namespace Adv
         }
 
 
-        // public void Return(GameObject gameObject)
-        // {
-        //     if (!queue.Contains(gameObject))
-        //         queue.Enqueue(gameObject);
-        // }
-
-    }
-
-    public static class ListGameObjectExtensions
-    {
-        /// <summary>
-        /// 遍历队列的前十个对象是否为false
-        /// </summary>
-        public static GameObject GetGameObjectWithFalse(
-            this List<GameObject> list
-        )
+        public void Return(GameObject gameObject)
         {
-            var EachCount = 10;
-            if (list.Count == 0)
-            {
-                Debug.LogError($"对象池为空");
-                return null;
-            }
-            else if (list.Count < 10)
-            {
-                EachCount = list.Count;
-            }
-            for (var i = 0; i < EachCount; i++)
-            {
-                if (!list[i].activeSelf)
-                {
-                    return list[i];
-                }
-            }
-            return null;
+            if (!queue.Contains(gameObject))
+                queue.Enqueue(gameObject);
         }
     }
 }

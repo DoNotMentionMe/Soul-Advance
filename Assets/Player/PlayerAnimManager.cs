@@ -182,5 +182,7 @@ namespace Adv
         HasWallClimbed,
         Attack1,
         Attack2,
+        StabAttack,
+        StabAttackEnd,
     }
 }

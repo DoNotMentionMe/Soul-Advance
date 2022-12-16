@@ -1,5 +1,5 @@
 ﻿Backup Table
-4
+3
 SampleScene
 animController
 2
@@ -7,17 +7,11 @@ animController
 12
 10
 SampleScene
-动画
-10
-2022
-12
-9
-SampleScene
 PlayerAnim
-14
+24
 2022
 12
-12
+16
 SampleScene
 animManager
 23
