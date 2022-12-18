@@ -88,6 +88,8 @@ namespace Adv
         private Vector2 WallClimbPos;
         private Vector2 EndWallClimbPos;
         private Vector2 attackDirection;
+        private Vector2 OnEnablePos;
+        private bool HasGetEnablePos;
         private bool IsStop;
         private bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
@@ -103,6 +105,15 @@ namespace Adv
             mTransform = transform;
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
+        }
+
+        private void OnEnable()
+        {
+            if (HasGetEnablePos)
+            {
+                mTransform.position = OnEnablePos;
+            }
+
         }
 
         private void OnDestroy()
@@ -138,6 +149,15 @@ namespace Adv
         #region 对外API
 
         /// <summary>
+        /// 使用LDtk生成玩家无法获取初始生成位置，通过获取第一次离开Idle的位置来确定
+        /// </summary>
+        public void GetOnEnablePos()
+        {
+            HasGetEnablePos = true;
+            OnEnablePos = mTransform.position;
+        }
+
+        /// <summary>
         /// 用于顿帧使用，该函数将使玩家速度按ratio比例降低ControlTime时间后恢复原速
         /// 同时调用顺序执行
         /// </summary>
@@ -162,6 +182,7 @@ namespace Adv
                 SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
             else
                 SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed + attackExtraMoveSpeed));
+
         }
 
         public void MoveWhenAttack(float AxesX)

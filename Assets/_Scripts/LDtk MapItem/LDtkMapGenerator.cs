@@ -41,21 +41,21 @@ namespace Adv
 
         public void ReGenerateMap()
         {
-            Debug.Log($"开始清理地块");
+            //Debug.Log($"开始清理地块");
             foreach (var level in currentLevels)
             {
                 level.ClearLevel();
-                Debug.Log($"{name}");
+                //Debug.Log($"{name}");
             }
-            Debug.Log($"地块清理完毕");
+            //Debug.Log($"地块清理完毕");
 
-            Debug.Log($"清空地块存储列表");
+            //Debug.Log($"清空地块存储列表");
             currentLevels.Clear();
-            Debug.Log($"地块存储列表清空完毕");
+            //Debug.Log($"地块存储列表清空完毕");
 
-            Debug.Log($"开始重新生成地图");
+            //Debug.Log($"开始重新生成地图");
             GenerateHorizontalMap();
-            Debug.Log($"生成完毕");
+            //Debug.Log($"生成完毕");
         }
 
         private void GenerateHorizontalMap()

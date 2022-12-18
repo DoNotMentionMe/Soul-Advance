@@ -8,6 +8,7 @@ namespace Adv
     {
         private float NotGroundedTime = -100f;
         private bool FirstOnEnable = true;
+        private bool FirstExit = true;
 
         public override void Enter()
         {
@@ -67,6 +68,16 @@ namespace Adv
             base.PhysicUpdate();
             //实时加速或减速
             ctler.Move(input.AxesX);
+        }
+
+        public override void Exit()
+        {
+            base.Exit();
+            if (FirstExit)
+            {
+                FirstExit = false;
+                ctler.GetOnEnablePos();
+            }
         }
     }
 }

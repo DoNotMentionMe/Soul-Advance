@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083187012}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.7440004, y: 4.23, z: -10}
+  m_LocalPosition: {x: 2.04, y: -0.64, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -41817,7 +41817,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9117152492469156087}
   - component: {fileID: 9117152492469156084}
-  - component: {fileID: 9117152492469156085}
+  - component: {fileID: 1282099049065928366}
   - component: {fileID: 9117152492469156080}
   - component: {fileID: 9117152492469156044}
   - component: {fileID: 9117152492469156047}
@@ -41867,11 +41867,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ctler: {fileID: 9117152492469156080}
-  input: {fileID: 9117152492469156085}
+  input: {fileID: 1282099049065928366}
   effect: {fileID: 9117152492469156047}
   apPortrait: {fileID: 279230467910121269}
   animManager: {fileID: 279230467910121271}
---- !u!114 &9117152492469156085
+--- !u!114 &1282099049065928366
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

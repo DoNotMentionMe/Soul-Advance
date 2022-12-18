@@ -22,6 +22,10 @@ namespace Adv
 
             if (input.RollFrame.Value)
                 FSM.SwitchState(typeof(PlayerState_Roll));
+            else if (input.AttackFrame.Value)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
+            }
 
 
         }

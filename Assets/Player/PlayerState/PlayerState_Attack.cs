@@ -29,6 +29,7 @@ namespace Adv
                 animManager.Play(AnimName.Attack2);
                 animManager.effectAnim.Play(Attack2);
             }
+
             ctler.Attack(input.AxesX);
             //停顿一下，然后冲出
             //effect.AttackEffect();
@@ -56,6 +57,8 @@ namespace Adv
             {
                 if (input.AttackFrame.Value || input.AttackFrame.IntervalWithLastTrue <= ctler.AttackBufferTime)
                     FSM.SwitchState(typeof(PlayerState_Attack));
+                else if (!ctler.Grounded)
+                    FSM.SwitchState(typeof(PlayerState_JumpDown));
                 else if (input.Move)
                     FSM.SwitchState(typeof(PlayerState_Move));
                 else

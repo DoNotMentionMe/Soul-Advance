@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using LDtkUnity;
 
 namespace Adv
 {
-    public class LDtkLevel_Entrance : LDtkLevel
+    public class LDtkLevel_Entrance : LDtkLevel, ILDtkImportedLevel
     {
-        private PlayerFSM Player;
+        [SerializeField] PlayerFSM Player;
 
         public override void ClearLevel()
         {
@@ -20,9 +21,8 @@ namespace Adv
             Player.gameObject.SetActive(true);
         }
 
-        protected override void Awake()
+        public void OnLDtkImportLevel(Level level)
         {
-            base.Awake();
             Player = GetComponentInChildren<PlayerFSM>();
         }
     }

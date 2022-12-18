@@ -30,13 +30,13 @@ namespace Adv
         /// </summary>
         public virtual void ClearLevel()
         {
-            Debug.Log($"--开始清空地块");
+            //Debug.Log($"--开始清空地块");
             foreach (var generate in GenerateList)
             {
                 generate.Clear();
             }
             gameObject.SetActive(false);
-            Debug.Log($"--地块清空完毕");
+            //Debug.Log($"--地块清空完毕");
         }
 
         /// <summary>

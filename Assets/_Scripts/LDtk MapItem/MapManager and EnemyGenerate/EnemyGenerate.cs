@@ -23,7 +23,7 @@ namespace Adv
         /// </summary>
         public void StartGenerateEnemy()
         {
-            Debug.Log($"开始生成敌人，总数{可生成敌人总数},当前数{当前可生成数}");
+            //Debug.Log($"开始生成敌人，总数{可生成敌人总数},当前数{当前可生成数}");
             CanGenerate = true;
             var halfDistance = 可生成敌人总数 / 2;
             left = mTransform.position - Vector3.right * halfDistance;
@@ -68,7 +68,7 @@ namespace Adv
         {
             该区域当前敌人.Remove(data);
             当前可生成数 += data.Occupation;
-            Debug.Log($"------释放{data.Occupation}占用，当前占用{当前可生成数}");
+            //Debug.Log($"------释放{data.Occupation}占用，当前占用{当前可生成数}");
             if (CanGenerate && 生成敌人协程 == null)
                 生成敌人协程 = StartCoroutine(GenerateEnemy());
         }
@@ -78,7 +78,7 @@ namespace Adv
         /// </summary>
         public void Clear()
         {
-            Debug.Log($"----开始清空敌人生成区域");
+            //Debug.Log($"----开始清空敌人生成区域");
             CanGenerate = false;
             if (生成敌人协程 != null)
             {
@@ -90,10 +90,10 @@ namespace Adv
             for (var i = enemyCount - 1; i >= 0; i--)
             {
                 该区域当前敌人[i].gameObject.SetActive(false);//Data设为false会调用ReleaseOccupation移出List
-                Debug.Log($"清空第{i}个");
+                //Debug.Log($"清空第{i}个");
             }
             //当前可生成数 = 可生成敌人总数;
-            Debug.Log($"----敌人生成区域清空完毕，区域总敌人数：{可生成敌人总数}，当前可生成数：{当前可生成数}");
+            //Debug.Log($"----敌人生成区域清空完毕，区域总敌人数：{可生成敌人总数}，当前可生成数：{当前可生成数}");
         }
 
 
@@ -135,7 +135,7 @@ namespace Adv
             } while (CanGenerateOnThisRegion(该区域敌人生成列表[0]));
             生成敌人协程 = null;
             var count = (int)(可生成敌人总数 / 该区域敌人生成列表[0].Occupation);
-            Debug.Log($"生成结束，当前数{当前可生成数}，应存在{count}，实际存在{该区域当前敌人.Count}");
+            //Debug.Log($"生成结束，当前数{当前可生成数}，应存在{count}，实际存在{该区域当前敌人.Count}");
         }
     }
 

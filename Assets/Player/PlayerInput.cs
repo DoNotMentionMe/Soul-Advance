@@ -27,13 +27,20 @@ namespace Adv
 
         private Vector2 axes;
 
-
         private void Awake()
         {
             playerInput = new PlayerInputActions();
             playerInput.Gameplay.SetCallbacks(this);
+        }
 
+        private void OnEnable()
+        {
             EnableGameplayInput();
+        }
+
+        private void OnDisable()
+        {
+            DisableAllInputs();
         }
 
         private void OnDestroy()
@@ -110,6 +117,7 @@ namespace Adv
 
         private void StartSetBoolFalse(Bool boolObj)
         {
+            //DOVirtual.DelayedCall(Time.deltaTime, () => { boolObj.Value = false; });
             StartCoroutine(SetBoolFalse(boolObj));
         }
 
