@@ -66,5 +66,15 @@ namespace Adv
         {
             FSM = null;
         }
+
+        public virtual void OnAwake()
+        {
+
+        }
+
+        public PlayerState()
+        {
+            OnAwake();
+        }
     }
 }

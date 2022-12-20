@@ -7,6 +7,8 @@ namespace Adv
     public class PlayerState_Roll : PlayerState
     {
         //private float NotGroundedTime = -100f;
+        private bool CountJumpBuffering = false;
+        private float IsNotGroundTime;
 
         public override void Enter()
         {
@@ -21,10 +23,23 @@ namespace Adv
         {
             base.LogicUpdate();
             //跳跃
-            if (input.JumpFrame.Value && ctler.Grounded)
+            if (!ctler.Grounded && !CountJumpBuffering)
             {
-                input.JumpFrame.TrueWhenGrounded = true;
-                FSM.SwitchState(typeof(PlayerState_JumpUp));
+                CountJumpBuffering = true;
+                IsNotGroundTime = Time.time;
+            }
+            if (input.JumpFrame.Value)
+            {
+                if (ctler.Grounded)
+                {
+                    input.JumpFrame.TrueWhenGrounded = true;
+                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                }
+                else if (CountJumpBuffering && Time.time - IsNotGroundTime <= ctler.ClimbUpJumpBufferTime)
+                {
+                    input.JumpFrame.TrueWhenGrounded = true;
+                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                }
             }
             else if (input.AttackFrame.Value)
             {
@@ -67,6 +82,12 @@ namespace Adv
 
             //翻滚移速判定
             ctler.Rolling(input.AxesX);
+        }
+
+        public override void Exit()
+        {
+            base.Exit();
+            CountJumpBuffering = false;
         }
     }
 }

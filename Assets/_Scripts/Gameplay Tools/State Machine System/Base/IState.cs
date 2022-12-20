@@ -6,6 +6,7 @@ namespace Adv
 {
     public interface IState
     {
+        void OnAwake();
         void Enter();
         void Exit();
         void LogicUpdate();

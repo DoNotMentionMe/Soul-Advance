@@ -54,6 +54,7 @@ namespace Adv
         public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed);
         public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
         public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;
+        public apAnimPlayData GetApAnimPlayData(AnimName animName) => animList[((int)animName)];
 
         #endregion
 
@@ -110,31 +111,37 @@ namespace Adv
             WeaponSpriteRenderer.sortingOrder = 0;
         }
 
-        private void Attack1Start()
+        // private void Attack1Start()
+        // {
+        //     //攻击碰撞体.SetCollEnable(true);
+        //     WeaponSpriteRenderer.sortingOrder = 15;
+        //     IsAttacking = true;
+        // }
+
+        // private void Attack1End()
+        // {
+        //     //攻击碰撞体.SetCollEnable(false);
+        //     WeaponSpriteRenderer.sortingOrder = 0;
+        // }
+
+        private void GAttack2Start()
+        {
+            //攻击碰撞体.SetCollEnable(true);
+            WeaponSpriteRenderer.sortingOrder = 0;
+            IsAttacking = true;
+        }
+        private void GAttack()
         {
             //攻击碰撞体.SetCollEnable(true);
             WeaponSpriteRenderer.sortingOrder = 15;
             IsAttacking = true;
         }
 
-        private void Attack1End()
-        {
-            //攻击碰撞体.SetCollEnable(false);
-            WeaponSpriteRenderer.sortingOrder = 0;
-        }
-
-        private void Attack2Start()
-        {
-            //攻击碰撞体.SetCollEnable(true);
-            WeaponSpriteRenderer.sortingOrder = 0;
-            IsAttacking = true;
-        }
-
-        private void Attack2End()
-        {
-            //攻击碰撞体.SetCollEnable(false);
-            WeaponSpriteRenderer.sortingOrder = 15;
-        }
+        // private void Attack2End()
+        // {
+        //     //攻击碰撞体.SetCollEnable(false);
+        //     WeaponSpriteRenderer.sortingOrder = 15;
+        // }
         #endregion
 
         /// <summary>
@@ -182,7 +189,9 @@ namespace Adv
         HasWallClimbed,
         Attack1,
         Attack2,
-        StabAttack,
-        StabAttackEnd,
+        GAttack1,
+        GAttack2,
+        GAttack3,
+        GAttack4,
     }
 }

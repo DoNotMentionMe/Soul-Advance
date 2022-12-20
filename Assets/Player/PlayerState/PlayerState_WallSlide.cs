@@ -32,10 +32,6 @@ namespace Adv
             {
                 FSM.SwitchState(typeof(PlayerState_WallJump));
             }
-            // else if (ctler.canWallClimb)
-            // {
-            //     FSM.SwitchState(typeof(PlayerState_WallClimb));
-            // }
             //移动出墙壁，开始判定是否WallJump
             else if (!ReadyWallLeave && input.AxesX * ctler.PlayerFace > 0)
             {
@@ -65,6 +61,15 @@ namespace Adv
             if (input.Jump && LeaveWallTimer <= ctler.WallJumpBufferTimeWithWallSlide)//缓冲时间内按跳跃，判定为WallJump
             {
                 FSM.SwitchState(typeof(PlayerState_WallJump));
+            }
+            else if (input.RollFrame.Value
+                || input.RollFrame.IntervalWithLastTrue <= ctler.RollBufferTime)
+            {
+                FSM.SwitchState(typeof(PlayerState_Roll));
+            }
+            else if (input.AttackFrame.Value || input.AttackFrame.IntervalWithLastTrue <= ctler.AttackBufferTime)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
             }
             else if (LeaveWallTimer > ctler.WallJumpBufferTimeWithWallSlide)
             {

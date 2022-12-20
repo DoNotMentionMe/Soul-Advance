@@ -11,6 +11,7 @@ namespace Adv
 
         public float PlayerFace => mTransform.localScale.x;
         public float PlayerVectoryX => mRigidbody.velocity.x;
+        public float AttackPostDelay => attackPostDelay;
         public float AttackBufferTime => attackBufferTime;
         public float RollBufferTime => rollBufferTime;
         public float JumpBufferTime => jumpBufferTime;
@@ -39,6 +40,7 @@ namespace Adv
         [Header("玩家物理属性：攻击")]
         [SerializeField] float attackMoveSpeed;
         [SerializeField] float attackExtraMoveSpeed;
+        [SerializeField] float attackPostDelay;
         [SerializeField] float attackBufferTime;
         // [SerializeField] float attackDashTime;
         [SerializeField] float AttackDeceleration;
@@ -181,7 +183,12 @@ namespace Adv
             if (AxesX == 0)
                 SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
             else
+            {
                 SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed + attackExtraMoveSpeed));
+            }
+
+            if (mRigidbody.velocity.y < 0.1f)
+                SetVelocity(SetCoord.Y, 0);
 
         }
 

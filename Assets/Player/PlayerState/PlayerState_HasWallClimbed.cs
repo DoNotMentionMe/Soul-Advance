@@ -11,8 +11,8 @@ namespace Adv
         {
             base.Enter();
 
-            animManager.Play(AnimName.HasWallClimbed);
             ctler.EndWallClimb();
+            animManager.Play(AnimName.HasWallClimbed);
             effect.Release落地灰尘();
         }
 
@@ -23,20 +23,26 @@ namespace Adv
             // else 
             if (animManager.IsAnimEnded(AnimName.HasWallClimbed))
             {
-                if (input.JumpFrame.Value
-                || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime)
-                {
-                    FSM.SwitchState(typeof(PlayerState_JumpUp));
-                }
-                else if (input.Move)
+                // if (input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime)
+                // {
+                //     FSM.SwitchState(typeof(PlayerState_JumpUp));
+                // }
+                // else 
+                if (input.Move)
                     FSM.SwitchState(typeof(PlayerState_Move));
                 else
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
-            else if (!ctler.Grounded)
+            else if (input.JumpFrame.Value
+                  || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime
+                )
             {
-                FSM.SwitchState(typeof(PlayerState_JumpDown));
+                FSM.SwitchState(typeof(PlayerState_JumpUp));
             }
+            // else if (!ctler.Grounded)
+            // {
+            //     FSM.SwitchState(typeof(PlayerState_JumpDown));
+            // }
         }
 
         public override void PhysicUpdate()
@@ -45,6 +51,10 @@ namespace Adv
 
             //ctler.MoveWhenClimbUp(input.AxesX);
             ctler.Move(input.AxesX);
+            if (!ctler.Grounded)
+            {
+                FSM.SwitchState(typeof(PlayerState_JumpDown));
+            }
 
         }
     }
