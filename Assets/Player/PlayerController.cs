@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
 
 namespace Adv
 {
@@ -21,11 +22,13 @@ namespace Adv
         public float WallJumpBufferTimeWithWallSlide => wallJumpBufferTimeWithWallSlide;
         public bool ChangeableJump => changeableJump;
         public bool JumpDown => mRigidbody.velocity.y <= 0;
-        public bool Grounded => GroundCheck.IsTriggered;
-        public bool canWallClimb_Font => wallFunction && !WallClimbCheck_Font.IsTriggered;
-        public bool canWallClimb_Back => wallFunction && !WallClimbCheck_Back.IsTriggered;
+        public bool Grounded => GroundCheck.IsTriggered || OneWayGroundCheck.IsTriggered;
+        public bool GroundedOneWay => OneWayGroundCheck.IsTriggered;
+        public bool canWallClimb_Font => wallFunction && !WallClimbCheck_Font.IsTriggered && WallSlideCheck_Font.IsTriggered;
+        public bool canWallClimb_Back => wallFunction && !WallClimbCheck_Back.IsTriggered && WallSlideCheck_Back.IsTriggered;
         public bool WallSlided_Font => wallFunction && WallSlideCheck_Font.IsTriggered;
         public bool WallSlided_Back => wallFunction && WallSlideCheck_Back.IsTriggered;
+        public bool canOneWayClimb => wallFunction && OneWayCheck.IsTriggered && !OneWayClimbCheck.IsTriggered;
         public Trigger2D 攻击碰撞体 => m攻击碰撞体;
 
         #endregion
@@ -72,13 +75,20 @@ namespace Adv
         [SerializeField] float WallClimbYOffset1;
         [SerializeField] float WallClimbXOffset2;
         [SerializeField] float WallClimbYOffset2;
+        [Header("玩家物理属性：单向平台")]
+        [SerializeField] float DownFallOffsetY = 0.2f;
+        [SerializeField] float DownFallCollSetTrueDelay = 0.3f;
         [Header("检测器")]
         [SerializeField] Trigger2D GroundCheck;
         [SerializeField] Trigger2D WallClimbCheck_Font;
         [SerializeField] Trigger2D WallClimbCheck_Back;
         [SerializeField] Trigger2D WallSlideCheck_Font;
         [SerializeField] Trigger2D WallSlideCheck_Back;
+        [SerializeField] Trigger2D OneWayGroundCheck;
+        [SerializeField] Trigger2D OneWayClimbCheck;
+        [SerializeField] Trigger2D OneWayCheck;
         [SerializeField] Trigger2D m攻击碰撞体;
+        [SerializeField] PlayerDownBody 下半体;
         [Header("组件")]
         [SerializeField] PlayerFSM playerFSM;
 
@@ -92,7 +102,7 @@ namespace Adv
         private Vector2 attackDirection;
         private Vector2 OnEnablePos;
         private bool HasGetEnablePos;
-        private bool IsStop;
+        private bool IsFixToWallClimbPos;
         private bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
         private enum SetCoord { X, Y }
@@ -123,12 +133,6 @@ namespace Adv
             mTransform = null;
             mRigidbody = null;
             effect = null;
-        }
-
-        private void Update()
-        {
-            if (IsStop)
-                mTransform.position = WallClimbPos;
         }
 
         private void FixedUpdate()
@@ -238,7 +242,7 @@ namespace Adv
                 EndWallClimbPos = new Vector2(Mathf.Ceil(WallSlideCheck_Font.Pos.x - WallSlideCheck_Font.Length / 2 - 0.05f) - WallClimbXOffset2,
                                             Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset2);
             }
-            IsStop = true;
+            IsFixToWallClimbPos = true;
 #if UNITY_EDITOR
             if (DebugWallClimbPos)
             {
@@ -247,9 +251,49 @@ namespace Adv
             }
 #endif
         }
+
+        public void OneWayClimb()
+        {
+            mRigidbody.velocity = Vector2.zero;
+
+            WallClimbPos = new Vector2(mTransform.position.x,
+                                        Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset1);
+            EndWallClimbPos = new Vector2(mTransform.position.x + mTransform.localScale.x * WallClimbXOffset2,
+                                        Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset2);
+            IsFixToWallClimbPos = true;
+#if UNITY_EDITOR
+            if (DebugWallClimbPos)
+            {
+                Debug.Log("WallClimbPos: " + WallClimbPos);
+                Debug.Log("EndWallClimbPos" + EndWallClimbPos);
+            }
+#endif
+        }
+
+        public void OneWayDownFall(UnityAction onCompleted)
+        {
+            下半体.SetCollEnable(false);
+            OneWayClimbCheck.SetCollEnable(false);
+            OneWayCheck.SetCollEnable(false);
+            DOVirtual.DelayedCall(DownFallCollSetTrueDelay, () =>
+            {
+                下半体.SetCollEnable(true);
+                OneWayClimbCheck.SetCollEnable(true);
+                OneWayCheck.SetCollEnable(true);
+                onCompleted?.Invoke();
+            }, false);
+            mTransform.position -= Vector3.up * DownFallOffsetY;
+        }
+
+        public void FixPosToWallClimbPos()
+        {
+            if (IsFixToWallClimbPos)
+                mTransform.position = WallClimbPos;
+        }
+
         public void EndWallClimb()
         {
-            IsStop = false;
+            IsFixToWallClimbPos = false;
             mTransform.position = EndWallClimbPos;
         }
 

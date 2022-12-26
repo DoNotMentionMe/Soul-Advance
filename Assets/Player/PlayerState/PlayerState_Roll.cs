@@ -17,17 +17,22 @@ namespace Adv
             ctler.RollStart(input.AxesX);
             animManager.CrossFade(AnimName.Roll);
             //NotGroundedTime = 0f;
+            if (!ctler.Grounded)//在空中Roll时不能再跳跃
+            {
+                CountJumpBuffering = true;
+                IsNotGroundTime = -100;
+            }
         }
 
         public override void LogicUpdate()
         {
             base.LogicUpdate();
-            //跳跃
-            if (!ctler.Grounded && !CountJumpBuffering)
+            if (!CountJumpBuffering && !ctler.Grounded)//模拟土狼跳
             {
                 CountJumpBuffering = true;
                 IsNotGroundTime = Time.time;
             }
+            //跳跃
             if (input.JumpFrame.Value)
             {
                 if (ctler.Grounded)

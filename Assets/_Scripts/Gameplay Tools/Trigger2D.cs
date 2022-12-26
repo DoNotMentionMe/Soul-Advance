@@ -9,7 +9,6 @@ public class Trigger2D : MonoBehaviour
     public float Length => ((BoxCollider2D)mCol).size.x;
     public Vector2 Pos => mTransform.position;
 
-    [Header("Debug")]
     [SerializeField] bool isTriggeredWithLayer;
     [SerializeField] LayerMask layers;
     [SerializeField] Transform mTransform;
@@ -40,7 +39,8 @@ public class Trigger2D : MonoBehaviour
     {
         if (!LayerMaskUtility.Contains(layers, col.gameObject.layer)) return;
 
-        mCollider2Ds.Add(col);
+        if (!mCollider2Ds.Contains(col))
+            mCollider2Ds.Add(col);
         OnTriggerEnterWithCollider?.Invoke(col);
 
         if (!isTriggeredWithLayer && mCollider2Ds.Count > 0)
@@ -54,7 +54,8 @@ public class Trigger2D : MonoBehaviour
     {
         if (!LayerMaskUtility.Contains(layers, col.gameObject.layer)) return;
 
-        mCollider2Ds.Remove(col);
+        if (mCollider2Ds.Contains(col))
+            mCollider2Ds.Remove(col);
 
         if (isTriggeredWithLayer && mCollider2Ds.Count == 0)
         {

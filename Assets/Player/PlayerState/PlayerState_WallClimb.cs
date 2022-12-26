@@ -9,7 +9,10 @@ namespace Adv
         public override void Enter()
         {
             base.Enter();
-            ctler.WallClimb();
+            if (ctler.canOneWayClimb)
+                ctler.OneWayClimb();
+            else
+                ctler.WallClimb();
             animManager.CrossFade(AnimName.WallClimb, 0f);
             //计算爬上去后位置
         }
@@ -17,6 +20,8 @@ namespace Adv
         public override void LogicUpdate()
         {
             base.LogicUpdate();
+
+            ctler.FixPosToWallClimbPos();
 
             if (animManager.IsAnimEnded(AnimName.WallClimb))
             {

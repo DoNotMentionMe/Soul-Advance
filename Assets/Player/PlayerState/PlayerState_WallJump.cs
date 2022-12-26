@@ -33,11 +33,11 @@ namespace Adv
             // }
 
             //爬上墙
-            if (ctler.canWallClimb_Font && ctler.WallSlided_Font)
+            if (ctler.canOneWayClimb || ctler.canWallClimb_Font)
             {
                 FSM.SwitchState(typeof(PlayerState_WallClimb));
             }
-            else if (ctler.canWallClimb_Back && ctler.WallSlided_Back)
+            else if (ctler.canWallClimb_Back)
             {
                 ctler.FlipPlayer();
                 FSM.SwitchState(typeof(PlayerState_WallClimb));

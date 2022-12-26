@@ -51,10 +51,10 @@ namespace Adv
 
             //ctler.MoveWhenClimbUp(input.AxesX);
             ctler.Move(input.AxesX);
-            if (!ctler.Grounded)
-            {
-                FSM.SwitchState(typeof(PlayerState_JumpDown));
-            }
+            // if (!ctler.Grounded)
+            // {
+            //     FSM.SwitchState(typeof(PlayerState_JumpDown));
+            // }
 
         }
     }

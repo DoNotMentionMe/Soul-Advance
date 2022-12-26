@@ -54,7 +54,7 @@
 			"entityInstances": []
 		},
 		{
-			"__identifier": "IntGrid",
+			"__identifier": "GroundAndOneWay",
 			"__type": "IntGrid",
 			"__cWid": 16,
 			"__cHei": 16,
@@ -63,7 +63,7 @@
 			"__pxTotalOffsetX": 0,
 			"__pxTotalOffsetY": 0,
 			"__tilesetDefUid": 1,
-			"__tilesetRelPath": "TilesTest.png",
+			"__tilesetRelPath": "TilesTest 1.png",
 			"iid": "fccbde40-5110-11ed-a035-e54856784c8c",
 			"levelId": 0,
 			"layerDefUid": 5,

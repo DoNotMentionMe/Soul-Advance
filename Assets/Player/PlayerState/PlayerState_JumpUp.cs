@@ -19,11 +19,11 @@ namespace Adv
         {
             base.LogicUpdate();
             //爬上墙，如果按着跳跃键就不判定
-            if (ctler.canWallClimb_Font && ctler.WallSlided_Font && !input.Jump)
+            if (ctler.canOneWayClimb || ctler.canWallClimb_Font)
             {
                 FSM.SwitchState(typeof(PlayerState_WallClimb));
             }
-            else if (ctler.canWallClimb_Back && ctler.WallSlided_Back && !input.Jump)
+            else if (ctler.canWallClimb_Back)
             {
                 ctler.FlipPlayer();
                 FSM.SwitchState(typeof(PlayerState_WallClimb));

@@ -19,12 +19,24 @@ namespace Adv
         {
             base.LogicUpdate();
 
+            if (ctler.canOneWayClimb || ctler.canWallClimb_Font)
+            {
+                FSM.SwitchState(typeof(PlayerState_WallClimb));
+            }
             //按跳跃键或进入状态前按下了跳跃键
-            if (input.JumpFrame.Value
+            else if (input.JumpFrame.Value
                 || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime)
             {
-                input.JumpFrame.TrueWhenGrounded = true;
-                FSM.SwitchState(typeof(PlayerState_JumpUp));
+                if (ctler.GroundedOneWay && input.AxesY < 0)
+                {
+                    ctler.OneWayDownFall(null);
+                    FSM.SwitchState(typeof(PlayerState_JumpDown));
+                }
+                else
+                {
+                    input.JumpFrame.TrueWhenGrounded = true;
+                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                }
             }
             //踩空，判定为土狼跳或下落
             else if (!ctler.Grounded)

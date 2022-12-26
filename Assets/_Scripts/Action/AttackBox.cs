@@ -11,8 +11,11 @@ namespace Adv
         {
             if (LayerMaskUtility.Contains(AttackLayer, col.gameObject.layer))
             {
-                col.gameObject.GetComponent<IBeAttacked>().BeAttacked();
-                AttackHittedEvent?.Invoke();
+                if (col.gameObject.TryGetComponent<IBeAttacked>(out IBeAttacked beAttacked))//如果碰撞体上没有实现这个接口说明是无敌碰撞体
+                {
+                    beAttacked.BeAttacked();
+                    AttackHittedEvent?.Invoke();
+                }
             }
         }
     }

@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: SetPosprocessLevel
   m_EditorClassIdentifier: 
   UnityDefaultUnlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
-  OrderInLayer: 0
+  GroundOrderInLayer: 0
+  OneWayPlatformer:
+    serializedVersion: 2
+    m_Bits: 1024
+  OneWayEffectorSurfaceArc: 140

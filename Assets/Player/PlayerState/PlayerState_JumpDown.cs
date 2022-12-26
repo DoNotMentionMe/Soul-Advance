@@ -19,14 +19,28 @@ namespace Adv
         {
             base.LogicUpdate();
             //爬上墙
-            if (ctler.canWallClimb_Font && ctler.WallSlided_Font)
+            if (ctler.canOneWayClimb || ctler.canWallClimb_Font)
             {
                 FSM.SwitchState(typeof(PlayerState_WallClimb));
             }
-            else if (ctler.canWallClimb_Back && ctler.WallSlided_Back)
+            else if (ctler.canWallClimb_Back)
             {
                 ctler.FlipPlayer();
                 FSM.SwitchState(typeof(PlayerState_WallClimb));
+            }
+            //滑落
+            else if (ctler.WallSlided_Back || ctler.WallSlided_Font)
+            {
+                FSM.SwitchState(typeof(PlayerState_WallSlide));
+            }
+            //落地
+            else if (ctler.Grounded && StateDuration > 0.2f)
+            {
+                effect.Release落地灰尘();
+                if (input.Move)
+                    FSM.SwitchState(typeof(PlayerState_Move));
+                else
+                    FSM.SwitchState(typeof(PlayerState_Idle));
             }
             //指令缓存跳-在WallSlide中判断就可以
             // else if (ctler.WallSlided_Font && BtnJumpInThisState && input.JumpFrame.IntervalWithLastTrue <= ctler.JumpBufferTime)
@@ -39,21 +53,6 @@ namespace Adv
             // {
             //     FSM.SwitchState(typeof(PlayerState_JumpUp));
             // }
-            //滑落
-            //else if ((ctler.WallSlided_Back && input.AxesX * ctler.PlayerFace < 0) || ctler.WallSlided_Font)
-            else if (ctler.WallSlided_Back || ctler.WallSlided_Font)
-            {
-                FSM.SwitchState(typeof(PlayerState_WallSlide));
-            }
-            //落地
-            else if (ctler.Grounded)
-            {
-                effect.Release落地灰尘();
-                if (input.Move)
-                    FSM.SwitchState(typeof(PlayerState_Move));
-                else
-                    FSM.SwitchState(typeof(PlayerState_Idle));
-            }
         }
 
         public override void Exit()
