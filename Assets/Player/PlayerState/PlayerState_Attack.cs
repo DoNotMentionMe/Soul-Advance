@@ -87,7 +87,16 @@ namespace Adv
             else if (input.JumpFrame.Value && ctler.Grounded)
             {
                 ResetAttackState();
-                FSM.SwitchState(typeof(PlayerState_JumpUp));
+                if (ctler.GroundedOneWay && input.AxesY < 0)
+                {
+                    ctler.OneWayDownFall(null);
+                    FSM.SwitchState(typeof(PlayerState_JumpDown));
+                }
+                else
+                {
+                    input.JumpFrame.TrueWhenGrounded = true;
+                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                }
             }
             else if (!IsAttackEnd &&
                     (

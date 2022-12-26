@@ -9,6 +9,7 @@ namespace Adv
     {
         [SerializeField] Material UnityDefaultUnlit;
         [SerializeField] int GroundOrderInLayer;
+        [SerializeField] LayerMask Ground;
         [SerializeField] LayerMask OneWayPlatformer;
         [SerializeField] float OneWayEffectorSurfaceArc = 130;
         private const string GroundLayerName = "Ground";
@@ -26,9 +27,21 @@ namespace Adv
         }
 
         /// <summary>
+        /// 找到普通地面层，添加组件并设置好参数
+        /// </summary>
+        public void SetGround(GameObject Grid)
+        {
+            if (LayerMaskUtility.Contains(Ground, Grid.layer))
+            {
+                var coll = Grid.GetComponent<CompositeCollider2D>();
+                coll.geometryType = CompositeCollider2D.GeometryType.Polygons;
+            }
+        }
+
+        /// <summary>
         /// 找到单向平台层，添加组件并设置好参数
         /// </summary>
-        public bool AddOneWayEffector(GameObject Grid)
+        public void AddOneWayEffector(GameObject Grid)
         {
             if (LayerMaskUtility.Contains(OneWayPlatformer, Grid.layer))
             {
@@ -39,9 +52,7 @@ namespace Adv
                 effector.useColliderMask = false;
                 effector.useOneWayGrouping = true;
                 effector.surfaceArc = OneWayEffectorSurfaceArc;
-                return true;
             }
-            return false;
         }
 
         public void ResetLevelTrigger(PolygonCollider2D trigger)

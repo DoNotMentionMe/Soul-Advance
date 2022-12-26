@@ -24,6 +24,7 @@ namespace Adv
         public bool JumpDown => mRigidbody.velocity.y <= 0;
         public bool Grounded => GroundCheck.IsTriggered || OneWayGroundCheck.IsTriggered;
         public bool GroundedOneWay => OneWayGroundCheck.IsTriggered;
+        public bool HeadTouchGround => HeadCheck.IsTriggered;
         public bool canWallClimb_Font => wallFunction && !WallClimbCheck_Font.IsTriggered && WallSlideCheck_Font.IsTriggered;
         public bool canWallClimb_Back => wallFunction && !WallClimbCheck_Back.IsTriggered && WallSlideCheck_Back.IsTriggered;
         public bool WallSlided_Font => wallFunction && WallSlideCheck_Font.IsTriggered;
@@ -52,6 +53,7 @@ namespace Adv
         [SerializeField] float MoveAcceleration;
         [SerializeField] float Movedeceleration;
         [SerializeField] float RollStartSpeed;
+        [SerializeField] float RollHoldSpeed;
         [SerializeField] float RollDeceleration;
         [SerializeField] float RollExtraAcceleration;
         [SerializeField] float RollExtraDeceleration;
@@ -80,6 +82,7 @@ namespace Adv
         [SerializeField] float DownFallCollSetTrueDelay = 0.3f;
         [Header("检测器")]
         [SerializeField] Trigger2D GroundCheck;
+        [SerializeField] Trigger2D HeadCheck;
         [SerializeField] Trigger2D WallClimbCheck_Font;
         [SerializeField] Trigger2D WallClimbCheck_Back;
         [SerializeField] Trigger2D WallSlideCheck_Font;
@@ -91,6 +94,7 @@ namespace Adv
         [SerializeField] PlayerDownBody 下半体;
         [Header("组件")]
         [SerializeField] PlayerFSM playerFSM;
+        [SerializeField] Collider2D mColl;
 
         #region 私有变量声明和获取、周期函数
 
@@ -205,6 +209,12 @@ namespace Adv
         public void RollStart(float AxesX)
         {
             SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed);
+            mColl.enabled = false;
+        }
+
+        public void RollEnd()
+        {
+            mColl.enabled = true;
         }
 
         public void Rolling(float AxesX)
@@ -220,6 +230,11 @@ namespace Adv
             SetVelocity(SetCoord.X, VelocityX);
         }
 
+        public void RollHold()
+        {
+            SetVelocity(SetCoord.X, mTransform.localScale.x * RollHoldSpeed);
+        }
+
         public void Jump()
         {
             SetVelocity(SetCoord.Y, JumpForce);
@@ -228,6 +243,7 @@ namespace Adv
         public void WallClimb()
         {
             mRigidbody.velocity = Vector2.zero;
+            mColl.enabled = false;
             if (mTransform.localScale.x > 0)//向右
             {
                 WallClimbPos = new Vector2(Mathf.Floor(WallSlideCheck_Font.Pos.x + WallSlideCheck_Font.Length / 2 + 0.05f) - WallClimbXOffset1,
@@ -255,6 +271,7 @@ namespace Adv
         public void OneWayClimb()
         {
             mRigidbody.velocity = Vector2.zero;
+            mColl.enabled = false;
 
             WallClimbPos = new Vector2(mTransform.position.x,
                                         Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset1);
@@ -294,6 +311,7 @@ namespace Adv
         public void EndWallClimb()
         {
             IsFixToWallClimbPos = false;
+            mColl.enabled = true;
             mTransform.position = EndWallClimbPos;
         }
 

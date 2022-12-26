@@ -29,13 +29,16 @@ namespace Adv
             setting.ResetLevelTrigger(root.GetComponent<PolygonCollider2D>());
             //把地图块的排序图层改为对应位置
             setting.SetRenderer(root.GetComponentInChildren<TilemapRenderer>());
-            //如果存在单向平台
+
             foreach (Transform child in root.transform)
             {
                 if (child.GetComponent<LDtkComponentLayer>().LayerType == TypeEnum.IntGrid)
                 {
                     foreach (Transform childChild in child)
                     {
+                        //普通地面设置为实心
+                        setting.SetGround(childChild.gameObject);
+                        //如果存在单向平台标签，设置组件
                         setting.AddOneWayEffector(childChild.gameObject);
                     }
                 }

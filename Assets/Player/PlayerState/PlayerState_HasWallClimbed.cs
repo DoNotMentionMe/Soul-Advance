@@ -33,6 +33,11 @@ namespace Adv
                 else
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
+            //攻击
+            else if (input.AttackFrame.Value)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
+            }
             else if (input.JumpFrame.Value
                   || input.JumpFrame.IntervalWithLastTrue <= ctler.ClimbUpJumpBufferTime
                 )
