@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Events;
+using NaughtyAttributes;
 
 namespace Adv
 {
@@ -34,67 +35,59 @@ namespace Adv
 
         #endregion
 
-        [Header("能力开启")]
-        [SerializeField] bool wallFunction;
-        [SerializeField] bool changeableJump;
-        [Space]
-        [Header("基本物理属性")]
-        [SerializeField] float Gravity;
-        [SerializeField] float MaxFallSpeed;
-        [Header("玩家物理属性：攻击")]
-        [SerializeField] float attackMoveSpeed;
-        [SerializeField] float attackExtraMoveSpeed;
-        [SerializeField] float attackPostDelay;
-        [SerializeField] float attackBufferTime;
-        // [SerializeField] float attackDashTime;
-        [SerializeField] float AttackDeceleration;
-        [Header("玩家物理属性：移动，翻滚")]
-        [SerializeField] float MoveSpeed;
-        [SerializeField] float MoveAcceleration;
-        [SerializeField] float Movedeceleration;
-        [SerializeField] float RollStartSpeed;
-        [SerializeField] float RollHoldSpeed;
-        [SerializeField] float RollDeceleration;
-        [SerializeField] float RollExtraAcceleration;
-        [SerializeField] float RollExtraDeceleration;
-        [SerializeField] float rollBufferTime;
-        [Header("玩家物理属性：普通跳跃")]
-        [SerializeField] float JumpForce;
-        [SerializeField, Range(0, 1)] float ScaleChangeableJump;
-        [SerializeField] float jumpBufferTime;//OnAir时缓冲时间内按跳跃键判定为Jump或WallJump
-        [SerializeField] float leaveGroundJumpBufferTime;
-        [SerializeField] float climbUpJumpBufferTime;
-        [Header("玩家物理属性：滑墙、跳墙、爬墙")]
-        [SerializeField] bool DebugWallClimbPos;
-        [SerializeField] Vector2 WallJumpSpeed;
-        [SerializeField] Vector2 WallLeaveSpeed;
-        [SerializeField] float WallSlideSpeed;
-        [SerializeField] float wallJumpBufferTimeWithOnAir;//空中时缓冲时间内按跳跃键判定为WallJump
-        [SerializeField] float wallJumpBufferTimeWithWallSlide;//WallLeave时缓冲时间内按跳跃键判定为WallJump
-        [SerializeField] float decelerationWhenWallJumpStart;//wallJump时如果还是往同一边移动，设置为该速度
-        [SerializeField] float ClimbUpMoveSpeed;
-        [SerializeField] float WallClimbXOffset1;
-        [SerializeField] float WallClimbYOffset1;
-        [SerializeField] float WallClimbXOffset2;
-        [SerializeField] float WallClimbYOffset2;
-        [Header("玩家物理属性：单向平台")]
-        [SerializeField] float DownFallOffsetY = 0.2f;
-        [SerializeField] float DownFallCollSetTrueDelay = 0.3f;
-        [Header("检测器")]
-        [SerializeField] Trigger2D GroundCheck;
-        [SerializeField] Trigger2D HeadCheck;
-        [SerializeField] Trigger2D WallClimbCheck_Font;
-        [SerializeField] Trigger2D WallClimbCheck_Back;
-        [SerializeField] Trigger2D WallSlideCheck_Font;
-        [SerializeField] Trigger2D WallSlideCheck_Back;
-        [SerializeField] Trigger2D OneWayGroundCheck;
-        [SerializeField] Trigger2D OneWayClimbCheck;
-        [SerializeField] Trigger2D OneWayCheck;
-        [SerializeField] Trigger2D m攻击碰撞体;
-        [SerializeField] PlayerDownBody 下半体;
-        [Header("组件")]
-        [SerializeField] PlayerFSM playerFSM;
-        [SerializeField] Collider2D mColl;
+        #region 序列化变量
+        [Foldout("能力开启")][SerializeField] bool wallFunction;
+        [Foldout("能力开启")][SerializeField] bool changeableJump;
+        [Foldout("基本物理属性")][SerializeField] float Gravity;
+        [Foldout("基本物理属性")][SerializeField] float MaxFallSpeed;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackMoveSpeed;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackExtraMoveSpeed;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackPostDelay;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackBufferTime;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float AttackDeceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float MoveSpeed;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float MoveAcceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float Movedeceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float RollStartSpeed;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float RollHoldSpeed;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float RollDeceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float RollExtraAcceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float RollExtraDeceleration;
+        [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float rollBufferTime;
+        [Foldout("玩家物理属性：普通跳跃")][SerializeField] float JumpForce;
+        [Foldout("玩家物理属性：普通跳跃")][SerializeField, Range(0, 1)] float ScaleChangeableJump;
+        [Foldout("玩家物理属性：普通跳跃")][SerializeField] float jumpBufferTime;//OnAir时缓冲时间内按跳跃键判定为Jump或WallJump
+        [Foldout("玩家物理属性：普通跳跃")][SerializeField] float leaveGroundJumpBufferTime;
+        [Foldout("玩家物理属性：普通跳跃")][SerializeField] float climbUpJumpBufferTime;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] bool DebugWallClimbPos;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] Vector2 WallJumpSpeed;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] Vector2 WallLeaveSpeed;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallSlideSpeed;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float wallJumpBufferTimeWithOnAir;//空中时缓冲时间内按跳跃键判定为WallJump
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float wallJumpBufferTimeWithWallSlide;//WallLeave时缓冲时间内按跳跃键判定为WallJump
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float decelerationWhenWallJumpStart;//wallJump时如果还是往同一边移动，设置为该速度
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float ClimbUpMoveSpeed;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallClimbXOffset1;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallClimbYOffset1;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallClimbXOffset2;
+        [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallClimbYOffset2;
+        [Foldout("玩家物理属性：单向平台")][SerializeField] float DownFallOffsetY = 0.2f;
+        [Foldout("玩家物理属性：单向平台")][SerializeField] float DownFallCollSetTrueDelay = 0.3f;
+        [Foldout("检测器")][SerializeField] Trigger2D GroundCheck;
+        [Foldout("检测器")][SerializeField] Trigger2D HeadCheck;
+        [Foldout("检测器")][SerializeField] Trigger2D WallClimbCheck_Font;
+        [Foldout("检测器")][SerializeField] Trigger2D WallClimbCheck_Back;
+        [Foldout("检测器")][SerializeField] Trigger2D WallSlideCheck_Font;
+        [Foldout("检测器")][SerializeField] Trigger2D WallSlideCheck_Back;
+        [Foldout("检测器")][SerializeField] Trigger2D OneWayGroundCheck;
+        [Foldout("检测器")][SerializeField] Trigger2D OneWayClimbCheck;
+        [Foldout("检测器")][SerializeField] Trigger2D OneWayCheck;
+        [Foldout("检测器")][SerializeField] Trigger2D m攻击碰撞体;
+        [Foldout("检测器")][SerializeField] PlayerDownBody 下半体;
+        [Foldout("组件")][SerializeField] PlayerFSM playerFSM;
+        [Foldout("组件")][SerializeField] Collider2D mColl;
+
+        #endregion
 
         #region 私有变量声明和获取、周期函数
 
@@ -173,7 +166,10 @@ namespace Adv
         /// </summary>
         public void FullControlVelocity(float ratio, float ControlTime)
         {
-            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectList.Count > 0)
+                AttackHittedEffectList.Add(0.01f);
+            else
+                AttackHittedEffectList.Add(ControlTime);
             if (AttackHittedEffectCorotine == null)
             {
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio));

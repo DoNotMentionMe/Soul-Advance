@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 1083187015}
   - component: {fileID: 1083187014}
   m_Layer: 0
-  m_Name: "\u865A\u62DF\u76F8\u673A (1)"
+  m_Name: "\u865A\u62DF\u76F8\u673A"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39567,7 +39567,7 @@ MonoBehaviour:
   playerFSM: {fileID: 9117152492469156084}
 --- !u!95 &279230467910121265
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -39584,7 +39584,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!212 &279230467910121270
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -57457,6 +57457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d41b2341c6886a94ebb9f41fc2ca55ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  property: {fileID: 9117152492469156044}
   AttackLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -61724,8 +61725,8 @@ MonoBehaviour:
   changeableJump: 1
   Gravity: 50
   MaxFallSpeed: 20
-  attackMoveSpeed: 5
-  attackExtraMoveSpeed: 10
+  attackMoveSpeed: 6.5
+  attackExtraMoveSpeed: 4
   attackPostDelay: 0.1
   attackBufferTime: 0.1333
   AttackDeceleration: 55
@@ -61782,7 +61783,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea2cc5a746ede7a45a8668e3d983c69e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowProperty: 0
   MaxHP: 1
+  property: {fileID: 11400000, guid: 13ec9a2feb7d54b43bad619cc94f18c9, type: 2}
 --- !u!114 &9117152492469156047
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -40,7 +40,10 @@ namespace Adv
         /// </summary>
         public void AttackHittedEffect(float ControlTime)
         {
-            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectList.Count > 0)
+                AttackHittedEffectList.Add(0.01f);
+            else
+                AttackHittedEffectList.Add(ControlTime);
             if (AttackHittedEffectCorotine == null)
             {
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent());
@@ -58,7 +61,6 @@ namespace Adv
         private WaitForSecondsRealtime waitForIntervalShadow;
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
-        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
 
         private void Awake()
         {

@@ -40,6 +40,11 @@ namespace Adv
             攻击碰撞体.SetCollEnable(true);
         }
 
+        public void AttackEnd()
+        {
+            攻击碰撞体.SetCollEnable(false);
+        }
+
         #endregion
     }
 }

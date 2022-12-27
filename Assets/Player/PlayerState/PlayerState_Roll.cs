@@ -14,9 +14,9 @@ namespace Adv
         public override void Enter()
         {
             base.Enter();
+            animManager.CrossFade(AnimName.Roll);
             effect.Release落地灰尘();
             ctler.RollStart(input.AxesX);
-            animManager.CrossFade(AnimName.Roll);
             //NotGroundedTime = 0f;
             if (!ctler.Grounded)//在空中Roll时不能再跳跃
             {

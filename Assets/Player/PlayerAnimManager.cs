@@ -43,7 +43,10 @@ namespace Adv
         /// <param name="ControlTime"></param>
         public void CurrentAnimSpeedSlowDownForAWhile(float speed, float ControlTime)
         {
-            AttackHittedEffectList.Add(ControlTime);
+            if (AttackHittedEffectList.Count > 0)
+                AttackHittedEffectList.Add(0.01f);
+            else
+                AttackHittedEffectList.Add(ControlTime);
             if (AttackHittedEffectCorotine == null)
             {
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed));
@@ -87,6 +90,7 @@ namespace Adv
         private void GetLastAnim()
         {
             CurrentAnimSpeedSlowDown(1);
+            effectAnim.Play("Idle");
             攻击碰撞体.SetCollEnable(false);
             WeaponSpriteRenderer.sortingOrder = 15;
             lastAnim = currentAnim;
@@ -111,19 +115,6 @@ namespace Adv
             WeaponSpriteRenderer.sortingOrder = 0;
         }
 
-        // private void Attack1Start()
-        // {
-        //     //攻击碰撞体.SetCollEnable(true);
-        //     WeaponSpriteRenderer.sortingOrder = 15;
-        //     IsAttacking = true;
-        // }
-
-        // private void Attack1End()
-        // {
-        //     //攻击碰撞体.SetCollEnable(false);
-        //     WeaponSpriteRenderer.sortingOrder = 0;
-        // }
-
         private void GAttack2Start()
         {
             //攻击碰撞体.SetCollEnable(true);
@@ -136,12 +127,6 @@ namespace Adv
             WeaponSpriteRenderer.sortingOrder = 15;
             IsAttacking = true;
         }
-
-        // private void Attack2End()
-        // {
-        //     //攻击碰撞体.SetCollEnable(false);
-        //     WeaponSpriteRenderer.sortingOrder = 15;
-        // }
         #endregion
 
         /// <summary>

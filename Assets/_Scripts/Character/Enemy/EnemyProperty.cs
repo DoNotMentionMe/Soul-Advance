@@ -8,15 +8,18 @@ namespace Adv
 {
     public class EnemyProperty : CharacterProperty, IBeAttacked
     {
+        public override int Attack { get => attack; protected set => attack = value; }
+        [SerializeField] int attack;
         [Header("敌人组件")]
         [SerializeField] BehaviorTree mTree;
         [SerializeField] string 受伤事件 = "BeAttacked";
         [SerializeField] string 死亡事件 = "Died";
         [SerializeField] UnityEvent BeHittedEvent;//被命中时调用EnemyBattleEffect.BeHittedEffect
 
-        public override void BeAttacked()
+
+        public override void BeAttacked(int damage)
         {
-            base.BeAttacked();
+            base.BeAttacked(damage);
             if (HP <= 0)
             {
                 BeHittedEvent.Invoke();

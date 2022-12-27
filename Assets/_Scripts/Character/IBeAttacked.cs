@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IBeAttacked
 {
-    void BeAttacked();
+    void BeAttacked(int damage);
 }
