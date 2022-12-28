@@ -9,19 +9,19 @@ namespace Adv
 {
     public class EnemyBattleEffect : MonoBehaviour
     {
-        [Foldout("顿帧设置")][SerializeField] float FreezeFrameTime;//顿帧时间
-        [Foldout("顿帧设置")][SerializeField] float PlayerAnimFreezeFrameRange;
-        [Foldout("顿帧设置")][SerializeField] float PlayerVelocityFreezeFrameRange;
-        [Foldout("顿帧设置")][SerializeField] float AnimFreezeFrameRange;
-        [Foldout("被击中表现设置/震动")][SerializeField] Vector2 ShakeStrength;
-        [Foldout("被击中表现设置/被击退")][SerializeField] float HitBackStartSpeed;
-        [Foldout("被击中表现设置/被击退")][SerializeField] float HitBackDececleration;
+        [Foldout("被击中表现设置")][SerializeField] float AnimFreezeFrameRange;
+        [Foldout("被击中表现设置")][SerializeField] Vector2 CharacterShakeStrength;
+        [Foldout("被击中表现设置")][SerializeField] float HitBackStartSpeed;
+        [Foldout("被击中表现设置")][SerializeField] float HitBackDececleration;
+        [Foldout("死亡表现设置")][SerializeField] GameObject 死亡爆炸特效;
+        [Foldout("死亡表现设置")][SerializeField] float 屏幕震动幅度 = 1f;
+        [Foldout("死亡表现设置")][SerializeField] float 屏幕震动频率 = 0.5f;
         [Foldout("组件")][SerializeField] BehaviorTree mBehaviorTree;
         [Foldout("组件")][SerializeField] apPortrait mApPortrait;
         [Foldout("组件")][SerializeField] Rigidbody2D mRigidbody;
 
         private float StartTime;
-        private PlayerFSM playerFSM;
+        private PlayerEffectPerformance playerEffect;
         private SharedBool FreezeFrameing;//敌人行为树必带变量
         private SharedBool HittedBacking;//敌人行为树必带变量
         private Coroutine HittedBackCoroutine;
@@ -33,20 +33,26 @@ namespace Adv
             HittedBacking = (SharedBool)mBehaviorTree.GetVariable("HittedBacking");
             // playerAnim = PlayerFSM.Player.animManager;
             // playerController = PlayerFSM.Player.ctler;
-            // playerEffect = PlayerFSM.Player.effect;
         }
 
         private void OnEnable()
         {
             //需要先生成玩家，在生成敌人
-            playerFSM = PlayerFSM.Player;
+            playerEffect = PlayerFSM.Player.effect;
         }
 
         private void OnDestroy()
         {
             FreezeFrameing = null;
             HittedBacking = null;
-            playerFSM = null;
+            playerEffect = null;
+        }
+
+        public void DiedEffect()
+        {
+            PoolManager.Instance.Release(死亡爆炸特效, transform.position);
+            ImpulseController.Instance.ProduceImpulse(transform.position, 屏幕震动幅度, 屏幕震动频率);
+            gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -55,28 +61,24 @@ namespace Adv
         public void BeHittedEffect()
         {
             //TODO 这部分仅为测试用
-            if (playerFSM == null)
+            if (playerEffect == null)
             {
-                playerFSM = PlayerFSM.Player;
+                playerEffect = PlayerFSM.Player.effect;
             }
 
             FreezeFrameing.Value = true;
-            //玩家命中反馈
-            playerFSM.animManager.CurrentAnimSpeedSlowDownForAWhile(PlayerAnimFreezeFrameRange, FreezeFrameTime);
-            playerFSM.ctler.FullControlVelocity(PlayerVelocityFreezeFrameRange, FreezeFrameTime);
-            playerFSM.effect.AttackHittedEffect(FreezeFrameTime);
             //敌人被命中反馈
             StartTime = Time.time;
             mApPortrait.SetAnimationSpeed(AnimFreezeFrameRange);
             mApPortrait.SetControlParamInt("Hitted", 1);
             mRigidbody.velocity = Vector2.zero;
             DOVirtual.DelayedCall(0.13f, () => { mApPortrait.SetControlParamInt("Hitted", 0); });
-            DOVirtual.DelayedCall(FreezeFrameTime, () =>
+            DOVirtual.DelayedCall(playerEffect.AttackHittedFreezeTime, () =>
             {
                 mApPortrait.SetAnimationSpeed(1);
                 FreezeFrameing.Value = false;
             });
-            mApPortrait.transform.DOShakePosition(FreezeFrameTime, ShakeStrength);
+            mApPortrait.transform.DOShakePosition(playerEffect.AttackHittedFreezeTime, CharacterShakeStrength);
             StartHittedBack();
         }
 
@@ -84,7 +86,7 @@ namespace Adv
         {
             HittedBacking.Value = true;
             int direction = 0;
-            if (playerFSM.transform.position.x >= transform.position.x)
+            if (playerEffect.transform.position.x >= transform.position.x)
             {
                 direction = -1;
             }

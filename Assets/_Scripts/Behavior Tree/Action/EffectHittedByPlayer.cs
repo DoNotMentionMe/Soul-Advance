@@ -10,7 +10,6 @@ namespace Adv
     [TaskDescription("玩家命中特效")]
     public class EffectHittedByPlayer : Action
     {
-        [SerializeField] SharedFloat FreezeFrameTime;
         private PlayerEffectPerformance playerEffect;
 
         public override void OnAwake()
@@ -20,8 +19,12 @@ namespace Adv
 
         public override TaskStatus OnUpdate()
         {
-            playerEffect.AttackHittedEffect(FreezeFrameTime.Value);
+            playerEffect.AttackHittedEffect();
             return TaskStatus.Success;
+        }
+        public override void OnReset()
+        {
+            playerEffect = null;
         }
     }
 }

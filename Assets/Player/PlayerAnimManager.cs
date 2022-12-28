@@ -40,16 +40,13 @@ namespace Adv
         /// 控制玩家动画，用于命中顿帧，同时调用顺序执行
         /// </summary>
         /// <param name="speed"></param>
-        /// <param name="ControlTime"></param>
-        public void CurrentAnimSpeedSlowDownForAWhile(float speed, float ControlTime)
+        /// <param name="FreezeTime"></param>
+        public void CurrentAnimSpeedSlowDownForAWhile(float speed, float FreezeTime, float SecondFreezeTime)
         {
-            if (AttackHittedEffectList.Count > 0)
-                AttackHittedEffectList.Add(0.01f);
-            else
-                AttackHittedEffectList.Add(ControlTime);
+            AttackHittedEffectList.Add(FreezeTime);
             if (AttackHittedEffectCorotine == null)
             {
-                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed));
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed, SecondFreezeTime));
             }
 
         }
@@ -132,31 +129,39 @@ namespace Adv
         /// <summary>
         /// 顺序执行特效协程
         /// </summary>
-        IEnumerator ExecuteAttackHittedEvent(float speed)
+        IEnumerator ExecuteAttackHittedEvent(float speed, float SecondFreezeTime)
         {
+            bool firstFreeze = true;
             while (AttackHittedEffectList.Count > 0)
             {
-                var controltime = AttackHittedEffectList[0];
+                var freezeTime = AttackHittedEffectList[0];
                 AttackHittedEffectList.RemoveAt(0);
-                yield return StartCoroutine(AttackHittedEvent(speed, controltime));
+                if (firstFreeze)
+                    firstFreeze = false;
+                else
+                    freezeTime = SecondFreezeTime;
+                yield return StartCoroutine(AttackHittedEvent(speed, freezeTime));
             }
             AttackHittedEffectCorotine = null;
         }
         /// <summary>
         /// 特效协程
         /// </summary>
-        IEnumerator AttackHittedEvent(float speed, float ControlTime)
+        IEnumerator AttackHittedEvent(float speed, float FreezeTime)
         {
             ControlAnimSpeeding = true;
             CurrentAnimSpeedSlowDown(speed);
             effectAnim.speed = speed;
-            DOVirtual.DelayedCall(ControlTime, () =>
+            DOVirtual.DelayedCall(FreezeTime, () =>
             {
                 CurrentAnimSpeedSlowDown(1);
                 effectAnim.speed = 1;
                 ControlAnimSpeeding = false;
             });
-            yield return new WaitForSeconds(ControlTime + playerFSM.effect.IntervalOfHittedEffect);
+            if (FreezeTime == playerFSM.effect.AttackHittedFreezeTime)
+                yield return playerFSM.effect.waitForAttackHittedFreezeTime;
+            else
+                yield return playerFSM.effect.waitForSecondFreezeTime;
         }
     }
 

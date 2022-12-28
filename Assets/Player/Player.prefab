@@ -387,8 +387,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.055003315}
-  m_Size: {x: 0.3867819, y: 0.19683926}
+  m_Offset: {x: 0.001547062, y: -0.055003315}
+  m_Size: {x: 0.39309424, y: 0.19683932}
   m_Direction: 1
 --- !u!114 &1885870367
 MonoBehaviour:
@@ -57463,7 +57463,34 @@ MonoBehaviour:
     m_Bits: 128
   AttackHittedEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9117152492469156047}
+        m_TargetAssemblyTypeName: Adv.PlayerEffectPerformance, Assembly-CSharp
+        m_MethodName: AttackHittedEffect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  AttackHittedEventWithColl:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 9117152492469156047}
+        m_TargetAssemblyTypeName: Adv.PlayerEffectPerformance, Assembly-CSharp
+        m_MethodName: AttackHittedEffectWithColl
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!61 &279230468727741239
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -61798,18 +61825,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e6872dbed6a92438b49825d82e04f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackHittedFreezeTime: 0.07
+  SecondFreezeTime: 0.01
+  VelocityFreezeValue: 0.5
+  AnimSpeedFreezeValue: 0
   intervalOfHittedEffect: 0
-  "\u653B\u51FB\u547D\u4E2D\u9707\u5E45": 0.2
+  "\u653B\u51FB\u547D\u4E2D\u9707\u5E45": 0.1
+  HittedEffect: {fileID: 4597271037314741306, guid: 5d6417e2df3aa784db7056750a9983d3, type: 3}
+  AttackHittedSound:
+    audioClip: {fileID: 8300000, guid: da3813cb65bc409428740eab2da2273a, type: 3}
+    volume: 1
   "\u843D\u5730\u7070\u5C18": {fileID: 3739196177632191941, guid: eb90cd1cb1ac4cd4789876dbe79acb3c, type: 3}
-  AttackShadow: {fileID: 3251166345363306422, guid: 767d1f33271082b4d8887743ed69e481, type: 3}
-  ReleaseIntervalOfAttackShadow: 0.04
   AttackSound:
     audioClip: {fileID: 8300000, guid: ffb36db2ade11ab47ad4822f0f34773b, type: 3}
     volume: 1
-  AttackHittedSound:
-    audioClip: {fileID: 8300000, guid: 54b3eb993a70f5146a74b92ac80eaf55, type: 3}
-    volume: 0.5
   animManager: {fileID: 279230467910121271}
+  playerController: {fileID: 9117152492469156080}
 --- !u!114 &9117152492469156045
 MonoBehaviour:
   m_ObjectHideFlags: 0

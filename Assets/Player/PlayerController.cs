@@ -164,17 +164,23 @@ namespace Adv
         /// 用于顿帧使用，该函数将使玩家速度按ratio比例降低ControlTime时间后恢复原速
         /// 同时调用顺序执行
         /// </summary>
-        public void FullControlVelocity(float ratio, float ControlTime)
+        public void FullControlVelocity(float ratio, float FreezeTime, float SecondFreezeTime)
         {
-            if (AttackHittedEffectList.Count > 0)
-                AttackHittedEffectList.Add(0.01f);
-            else
-                AttackHittedEffectList.Add(ControlTime);
+            AttackHittedEffectList.Add(FreezeTime);
             if (AttackHittedEffectCorotine == null)
             {
-                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio));
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio, SecondFreezeTime));
             }
+        }
 
+        private void StopFullControlVelocity()
+        {
+            if (AttackHittedEffectCorotine != null)
+            {
+                StopCoroutine(AttackHittedEffectCorotine);
+                AttackHittedEffectCorotine = null;
+            }
+            AttackHittedEffectList.Clear();
         }
 
         public void Move(float AxesX)
@@ -204,6 +210,7 @@ namespace Adv
 
         public void RollStart(float AxesX)
         {
+            StopFullControlVelocity();
             SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed);
             mColl.enabled = false;
         }
@@ -233,6 +240,7 @@ namespace Adv
 
         public void Jump()
         {
+            StopFullControlVelocity();
             SetVelocity(SetCoord.Y, JumpForce);
         }
 
@@ -401,33 +409,41 @@ namespace Adv
         /// <summary>
         /// 顺序执行减速效果协程
         /// </summary>
-        IEnumerator ExecuteAttackHittedEvent(float ratio)
+        IEnumerator ExecuteAttackHittedEvent(float ratio, float SecondFreezeTime)
         {
+            bool firstFreeze = true;
             while (AttackHittedEffectList.Count > 0)
             {
-                var controltime = AttackHittedEffectList[0];
+                var freezeTime = AttackHittedEffectList[0];
                 AttackHittedEffectList.RemoveAt(0);
-                yield return StartCoroutine(AttackHittedEvent(ratio, controltime));
+                if (firstFreeze)
+                    firstFreeze = false;
+                else
+                    freezeTime = SecondFreezeTime;
+                yield return StartCoroutine(AttackHittedEvent(ratio, freezeTime));
             }
             AttackHittedEffectCorotine = null;
         }
         /// <summary>
         /// 减速效果协程
         /// </summary>
-        IEnumerator AttackHittedEvent(float ratio, float ControlTime)
+        IEnumerator AttackHittedEvent(float ratio, float FreezeTime)
         {
             FullControlVelocitying = true;
             speedRatio = ratio;
             var velocity = mRigidbody.velocity;
             mRigidbody.velocity *= ratio;
-            DOVirtual.DelayedCall(ControlTime, () =>
+            DOVirtual.DelayedCall(FreezeTime, () =>
             {
                 if (playerFSM.animManager.IsAttacking)
                     mRigidbody.velocity = velocity;
                 speedRatio = 1;
                 FullControlVelocitying = false;
             });
-            yield return new WaitForSeconds(ControlTime + playerFSM.effect.IntervalOfHittedEffect);
+            if (FreezeTime == playerFSM.effect.AttackHittedFreezeTime)
+                yield return playerFSM.effect.waitForAttackHittedFreezeTime;
+            else
+                yield return playerFSM.effect.waitForSecondFreezeTime;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Adv
         [SerializeField] string 受伤事件 = "BeAttacked";
         [SerializeField] string 死亡事件 = "Died";
         [SerializeField] UnityEvent BeHittedEvent;//被命中时调用EnemyBattleEffect.BeHittedEffect
+        [SerializeField] UnityEvent DiedEvent;
 
 
         public override void BeAttacked(int damage)
@@ -23,6 +24,7 @@ namespace Adv
             if (HP <= 0)
             {
                 BeHittedEvent.Invoke();
+                DiedEvent.Invoke();
                 mTree.SendEvent(死亡事件);
             }
             else
