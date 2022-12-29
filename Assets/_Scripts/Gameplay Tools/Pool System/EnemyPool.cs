@@ -39,7 +39,7 @@ namespace Adv
         {
             var copy = GameObject.Instantiate(prefab, parent);
 
-            copy.onDisbale += EnemyReturn;
+            copy.onDied += EnemyReturn;
             copy.gameObject.SetActive(false);
 
             return copy;

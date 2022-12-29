@@ -11,7 +11,7 @@ namespace Adv
         public float Occupation => occupation;
         public float GeneratedOffsetY => generatedOffsetY;
         public bool RegionIsNull => regionIsNull;
-        public event UnityAction<EnemyGeneratedData> onDisbale = delegate { };
+        public event UnityAction<EnemyGeneratedData> onDied = delegate { };
         [SerializeField] float occupation;
         [SerializeField] float generatedOffsetY;
 
@@ -26,10 +26,10 @@ namespace Adv
             return true;
         }
 
-        private EnemyGenerate selfRegion;
-        private bool regionIsNull = true;
-
-        private void OnDisable()
+        /// <summary>
+        /// 拖拽到EnemyProperty组件的DiedEvent中
+        /// </summary>
+        public void OnDied()
         {
             //释放占用和区域
             if (!regionIsNull)
@@ -39,12 +39,20 @@ namespace Adv
                 regionIsNull = true;
             }
 
-            onDisbale?.Invoke(this);
+            onDied?.Invoke(this);
+        }
+
+        private EnemyGenerate selfRegion;
+        private bool regionIsNull = true;
+
+        private void OnDisable()
+        {
+
         }
 
         private void OnDestroy()
         {
-            onDisbale = null;
+            onDied = null;
         }
 
     }

@@ -9,6 +9,16 @@ namespace Adv
     {
         [SerializeField] PlayerFSM Player;
 
+        public override void ShowLevel()
+        {
+
+        }
+
+        public override void HideLevel()
+        {
+
+        }
+
         public override void ClearLevel()
         {
             base.ClearLevel();

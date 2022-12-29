@@ -38,7 +38,7 @@ namespace Adv
         private void OnEnable()
         {
             //需要先生成玩家，在生成敌人
-            playerEffect = PlayerFSM.Player.effect;
+            playerEffect = PlayerFSM.Player?.effect;
         }
 
         private void OnDestroy()

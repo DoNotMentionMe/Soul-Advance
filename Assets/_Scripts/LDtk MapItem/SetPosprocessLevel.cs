@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Adv
@@ -12,7 +13,26 @@ namespace Adv
         [SerializeField] LayerMask Ground;
         [SerializeField] LayerMask OneWayPlatformer;
         [SerializeField] float OneWayEffectorSurfaceArc = 130;
-        private const string GroundLayerName = "Ground";
+        [SortingLayer][SerializeField] string GroundSortingLayerName = "Ground";
+        [Layer][SerializeField] int LDtkLevelLayerName;
+        [Tag][SerializeField] string LDtkLevelTagName;
+        [SerializeField] LDtkLevelEventChannel PlayerEnterLevel;
+        [SerializeField] LDtkLevelEventChannel PlayerLeaveLevel;
+
+        public void SetLDtkLevel(LDtkLevel level)
+        {
+            level.PlayerEnterLevel = PlayerEnterLevel;
+            level.PlayerLeaveLevel = PlayerLeaveLevel;
+        }
+
+        /// <summary>
+        /// 设置地图块对象的Layer为LDtkLevel
+        /// </summary>
+        public void SetLDtkLevelLayerAndTag(GameObject level)
+        {
+            level.tag = LDtkLevelTagName;
+            level.layer = LDtkLevelLayerName;
+        }
 
         /// <summary>
         /// 设置层级关系
@@ -21,7 +41,7 @@ namespace Adv
         public void SetRenderer(Renderer renderer)
         {
             renderer.material = UnityDefaultUnlit;
-            renderer.sortingLayerName = GroundLayerName;
+            renderer.sortingLayerName = GroundSortingLayerName;
             renderer.sortingOrder = GroundOrderInLayer;
 
         }

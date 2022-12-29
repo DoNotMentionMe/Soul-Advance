@@ -74,6 +74,41 @@ namespace Adv
         }
 
         /// <summary>
+        /// 显示被隐藏的敌人并开始生怪
+        /// </summary>
+        public void Show()
+        {
+            var enemyCount = 该区域当前敌人.Count;
+            for (var i = enemyCount - 1; i >= 0; i--)
+            {
+                var enemy = 该区域当前敌人[i];
+                enemy.gameObject.SetActive(true);
+            }
+
+            StartGenerateEnemy();
+        }
+
+        /// <summary>
+        /// 只隐藏，不清除敌人
+        /// </summary>
+        public void Hide()
+        {
+            CanGenerate = false;
+            if (生成敌人协程 != null)
+            {
+                StopCoroutine(生成敌人协程);
+                生成敌人协程 = null;
+            }
+
+            var enemyCount = 该区域当前敌人.Count;
+            for (var i = enemyCount - 1; i >= 0; i--)
+            {
+                var enemy = 该区域当前敌人[i];
+                enemy.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
         /// 由LDtkLevel调用，用于清空地图
         /// </summary>
         public void Clear()
@@ -89,7 +124,9 @@ namespace Adv
             var enemyCount = 该区域当前敌人.Count;
             for (var i = enemyCount - 1; i >= 0; i--)
             {
-                该区域当前敌人[i].gameObject.SetActive(false);//Data设为false会调用ReleaseOccupation移出List
+                var enemy = 该区域当前敌人[i];
+                enemy.OnDied();
+                enemy.gameObject.SetActive(false);//Data设为false会调用ReleaseOccupation移出List
                 //Debug.Log($"清空第{i}个");
             }
             //当前可生成数 = 可生成敌人总数;

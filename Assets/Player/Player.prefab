@@ -387,8 +387,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.001547062, y: -0.055003315}
-  m_Size: {x: 0.39309424, y: 0.19683932}
+  m_Offset: {x: 0.0077390615, y: -0.055003315}
+  m_Size: {x: 0.4054786, y: 0.1968395}
   m_Direction: 1
 --- !u!114 &1885870367
 MonoBehaviour:
@@ -796,7 +796,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 2
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272545410424
@@ -1113,7 +1113,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 16
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272625468164
@@ -1430,7 +1430,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 4
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272736200752
@@ -19431,7 +19431,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 14
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272759210880
@@ -19748,7 +19748,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 12
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272873725018
@@ -20065,7 +20065,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 8
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625272938725601
@@ -20382,7 +20382,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 10
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625273350763574
@@ -20699,7 +20699,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 6
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &129625273651174826
@@ -21016,7 +21016,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 18
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &279230467772221082
@@ -39562,7 +39562,6 @@ MonoBehaviour:
   effectAnim: {fileID: 279230467910121265}
   mApPortrait: {fileID: 279230467910121269}
   WeaponSpriteRenderer: {fileID: 2740326548853065835}
-  playerTransform: {fileID: 9117152492469156087}
   "\u653B\u51FB\u78B0\u649E\u4F53": {fileID: 279230468727741236}
   playerFSM: {fileID: 9117152492469156084}
 --- !u!95 &279230467910121265
@@ -39624,7 +39623,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 16
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -39997,7 +39996,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 15
   m_Sprite: {fileID: 21300000, guid: b6dd5063c048cfa4696757cc4d13077a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -59452,7 +59451,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2081969501
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 15
   m_Sprite: {fileID: 21300000, guid: f889b3f8530b08f46af5f9fdad8b0d85, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -61753,7 +61752,7 @@ MonoBehaviour:
   Gravity: 50
   MaxFallSpeed: 20
   attackMoveSpeed: 6.5
-  attackExtraMoveSpeed: 4
+  attackExtraMoveSpeed: 8
   attackPostDelay: 0.1
   attackBufferTime: 0.1333
   AttackDeceleration: 55
@@ -61826,10 +61825,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackHittedFreezeTime: 0.07
-  SecondFreezeTime: 0.01
-  VelocityFreezeValue: 0.5
+  secondFreezeTime: 0.01
+  VelocityFreezeValue: 0.1
   AnimSpeedFreezeValue: 0
-  intervalOfHittedEffect: 0
+  intervalOfHittedEffect: 0.01
   "\u653B\u51FB\u547D\u4E2D\u9707\u5E45": 0.1
   HittedEffect: {fileID: 4597271037314741306, guid: 5d6417e2df3aa784db7056750a9983d3, type: 3}
   AttackHittedSound:

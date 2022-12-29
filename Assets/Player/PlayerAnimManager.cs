@@ -16,14 +16,15 @@ namespace Adv
         public Animator effectAnim;
         [SerializeField] apPortrait mApPortrait;
         [SerializeField] SpriteRenderer WeaponSpriteRenderer;
-        [SerializeField] Transform playerTransform;
         [SerializeField] Trigger2D 攻击碰撞体;
         [SerializeField] PlayerFSM playerFSM;
 
         private List<apAnimPlayData> animList = new List<apAnimPlayData>();
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
-        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
+        private WaitForSecondsRealtime waitForIntervalHittedEffect;
+        private WaitForSecondsRealtime waitForAttackHittedFreezeTime;
+        private WaitForSecondsRealtime waitForSecondFreezeTime;
         private apAnimPlayData lastAnim;
         private apAnimPlayData currentAnim;
         private bool ControlAnimSpeeding;
@@ -32,6 +33,13 @@ namespace Adv
         {
             mApPortrait.Initialize();
             animList = mApPortrait.AnimationPlayDataList;
+        }
+
+        private void Start()
+        {
+            waitForIntervalHittedEffect = new WaitForSecondsRealtime(playerFSM.effect.IntervalOfHittedEffect);
+            waitForAttackHittedFreezeTime = new WaitForSecondsRealtime(playerFSM.effect.AttackHittedFreezeTime);
+            waitForSecondFreezeTime = new WaitForSecondsRealtime(playerFSM.effect.SecondFreezeTime);
         }
 
         #region 控制函数
@@ -46,6 +54,7 @@ namespace Adv
             AttackHittedEffectList.Add(FreezeTime);
             if (AttackHittedEffectCorotine == null)
             {
+                //Debug.Log($"进行一次命中协程");
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed, SecondFreezeTime));
             }
 
@@ -134,34 +143,45 @@ namespace Adv
             bool firstFreeze = true;
             while (AttackHittedEffectList.Count > 0)
             {
-                var freezeTime = AttackHittedEffectList[0];
-                AttackHittedEffectList.RemoveAt(0);
+                float freezeTime;
                 if (firstFreeze)
+                {
                     firstFreeze = false;
+                    freezeTime = AttackHittedEffectList[0];
+                }
                 else
                     freezeTime = SecondFreezeTime;
-                yield return StartCoroutine(AttackHittedEvent(speed, freezeTime));
+                AttackHittedEffectList.RemoveAt(0);
+                yield return StartCoroutine(AttackHittedEvent(speed, freezeTime, SecondFreezeTime));
             }
             AttackHittedEffectCorotine = null;
         }
         /// <summary>
         /// 特效协程
         /// </summary>
-        IEnumerator AttackHittedEvent(float speed, float FreezeTime)
+        IEnumerator AttackHittedEvent(float speed, float FreezeTime, float SecondFreezeTime)
         {
             ControlAnimSpeeding = true;
             CurrentAnimSpeedSlowDown(speed);
             effectAnim.speed = speed;
-            DOVirtual.DelayedCall(FreezeTime, () =>
+            // DOVirtual.DelayedCall(FreezeTime, () =>
+            // {
+            // });
+            if (FreezeTime == SecondFreezeTime)
             {
-                CurrentAnimSpeedSlowDown(1);
-                effectAnim.speed = 1;
-                ControlAnimSpeeding = false;
-            });
-            if (FreezeTime == playerFSM.effect.AttackHittedFreezeTime)
-                yield return playerFSM.effect.waitForAttackHittedFreezeTime;
+                //Debug.Log($"secondsAnimStop");
+                yield return waitForSecondFreezeTime;
+            }
             else
-                yield return playerFSM.effect.waitForSecondFreezeTime;
+            {
+                //Debug.Log($"FirstAnimStop,{Time.time}");
+                yield return waitForAttackHittedFreezeTime;
+                //Debug.Log($"FirstAnimStopEnd,{Time.time}");
+            }
+            CurrentAnimSpeedSlowDown(1);
+            effectAnim.speed = 1;
+            ControlAnimSpeeding = false;
+            yield return waitForIntervalHittedEffect;
         }
     }
 

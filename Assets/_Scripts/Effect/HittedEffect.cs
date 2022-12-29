@@ -10,7 +10,7 @@ namespace Adv
         [SerializeField] Animator anim;
         [SerializeField] float StartWaitTime = 0.07f;//和玩家顿帧时间相同
         [SerializeField] float LifeTime = 1f;
-        [ShowNonSerializedField] private Transform defaultParent;
+
         private WaitForSecondsRealtime waitForStartWaitTime;
         private WaitForSecondsRealtime waitForLifeTime;
         private const string Idle = "Idle";
@@ -18,22 +18,15 @@ namespace Adv
 
         private void Awake()
         {
-            defaultParent = transform.parent;
             waitForStartWaitTime = new WaitForSecondsRealtime(StartWaitTime);
             waitForLifeTime = new WaitForSecondsRealtime(LifeTime);
         }
         private void OnEnable()
         {
-            if (transform.parent != defaultParent)
-            {
-                transform.parent = defaultParent;
-                gameObject.SetActive(false);
-            }
-            else
-            {
-                StartCoroutine(nameof(EffectStart));
-            }
+
+            StartCoroutine(nameof(EffectStart));
         }
+
 
         private void OnDisable()
         {
@@ -46,8 +39,9 @@ namespace Adv
             yield return waitForStartWaitTime;
             anim.Play(命中特效);
             yield return waitForLifeTime;
-            transform.parent = defaultParent;
             gameObject.SetActive(false);
         }
+
+
     }
 }

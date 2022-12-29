@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - LDtkLevel
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - PlayerAttack
   - OneWayPlatformer
   - PlayerDownBody
-  - 
+  - LDtkLevel
   - 
   - 
   - 
@@ -50,6 +51,9 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 1559257001
+    locked: 0
+  - name: BackEffect
+    uniqueID: 2968310711
     locked: 0
   - name: Player
     uniqueID: 2081969501

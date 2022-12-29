@@ -105,7 +105,9 @@ namespace Adv
         private enum SetCoord { X, Y }
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
-        private WaitForSeconds WaitForIntervalOfHittedEffect;//攻击命中执行间隔
+        private WaitForSecondsRealtime waitForIntervalHittedEffect;
+        private WaitForSecondsRealtime waitForAttackHittedFreezeTime;
+        private WaitForSecondsRealtime waitForSecondFreezeTime;
         private WaitForSeconds waitForFixedDeltatime;
 
         private void Awake()
@@ -114,6 +116,13 @@ namespace Adv
             mTransform = transform;
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
+        }
+
+        private void Start()
+        {
+            waitForIntervalHittedEffect = new WaitForSecondsRealtime(playerFSM.effect.IntervalOfHittedEffect);
+            waitForAttackHittedFreezeTime = new WaitForSecondsRealtime(playerFSM.effect.AttackHittedFreezeTime);
+            waitForSecondFreezeTime = new WaitForSecondsRealtime(playerFSM.effect.SecondFreezeTime);
         }
 
         private void OnEnable()
@@ -166,6 +175,7 @@ namespace Adv
         /// </summary>
         public void FullControlVelocity(float ratio, float FreezeTime, float SecondFreezeTime)
         {
+            ///mRigidbody.velocity *= ratio;
             AttackHittedEffectList.Add(FreezeTime);
             if (AttackHittedEffectCorotine == null)
             {
@@ -181,6 +191,8 @@ namespace Adv
                 AttackHittedEffectCorotine = null;
             }
             AttackHittedEffectList.Clear();
+            FullControlVelocitying = false;
+            speedRatio = 1;
         }
 
         public void Move(float AxesX)
@@ -414,36 +426,37 @@ namespace Adv
             bool firstFreeze = true;
             while (AttackHittedEffectList.Count > 0)
             {
-                var freezeTime = AttackHittedEffectList[0];
-                AttackHittedEffectList.RemoveAt(0);
+                float freezeTime;
                 if (firstFreeze)
+                {
                     firstFreeze = false;
+                    freezeTime = AttackHittedEffectList[0];
+                }
                 else
                     freezeTime = SecondFreezeTime;
-                yield return StartCoroutine(AttackHittedEvent(ratio, freezeTime));
+                AttackHittedEffectList.RemoveAt(0);
+                yield return StartCoroutine(AttackHittedEvent(ratio, freezeTime, SecondFreezeTime));
             }
             AttackHittedEffectCorotine = null;
         }
         /// <summary>
         /// 减速效果协程
         /// </summary>
-        IEnumerator AttackHittedEvent(float ratio, float FreezeTime)
+        IEnumerator AttackHittedEvent(float ratio, float FreezeTime, float SecondFreezeTime)
         {
             FullControlVelocitying = true;
             speedRatio = ratio;
             var velocity = mRigidbody.velocity;
             mRigidbody.velocity *= ratio;
-            DOVirtual.DelayedCall(FreezeTime, () =>
-            {
-                if (playerFSM.animManager.IsAttacking)
-                    mRigidbody.velocity = velocity;
-                speedRatio = 1;
-                FullControlVelocitying = false;
-            });
-            if (FreezeTime == playerFSM.effect.AttackHittedFreezeTime)
-                yield return playerFSM.effect.waitForAttackHittedFreezeTime;
+            if (FreezeTime == SecondFreezeTime)
+                yield return waitForSecondFreezeTime;
             else
-                yield return playerFSM.effect.waitForSecondFreezeTime;
+                yield return waitForAttackHittedFreezeTime;
+            if (playerFSM.animManager.IsAttacking)
+                mRigidbody.velocity = velocity / 2;
+            speedRatio = 1;
+            FullControlVelocitying = false;
+            yield return waitForIntervalHittedEffect;
         }
     }
 }

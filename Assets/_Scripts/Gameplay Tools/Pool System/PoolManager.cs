@@ -17,10 +17,11 @@ namespace Adv
         [SerializeField] EnemyPool[] Enemy;
         [SerializeField] Pool[] EnemyItem;
         [SerializeField] Pool[] Effect;
-        [SerializeField] Pool[] LDtkLevel;
+        [SerializeField] LDtkLevelPool[] LDtkLevel;
 
         static Dictionary<GameObject, Pool> dictionary;
         private Dictionary<string, EnemyPool> enemyPools;
+        private Dictionary<LDtkLevel, LDtkLevelPool> lDtkLevelPools;
 
         private const string Clone = "(Clone)";
         private Coroutine OrderReleaseEnemyCoroutine;
@@ -28,9 +29,11 @@ namespace Adv
         protected override void Awake()
         {
             base.Awake();
+            LDtkLevel = new LDtkLevelPool[0];
+
             dictionary = new Dictionary<GameObject, Pool>();
             enemyPools = new Dictionary<string, EnemyPool>();
-            LDtkLevel = new Pool[0];
+            lDtkLevelPools = new Dictionary<LDtkLevel, LDtkLevelPool>();
 
             //2
             InitializeEnemy(Enemy);
@@ -124,42 +127,42 @@ namespace Adv
         /// <summary>
         /// 根据输入预制体动态生成对象池
         /// </summary>
-        public GameObject ReleaseLDtkLevel(LDtkLevel prefab)
+        public LDtkLevel ReleaseLDtkLevel(LDtkLevel prefab)
         {
-            if (!dictionary.ContainsKey(prefab.gameObject))
+            if (!lDtkLevelPools.ContainsKey(prefab))
             {
                 Array.Resize(ref LDtkLevel, LDtkLevel.Length + 1);//扩容
-                Pool pool = new Pool();
-                pool.Prefab = prefab.gameObject;//将预制体添加到对象池中
+                LDtkLevelPool pool = new LDtkLevelPool();
+                pool.Prefab = prefab;//将预制体添加到对象池中
                 pool.Size = 1;//TODO 建议设置为自定义初始数量
                 LDtkLevel[LDtkLevel.Length - 1] = pool;
-                dictionary.Add(pool.Prefab, pool);
+                lDtkLevelPools.Add(pool.Prefab, pool);
 
                 Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
 
                 poolParent.parent = transform;
                 pool.Initialize(poolParent);
             }
-            return dictionary[prefab.gameObject].PreparedObject();
+            return lDtkLevelPools[prefab].PreparedLevel();
         }
 
-        public GameObject ReleaseLDtkLevel(LDtkLevel prefab, Vector3 position)
+        public LDtkLevel ReleaseLDtkLevel(LDtkLevel prefab, Vector3 position)
         {
-            if (!dictionary.ContainsKey(prefab.gameObject))
+            if (!lDtkLevelPools.ContainsKey(prefab))
             {
                 Array.Resize(ref LDtkLevel, LDtkLevel.Length + 1);//扩容
-                Pool pool = new Pool();
-                pool.Prefab = prefab.gameObject;//将预制体添加到对象池中
+                LDtkLevelPool pool = new LDtkLevelPool();
+                pool.Prefab = prefab;//将预制体添加到对象池中
                 pool.Size = 1;//TODO 建议设置为自定义初始数量
                 LDtkLevel[LDtkLevel.Length - 1] = pool;
-                dictionary.Add(pool.Prefab, pool);
+                lDtkLevelPools.Add(pool.Prefab, pool);
 
                 Transform poolParent = new GameObject("Pool: " + pool.Prefab.name).transform;
 
                 poolParent.parent = transform;
                 pool.Initialize(poolParent);
             }
-            return dictionary[prefab.gameObject].PreparedObject(position);
+            return lDtkLevelPools[prefab].PreparedLevel(position);
         }
 
         /// <summary>

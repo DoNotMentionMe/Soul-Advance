@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Adv
 {
@@ -11,8 +12,12 @@ namespace Adv
     /// </summary>
     public class LDtkLevel : MonoBehaviour
     {
+        public bool IsShowing => gameObject.activeSelf;
+        public event UnityAction<LDtkLevel> onClear = delegate { };
         public List<Door_LDtk> DoorList = new List<Door_LDtk>();
         public List<EnemyGenerate> GenerateList = new List<EnemyGenerate>();
+        public LDtkLevelEventChannel PlayerEnterLevel;//由SetPosprocessLevel配置
+        public LDtkLevelEventChannel PlayerLeaveLevel;//由SetPosprocessLevel配置
 
         protected virtual void Awake()
         {
@@ -26,6 +31,30 @@ namespace Adv
         }
 
         /// <summary>
+        /// 显示被隐藏的关卡
+        /// </summary>
+        public virtual void ShowLevel()
+        {
+            gameObject.SetActive(true);
+            foreach (var generate in GenerateList)
+            {
+                generate.Show();
+            }
+        }
+
+        /// <summary>
+        /// 隐藏关卡，不清除敌人
+        /// </summary>
+        public virtual void HideLevel()
+        {
+            foreach (var generate in GenerateList)
+            {
+                generate.Hide();
+            }
+            gameObject.SetActive(false);
+        }
+
+        /// <summary>
         /// 停止生成敌人，清除当前敌人，清除Level
         /// </summary>
         public virtual void ClearLevel()
@@ -35,6 +64,11 @@ namespace Adv
             {
                 generate.Clear();
             }
+            onClear?.Invoke(this);
+            playerColls.Clear();
+            LevelColls.Clear();
+            IsPlayerEnter = false;
+            IsLevelColl = false;
             gameObject.SetActive(false);
             //Debug.Log($"--地块清空完毕");
         }
@@ -67,22 +101,50 @@ namespace Adv
             return null;
         }
 
-        /// <summary>
-        /// 返回未被使用的门的数列
-        /// </summary>
-        /// <returns></returns>
-        // public Door_LDtk[] FindDoorsNotBeUsed()
-        // {
-        //     Door_LDtk[] list = new Door_LDtk[0];
-        //     for (var i = 0; i < DoorList.Count; i++)
-        //     {
-        //         if (!DoorList[i].HasBeUsed)
-        //         {
-        //             Array.Resize<Door_LDtk>(ref list, list.Length + 1);
-        //             list[list.Length - 1] = DoorList[i];
-        //         }
-        //     }
-        //     return list;
-        // }
+        public bool IsPlayerEnter;
+        public bool IsLevelColl;
+        private HashSet<Collider2D> playerColls = new HashSet<Collider2D>();
+        private HashSet<Collider2D> LevelColls = new HashSet<Collider2D>();
+        void OnTriggerEnter2D(Collider2D col)
+        {
+            if (col.CompareTag("Player"))
+            {
+                if (!playerColls.Contains(col))
+                    playerColls.Add(col);
+                if (!IsPlayerEnter && playerColls.Count > 0)
+                {
+                    IsPlayerEnter = true;
+                    PlayerEnterLevel.Broadcast(this);
+                }
+            }
+            else if (col.CompareTag("LDtkLevel"))
+            {
+                if (!LevelColls.Contains(col))
+                    LevelColls.Add(col);
+                if (!IsLevelColl && LevelColls.Count > 0)
+                    IsLevelColl = true;
+            }
+        }
+
+        void OnTriggerExit2D(Collider2D col)
+        {
+            if (col.CompareTag("Player"))
+            {
+                if (playerColls.Contains(col))
+                    playerColls.Remove(col);
+                if (IsPlayerEnter && playerColls.Count == 0)
+                {
+                    IsPlayerEnter = false;
+                    PlayerLeaveLevel.Broadcast(this);
+                }
+            }
+            else if (col.CompareTag("LDtkLevel"))
+            {
+                if (LevelColls.Contains(col))
+                    LevelColls.Remove(col);
+                if (IsLevelColl && LevelColls.Count == 0)
+                    IsLevelColl = false;
+            }
+        }
     }
 }

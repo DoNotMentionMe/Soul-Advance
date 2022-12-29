@@ -7,13 +7,12 @@ namespace Adv
 {
     public class PlayerEffectPerformance : MonoBehaviour
     {
+        public float IntervalOfHittedEffect => intervalOfHittedEffect;
         public float AttackHittedFreezeTime => attackHittedFreezeTime;
-
-        public WaitForSecondsRealtime waitForAttackHittedFreezeTime;
-        public WaitForSecondsRealtime waitForSecondFreezeTime;
+        public float SecondFreezeTime => secondFreezeTime;
 
         [Foldout("攻击命中设置")][SerializeField] float attackHittedFreezeTime;//顿帧时间
-        [Foldout("攻击命中设置")][SerializeField] float SecondFreezeTime = 0.01f;//顿帧时间
+        [Foldout("攻击命中设置")][SerializeField] float secondFreezeTime = 0.01f;//顿帧时间
         [Foldout("攻击命中设置")][SerializeField] float VelocityFreezeValue;//速度百分比
         [Foldout("攻击命中设置")][SerializeField] float AnimSpeedFreezeValue;//动画播放速度百分比
         [Foldout("攻击命中设置")][SerializeField] float intervalOfHittedEffect;//控制攻击命中特效播放间隔
@@ -53,8 +52,8 @@ namespace Adv
             {
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent());
             }
-            animManager.CurrentAnimSpeedSlowDownForAWhile(AnimSpeedFreezeValue, AttackHittedFreezeTime, SecondFreezeTime);
-            playerController.FullControlVelocity(VelocityFreezeValue, AttackHittedFreezeTime, SecondFreezeTime);
+            animManager.CurrentAnimSpeedSlowDownForAWhile(AnimSpeedFreezeValue, AttackHittedFreezeTime, secondFreezeTime);
+            playerController.FullControlVelocity(VelocityFreezeValue, AttackHittedFreezeTime, secondFreezeTime);
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace Adv
             var point = BeHittedObj.bounds.center;
             var randomRota = Quaternion.Euler(0, 0, Random.Range(0, 360f));
             var obj = PoolManager.Instance.Release(HittedEffect, point, randomRota);
-            obj.transform.parent = BeHittedObj.transform;
+            StartCoroutine(TransformFollowAnother(obj, BeHittedObj));
         }
 
         #endregion
@@ -80,12 +79,16 @@ namespace Adv
         private Transform mTransform;
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
+        private WaitForSecondsRealtime waitForIntervalHittedEffect;
+        private WaitForSecondsRealtime waitForAttackHittedFreezeTime;
+        private WaitForSecondsRealtime waitForSecondFreezeTime;
 
         private void Awake()
         {
             mTransform = transform;
-            waitForAttackHittedFreezeTime = new WaitForSecondsRealtime(AttackHittedFreezeTime + intervalOfHittedEffect);
-            waitForSecondFreezeTime = new WaitForSecondsRealtime(SecondFreezeTime + intervalOfHittedEffect);
+            waitForIntervalHittedEffect = new WaitForSecondsRealtime(intervalOfHittedEffect);
+            waitForAttackHittedFreezeTime = new WaitForSecondsRealtime(AttackHittedFreezeTime);
+            waitForSecondFreezeTime = new WaitForSecondsRealtime(secondFreezeTime);
         }
 
         private void OnDestroy()
@@ -101,12 +104,15 @@ namespace Adv
             bool firstFreeze = true;
             while (AttackHittedEffectList.Count > 0)
             {
-                var freezeTime = AttackHittedEffectList[0];
-                AttackHittedEffectList.RemoveAt(0);
+                float freezeTime;
                 if (firstFreeze)
+                {
                     firstFreeze = false;
+                    freezeTime = AttackHittedEffectList[0];
+                }
                 else
-                    freezeTime = SecondFreezeTime;
+                    freezeTime = secondFreezeTime;
+                AttackHittedEffectList.RemoveAt(0);
                 yield return StartCoroutine(AttackHittedEvent(freezeTime));
             }
             AttackHittedEffectCorotine = null;
@@ -119,9 +125,25 @@ namespace Adv
             AudioManager.Instance.PlayRandomSFX(AttackHittedSound);
             ImpulseController.Instance.ProduceImpulse(mTransform.position, 攻击命中震幅, 0.7f);
             if (FreezeTime == AttackHittedFreezeTime)
+            {
+                //Debug.Log($"FirstAudioEffect,{Time.time}");
                 yield return waitForAttackHittedFreezeTime;
+                //Debug.Log($"FirstAudioEffectEnd,{Time.time}");
+            }
             else
                 yield return waitForSecondFreezeTime;
+            yield return waitForIntervalHittedEffect;
+        }
+
+        IEnumerator TransformFollowAnother(GameObject follower, Collider2D another)
+        {
+            var followerTransform = follower.transform;
+            var anotherGameObject = another.gameObject;
+            while (follower.activeSelf && anotherGameObject.activeSelf)
+            {
+                followerTransform.position = another.bounds.center;
+                yield return null;
+            }
         }
     }
 }
