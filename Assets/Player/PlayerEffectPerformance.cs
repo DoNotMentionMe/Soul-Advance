@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using MoreMountains.Feedbacks;
 
 namespace Adv
 {
@@ -12,15 +13,14 @@ namespace Adv
         public float SecondFreezeTime => secondFreezeTime;
 
         [Foldout("攻击命中设置")][SerializeField] float attackHittedFreezeTime;//顿帧时间
-        [Foldout("攻击命中设置")][SerializeField] float secondFreezeTime = 0.01f;//顿帧时间
+        [Foldout("攻击命中设置")][SerializeField] float secondFreezeTime = 0.01f;//次级顿帧时间
         [Foldout("攻击命中设置")][SerializeField] float VelocityFreezeValue;//速度百分比
         [Foldout("攻击命中设置")][SerializeField] float AnimSpeedFreezeValue;//动画播放速度百分比
         [Foldout("攻击命中设置")][SerializeField] float intervalOfHittedEffect;//控制攻击命中特效播放间隔
-        [Foldout("攻击命中设置")][SerializeField] float 攻击命中震幅 = 0.2f;
         [Foldout("攻击命中设置")][SerializeField] GameObject HittedEffect;
-        [Foldout("攻击命中设置")][SerializeField] AudioData AttackHittedSound;
+        [Foldout("攻击命中设置")][SerializeField] MMF_Player AttackHittedFeedBacks;
         [SerializeField] GameObject 落地灰尘;
-        [SerializeField] AudioData AttackSound;
+        //[SerializeField] AudioData AttackSound;
         [Foldout("组件")][SerializeField] PlayerAnimManager animManager;
         [Foldout("组件")][SerializeField] PlayerController playerController;
 
@@ -72,7 +72,7 @@ namespace Adv
         #endregion
 
         #region 单一功能
-        public void PlayAttackSound() => AudioManager.Instance.PlayRandomSFX(AttackSound);
+        //public void PlayAttackSound() => AudioManager.Instance.PlayRandomSFX(AttackSound);
         public void Release落地灰尘() => PoolManager.Instance.Release(落地灰尘, mTransform.position);
         #endregion
 
@@ -122,8 +122,7 @@ namespace Adv
         /// </summary>
         IEnumerator AttackHittedEvent(float FreezeTime)
         {
-            AudioManager.Instance.PlayRandomSFX(AttackHittedSound);
-            ImpulseController.Instance.ProduceImpulse(mTransform.position, 攻击命中震幅, 0.7f);
+            AttackHittedFeedBacks.PlayFeedbacks();
             if (FreezeTime == AttackHittedFreezeTime)
             {
                 //Debug.Log($"FirstAudioEffect,{Time.time}");

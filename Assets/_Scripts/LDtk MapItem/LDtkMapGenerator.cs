@@ -15,7 +15,6 @@ namespace Adv
         private const string EntrancePath = "Entrance";
         private const string ExitPath = "Exit";
         private const string LeftRightPath = "LeftRight";
-        [BoxGroup("Setting")][SerializeField] int 生成地图的地块数;
         [BoxGroup("Setting")][SerializeField] LDtkLevelEventChannel PlayerEnterLevel;
         [BoxGroup("Setting")][SerializeField] LDtkLevelEventChannel PlayerLeaveLevel;
         [Foldout("LaodList")][SerializeField] List<LDtkLevel_Entrance> EntranceList;
@@ -28,7 +27,6 @@ namespace Adv
         private List<LDtkLevel> ShowingLevels = new List<LDtkLevel>();//记录从左往右所有关卡
         private List<LDtkLevel> PlayerLocallevels = new List<LDtkLevel>();//当前玩家的位置
         private int PlayerLocalIndex;//当前玩家所在currentLevels中的位置
-        private int 当前需要生成地块数;
         /// <summary>
         /// 玩家位置变动时调用，激活玩家附近五个地图块
         /// </summary>
@@ -111,7 +109,6 @@ namespace Adv
         protected override void Awake()
         {
             base.Awake();
-            当前需要生成地块数 = 生成地图的地块数;
             PlayerEnterLevel.AddListener(PlayerEnterLevelListener);
             PlayerLeaveLevel.AddListener(PlayerLeaveLevelListener);
         }
@@ -174,7 +171,6 @@ namespace Adv
             nextLevel.SetLevelPositionAndStartGenerateEnemy(nextDoor.levelPositionOffset + curDoor.transform.position);
             ShowingLevels.Add(nextLevel);
             currentLevels.Add(nextLevel);
-            当前需要生成地块数--;
             return nextLevel.GetDoorWithType(LDtkDoorType.Right);
         }
 
@@ -185,7 +181,6 @@ namespace Adv
             PlayerLocallevels.Add(currentEntrance);
             ShowingLevels.Add(currentEntrance);
             currentLevels.Add(currentEntrance);
-            当前需要生成地块数--;
             return currentEntrance.GetDoorWithType(LDtkDoorType.Right);
         }
 
@@ -196,7 +191,6 @@ namespace Adv
             nextDoor = currentExit.GetDoorWithType(LDtkDoorType.Left);
             currentExit.SetLevelPositionAndStartGenerateEnemy(nextDoor.levelPositionOffset + curDoor.transform.position);
             currentLevels.Add(currentExit);
-            当前需要生成地块数--;
         }
 
         private void PlayerEnterLevelListener(LDtkLevel level)

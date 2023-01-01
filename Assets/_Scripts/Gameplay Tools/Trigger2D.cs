@@ -12,7 +12,7 @@ public class Trigger2D : MonoBehaviour
     [SerializeField] bool isTriggeredWithLayer;
     [SerializeField] LayerMask layers;
     [SerializeField] Transform mTransform;
-    // public UnityEvent OnTriggerEnter = new UnityEvent();
+    [SerializeField] UnityEvent OnTriggerEnter = new UnityEvent();
     // public UnityEvent OnTriggerExit = new UnityEvent();
     [SerializeField] UnityEvent<Collider2D> OnTriggerEnterWithCollider = new UnityEvent<Collider2D>();
     //public UnityEvent<Collider2D> OnTriggerExitWithCollider = new UnityEvent<Collider2D>();
@@ -41,6 +41,7 @@ public class Trigger2D : MonoBehaviour
 
         if (!mCollider2Ds.Contains(col))
             mCollider2Ds.Add(col);
+        OnTriggerEnter?.Invoke();
         OnTriggerEnterWithCollider?.Invoke(col);
 
         if (!isTriggeredWithLayer && mCollider2Ds.Count > 0)

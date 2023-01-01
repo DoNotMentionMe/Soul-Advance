@@ -41,6 +41,9 @@ namespace Adv
             }
         }
 
+        /// <summary>
+        /// 用于初始化时的实例化
+        /// </summary>
         GameObject Copy()
         {
             var copy = GameObject.Instantiate(prefab, parent);
@@ -48,6 +51,15 @@ namespace Adv
             copy.SetActive(false);
 
             return copy;
+        }
+
+        /// <summary>
+        /// 用于释放对象时的实例化
+        /// copy在实例化挂载Feel插件的对象时存在无法自动播放的情况
+        /// </summary>
+        GameObject Get()
+        {
+            return GameObject.Instantiate(prefab, parent);
         }
 
         GameObject AvailableObject()
@@ -60,7 +72,7 @@ namespace Adv
             }
             else
             {
-                availableObject = Copy();
+                availableObject = Get();
             }
             //如果数量没有规划好，可能出现列头对象激活状态，后面的对象闲置状态，但是取不出来导致无限生成新的对象的情况
             queue.Enqueue(availableObject);//提前入列，不需要在对象使用后调用一次入列的方法，但是有个弊端，如果对象池调用过快，这个提前入列的会再被调用到新的地方，比如子弹飞一半被重新调用道枪口的位置

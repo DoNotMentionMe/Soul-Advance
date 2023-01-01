@@ -15,7 +15,8 @@ namespace Adv
         [SerializeField] protected int MaxHP;
 
         protected int ExtraHP;//用来记录其他情况增加最大血量的数据
-        protected int HP;
+        [ShowIf("ShowProperty")]
+        [SerializeField] protected int HP;
 
         protected virtual void OnEnable()
         {

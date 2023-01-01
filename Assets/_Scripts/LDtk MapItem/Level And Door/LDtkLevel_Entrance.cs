@@ -28,6 +28,7 @@ namespace Adv
         protected override void OnEnable()
         {
             base.OnEnable();
+            Camera.main.transform.position = Player.transform.position;
             Player.gameObject.SetActive(true);
         }
 

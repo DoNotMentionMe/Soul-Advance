@@ -76,6 +76,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   mTransform: {fileID: 743254885}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -155,6 +158,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   mTransform: {fileID: 845306933}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -184,7 +190,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083187012}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.04, y: -0.64, z: -10}
+  m_LocalPosition: {x: 2.040001, y: -0.09399998, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -367,7 +373,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1885870364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.407, z: 0}
+  m_LocalPosition: {x: 0, y: -0.86099994, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -479,6 +485,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   mTransform: {fileID: 2095565256}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -21186,7 +21195,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 279230467910121274}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.484, y: 0, z: 0}
+  m_LocalPosition: {x: 0.484, y: 0.546, z: 0}
   m_LocalScale: {x: 6, y: 6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -57429,6 +57438,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   mTransform: {fileID: 279230468727741243}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls:
@@ -57697,7 +57709,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 279230468847950939}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: "\u89C6\u91CE\u70B9"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57712,7 +57724,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 279230468847950936}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.04, y: -0.64, z: 0}
+  m_LocalPosition: {x: 2.04, y: -0.09399998, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -59054,7 +59066,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 810220238880405377}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.546, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -59377,6 +59389,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 2446645079226100193}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -61659,6 +61674,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 9117152492333345126}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -61676,6 +61694,7 @@ GameObject:
   - component: {fileID: 9117152492469156080}
   - component: {fileID: 9117152492469156044}
   - component: {fileID: 9117152492469156047}
+  - component: {fileID: 1467724855}
   - component: {fileID: 9117152492469156045}
   - component: {fileID: 9117152492469156083}
   - component: {fileID: 9117152492469156082}
@@ -61781,7 +61800,7 @@ MonoBehaviour:
   WallClimbXOffset1: 0.2
   WallClimbYOffset1: 1.6
   WallClimbXOffset2: 0.32
-  WallClimbYOffset2: 2.578
+  WallClimbYOffset2: 2.017
   DownFallOffsetY: 0.3
   DownFallCollSetTrueDelay: 0.3
   GroundCheck: {fileID: 9117152492838977016}
@@ -61811,6 +61830,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowProperty: 0
   MaxHP: 1
+  HP: 0
   property: {fileID: 11400000, guid: 13ec9a2feb7d54b43bad619cc94f18c9, type: 2}
 --- !u!114 &9117152492469156047
 MonoBehaviour:
@@ -61824,22 +61844,381 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e6872dbed6a92438b49825d82e04f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackHittedFreezeTime: 0.07
-  secondFreezeTime: 0.01
+  attackHittedFreezeTime: 0.045
+  secondFreezeTime: 0.003
   VelocityFreezeValue: 0.1
   AnimSpeedFreezeValue: 0
-  intervalOfHittedEffect: 0.01
-  "\u653B\u51FB\u547D\u4E2D\u9707\u5E45": 0.1
+  intervalOfHittedEffect: 0.03
   HittedEffect: {fileID: 4597271037314741306, guid: 5d6417e2df3aa784db7056750a9983d3, type: 3}
-  AttackHittedSound:
-    audioClip: {fileID: 8300000, guid: da3813cb65bc409428740eab2da2273a, type: 3}
-    volume: 1
+  AttackHittedFeedBacks: {fileID: 1467724855}
   "\u843D\u5730\u7070\u5C18": {fileID: 3739196177632191941, guid: eb90cd1cb1ac4cd4789876dbe79acb3c, type: 3}
-  AttackSound:
-    audioClip: {fileID: 8300000, guid: ffb36db2ade11ab47ad4822f0f34773b, type: 3}
-    volume: 1
   animManager: {fileID: 279230467910121271}
   playerController: {fileID: 9117152492469156080}
+--- !u!114 &1467724855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9117152492469156086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6da43522623d4704e979466dc7650b65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Feedbacks: []
+  InitializationMode: 2
+  SafeMode: 3
+  Direction: 0
+  AutoChangeDirectionOnEnd: 0
+  AutoPlayOnStart: 0
+  AutoPlayOnEnable: 0
+  ForceTimescaleMode: 0
+  ForcedTimescaleMode: 1
+  DurationMultiplier: 1
+  RandomizeDuration: 0
+  RandomDurationMultiplier: {x: 0.5, y: 1.5}
+  DisplayFullDurationDetails: 0
+  PlayerTimescaleMode: 1
+  OnlyPlayIfWithinRange: 0
+  RangeCenter: {fileID: 0}
+  RangeDistance: 5
+  UseRangeFalloff: 0
+  RangeFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  RemapRangeFalloff: {x: 0, y: 1}
+  IgnoreRangeEvents: 0
+  CooldownDuration: 0
+  InitialDelay: 0
+  CanPlay: 1
+  CanPlayWhileAlreadyPlaying: 1
+  ChanceToPlay: 100
+  FeedbacksIntensity: 1
+  Events:
+    TriggerMMFeedbacksEvents: 0
+    TriggerUnityEvents: 1
+    OnPlay:
+      m_PersistentCalls:
+        m_Calls: []
+    OnPause:
+      m_PersistentCalls:
+        m_Calls: []
+    OnResume:
+      m_PersistentCalls:
+        m_Calls: []
+    OnRevert:
+      m_PersistentCalls:
+        m_Calls: []
+    OnComplete:
+      m_PersistentCalls:
+        m_Calls: []
+  DebugActive: 0
+  FeedbacksList:
+  - rid: 158509608502820866
+  - rid: 158509608502820867
+  KeepPlayModeChanges: 0
+  PerformanceMode: 0
+  ForceStopFeedbacksOnDisable: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 158509608502820866
+      type: {class: MMF_CinemachineImpulse, ns: MoreMountains.FeedbacksForThirdParty, asm: MoreMountains.Feedbacks.Cinemachine}
+      data:
+        Active: 1
+        UniqueID: 2103643201
+        Label: Cinemachine Impulse
+        ChannelMode: 0
+        Channel: 0
+        MMChannelDefinition: {fileID: 0}
+        Chance: 100
+        DisplayColor: {r: 0, g: 0, b: 0, a: 1}
+        Timing:
+          TimescaleMode: 0
+          ExcludeFromHoldingPauses: 0
+          ContributeToTotalDuration: 1
+          InitialDelay: 0
+          CooldownDuration: 0
+          InterruptsOnStop: 1
+          NumberOfRepeats: 0
+          RepeatForever: 0
+          DelayBetweenRepeats: 1
+          MMFeedbacksDirectionCondition: 0
+          PlayDirection: 0
+          ConstantIntensity: 0
+          UseIntensityInterval: 0
+          IntensityIntervalMin: 0
+          IntensityIntervalMax: 0
+          Sequence: {fileID: 0}
+          TrackID: 0
+          Quantized: 0
+          TargetBPM: 120
+        RandomizeOutput: 0
+        RandomMultiplier: {x: 0.8, y: 1}
+        RandomizeDuration: 0
+        RandomDurationMultiplier: {x: 0.5, y: 2}
+        UseRange: 0
+        RangeDistance: 5
+        UseRangeFalloff: 0
+        RangeFalloff:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        RemapRangeFalloff: {x: 0, y: 1}
+        Owner: {fileID: 1467724855}
+        DebugActive: 0
+        m_ImpulseDefinition:
+          m_ImpulseChannel: 1
+          m_ImpulseShape: 0
+          m_CustomImpulseShape:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          m_ImpulseDuration: 0.2
+          m_ImpulseType: 3
+          m_DissipationRate: 0
+          m_RawSignal: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
+          m_AmplitudeGain: 0.3
+          m_FrequencyGain: 0.5
+          m_RepeatMode: 0
+          m_Randomize: 1
+          m_TimeEnvelope:
+            m_AttackShape:
+              serializedVersion: 2
+              m_Curve: []
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+            m_DecayShape:
+              serializedVersion: 2
+              m_Curve: []
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+            m_AttackTime: 0
+            m_SustainTime: 0.2
+            m_DecayTime: 0
+            m_ScaleWithImpact: 1
+            m_HoldForever: 0
+          m_ImpactRadius: 100
+          m_DirectionMode: 0
+          m_DissipationMode: 2
+          m_DissipationDistance: 100
+          m_PropagationSpeed: 343
+        Velocity: {x: 2, y: 2, z: 0}
+        ClearImpulseOnStop: 0
+    - rid: 158509608502820867
+      type: {class: MMF_MMSoundManagerSound, ns: MoreMountains.Feedbacks, asm: MoreMountains.Feedbacks.MMTools}
+      data:
+        Active: 1
+        UniqueID: 2013137026
+        Label: MMSoundManager Sound
+        ChannelMode: 0
+        Channel: 0
+        MMChannelDefinition: {fileID: 0}
+        Chance: 100
+        DisplayColor: {r: 0, g: 0, b: 0, a: 1}
+        Timing:
+          TimescaleMode: 0
+          ExcludeFromHoldingPauses: 0
+          ContributeToTotalDuration: 1
+          InitialDelay: 0
+          CooldownDuration: 0
+          InterruptsOnStop: 1
+          NumberOfRepeats: 0
+          RepeatForever: 0
+          DelayBetweenRepeats: 1
+          MMFeedbacksDirectionCondition: 0
+          PlayDirection: 0
+          ConstantIntensity: 0
+          UseIntensityInterval: 0
+          IntensityIntervalMin: 0
+          IntensityIntervalMax: 0
+          Sequence: {fileID: 0}
+          TrackID: 0
+          Quantized: 0
+          TargetBPM: 120
+        RandomizeOutput: 0
+        RandomMultiplier: {x: 0.8, y: 1}
+        RandomizeDuration: 0
+        RandomDurationMultiplier: {x: 0.5, y: 2}
+        UseRange: 0
+        RangeDistance: 5
+        UseRangeFalloff: 0
+        RangeFalloff:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        RemapRangeFalloff: {x: 0, y: 1}
+        Owner: {fileID: 1467724855}
+        DebugActive: 0
+        Sfx: {fileID: 8300000, guid: da3813cb65bc409428740eab2da2273a, type: 3}
+        RandomSfx: []
+        SequentialOrder: 0
+        SequentialOrderHoldLast: 0
+        SequentialOrderHoldCooldownDuration: 2
+        MinVolume: 1
+        MaxVolume: 1
+        MinPitch: 0.7
+        MaxPitch: 1.3
+        PlaybackTime: {x: 0, y: 0}
+        MmSoundManagerTrack: 0
+        ID: 0
+        AudioGroup: {fileID: 0}
+        RecycleAudioSource: {fileID: 0}
+        Loop: 0
+        Persistent: 0
+        DoNotPlayIfClipAlreadyPlaying: 0
+        StopSoundOnFeedbackStop: 0
+        Fade: 0
+        FadeInitialVolume: 0
+        FadeDuration: 1
+        FadeTween:
+          MMTweenDefinitionType: 0
+          MMTweenCurve: 9
+          Curve:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 0
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          Initialized: 0
+        SoloSingleTrack: 0
+        SoloAllTracks: 0
+        AutoUnSoloOnEnd: 0
+        PanStereo: 0
+        SpatialBlend: 0
+        AttachToTransform: {fileID: 0}
+        BypassEffects: 0
+        BypassListenerEffects: 0
+        BypassReverbZones: 0
+        Priority: 128
+        ReverbZoneMix: 1
+        DopplerLevel: 1
+        Spread: 0
+        RolloffMode: 0
+        MinDistance: 1
+        MaxDistance: 500
+        UseCustomRolloffCurve: 0
+        CustomRolloffCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        UseSpatialBlendCurve: 0
+        SpatialBlendCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        UseReverbZoneMixCurve: 0
+        ReverbZoneMixCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        UseSpreadCurve: 0
+        SpreadCurve:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        DrawGizmos: 0
+        GizmosCenter: {fileID: 0}
+        MinDistanceColor: {r: 0.37254903, g: 0.61960787, b: 0.627451, a: 1}
+        MaxDistanceColor: {r: 1, g: 0.27058825, b: 0, a: 1}
+        TestPlayButton:
+          ButtonText: Debug Play Sound
+        TestStopButton:
+          ButtonText: Debug Stop Sound
+        ResetSequentialIndexButton:
+          ButtonText: Reset Sequential Index
 --- !u!114 &9117152492469156045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61864,7 +62243,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 0.0001
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
@@ -61886,7 +62265,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.72753555}
+  m_Offset: {x: 0, y: -0.1815}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -61975,6 +62354,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 9117152492748670723}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -62054,6 +62436,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 9117152492838977018}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -62133,6 +62518,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 9117152492925336277}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []
@@ -62212,6 +62600,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   mTransform: {fileID: 9117152493621973250}
+  OnTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
   OnTriggerEnterWithCollider:
     m_PersistentCalls:
       m_Calls: []

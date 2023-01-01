@@ -17,6 +17,11 @@ namespace Adv
         [SerializeField] UnityEvent BeHittedEvent;//被命中时调用EnemyBattleEffect.BeHittedEffect
         [SerializeField] UnityEvent DiedEvent;
 
+        public void KillEnemy()
+        {
+            BeAttacked(HP);
+        }
+
 
         public override void BeAttacked(int damage)
         {
@@ -31,6 +36,14 @@ namespace Adv
             {
                 BeHittedEvent.Invoke();
                 mTree.SendEvent(受伤事件);
+            }
+        }
+
+        private void Update()
+        {
+            if (transform.position.y < -200)
+            {
+                KillEnemy();
             }
         }
 
