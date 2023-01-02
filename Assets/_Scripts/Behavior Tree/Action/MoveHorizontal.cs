@@ -15,6 +15,7 @@ namespace Adv
             WithLocalScaleX,
             WithDirection,
         }
+        [SerializeField] bool 倒转方向 = false;
         [SerializeField] MoveModes MoveMode;
         [SerializeField] SharedRigidbody2D mRigidbody;
         [SerializeField] SharedTransform mTransform;
@@ -39,7 +40,10 @@ namespace Adv
             else
             {
                 var velocity = mRigidbody.Value.velocity;
-                velocity.x = mTransform.Value.localScale.x * Speed;
+                if (倒转方向)
+                    velocity.x = -mTransform.Value.localScale.x * Speed;
+                else
+                    velocity.x = mTransform.Value.localScale.x * Speed;
                 mRigidbody.Value.velocity = velocity;
             }
         }

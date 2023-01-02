@@ -73,7 +73,7 @@ namespace Adv
 
         #region 单一功能
         //public void PlayAttackSound() => AudioManager.Instance.PlayRandomSFX(AttackSound);
-        public void Release落地灰尘() => PoolManager.Instance.Release(落地灰尘, mTransform.position);
+        public void Release落地灰尘() => PoolManager.Instance.Release(落地灰尘, mTransform.position, Quaternion.identity, transform.localScale);
         #endregion
 
         private Transform mTransform;

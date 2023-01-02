@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using AnyPortrait;
 using DG.Tweening;
+using UnityEngine.Events;
 
 namespace Adv
 {
     public class EnemyAnimManager : MonoBehaviour
     {
-        [SerializeField] Trigger2D 攻击碰撞体;
         [SerializeField] apPortrait mApPortrait;
+        [SerializeField] UnityEvent OnAttackStart = new UnityEvent();
+        [SerializeField] UnityEvent OnAttackEnd = new UnityEvent();
 
         private bool ControlAnimSpeeding;
 
@@ -36,13 +38,12 @@ namespace Adv
         //动画事件
         public void AttackStart()
         {
-            //开启动画碰撞体
-            攻击碰撞体.SetCollEnable(true);
+            OnAttackStart?.Invoke();
         }
 
         public void AttackEnd()
         {
-            攻击碰撞体.SetCollEnable(false);
+            OnAttackEnd?.Invoke();
         }
 
         #endregion

@@ -61800,7 +61800,7 @@ MonoBehaviour:
   WallClimbXOffset1: 0.2
   WallClimbYOffset1: 1.6
   WallClimbXOffset2: 0.32
-  WallClimbYOffset2: 2.017
+  WallClimbYOffset2: 2.03
   DownFallOffsetY: 0.3
   DownFallCollSetTrueDelay: 0.3
   GroundCheck: {fileID: 9117152492838977016}

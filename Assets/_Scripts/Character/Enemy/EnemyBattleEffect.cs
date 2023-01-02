@@ -10,8 +10,10 @@ namespace Adv
 {
     public class EnemyBattleEffect : MonoBehaviour
     {
+        [Foldout("被击中表现设置")][SerializeField] bool 顿帧减速 = true;
         [Foldout("被击中表现设置")][SerializeField] float AnimFreezeFrameRange;
         [Foldout("被击中表现设置")][SerializeField] Vector2 CharacterShakeStrength;
+        [Foldout("被击中表现设置")][SerializeField] bool 可以被击退 = true;
         [Foldout("被击中表现设置")][SerializeField] float HitBackStartSpeed_Front;//正面
         [Foldout("被击中表现设置")][SerializeField] float HitBackStartSpeed_Back;//背面
         [Foldout("被击中表现设置")][SerializeField] float HitBackDececleration;
@@ -82,7 +84,8 @@ namespace Adv
             StartTime = Time.time;
             mApPortrait.SetAnimationSpeed(AnimFreezeFrameRange);
             mApPortrait.SetControlParamInt("Hitted", 1);
-            mRigidbody.velocity = Vector2.zero;
+            if (顿帧减速)
+                mRigidbody.velocity = Vector2.zero;
             DOVirtual.DelayedCall(0.13f, () => { mApPortrait.SetControlParamInt("Hitted", 0); });
             DOVirtual.DelayedCall(playerEffect.AttackHittedFreezeTime, () =>
             {
@@ -97,7 +100,6 @@ namespace Adv
 
         private void StartHittedBack()
         {
-            HittedBacking.Value = true;
             int backDirection = 0;//被击退方向
             var pushForce = Vector2.zero;//推开玩家力
             var hitBackSpeed = 0f;
@@ -123,7 +125,11 @@ namespace Adv
             //被击退
             if (HittedBackCoroutine != null)
                 StopCoroutine(HittedBackCoroutine);
-            HittedBackCoroutine = StartCoroutine(HittedBack(backDirection, hitBackSpeed));
+            if (可以被击退)
+            {
+                HittedBacking.Value = true;
+                HittedBackCoroutine = StartCoroutine(HittedBack(backDirection, hitBackSpeed));
+            }
             //推开玩家
             playerController.GetAPush(pushForce);
         }

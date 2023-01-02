@@ -12,7 +12,7 @@ namespace Adv
         [SerializeField] SharedBool BoolComparison;
         [Space]
         [Header("自定义bool变量判定")]
-        [BehaviorDesigner.Runtime.Tasks.Tooltip("是否同时检测trigger2D和自定义bool类型变量")]
+        [BehaviorDesigner.Runtime.Tasks.Tooltip("是否检测trigger2D和自定义bool类型变量")]
         [SerializeField] bool CheckCustomBool = false;
         [SerializeField] SharedBool CustomBool;
         [SerializeField] SharedBool CustomBoolComparison;

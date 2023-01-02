@@ -20,7 +20,7 @@ MonoBehaviour:
   OneWayPlatformer:
     serializedVersion: 2
     m_Bits: 1024
-  OneWayEffectorSurfaceArc: 140
+  OneWayEffectorSurfaceArc: 130
   GroundSortingLayerName: Ground
   LDtkLevelLayerName: 12
   LDtkLevelTagName: LDtkLevel

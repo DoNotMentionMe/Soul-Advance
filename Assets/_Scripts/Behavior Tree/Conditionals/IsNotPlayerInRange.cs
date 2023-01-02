@@ -10,6 +10,7 @@ namespace Adv
     [TaskDescription("检测玩家是否在范围内")]
     public class IsNotPlayerInRange : Conditional
     {
+        [BehaviorDesigner.Runtime.Tasks.Tooltip("检测玩家不在范围内")]
         [SerializeField] bool CheckHasNotPlayer = true;//检测玩家不在范围内
         [SerializeField] SharedPlayerFSM player;
         [SerializeField] float MaxDistanceXWithPlayer;
