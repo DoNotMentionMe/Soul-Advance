@@ -1949,6 +1949,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60bf320a03d3e6143a03963e2a149e26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "\u987F\u5E27": 1
   "\u987F\u5E27\u51CF\u901F": 1
   AnimFreezeFrameRange: 0
   CharacterShakeStrength: {x: 0.5, y: 0}
@@ -1962,6 +1963,7 @@ MonoBehaviour:
   DiedFeedbacks: {fileID: 2931095576668673361}
   mBehaviorTree: {fileID: 1956431528782812698}
   mApPortrait: {fileID: 1956431530090122094}
+  "\u52A8\u753B": {fileID: 1956431530090122095}
   mRigidbody: {fileID: 1956431528782812701}
 --- !u!114 &2931095576668673361
 MonoBehaviour:

@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public class Trigger2D : MonoBehaviour
 {
     public bool IsTriggered => isTriggeredWithLayer;
-    public float Length => ((BoxCollider2D)mCol).size.x;
+    public float Length => ((BoxCollider2D)mCol).size.x;//只有PlayerController用到，必须是BOXCOLL
     public Vector2 Pos => mTransform.position;
 
     [SerializeField] bool isTriggeredWithLayer;
@@ -24,6 +24,12 @@ public class Trigger2D : MonoBehaviour
     private void Awake()
     {
         mCol = GetComponent<Collider2D>();
+    }
+
+    private void OnDisable()
+    {
+        mCollider2Ds.Clear();
+        isTriggeredWithLayer = false;
     }
 
     private void OnDestroy()

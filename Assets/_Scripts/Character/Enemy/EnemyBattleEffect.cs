@@ -5,40 +5,55 @@ using DG.Tweening;
 using NaughtyAttributes;
 using System.Collections;
 using MoreMountains.Feedbacks;
+using UnityEngine.Events;
 
 namespace Adv
 {
     public class EnemyBattleEffect : MonoBehaviour
     {
-        [Foldout("被击中表现设置")][SerializeField] bool 顿帧减速 = true;
-        [Foldout("被击中表现设置")][SerializeField] float AnimFreezeFrameRange;
+        [Foldout("被击中表现设置")][SerializeField] bool 顿帧 = true;
+        [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 顿帧减速 = true;
+        [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] float AnimFreezeFrameRange;
+        [Space]
         [Foldout("被击中表现设置")][SerializeField] Vector2 CharacterShakeStrength;
+        [Foldout("被击中表现设置")][SerializeField] float FlashTime = 0.13f;
+        [Space]
         [Foldout("被击中表现设置")][SerializeField] bool 可以被击退 = true;
-        [Foldout("被击中表现设置")][SerializeField] float HitBackStartSpeed_Front;//正面
-        [Foldout("被击中表现设置")][SerializeField] float HitBackStartSpeed_Back;//背面
-        [Foldout("被击中表现设置")][SerializeField] float HitBackDececleration;
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Front;//正面
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Back;//背面
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackDececleration;
+        [Space]
         [Foldout("被击中表现设置")][SerializeField] Vector2 PushPlayerForce_Front;//正面
         [Foldout("被击中表现设置")][SerializeField] Vector2 PushPlayerForce_Back;//背面
+        [Space]
+        [Foldout("被击中表现设置")][SerializeField] UnityEvent OnBeHitted;
         [Foldout("死亡表现设置")][SerializeField] GameObject 死亡爆炸特效;
         [Foldout("死亡表现设置")][SerializeField] MMF_Player DiedFeedbacks;
+        [Foldout("死亡表现设置")][SerializeField] UnityEvent OnDied;
         [Foldout("组件")][SerializeField] BehaviorTree mBehaviorTree;
-        [Foldout("组件")][SerializeField] apPortrait mApPortrait;
+        [Foldout("组件")][ShowIf("顿帧")][SerializeField] apPortrait mApPortrait;
+        [Foldout("组件")][SerializeField] Transform 动画;
         [Foldout("组件")][SerializeField] Rigidbody2D mRigidbody;
 
-        private float StartTime;
         private PlayerEffectPerformance playerEffect;
         private PlayerController playerController;
         private SharedBool FreezeFrameing;//敌人行为树必带变量
         private SharedBool HittedBacking;//敌人行为树必带变量
         private Coroutine HittedBackCoroutine;
+        private Coroutine HittedFlashCoroutine;
+        private Coroutine HittedFreezeTimeCoroutine;
+        private WaitForSeconds waitForFlashTime;
+        private WaitForSeconds waitForFreezeTime;
 
+        private void Awake()
+        {
+            waitForFlashTime = new WaitForSeconds(FlashTime);
+        }
 
         private void Start()
         {
             FreezeFrameing = (SharedBool)mBehaviorTree.GetVariable("FreezeFrameing");
             HittedBacking = (SharedBool)mBehaviorTree.GetVariable("HittedBacking");
-            // playerAnim = PlayerFSM.Player.animManager;
-            // playerController = PlayerFSM.Player.ctler;
         }
 
         private void OnEnable()
@@ -46,6 +61,7 @@ namespace Adv
             //需要先生成玩家，在生成敌人
             playerEffect = PlayerFSM.Player?.effect;
             playerController = PlayerFSM.Player?.ctler;
+            waitForFreezeTime = new WaitForSeconds(playerEffect.AttackHittedFreezeTime);
         }
 
         private void OnDisable()
@@ -63,7 +79,8 @@ namespace Adv
         public void DiedEffect()
         {
             PoolManager.Instance.Release(死亡爆炸特效, transform.position);
-            DiedFeedbacks.PlayFeedbacks();
+            DiedFeedbacks?.PlayFeedbacks();
+            OnDied?.Invoke();
             gameObject.SetActive(false);
         }
 
@@ -80,22 +97,19 @@ namespace Adv
             //}
 
             //顿帧
-            FreezeFrameing.Value = true;
-            StartTime = Time.time;
-            mApPortrait.SetAnimationSpeed(AnimFreezeFrameRange);
-            mApPortrait.SetControlParamInt("Hitted", 1);
-            if (顿帧减速)
-                mRigidbody.velocity = Vector2.zero;
-            DOVirtual.DelayedCall(0.13f, () => { mApPortrait.SetControlParamInt("Hitted", 0); });
-            DOVirtual.DelayedCall(playerEffect.AttackHittedFreezeTime, () =>
+            if (顿帧)
             {
-                mApPortrait.SetAnimationSpeed(1);
-                FreezeFrameing.Value = false;
-            });
+                if (顿帧减速)
+                    mRigidbody.velocity = Vector2.zero;
+                StartFlash();
+                StartFreezeTime();
+            }
             //左右震动
-            mApPortrait.transform.DOShakePosition(playerEffect.AttackHittedFreezeTime, CharacterShakeStrength);
+            动画.DOShakePosition(playerEffect.AttackHittedFreezeTime, CharacterShakeStrength);
             //被击退和推开玩家
             StartHittedBack();
+
+            OnBeHitted?.Invoke();
         }
 
         private void StartHittedBack()
@@ -147,6 +161,40 @@ namespace Adv
             }
             HittedBacking.Value = false;
             HittedBackCoroutine = null;
+        }
+
+        private void StartFreezeTime()
+        {
+            if (HittedFreezeTimeCoroutine != null)
+                StopCoroutine(HittedFreezeTimeCoroutine);
+            HittedFreezeTimeCoroutine = StartCoroutine(nameof(FreezeTime));
+        }
+
+        IEnumerator FreezeTime()
+        {
+            FreezeFrameing.Value = true;
+            mApPortrait.SetAnimationSpeed(AnimFreezeFrameRange);
+            yield return waitForFreezeTime;
+            mApPortrait.SetAnimationSpeed(1);
+            FreezeFrameing.Value = false;
+
+            HittedFreezeTimeCoroutine = null;
+        }
+
+        private void StartFlash()
+        {
+            if (HittedFlashCoroutine != null)
+                StopCoroutine(HittedFlashCoroutine);
+            HittedFlashCoroutine = StartCoroutine(nameof(Flash));
+        }
+
+        IEnumerator Flash()
+        {
+            mApPortrait.SetControlParamInt("Hitted", 1);
+            yield return waitForFlashTime;
+            mApPortrait.SetControlParamInt("Hitted", 0);
+
+            HittedFlashCoroutine = null;
         }
 
     }

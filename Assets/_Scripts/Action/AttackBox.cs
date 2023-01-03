@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -5,7 +6,9 @@ namespace Adv
 {
     public class AttackBox : MonoBehaviour
     {
-        [SerializeField] CharacterProperty property;
+        [SerializeField] bool 独立攻击力 = false;
+        [SerializeField][ShowIf("独立攻击力")] int 攻击力;
+        [SerializeField][HideIf("独立攻击力")] CharacterProperty property;
         [SerializeField] LayerMask AttackLayer;
         [SerializeField] UnityEvent AttackHittedEvent;
         [SerializeField] UnityEvent<Collider2D> AttackHittedEventWithColl;
@@ -18,7 +21,10 @@ namespace Adv
                 AttackHittedEventWithColl?.Invoke(BeHittedObj);
                 if (BeHittedObj.gameObject.TryGetComponent<IBeAttacked>(out IBeAttacked beAttacked))//如果碰撞体上没有实现这个接口说明是无敌碰撞体
                 {
-                    beAttacked.BeAttacked(property.Attack);
+                    if (独立攻击力)
+                        beAttacked.BeAttacked(攻击力);
+                    else
+                        beAttacked.BeAttacked(property.Attack);
                 }
             }
         }

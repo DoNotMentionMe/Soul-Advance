@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Adv
 {
     [TaskCategory("Custom")]
-    [TaskDescription("面向玩家")]
+    [TaskDescription("水平方向面向玩家")]
     public class LookAtPlayer : Action
     {
         [SerializeField] SharedTransform mTransform;

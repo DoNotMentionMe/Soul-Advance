@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Adv
 {
-    [TaskCategory("Custom/Action")]
+    [TaskCategory("Custom")]
     public class SetCollEnabled : Action
     {
         [SerializeField] SharedTrigger2D mColl2D;
