@@ -176,11 +176,11 @@ namespace Adv
         public void FullControlVelocity(float ratio, float FreezeTime, float SecondFreezeTime)
         {
             //mRigidbody.velocity *= ratio;
-            // AttackHittedEffectList.Add(FreezeTime);
-            // if (AttackHittedEffectCorotine == null)
-            // {
-            //     AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio, SecondFreezeTime));
-            // }
+            AttackHittedEffectList.Add(FreezeTime);
+            if (AttackHittedEffectCorotine == null)
+            {
+                AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(ratio, SecondFreezeTime));
+            }
         }
 
         /// <summary>
@@ -188,7 +188,8 @@ namespace Adv
         /// </summary>
         public void GetAPush(Vector2 force)
         {
-            mRigidbody.velocity = force;
+            if (FullControlVelocitying)
+                mRigidbody.velocity = force;
             //StartCoroutine(GetAPushCoroutine(force));
         }
 
@@ -457,16 +458,16 @@ namespace Adv
         /// </summary>
         IEnumerator AttackHittedEvent(float ratio, float FreezeTime, float SecondFreezeTime)
         {
-            speedRatio = ratio;
-            var velocity = mRigidbody.velocity;
-            mRigidbody.velocity *= ratio;
+            // speedRatio = ratio;
+            // var velocity = mRigidbody.velocity;
+            // mRigidbody.velocity *= ratio;
             if (FreezeTime == SecondFreezeTime)
                 yield return waitForSecondFreezeTime;
             else
                 yield return waitForAttackHittedFreezeTime;
             // if (playerFSM.animManager.IsAttacking)
             //     mRigidbody.velocity = velocity / 2;
-            speedRatio = 1;
+            //speedRatio = 1;
             yield return waitForIntervalHittedEffect;
         }
 

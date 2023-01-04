@@ -7,6 +7,7 @@ namespace Adv
 {
     /// <summary>
     /// 这个组件对外提供修改真正玩家属性的API
+    /// 必须继承CharacterProperty和IBeAttacked，需要对AttackBox提供玩家敌人一致接口
     /// </summary>
     public class PlayerPropertyController : CharacterProperty, IBeAttacked
     {
@@ -24,7 +25,7 @@ namespace Adv
         public override void BeAttacked(int damage)
         {
             property.BeAttacked(damage);
-            //Debug.Log($"玩家受伤，当前血量{property.HP}");
+            Debug.Log($"玩家受伤，当前血量{property.HP}");
         }
     }
 }

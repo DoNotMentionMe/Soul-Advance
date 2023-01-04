@@ -11,7 +11,7 @@ namespace Adv
         public override int Attack { get => attack; protected set => attack = value; }
         [SerializeField] int attack;
         [Header("敌人组件")]
-        [SerializeField] BehaviorTree mTree;
+        [SerializeField] protected BehaviorTree mTree;
         [SerializeField] string 受伤事件 = "BeAttacked";
         [SerializeField] string 死亡事件 = "Died";
         [SerializeField] UnityEvent BeHittedEvent;//被命中时调用EnemyBattleEffect.BeHittedEffect

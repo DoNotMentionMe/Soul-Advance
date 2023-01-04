@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using BehaviorDesigner.Runtime;
 using AnyPortrait;
 using DG.Tweening;
@@ -11,9 +12,12 @@ namespace Adv
 {
     public class EnemyBattleEffect : MonoBehaviour
     {
+        [Tooltip("基于骨骼动画组件的顿帧，如果没有骨骼动画，只会对行为树变量进行修改")]
         [Foldout("被击中表现设置")][SerializeField] bool 顿帧 = true;
         [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 顿帧减速 = true;
-        [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] float AnimFreezeFrameRange;
+        [Tooltip("勾选则使用ApPortrait控制动画顿帧和闪烁")]
+        [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 使用骨骼动画 = true;
+        [Foldout("被击中表现设置")][ShowIf("使用骨骼动画")][SerializeField] float AnimFreezeFrameRange;
         [Space]
         [Foldout("被击中表现设置")][SerializeField] Vector2 CharacterShakeStrength;
         [Foldout("被击中表现设置")][SerializeField] float FlashTime = 0.13f;
@@ -31,9 +35,9 @@ namespace Adv
         [Foldout("死亡表现设置")][SerializeField] MMF_Player DiedFeedbacks;
         [Foldout("死亡表现设置")][SerializeField] UnityEvent OnDied;
         [Foldout("组件")][SerializeField] BehaviorTree mBehaviorTree;
-        [Foldout("组件")][ShowIf("顿帧")][SerializeField] apPortrait mApPortrait;
+        [Foldout("组件")][ShowIf("使用骨骼动画")][SerializeField] apPortrait mApPortrait;
         [Foldout("组件")][SerializeField] Transform 动画;
-        [Foldout("组件")][SerializeField] Rigidbody2D mRigidbody;
+        [Foldout("组件")][ShowIf("可以被击退")][SerializeField] Rigidbody2D mRigidbody;
 
         private PlayerEffectPerformance playerEffect;
         private PlayerController playerController;
@@ -136,16 +140,26 @@ namespace Adv
                 hitBackSpeed = HitBackStartSpeed_Back;
             }
             pushForce.x *= -backDirection;
-            //被击退
-            if (HittedBackCoroutine != null)
-                StopCoroutine(HittedBackCoroutine);
-            if (可以被击退)
+            StartCoroutine(WaitFreezeEnd(() =>
             {
-                HittedBacking.Value = true;
-                HittedBackCoroutine = StartCoroutine(HittedBack(backDirection, hitBackSpeed));
-            }
-            //推开玩家
-            playerController.GetAPush(pushForce);
+                //被击退
+                if (HittedBackCoroutine != null)
+                    StopCoroutine(HittedBackCoroutine);
+                if (可以被击退)
+                {
+                    HittedBacking.Value = true;
+                    HittedBackCoroutine = StartCoroutine(HittedBack(backDirection, hitBackSpeed));
+                }
+                //推开玩家
+                playerController.GetAPush(pushForce);
+            }));
+
+        }
+
+        IEnumerator WaitFreezeEnd(Action onEnd)
+        {
+            while (FreezeFrameing.Value) { yield return null; }
+            onEnd?.Invoke();
         }
 
         IEnumerator HittedBack(int direction, float hitBackSpeed)
@@ -173,9 +187,11 @@ namespace Adv
         IEnumerator FreezeTime()
         {
             FreezeFrameing.Value = true;
-            mApPortrait.SetAnimationSpeed(AnimFreezeFrameRange);
+            if (使用骨骼动画)
+                mApPortrait?.SetAnimationSpeed(AnimFreezeFrameRange);
             yield return waitForFreezeTime;
-            mApPortrait.SetAnimationSpeed(1);
+            if (使用骨骼动画)
+                mApPortrait?.SetAnimationSpeed(1);
             FreezeFrameing.Value = false;
 
             HittedFreezeTimeCoroutine = null;
@@ -190,9 +206,11 @@ namespace Adv
 
         IEnumerator Flash()
         {
-            mApPortrait.SetControlParamInt("Hitted", 1);
+            if (使用骨骼动画)
+                mApPortrait?.SetControlParamInt("Hitted", 1);
             yield return waitForFlashTime;
-            mApPortrait.SetControlParamInt("Hitted", 0);
+            if (使用骨骼动画)
+                mApPortrait?.SetControlParamInt("Hitted", 0);
 
             HittedFlashCoroutine = null;
         }

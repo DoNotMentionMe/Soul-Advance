@@ -181,7 +181,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1083187013
 Transform:
   m_ObjectHideFlags: 0
@@ -190,7 +190,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083187012}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.040001, y: -0.09399998, z: -10}
+  m_LocalPosition: {x: 2.040001, y: -0.09399986, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1212,9 +1212,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -1.2584245e-10
       _m02: 446
-      _m10: 0
+      _m10: 1.2584245e-10
       _m11: 1
       _m12: 486
       _m20: 0
@@ -1250,9 +1250,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -1.2584245e-10
       _m02: 446
-      _m10: 0
+      _m10: 1.2584245e-10
       _m11: 1
       _m12: 486
       _m20: 0
@@ -1288,9 +1288,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -1.2584245e-10
       _m02: 446
-      _m10: 0
+      _m10: 1.2584245e-10
       _m11: 1
       _m12: 486
       _m20: 0
@@ -1326,9 +1326,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -1.2584245e-10
       _m02: 446
-      _m10: 0
+      _m10: 1.2584245e-10
       _m11: 1
       _m12: 486
       _m20: 0
@@ -19507,7 +19507,7 @@ MonoBehaviour:
     _pos_Local: {x: -509.42307, y: -487.8846}
     _uv: {x: 0.002516538, y: 0.023550183}
     _zDepth: 0
-    _vertPos_World: {x: -19.423065, y: 5.115387}
+    _vertPos_World: {x: -19.423067, y: 5.1153884}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -19530,9 +19530,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: 0
+      _m01: 0.000000002594661
       _m02: 490
-      _m10: 0
+      _m10: -0.000000002594661
       _m11: 1
       _m12: 493
       _m20: 0
@@ -19545,7 +19545,7 @@ MonoBehaviour:
     _pos_Local: {x: -489.19232, y: -487.96155}
     _uv: {x: 0.022273123, y: 0.02347505}
     _zDepth: 0
-    _vertPos_World: {x: 0.8076782, y: 5.038452}
+    _vertPos_World: {x: 0.807677, y: 5.0384536}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -19568,9 +19568,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: 0
+      _m01: 0.000000002594661
       _m02: 490
-      _m10: 0
+      _m10: -0.000000002594661
       _m11: 1
       _m12: 493
       _m20: 0
@@ -19583,7 +19583,7 @@ MonoBehaviour:
     _pos_Local: {x: -489.26923, y: -508.69232}
     _uv: {x: 0.022198021, y: 0.0032301545}
     _zDepth: 0
-    _vertPos_World: {x: 0.7307739, y: -15.692322}
+    _vertPos_World: {x: 0.7307726, y: -15.692321}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -19606,9 +19606,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: 0
+      _m01: 0.000000002594661
       _m02: 490
-      _m10: 0
+      _m10: -0.000000002594661
       _m11: 1
       _m12: 493
       _m20: 0
@@ -19621,7 +19621,7 @@ MonoBehaviour:
     _pos_Local: {x: -509.19232, y: -508.73077}
     _uv: {x: 0.0027418733, y: 0.0031926036}
     _zDepth: 0
-    _vertPos_World: {x: -19.192322, y: -15.730774}
+    _vertPos_World: {x: -19.192324, y: -15.730773}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -19644,9 +19644,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: 0
+      _m01: 0.000000002594661
       _m02: 490
-      _m10: 0
+      _m10: -0.000000002594661
       _m11: 1
       _m12: 493
       _m20: 0
@@ -20775,7 +20775,7 @@ MonoBehaviour:
     _pos_Local: {x: -440.92307, y: -504.46155}
     _uv: {x: 0.06941107, y: 0.0073617697}
     _zDepth: 0
-    _vertPos_World: {x: -12.923065, y: -18.461548}
+    _vertPos_World: {x: -12.923063, y: -18.46155}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -20798,9 +20798,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -0.0000000035344812
       _m02: 428
-      _m10: 0
+      _m10: 0.0000000035344812
       _m11: 1
       _m12: 486
       _m20: 0
@@ -20813,7 +20813,7 @@ MonoBehaviour:
     _pos_Local: {x: -437, y: -504.34616}
     _uv: {x: 0.07324219, y: 0.0074744523}
     _zDepth: 0
-    _vertPos_World: {x: -9, y: -18.34616}
+    _vertPos_World: {x: -8.999998, y: -18.346163}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -20836,9 +20836,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -0.0000000035344812
       _m02: 428
-      _m10: 0
+      _m10: 0.0000000035344812
       _m11: 1
       _m12: 486
       _m20: 0
@@ -20851,7 +20851,7 @@ MonoBehaviour:
     _pos_Local: {x: -437.23077, y: -508.42307}
     _uv: {x: 0.07301682, y: 0.0034931004}
     _zDepth: 0
-    _vertPos_World: {x: -9.230774, y: -22.423065}
+    _vertPos_World: {x: -9.230772, y: -22.423067}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -20874,9 +20874,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -0.0000000035344812
       _m02: 428
-      _m10: 0
+      _m10: 0.0000000035344812
       _m11: 1
       _m12: 486
       _m20: 0
@@ -20889,7 +20889,7 @@ MonoBehaviour:
     _pos_Local: {x: -440.92307, y: -508.69232}
     _uv: {x: 0.06941107, y: 0.0032301545}
     _zDepth: 0
-    _vertPos_World: {x: -12.923065, y: -22.692322}
+    _vertPos_World: {x: -12.923063, y: -22.692324}
     _matrix_Static_Vert2Mesh:
       _m00: 1
       _m01: -0
@@ -20912,9 +20912,9 @@ MonoBehaviour:
       _m22: 1
     _matrix_ToWorld:
       _m00: 1
-      _m01: -0
+      _m01: -0.0000000035344812
       _m02: 428
-      _m10: 0
+      _m10: 0.0000000035344812
       _m11: 1
       _m12: 486
       _m20: 0
@@ -57468,6 +57468,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d41b2341c6886a94ebb9f41fc2ca55ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "\u72EC\u7ACB\u653B\u51FB\u529B": 0
+  "\u653B\u51FB\u529B": 0
   property: {fileID: 9117152492469156044}
   AttackLayer:
     serializedVersion: 2
@@ -57515,7 +57517,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.3528831, y: 0.4036647}
+  m_Offset: {x: 0.5216522, y: 0.4036647}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -57526,7 +57528,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.5631623, y: 2.5150745}
+  m_Size: {x: 2.225624, y: 2.5150745}
   m_EdgeRadius: 0
 --- !u!1 &279230468749010635
 GameObject:
@@ -58581,8 +58583,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 279230469003650886}
-  m_LocalRotation: {x: 0, y: 0, z: 0.0006737797, w: 0.99999976}
-  m_LocalPosition: {x: 14.469825, y: -24.335382, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -0.76431835, w: 0.64483905}
+  m_LocalPosition: {x: -10.772592, y: -20.946468, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -61624,7 +61626,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9117152492333345129}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.2550001, y: -0.42299986, z: 0}
+  m_LocalPosition: {x: -0.2787, y: -0.42299986, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -61655,7 +61657,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.13, y: 0.01}
+  m_Size: {x: 0.17, y: 0.01}
   m_EdgeRadius: 0
 --- !u!114 &9117152492333345127
 MonoBehaviour:
@@ -62468,7 +62470,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9117152492925336276}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.25299978, y: -0.42299986, z: 0}
+  m_LocalPosition: {x: 0.2785, y: -0.42299986, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -62499,7 +62501,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.13, y: 0.01}
+  m_Size: {x: 0.17, y: 0.01}
   m_EdgeRadius: 0
 --- !u!114 &9117152492925336272
 MonoBehaviour:

@@ -10,6 +10,8 @@ public class Trigger2D : MonoBehaviour
     public Vector2 Pos => mTransform.position;
 
     [SerializeField] bool isTriggeredWithLayer;
+    [Tooltip("只在触发那一帧执行触发时间")]
+    [SerializeField] bool OnlyInvokeEventWhenTriggerFrame = false;
     [SerializeField] LayerMask layers;
     [SerializeField] Transform mTransform;
     [SerializeField] UnityEvent OnTriggerEnter = new UnityEvent();
@@ -28,8 +30,7 @@ public class Trigger2D : MonoBehaviour
 
     private void OnDisable()
     {
-        mCollider2Ds.Clear();
-        isTriggeredWithLayer = false;
+        ResetTrigger();
     }
 
     private void OnDestroy()
@@ -37,6 +38,13 @@ public class Trigger2D : MonoBehaviour
         mCol = null;
         mCollider2Ds.Clear();
         mCollider2Ds = null;
+    }
+
+    public void ResetTrigger()
+    {
+        SetCollEnable(false);
+        mCollider2Ds.Clear();
+        isTriggeredWithLayer = false;
     }
 
     public void SetCollEnable(bool enable) => mCol.enabled = enable;
@@ -47,13 +55,20 @@ public class Trigger2D : MonoBehaviour
 
         if (!mCollider2Ds.Contains(col))
             mCollider2Ds.Add(col);
-        OnTriggerEnter?.Invoke();
-        OnTriggerEnterWithCollider?.Invoke(col);
+        if (!OnlyInvokeEventWhenTriggerFrame)
+        {
+            OnTriggerEnter?.Invoke();
+            OnTriggerEnterWithCollider?.Invoke(col);
+        }
 
         if (!isTriggeredWithLayer && mCollider2Ds.Count > 0)
         {
+            if (OnlyInvokeEventWhenTriggerFrame)
+            {
+                OnTriggerEnter?.Invoke();
+                OnTriggerEnterWithCollider?.Invoke(col);
+            }
             isTriggeredWithLayer = true;
-            // OnTriggerEnter?.Invoke();
         }
     }
 

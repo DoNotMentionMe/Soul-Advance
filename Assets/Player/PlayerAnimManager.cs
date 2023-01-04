@@ -95,7 +95,10 @@ namespace Adv
 
         private void GetLastAnim()
         {
+            //StopAllCoroutines();
             CurrentAnimSpeedSlowDown(1);
+            effectAnim.speed = 1;
+            //ControlAnimSpeeding = false;
             effectAnim.Play("Idle");
             攻击碰撞体.SetCollEnable(false);
             WeaponSpriteRenderer.sortingOrder = 15;
