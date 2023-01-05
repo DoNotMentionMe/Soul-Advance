@@ -25,7 +25,7 @@ namespace Adv
         public override void BeAttacked(int damage)
         {
             property.BeAttacked(damage);
-            Debug.Log($"玩家受伤，当前血量{property.HP}");
+            //Debug.Log($"玩家受伤，当前血量{property.HP}");
         }
     }
 }
