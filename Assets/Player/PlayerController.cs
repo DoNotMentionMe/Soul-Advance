@@ -193,6 +193,18 @@ namespace Adv
             //StartCoroutine(GetAPushCoroutine(force));
         }
 
+        /// <summary>
+        /// 给一个横向击退力
+        /// </summary>
+        public void GetHittedBackForce(float force)
+        {
+            // if (FullControlVelocitying)
+            //     mRigidbody.velocity = force;
+            //StartCoroutine(GetAPushCoroutine(force));
+            if (FullControlVelocitying)
+                SetVelocity(SetCoord.X, -mTransform.localScale.x * force);
+        }
+
         private void StopFullControlVelocity()
         {
             // if (AttackHittedEffectCorotine != null)
@@ -423,7 +435,9 @@ namespace Adv
             if (direction == 0) return mTransform.localScale.x;
             if (mTransform.localScale.x * direction < 0)
             {
-                mTransform.localScale *= Vector2.left + Vector2.up;
+                var Scale = mTransform.localScale;
+                Scale.x *= -1;
+                mTransform.localScale = Scale;
             }
             return mTransform.localScale.x;
         }

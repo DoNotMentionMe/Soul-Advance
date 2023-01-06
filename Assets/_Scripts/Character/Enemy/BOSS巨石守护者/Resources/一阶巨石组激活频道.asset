@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9491abe323999e64dbbfd774e8e0e91b, type: 3}
-  m_Name: "\u4E8C\u9636\u5DE8\u77F3\u7EC4\u9891\u9053"
+  m_Name: "\u4E00\u9636\u5DE8\u77F3\u7EC4\u6FC0\u6D3B\u9891\u9053"
   m_EditorClassIdentifier: 
   comment: 

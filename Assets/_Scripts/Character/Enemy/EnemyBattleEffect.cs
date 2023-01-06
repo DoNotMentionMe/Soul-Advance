@@ -139,7 +139,7 @@ namespace Adv
                 pushForce = PushPlayerForce_Back;
                 hitBackSpeed = HitBackStartSpeed_Back;
             }
-            pushForce.x *= -backDirection;
+            //pushForce.x *= -backDirection;
             StartCoroutine(WaitFreezeEnd(() =>
             {
                 //被击退
@@ -151,7 +151,8 @@ namespace Adv
                     HittedBackCoroutine = StartCoroutine(HittedBack(backDirection, hitBackSpeed));
                 }
                 //推开玩家
-                playerController.GetAPush(pushForce);
+                //playerController.GetAPush(pushForce);
+                playerController.GetHittedBackForce(pushForce.x);
             }));
 
         }

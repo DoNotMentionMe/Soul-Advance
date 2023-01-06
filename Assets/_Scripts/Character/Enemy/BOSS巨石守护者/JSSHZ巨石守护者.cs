@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NaughtyAttributes;
@@ -13,12 +14,20 @@ namespace Adv
     public class JSSHZ巨石守护者 : MonoBehaviour
     {
         public List<Transform> 当前巨石组 { get; set; }//和行为树的当前巨石组直接链接
+        public List<Transform> 当前静止点组 { get; set; }
 
-        [SerializeField] IntBoolEventChannel 一阶巨石组频道;
-        [SerializeField] IntBoolEventChannel 二阶巨石组频道;
-        [SerializeField] IntBoolEventChannel 三阶巨石组频道;
         [SerializeField] BOSSProperty bOSSProperty;
         [SerializeField] BehaviorTree mTree;
+
+        #region 事件频道
+
+        [Foldout("事件频道")][SerializeField] IntBoolEventChannel 一阶巨石组频道;
+        [Foldout("事件频道")][SerializeField] IntBoolEventChannel 二阶巨石组频道;
+        [Foldout("事件频道")][SerializeField] IntBoolEventChannel 三阶巨石组频道;
+        [Foldout("事件频道")][SerializeField] IntTransformListEventChannel 一阶静止点频道;
+        [Foldout("事件频道")][SerializeField] IntTransformListEventChannel 二阶静止点频道;
+        [Foldout("事件频道")][SerializeField] IntTransformListEventChannel 三阶静止点频道;
+        #endregion
 
         #region 巨石组
         [Foldout("各巨石组父级")][SerializeField] Transform One一阶巨石组1父级;
@@ -89,10 +98,30 @@ namespace Adv
                 SZJD当前巨石组所在阶段 = ZDJD指定阶段;
                 SZZS当前巨石组所在组数 = index;
                 设置当前巨石组(SZJD当前巨石组所在阶段, SZZS当前巨石组所在组数);
+                //获取静止点
+                当前静止点组.Clear();
+                switch (ZDJD指定阶段)
+                {
+                    case 1:
+                        一阶静止点频道.Broadcast(index, 当前静止点组);
+                        break;
+                    case 2:
+                        二阶静止点频道.Broadcast(index, 当前静止点组);
+                        break;
+                    case 3:
+                        三阶静止点频道.Broadcast(index, 当前静止点组);
+                        break;
+                    default:
+                        break;
+                }
                 Debug.Log($"激活{SZJD当前巨石组所在阶段}阶{SZZS当前巨石组所在组数}组");
             }
         }
 
+        private void Awake()
+        {
+            当前静止点组 = new List<Transform>();
+        }
 
         private void OnEnable()
         {
@@ -101,10 +130,8 @@ namespace Adv
             SZZS当前巨石组所在组数 = 1;
             //bOSSProperty.On阶段改变.AddListener(Listen阶段改变);
             Enable激活指定阶段指定巨石组(SZJD当前巨石组所在阶段, SZZS当前巨石组所在组数, true);
-            DOVirtual.DelayedCall(0.1f, () =>
-            {
-                mTree.EnableBehavior();
-            });
+            //等当前巨石组不为空时执行行为树
+            StartCoroutine(等当前巨石组不为空(() => { mTree.EnableBehavior(); }));
 
         }
 
@@ -126,10 +153,10 @@ namespace Adv
         private int GetRandomIndex()
         {
             if (bOSSProperty.当前阶段 != SZJD当前巨石组所在阶段 || bOSSProperty.当前阶段 == 1)
-                return Random.Range(1, bOSSProperty.当前阶段 + 1);
+                return UnityEngine.Random.Range(1, bOSSProperty.当前阶段 + 1);
             else
             {
-                var index = Random.Range(1, bOSSProperty.当前阶段 + 1);
+                var index = UnityEngine.Random.Range(1, bOSSProperty.当前阶段 + 1);
                 if (index == SZZS当前巨石组所在组数)
                     return GetRandomIndex();
                 else
@@ -169,6 +196,12 @@ namespace Adv
             {
                 N阶巨石组.Add(N阶巨石组父级.GetChild(i));
             }
+        }
+
+        IEnumerator 等当前巨石组不为空(Action action)
+        {
+            while (当前巨石组 == null || 当前静止点组.Count == 0) { yield return null; }
+            action?.Invoke();
         }
     }
 }

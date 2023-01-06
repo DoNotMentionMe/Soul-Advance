@@ -42,9 +42,12 @@ namespace Adv
             else if (!ctler.Grounded)
             {
                 NotGroundedTime += Time.deltaTime;
-                if (NotGroundedTime <= ctler.LeaveGroundJumpBufferTime && input.JumpFrame.Value)
+                if (NotGroundedTime <= ctler.LeaveGroundJumpBufferTime)
                 {
-                    FSM.SwitchState(typeof(PlayerState_JumpUp));
+                    if (input.JumpFrame.Value)
+                        FSM.SwitchState(typeof(PlayerState_JumpUp));
+                    else if (input.RollFrame.Value)
+                        FSM.SwitchState(typeof(PlayerState_Roll));
                 }
                 else if (NotGroundedTime > ctler.LeaveGroundJumpBufferTime)
                     FSM.SwitchState(typeof(PlayerState_JumpDown));

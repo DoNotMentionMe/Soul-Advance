@@ -78,6 +78,10 @@ namespace Adv
             // {
             //     ctler.SetScale(input.AxesX);
             // }
+            if (StateDuration < 0.1f)
+            {
+                ctler.SetScale(input.AxesX);
+            }
 
             if (input.RollFrame.Value)
             {
