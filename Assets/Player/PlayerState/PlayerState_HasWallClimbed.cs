@@ -62,5 +62,11 @@ namespace Adv
             // }
 
         }
+
+        public override void Exit()
+        {
+            base.Exit();
+            ctler.HasWallClimbedEnd();
+        }
     }
 }

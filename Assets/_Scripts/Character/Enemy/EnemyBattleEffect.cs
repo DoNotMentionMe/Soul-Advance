@@ -56,8 +56,18 @@ namespace Adv
 
         private void Start()
         {
-            FreezeFrameing = (SharedBool)mBehaviorTree.GetVariable("FreezeFrameing");
-            HittedBacking = (SharedBool)mBehaviorTree.GetVariable("HittedBacking");
+            if (mBehaviorTree != null)
+            {
+                FreezeFrameing = (SharedBool)mBehaviorTree?.GetVariable("FreezeFrameing");
+                HittedBacking = (SharedBool)mBehaviorTree?.GetVariable("HittedBacking");
+            }
+            else
+            {
+                FreezeFrameing = new SharedBool();
+                FreezeFrameing.Value = false;
+                HittedBacking = new SharedBool();
+                HittedBacking.Value = false;
+            }
         }
 
         private void OnEnable()
@@ -65,7 +75,8 @@ namespace Adv
             //需要先生成玩家，在生成敌人
             playerEffect = PlayerFSM.Player?.effect;
             playerController = PlayerFSM.Player?.ctler;
-            waitForFreezeTime = new WaitForSeconds(playerEffect.AttackHittedFreezeTime);
+            if (playerEffect != null)
+                waitForFreezeTime = new WaitForSeconds(playerEffect.AttackHittedFreezeTime);
         }
 
         private void OnDisable()

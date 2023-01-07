@@ -19,6 +19,26 @@ namespace Adv
         [SerializeField] float FadeInOrOutDuration = 1f;
 
         private Coroutine FadeInOrOutCoroutine;
+        private WaitForSeconds waitForFlashUp;
+        private WaitForSeconds waitForFlashDown;
+        private WaitForSeconds waitForFlashEnd;
+        private WaitForSeconds waitForDisable;
+
+        private void Awake()
+        {
+            阶数对应激活事件频道.AddListener(Listen激活频道);
+            阶数对应静止点事件频道.AddListener(Listen静止点获取频道);
+            waitForFlashUp = new WaitForSeconds(0.15f);
+            waitForFlashDown = new WaitForSeconds(0.2f);
+            waitForFlashEnd = new WaitForSeconds(0.25f);
+            waitForDisable = new WaitForSeconds(0.8f);
+        }
+
+        private void OnDestroy()
+        {
+            阶数对应激活事件频道.RemoveListenner(Listen激活频道);
+            阶数对应静止点事件频道.AddListener(Listen静止点获取频道);
+        }
 
         public void StartFadeInOrOut(bool enabled)
         {
@@ -36,27 +56,71 @@ namespace Adv
             if (enabled)
                 spriteRenderer.enabled = enabled;
             float a = spriteRenderer.color.a;
-            while (enabled && a < 1f)
+            Color curColor;
+            if (enabled)
             {
-                a += 3f * Time.deltaTime;
-                var curColor = spriteRenderer.color;
-                curColor.a = a;
-                spriteRenderer.color = curColor;
+                //闪烁两下
+                for (var i = 0; i < 2; i++)
+                {
+                    a = spriteRenderer.color.a;
+                    while (a < 0.4f)
+                    {
+                        a += 6.667f * Time.deltaTime;
+                        curColor = spriteRenderer.color;
+                        curColor.a = a;
+                        spriteRenderer.color = curColor;
+                        yield return null;
+                    }
+                    a = spriteRenderer.color.a;
+                    while (a > 0f)
+                    {
+                        a -= 5f * Time.deltaTime;
+                        curColor = spriteRenderer.color;
+                        curColor.a = a;
+                        spriteRenderer.color = curColor;
+                        yield return null;
+                    }
+                    // curColor = spriteRenderer.color;
+                    // curColor.a = 0.4f;
+                    // spriteRenderer.color = curColor;
+                    // yield return waitForFlashUp;
+                    // curColor = spriteRenderer.color;
+                    // curColor.a = 0;
+                    // spriteRenderer.color = curColor;
+                    // yield return waitForFlashDown;
+                }
 
-                if (!boxCollider2D.enabled && a >= 0.75f)
-                    boxCollider2D.enabled = enabled;
-                yield return null;
+                yield return waitForFlashEnd;
+
+                a = spriteRenderer.color.a;
+                while (a < 1f)
+                {
+                    a += 14f * Time.deltaTime;
+                    curColor = spriteRenderer.color;
+                    curColor.a = a;
+                    spriteRenderer.color = curColor;
+
+                    if (!boxCollider2D.enabled && a >= 0f)
+                        boxCollider2D.enabled = enabled;
+                    yield return null;
+                }
             }
 
-            while (!enabled && a > 0f)
+            if (!enabled && a > 0f)
             {
-                a -= 0.8f * Time.deltaTime;
-                var curColor = spriteRenderer.color;
-                curColor.a = a;
-                spriteRenderer.color = curColor;
-                if (boxCollider2D.enabled && a <= 0.1f)
-                    boxCollider2D.enabled = enabled;
-                yield return null;
+                //不变，但是需要等待和闪烁一样的时间
+                yield return waitForDisable;
+
+                while (a > 0f)
+                {
+                    a -= 12f * Time.deltaTime;
+                    curColor = spriteRenderer.color;
+                    curColor.a = a;
+                    spriteRenderer.color = curColor;
+                    if (boxCollider2D.enabled && a <= 0.01f)
+                        boxCollider2D.enabled = enabled;
+                    yield return null;
+                }
             }
 
             if (!enabled)
@@ -81,18 +145,6 @@ namespace Adv
             {
                 StartFadeInOrOut(enabled);
             }
-        }
-
-        private void Awake()
-        {
-            阶数对应激活事件频道.AddListener(Listen激活频道);
-            阶数对应静止点事件频道.AddListener(Listen静止点获取频道);
-        }
-
-        private void OnDestroy()
-        {
-            阶数对应激活事件频道.RemoveListenner(Listen激活频道);
-            阶数对应静止点事件频道.AddListener(Listen静止点获取频道);
         }
 
         [Button]

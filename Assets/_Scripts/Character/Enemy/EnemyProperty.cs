@@ -30,12 +30,12 @@ namespace Adv
             {
                 BeHittedEvent.Invoke();
                 DiedEvent.Invoke();
-                mTree.SendEvent(死亡事件);
+                mTree?.SendEvent(死亡事件);
             }
             else
             {
                 BeHittedEvent.Invoke();
-                mTree.SendEvent(受伤事件);
+                mTree?.SendEvent(受伤事件);
             }
         }
 

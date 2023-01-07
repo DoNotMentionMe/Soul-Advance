@@ -192,6 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 1032
@@ -995,7 +996,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowProperty: 1
-  MaxHP: 5
+  MaxHP: 999
   HP: 0
   attack: 0
   mTree: {fileID: 1009536904090981104}
@@ -1057,16 +1058,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   "\u987F\u5E27": 1
   "\u987F\u5E27\u51CF\u901F": 1
+  "\u4F7F\u7528\u9AA8\u9ABC\u52A8\u753B": 1
   AnimFreezeFrameRange: 0.05
-  CharacterShakeStrength: {x: 1, y: 0}
+  CharacterShakeStrength: {x: 0.5, y: 0}
+  FlashTime: 0.13
   "\u53EF\u4EE5\u88AB\u51FB\u9000": 1
-  HitBackStartSpeed_Front: 0
-  HitBackStartSpeed_Back: 0
-  HitBackDececleration: 65
-  PushPlayerForce_Front: {x: 0, y: 0}
-  PushPlayerForce_Back: {x: 0, y: 0}
+  HitBackStartSpeed_Front: 10
+  HitBackStartSpeed_Back: 10
+  HitBackDececleration: 25
+  PushPlayerForce_Front: {x: 4, y: 0}
+  PushPlayerForce_Back: {x: 4, y: 0}
+  OnBeHitted:
+    m_PersistentCalls:
+      m_Calls: []
   "\u6B7B\u4EA1\u7206\u70B8\u7279\u6548": {fileID: 158340644718711525, guid: 9975f5cd0a32dc44fab095f9cfc92ebf, type: 3}
   DiedFeedbacks: {fileID: 4307229371879620447}
+  OnDied:
+    m_PersistentCalls:
+      m_Calls: []
   mBehaviorTree: {fileID: 1009536904090981104}
   mApPortrait: {fileID: 1009536904146693878}
   "\u52A8\u753B": {fileID: 1009536904146693879}
@@ -7453,6 +7462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 64
@@ -17914,6 +17924,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 64
@@ -17948,6 +17959,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d41b2341c6886a94ebb9f41fc2ca55ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "\u72EC\u7ACB\u653B\u51FB\u529B": 0
+  "\u653B\u51FB\u529B": 0
   property: {fileID: 1009536904090981109}
   AttackLayer:
     serializedVersion: 2

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using AnyPortrait;
@@ -80,7 +81,12 @@ namespace Adv
             // }
             if (StateDuration < 0.1f)
             {
-                ctler.SetScale(input.AxesX);
+                var axesX = Math.Sign(input.AxesX);
+                if (axesX != 0 && axesX != ctler.PlayerFace)
+                {
+                    ctler.SetScale(input.AxesX);
+                    ctler.Attack(input.AxesX);
+                }
             }
 
             if (input.RollFrame.Value)
@@ -169,6 +175,8 @@ namespace Adv
             base.Exit();
             ctler.攻击碰撞体.SetCollEnable(false);
             //effect.AttackEndEffect();
+            ctler.AttackEnd();
+
         }
 
         private void ResetAttackState()

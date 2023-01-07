@@ -102,6 +102,7 @@ namespace Adv
         private bool IsFixToWallClimbPos;
         private bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
+        private float currentHittedBackForce;
         private enum SetCoord { X, Y }
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
@@ -201,8 +202,11 @@ namespace Adv
             // if (FullControlVelocitying)
             //     mRigidbody.velocity = force;
             //StartCoroutine(GetAPushCoroutine(force));
-            if (FullControlVelocitying)
-                SetVelocity(SetCoord.X, -mTransform.localScale.x * force);
+            if (FullControlVelocitying && currentHittedBackForce < force)
+            {
+                currentHittedBackForce = force;
+                SetVelocity(SetCoord.X, -mTransform.localScale.x * currentHittedBackForce);
+            }
         }
 
         private void StopFullControlVelocity()
@@ -234,6 +238,11 @@ namespace Adv
 
             if (mRigidbody.velocity.y < -0.1f)
                 SetVelocity(SetCoord.Y, 4f);
+        }
+
+        public void AttackEnd()
+        {
+            currentHittedBackForce = 0;
         }
 
         public void MoveWhenAttack(float AxesX)
@@ -325,6 +334,23 @@ namespace Adv
 #endif
         }
 
+        public void EndWallClimb()
+        {
+            IsFixToWallClimbPos = false;
+            mTransform.position = EndWallClimbPos;
+        }
+
+        public void FixPosToWallClimbPos()
+        {
+            if (IsFixToWallClimbPos)
+                mTransform.position = WallClimbPos;
+        }
+
+        public void HasWallClimbedEnd()
+        {
+            mColl.enabled = true;
+        }
+
         public void OneWayDownFall(UnityAction onCompleted)
         {
             下半体.SetCollEnable(false);
@@ -338,19 +364,6 @@ namespace Adv
                 onCompleted?.Invoke();
             }, false);
             mTransform.position -= Vector3.up * DownFallOffsetY;
-        }
-
-        public void FixPosToWallClimbPos()
-        {
-            if (IsFixToWallClimbPos)
-                mTransform.position = WallClimbPos;
-        }
-
-        public void EndWallClimb()
-        {
-            IsFixToWallClimbPos = false;
-            mColl.enabled = true;
-            mTransform.position = EndWallClimbPos;
         }
 
         public void DecelerationWhenChangeableJump()

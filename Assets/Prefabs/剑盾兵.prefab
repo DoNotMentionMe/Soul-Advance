@@ -1668,6 +1668,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 64
@@ -1780,7 +1781,7 @@ MonoBehaviour:
         Bool","Instant":true,"SharedBoolboolValue":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedBoolstoreResult":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"FreezeFrameing","IsShared":true,"BooleanmValue":false}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.Math.SetBool","NodeData":{"Offset":"(-102.011909,277.93634)"},"ID":4,"Name":"Set
         Bool","Instant":true,"SharedBoolboolValue":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedBoolstoreResult":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"IsFollowPlayer","IsShared":true,"BooleanmValue":false}},{"Type":"Adv.GetPlayer","NodeData":{"Offset":"(62.6889648,273.8841)"},"ID":5,"Name":"Get
         Player","Instant":true,"SharedPlayerFSMplayerFSM":{"Type":"Adv.SharedPlayerFSM","Name":"Player","IsShared":true}},{"Type":"BehaviorDesigner.Runtime.Tasks.Repeater","NodeData":{"Offset":"(277.5,180)"},"ID":6,"Name":"Repeater","Instant":true,"SharedIntcount":{"Type":"BehaviorDesigner.Runtime.SharedInt","Name":null,"Int32mValue":0},"SharedBoolrepeatForever":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true},"SharedBoolendOnFailure":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Selector","NodeData":{"Offset":"(2.06907654,130)"},"ID":7,"Name":"Selector","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-1530,210)","Comment":"\u68c0\u6d4b\u73a9\u5bb6\u662f\n\u5426\u8d85\u51fa\u8303\u56f4"},"ID":8,"Name":"Sequence","Instant":true,"AbortTypeabortType":"LowerPriority","Children":[{"Type":"Adv.IsNotPlayerInRange","NodeData":{"Offset":"(-121.052132,145.270279)"},"ID":9,"Name":"Is
-        Not Player In Range","Instant":true,"BooleanCheckHasNotPlayer":true,"SharedPlayerFSMplayer":{"Type":"Adv.SharedPlayerFSM","Name":"Player","IsShared":true},"SingleMaxDistanceXWithPlayer":7,"SingleMaxDistanceYWithPlayer":4,"BooleanCheckCustomBool":true,"SharedBoolCustomBool":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"IsFollowPlayer","IsShared":true,"BooleanmValue":false},"SharedBoolCustomBoolComparison":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.Math.SetBool","NodeData":{"Offset":"(91.21802,255.467346)"},"ID":10,"Name":"Set
+        Not Player In Range","Instant":true,"BooleanCheckHasNotPlayer":true,"SharedPlayerFSMplayer":{"Type":"Adv.SharedPlayerFSM","Name":"Player","IsShared":true},"SingleMaxDistanceXWithPlayer":9,"SingleMaxDistanceYWithPlayer":4,"BooleanCheckCustomBool":true,"SharedBoolCustomBool":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"IsFollowPlayer","IsShared":true,"BooleanmValue":false},"SharedBoolCustomBoolComparison":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.Math.SetBool","NodeData":{"Offset":"(91.21802,255.467346)"},"ID":10,"Name":"Set
         Bool","Instant":true,"SharedBoolboolValue":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedBoolstoreResult":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"IsFollowPlayer","IsShared":true,"BooleanmValue":false}}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-940.253,231.489914)","Comment":"\u8f6c\u5411"},"ID":11,"Name":"Sequence","Instant":true,"AbortTypeabortType":"Self","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.Math.BoolComparison","NodeData":{"Offset":"(-382.27533,182.869064)"},"ID":12,"Name":"Bool
         Comparison","Instant":true,"SharedBoolbool1":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":"IsFollowPlayer","IsShared":true,"BooleanmValue":false},"SharedBoolbool2":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true}},{"Type":"Adv.IsThePlayerOnTheBack","NodeData":{"Offset":"(-272.479431,296.149231)"},"ID":13,"Name":"Is
         The Player On The Back","Instant":true,"BooleanCheckOnTheBack":true,"SharedPlayerFSMplayer":{"Type":"Adv.SharedPlayerFSM","Name":"Player","IsShared":true},"SharedTransformmTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":"mTransform","IsShared":true,"TransformmValue":0}},{"Type":"Adv.MoveHorizontal","NodeData":{"Offset":"(-141.45108,391.693237)"},"ID":14,"Name":"Move
@@ -2608,6 +2609,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 64
@@ -3484,6 +3486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTriggeredWithLayer: 0
+  OnlyInvokeEventWhenTriggerFrame: 0
   layers:
     serializedVersion: 2
     m_Bits: 64

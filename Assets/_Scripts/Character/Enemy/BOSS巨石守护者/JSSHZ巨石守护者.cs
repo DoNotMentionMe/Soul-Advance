@@ -116,20 +116,34 @@ namespace Adv
                 }
                 Debug.Log($"激活{SZJD当前巨石组所在阶段}阶{SZZS当前巨石组所在组数}组");
             }
+            else
+            {
+                当前巨石组 = null;
+                当前静止点组.Clear();
+            }
         }
 
         private void Awake()
         {
             当前静止点组 = new List<Transform>();
+
+            SZJD当前巨石组所在阶段 = 1;
+            SZZS当前巨石组所在组数 = 1;
         }
 
         private void OnEnable()
         {
-            //当前巨石组 = One一阶巨石组1;
-            SZJD当前巨石组所在阶段 = 1;
-            SZZS当前巨石组所在组数 = 1;
-            //bOSSProperty.On阶段改变.AddListener(Listen阶段改变);
-            Enable激活指定阶段指定巨石组(SZJD当前巨石组所在阶段, SZZS当前巨石组所在组数, true);
+            //清空场上的巨石组
+            if (当前巨石组 != null)
+            {
+                Enable激活指定阶段指定巨石组(SZJD当前巨石组所在阶段, SZZS当前巨石组所在组数, false);
+            }
+
+            //赋值当前巨石组和当前静止点组为1阶段，但是不激活
+            当前巨石组 = One一阶巨石组1;
+            一阶静止点频道.Broadcast(1, 当前静止点组);
+            //Enable随机激活当前阶段巨石组();
+
             //等当前巨石组不为空时执行行为树
             StartCoroutine(等当前巨石组不为空(() => { mTree.EnableBehavior(); }));
 
@@ -137,6 +151,7 @@ namespace Adv
 
         private void OnDisable()
         {
+            mTree.DisableBehavior();
             //bOSSProperty.On阶段改变.RemoveListener(Listen阶段改变);
         }
 
@@ -200,7 +215,7 @@ namespace Adv
 
         IEnumerator 等当前巨石组不为空(Action action)
         {
-            while (当前巨石组 == null || 当前静止点组.Count == 0) { yield return null; }
+            while (当前巨石组 == null) { yield return null; }
             action?.Invoke();
         }
     }

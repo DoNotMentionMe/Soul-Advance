@@ -34,7 +34,18 @@ namespace Adv
                 IsNotGroundTime = Time.time;
             }
             //跳跃
-            if (input.JumpFrame.Value && !ctler.HeadTouchGround)
+            //爬上墙
+            if ((ctler.canOneWayClimb || ctler.canWallClimb_Font) && !ctler.Grounded)
+            {
+                FSM.SwitchState(typeof(PlayerState_WallClimb));
+            }
+            //滑落
+            // else if ((ctler.WallSlided_Back || ctler.WallSlided_Font) && !ctler.Grounded)
+            // {
+            //     if (!ctler.Grounded)
+            //         FSM.SwitchState(typeof(PlayerState_WallSlide));
+            // }
+            else if (input.JumpFrame.Value && !ctler.HeadTouchGround)
             {
                 if (ctler.Grounded)
                 {
