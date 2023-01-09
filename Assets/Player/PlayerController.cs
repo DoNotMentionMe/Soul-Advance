@@ -21,6 +21,7 @@ namespace Adv
         public float ClimbUpJumpBufferTime => climbUpJumpBufferTime;
         public float WallJumpBufferTimeWithnOnAir => wallJumpBufferTimeWithOnAir;
         public float WallJumpBufferTimeWithWallSlide => wallJumpBufferTimeWithWallSlide;
+        public float HurtStateTime => hurtStateTime;
         public bool ChangeableJump => changeableJump;
         public bool JumpDown => mRigidbody.velocity.y <= 0;
         public bool Grounded => GroundCheck.IsTriggered || OneWayGroundCheck.IsTriggered;
@@ -73,6 +74,9 @@ namespace Adv
         [Foldout("玩家物理属性：滑墙、跳墙、爬墙")][SerializeField] float WallClimbYOffset2;
         [Foldout("玩家物理属性：单向平台")][SerializeField] float DownFallOffsetY = 0.2f;
         [Foldout("玩家物理属性：单向平台")][SerializeField] float DownFallCollSetTrueDelay = 0.3f;
+        [Foldout("玩家物理属性：受伤")][SerializeField] float hurtStateTime;
+        [Foldout("玩家物理属性：受伤")][SerializeField] float HurtNotInjuryTime;
+        [Foldout("玩家物理属性：受伤")][SerializeField] float HurtJumpForce;
         [Foldout("检测器")][SerializeField] Trigger2D GroundCheck;
         [Foldout("检测器")][SerializeField] Trigger2D HeadCheck;
         [Foldout("检测器")][SerializeField] Trigger2D WallClimbCheck_Font;
@@ -106,10 +110,12 @@ namespace Adv
         private enum SetCoord { X, Y }
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
+        private Coroutine HurtNotInjuryCoroutine;
         private WaitForSecondsRealtime waitForIntervalHittedEffect;
         private WaitForSecondsRealtime waitForAttackHittedFreezeTime;
         private WaitForSecondsRealtime waitForSecondFreezeTime;
         private WaitForSeconds waitForFixedDeltatime;
+        private WaitForSeconds waitForHurtNotInjuryTime;
 
         private void Awake()
         {
@@ -117,6 +123,7 @@ namespace Adv
             mTransform = transform;
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
+            waitForHurtNotInjuryTime = new WaitForSeconds(HurtNotInjuryTime);
         }
 
         private void Start()
@@ -211,15 +218,25 @@ namespace Adv
 
         private void StopFullControlVelocity()
         {
-            // if (AttackHittedEffectCorotine != null)
-            // {
-            //     StopCoroutine(AttackHittedEffectCorotine);
-            // }
-            StopAllCoroutines();
+            if (AttackHittedEffectCorotine != null)
+            {
+                StopCoroutine(AttackHittedEffectCorotine);
+            }
+            //StopAllCoroutines();
             AttackHittedEffectCorotine = null;
             AttackHittedEffectList.Clear();
             FullControlVelocitying = false;
             speedRatio = 1;
+        }
+
+        public void StartHurt()
+        {
+            SetVelocity(SetCoord.Y, HurtJumpForce);
+        }
+
+        public void EndHurt()
+        {
+
         }
 
         public void Move(float AxesX)
@@ -255,12 +272,12 @@ namespace Adv
         {
             StopFullControlVelocity();
             SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed);
-            mColl.enabled = false;
+            NotInjury(true);
         }
 
         public void RollEnd()
         {
-            mColl.enabled = true;
+            NotInjury(false);
         }
 
         public void Rolling(float AxesX)
@@ -290,7 +307,7 @@ namespace Adv
         public void WallClimb()
         {
             mRigidbody.velocity = Vector2.zero;
-            mColl.enabled = false;
+            NotInjury(true);
             if (mTransform.localScale.x > 0)//向右
             {
                 WallClimbPos = new Vector2(Mathf.Floor(WallSlideCheck_Font.Pos.x + WallSlideCheck_Font.Length / 2 + 0.05f) - WallClimbXOffset1,
@@ -318,7 +335,7 @@ namespace Adv
         public void OneWayClimb()
         {
             mRigidbody.velocity = Vector2.zero;
-            mColl.enabled = false;
+            NotInjury(true);
 
             WallClimbPos = new Vector2(mTransform.position.x,
                                         Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset1);
@@ -348,7 +365,7 @@ namespace Adv
 
         public void HasWallClimbedEnd()
         {
-            mColl.enabled = true;
+            NotInjury(false);
         }
 
         public void OneWayDownFall(UnityAction onCompleted)
@@ -455,6 +472,32 @@ namespace Adv
             return mTransform.localScale.x;
         }
 
+        private void NotInjury(bool Enable)
+        {
+            if (Enable)
+                StopHurtNorInjury();
+            mColl.enabled = !Enable;
+        }
+
+        public void StartHurtNotInjury()
+        {
+            if (HurtNotInjuryCoroutine != null)
+            {
+                //StopCoroutine(HurtNotInjuryCoroutine);
+                return;
+            }
+            HurtNotInjuryCoroutine = StartCoroutine(nameof(HurtNotInjury));
+        }
+
+        /// <summary>
+        /// 当其他情况使角色无敌时，先关闭可能存在的受伤无敌协程
+        /// </summary>
+        private void StopHurtNorInjury()
+        {
+            if (HurtNotInjuryCoroutine != null)
+                StopCoroutine(HurtNotInjuryCoroutine);
+        }
+
         /// <summary>
         /// 顺序执行减速效果协程
         /// </summary>
@@ -505,6 +548,15 @@ namespace Adv
                 yield return null;
             }
             mRigidbody.velocity += force;
+        }
+
+        IEnumerator HurtNotInjury()
+        {
+            mColl.enabled = false;
+            yield return waitForHurtNotInjuryTime;
+            mColl.enabled = true;
+
+            HurtNotInjuryCoroutine = null;
         }
     }
 }

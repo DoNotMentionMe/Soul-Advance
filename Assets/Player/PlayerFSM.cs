@@ -17,6 +17,7 @@ namespace Adv
         public PlayerEffectPerformance effect;
         public apPortrait apPortrait;
         public PlayerAnimManager animManager;
+        public PlayerPropertyController propertyController;
 
 
         private void Awake()
@@ -41,6 +42,7 @@ namespace Adv
             Register(new PlayerState_HasWallClimbed());
             Register(new PlayerState_Roll());
             Register(new PlayerState_Attack());
+            Register(new PlayerState_Hurt());
             //Register(new PlayerState_StabAttack());
         }
 
@@ -67,6 +69,7 @@ namespace Adv
                 effect,
                 apPortrait,
                 animManager,
+                propertyController,
                 this);
             stateTable.Add(newState.GetType(), newState);
         }

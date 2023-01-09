@@ -28,6 +28,11 @@ public class Trigger2D : MonoBehaviour
         mCol = GetComponent<Collider2D>();
     }
 
+    private void OnEnable()
+    {
+        SetCollEnable(true);
+    }
+
     private void OnDisable()
     {
         ResetTrigger();

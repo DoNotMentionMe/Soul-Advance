@@ -104,7 +104,7 @@ namespace Adv
         /// </summary>
         public void BeHittedEffect()
         {
-            //TODO 这部分仅为测试用
+            //这部分仅为测试用
             //if (playerEffect == null)
             //{
             //    playerEffect = PlayerFSM.Player.effect;

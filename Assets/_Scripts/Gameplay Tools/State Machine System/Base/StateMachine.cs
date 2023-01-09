@@ -36,5 +36,10 @@ namespace Adv
             currentState.PhysicUpdate();
         }
         #endregion
+
+        public IState GetIState(System.Type stateKey)
+        {
+            return stateTable[stateKey];
+        }
     }
 }

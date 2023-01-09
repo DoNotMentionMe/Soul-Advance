@@ -42,7 +42,7 @@ namespace Adv
 
         public void StartFadeInOrOut(bool enabled)
         {
-            //TODO开始缓入或缓出协程
+            //开始缓入或缓出协程
             if (FadeInOrOutCoroutine != null)
                 StopCoroutine(FadeInOrOutCoroutine);
             FadeInOrOutCoroutine = StartCoroutine(FadeInOrOut(enabled));

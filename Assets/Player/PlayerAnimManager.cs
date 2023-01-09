@@ -60,6 +60,7 @@ namespace Adv
 
         }
 
+        public void SetControlParamInt(string ParamName, int ParamInt) => mApPortrait.SetControlParamInt(ParamName, ParamInt);
         public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed);
         public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
         public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;

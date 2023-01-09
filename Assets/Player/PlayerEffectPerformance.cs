@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 using MoreMountains.Feedbacks;
+using UnityEngine.Events;
 
 namespace Adv
 {
@@ -17,14 +18,24 @@ namespace Adv
         [Foldout("攻击命中设置")][SerializeField] float VelocityFreezeValue;//速度百分比
         [Foldout("攻击命中设置")][SerializeField] float AnimSpeedFreezeValue;//动画播放速度百分比
         [Foldout("攻击命中设置")][SerializeField] float intervalOfHittedEffect;//控制攻击命中特效播放间隔
-        [Foldout("攻击命中设置")][SerializeField] GameObject HittedEffect;
+        [Foldout("攻击命中设置")][SerializeField] GameObject AttackHittedEffectObj;
         [Foldout("攻击命中设置")][SerializeField] MMF_Player AttackHittedFeedBacks;
+        [Foldout("受伤")][SerializeField] int FlashCount;
+        [Foldout("受伤")][SerializeField] float FlashInterval;
+        [Foldout("受伤")][SerializeField] UnityEvent OnHurt;
         [SerializeField] GameObject 落地灰尘;
         //[SerializeField] AudioData AttackSound;
         [Foldout("组件")][SerializeField] PlayerAnimManager animManager;
         [Foldout("组件")][SerializeField] PlayerController playerController;
 
         #region 事件功能
+
+        public void HurtEffectStart()
+        {
+            OnHurt?.Invoke();
+            StartCoroutine(FlashCounts(FlashCount));
+        }
+
         /// <summary>
         /// 攻击开始事件
         /// </summary>
@@ -65,7 +76,7 @@ namespace Adv
             //计算碰撞体的中心点
             var point = BeHittedObj.bounds.center;
             var randomRota = Quaternion.Euler(0, 0, Random.Range(0, 360f));
-            var obj = PoolManager.Instance.Release(HittedEffect, point, randomRota);
+            var obj = PoolManager.Instance.Release(AttackHittedEffectObj, point, randomRota);
             StartCoroutine(TransformFollowAnother(obj, BeHittedObj));
         }
 
@@ -82,6 +93,7 @@ namespace Adv
         private WaitForSecondsRealtime waitForIntervalHittedEffect;
         private WaitForSecondsRealtime waitForAttackHittedFreezeTime;
         private WaitForSecondsRealtime waitForSecondFreezeTime;
+        private WaitForSeconds waitForFlashInterval;
 
         private void Awake()
         {
@@ -89,6 +101,7 @@ namespace Adv
             waitForIntervalHittedEffect = new WaitForSecondsRealtime(intervalOfHittedEffect);
             waitForAttackHittedFreezeTime = new WaitForSecondsRealtime(AttackHittedFreezeTime);
             waitForSecondFreezeTime = new WaitForSecondsRealtime(secondFreezeTime);
+            waitForFlashInterval = new WaitForSeconds(FlashInterval);
         }
 
         private void OnDestroy()
@@ -142,6 +155,17 @@ namespace Adv
             {
                 followerTransform.position = another.bounds.center;
                 yield return null;
+            }
+        }
+
+        IEnumerator FlashCounts(int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                animManager.SetControlParamInt("IsHurt", 1);
+                yield return waitForFlashInterval;
+                animManager.SetControlParamInt("IsHurt", 0);
+                yield return waitForFlashInterval;
             }
         }
     }

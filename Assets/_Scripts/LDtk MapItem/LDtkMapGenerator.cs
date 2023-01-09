@@ -24,7 +24,7 @@ namespace Adv
         private LDtkLevel currentExit;
         private Door_LDtk CurrentDoor;//记录已经生成的最右侧地图块的出口
         private List<LDtkLevel> currentLevels = new List<LDtkLevel>();//记录从左往右所有关卡
-        private List<LDtkLevel> ShowingLevels = new List<LDtkLevel>();//记录从左往右所有关卡
+        private List<LDtkLevel> ShowingLevels = new List<LDtkLevel>();//记录显示着的关卡，没有顺序
         private List<LDtkLevel> PlayerLocallevels = new List<LDtkLevel>();//当前玩家的位置
         private int PlayerLocalIndex;//当前玩家所在currentLevels中的位置
         /// <summary>
@@ -197,7 +197,7 @@ namespace Adv
         {
             if (!PlayerLocallevels.Contains(level))
                 PlayerLocallevels.Add(level);
-            //TODO 显示玩家所在关卡附近的关卡，隐藏其他关卡
+            //显示玩家所在关卡附近的关卡，隐藏其他关卡
             ResetShowingLevels();
         }
 
@@ -205,7 +205,7 @@ namespace Adv
         {
             if (PlayerLocallevels.Contains(level))
                 PlayerLocallevels.Remove(level);
-            //TODO 显示玩家所在关卡附近的关卡，隐藏其他关卡
+            //显示玩家所在关卡附近的关卡，隐藏其他关卡
             //ResetShowingLevels();
         }
     }

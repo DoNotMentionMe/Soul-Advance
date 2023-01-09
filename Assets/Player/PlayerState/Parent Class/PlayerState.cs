@@ -21,6 +21,7 @@ namespace Adv
         protected PlayerEffectPerformance effect;
         protected AnyPortrait.apPortrait apPortrait;
         protected PlayerAnimManager animManager;
+        protected PlayerPropertyController propertyController;
         protected PlayerFSM FSM;
 
         protected float stateFixedFrameCount = 0;
@@ -33,6 +34,7 @@ namespace Adv
                                 PlayerEffectPerformance effect,
                                 AnyPortrait.apPortrait apPortrait,
                                 PlayerAnimManager animManager,
+                                PlayerPropertyController propertyController,
                                 PlayerFSM FSM)
         {
             this.ctler = playerController;
@@ -40,6 +42,7 @@ namespace Adv
             this.effect = effect;
             this.apPortrait = apPortrait;
             this.animManager = animManager;
+            this.propertyController = propertyController;
             this.FSM = FSM;
         }
 
@@ -55,6 +58,11 @@ namespace Adv
 
         public virtual void LogicUpdate()
         {
+            if (propertyController.GetHurt && FSM.currentState != FSM.GetIState(typeof(PlayerState_Hurt)))
+            {
+                FSM.SwitchState(typeof(PlayerState_Hurt));
+                return;
+            }
         }
 
         public virtual void PhysicUpdate()

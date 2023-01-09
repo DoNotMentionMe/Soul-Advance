@@ -14,6 +14,9 @@ namespace Adv
         [SerializeField] float Acceleration;
         [SerializeField] float Deceleration;
         [SerializeField] float RotateSpeed;
+        [SerializeField] TrailRenderer Trail;
+        [SerializeField, Range(0, 1)] float EmittingWhenMoveSpeedPercent = 0.3f;
+        [SerializeField] Collider2D body;
         private bool Can转向 = false;
         private bool ZX转向ing;
         private SDZT速度状态s SDZT速度状态;
@@ -21,7 +24,7 @@ namespace Adv
         private float currentMoveSpeed;
         private Coroutine JJS加减速协程;
         private Tween 转向Tween;
-        private WaitForSeconds waitForStart转向;
+        private WaitForSeconds waitFor冲出一段距离;
 
         private void OnEnable()
         {
@@ -29,7 +32,14 @@ namespace Adv
             currentMoveSpeed = BurstSpeed;
             Can转向 = false;
             ZX转向ing = false;
-            waitForStart转向 = new WaitForSeconds(BurstEndTime);
+            waitFor冲出一段距离 = new WaitForSeconds(BurstEndTime);
+
+            //向相反方向飞出
+            body.enabled = false;
+            var direction = transform.position - player.position;
+            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            var randomAnglePlus = UnityEngine.Random.Range(-60f, 60f);
+            transform.rotation = Quaternion.AngleAxis(angle + randomAnglePlus, Vector3.forward);
             StartCoroutine(激活冲出一段距离());
         }
 
@@ -49,9 +59,9 @@ namespace Adv
                 yield return null;
             }
 
-
+            body.enabled = true;
             SDZT速度状态 = SDZT速度状态s.满速;
-            yield return waitForStart转向;
+            yield return waitFor冲出一段距离;
             Can转向 = true;
         }
 
@@ -122,7 +132,7 @@ namespace Adv
                     angleComparison = angleSum;
                 }
 
-                if (angleComparison > 60)
+                if (angleComparison > 67)
                 {
                     Start加速或减速(false);
                 }
@@ -163,9 +173,20 @@ namespace Adv
         private void Update()
         {
             transform.Translate(currentMoveSpeed * Vector3.right * Time.deltaTime);
-            //到玩家的方向
+
+            if (currentMoveSpeed >= MoveSpeed * EmittingWhenMoveSpeedPercent && !Trail.emitting)
+            {
+                Trail.emitting = true;
+            }
+            else if (currentMoveSpeed < MoveSpeed * EmittingWhenMoveSpeedPercent && Trail.emitting)
+            {
+                Trail.emitting = false;
+                Trail.Clear();
+            }
+
             if (Can转向 && !ZX转向ing)
             {
+                //到玩家的方向
                 var direction = player.position - transform.position;
                 //和玩家的角度
                 var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;//-180~180

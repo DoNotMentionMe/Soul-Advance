@@ -11,20 +11,18 @@ namespace Adv
     /// </summary>
     public class PlayerPropertyController : CharacterProperty, IBeAttacked
     {
-        [NaughtyAttributes.Expandable]
-        [SerializeField]
-        PlayerProperty property;
+        public bool GetHurt { get; set; }
+
+        [NaughtyAttributes.Expandable][SerializeField] PlayerProperty property;
 
         public override int Attack { get => property.Attack; protected set => Attack = value; }
 
-        protected override void OnEnable()
-        {
-
-        }
+        protected override void OnEnable() { }
 
         public override void BeAttacked(int damage)
         {
             property.BeAttacked(damage);
+            GetHurt = true;
             //Debug.Log($"玩家受伤，当前血量{property.HP}");
         }
     }
