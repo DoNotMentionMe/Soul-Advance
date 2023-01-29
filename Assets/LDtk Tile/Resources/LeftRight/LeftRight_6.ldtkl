@@ -53,48 +53,6 @@
 			"gridTiles": [],
 			"entityInstances": [
 				{
-					"__identifier": "EnemyGenerate2",
-					"__grid": [11,8],
-					"__pivot": [1,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "17091af0-7820-11ed-9abe-1b82719e827e",
-					"width": 16,
-					"height": 16,
-					"defUid": 89,
-					"px": [192,128],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 20, "__type": "Int", "__tile": null, "defUid": 90, "realEditorValues": [{ "id": "V_Int", "params": [20] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate2",
-					"__grid": [11,15],
-					"__pivot": [1,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "19398f80-7820-11ed-9abe-4109739af9e6",
-					"width": 16,
-					"height": 16,
-					"defUid": 89,
-					"px": [192,240],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 20, "__type": "Int", "__tile": null, "defUid": 90, "realEditorValues": [{ "id": "V_Int", "params": [20] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate2",
-					"__grid": [11,22],
-					"__pivot": [1,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "1b551c80-7820-11ed-9abe-9150e0c16229",
-					"width": 16,
-					"height": 16,
-					"defUid": 89,
-					"px": [192,352],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 20, "__type": "Int", "__tile": null, "defUid": 90, "realEditorValues": [{ "id": "V_Int", "params": [20] }] }]
-				},
-				{
 					"__identifier": "DoorLeft",
 					"__grid": [1,8],
 					"__pivot": [0,0],
@@ -121,6 +79,20 @@
 					"defUid": 88,
 					"px": [368,240],
 					"fieldInstances": []
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [11,8],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "6afe9360-9f30-11ed-babd-6fa00ddfa7bc",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [184,128],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -5, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-5] }] }]
 				}
 			]
 		},

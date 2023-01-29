@@ -1,0 +1,45 @@
+fileFormatVersion: 2
+guid: de0396982a9d56a4abd458a99df424fc
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: aaa16bfc62c086f4fb45da87b6acf9b1, type: 3}
+  _reimportOnDependencyChange: 1
+  _jsonFile: {fileID: -164016180542632921, guid: de0396982a9d56a4abd458a99df424fc, type: 3}
+  _pixelsPerUnit: 16
+  _atlas: {fileID: 4343727234628468602, guid: f81b6c8247caffa4a97f40635a02578e, type: 2}
+  _customLevelPrefab: {fileID: 2846521388032451929, guid: bd79f2f54e168c4418edd29d743df5c1, type: 3}
+  _deparentInRuntime: 0
+  _intGridValueColorsVisible: 0
+  _useCompositeCollider: 1
+  _createBackgroundColor: 0
+  _createLevelBoundsTrigger: 1
+  _intGridValues:
+  - _key: GroundAndOneWay_1
+    _asset: {fileID: 11400000, guid: 7e4c28b393299d7459aee6d43f673f48, type: 2}
+  - _key: GroundAndOneWay_2
+    _asset: {fileID: 11400000, guid: 122b69c362badb84eab855f7260bd223, type: 2}
+  _entities:
+  - _key: DoorLeft
+    _asset: {fileID: 1354659135677703109, guid: 34771450517333c4e8a7d81e591a2c7c, type: 3}
+  - _key: DoorRight
+    _asset: {fileID: 7952948588881294292, guid: 11d7ef91372dd244bb4683e57d571701, type: 3}
+  - _key: DoorUp
+    _asset: {instanceID: 0}
+  - _key: DoorDown
+    _asset: {instanceID: 0}
+  - _key: JianDunBin
+    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
+  - _key: DaoCaoRen
+    _asset: {fileID: 2674135870893880689, guid: 73fe4303092ce3247a25379f8bc7a534, type: 3}
+  - _key: ShiTouRen
+    _asset: {fileID: 2674135870893880689, guid: a3f896f9528bdff4088da5efdfff4136, type: 3}
+  - _key: JSSHZ
+    _asset: {fileID: 4365271770923570936, guid: ded900bd7370f7f44be3cf03bd28a0bd, type: 3}
+  _enumGenerate: 0
+  _enumPath: 
+  _enumNamespace: 

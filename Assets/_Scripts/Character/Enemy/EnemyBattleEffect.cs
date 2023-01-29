@@ -39,6 +39,7 @@ namespace Adv
         [Foldout("组件")][SerializeField] Transform 动画;
         [Foldout("组件")][ShowIf("可以被击退")][SerializeField] Rigidbody2D mRigidbody;
 
+        [Button] public void AnimInitialize() => mApPortrait.Initialize();
         private PlayerEffectPerformance playerEffect;
         private PlayerController playerController;
         private SharedBool FreezeFrameing;//敌人行为树必带变量
@@ -105,11 +106,11 @@ namespace Adv
         public void BeHittedEffect()
         {
             //这部分仅为测试用
-            //if (playerEffect == null)
-            //{
-            //    playerEffect = PlayerFSM.Player.effect;
-            //    playerController = PlayerFSM.Player?.ctler;
-            //}
+            // if (playerEffect == null)
+            // {
+            //     playerEffect = PlayerFSM.Player.effect;
+            //     playerController = PlayerFSM.Player?.ctler;
+            // }
 
             //顿帧
             if (顿帧)

@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c7b80dbe8cb77c4ab7b3350ac50bf82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "DTMS\u5730\u56FE\u6A21\u5F0F": 0
+  "DTS\u5730\u56FE\u6570": 5
   PlayerEnterLevel: {fileID: 11400000, guid: 2a1198f1e0ddc7c46840dad603cd563d, type: 2}
   PlayerLeaveLevel: {fileID: 11400000, guid: 75772d9a7895fdd44b43bd26817338c0, type: 2}
   EntranceList:
@@ -60,3 +62,4 @@ MonoBehaviour:
   - {fileID: 3735827315059965886, guid: a3f2a741854b27b4091a6dbaee6fa747, type: 3}
   - {fileID: 1607808677836583495, guid: 85c6364727630554ba80c9acc80b3cbc, type: 3}
   - {fileID: -739805428464022227, guid: 9ec60a404a785324fb6689b05bdae3e7, type: 3}
+  "Level_BOSS\u5DE8\u77F3\u5B88\u62A4\u8005": {fileID: 5484760006380903189, guid: 688b98f254174f44d9f0d474a05b3726, type: 3}

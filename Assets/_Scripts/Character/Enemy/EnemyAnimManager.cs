@@ -20,6 +20,13 @@ namespace Adv
             //初始化ApPortrait
             mApPortrait.Initialize();
         }
+
+        private void OnEnable()
+        {
+            mApPortrait.SetControlParamInt("Hitted", 0);
+            mApPortrait.SetAnimationSpeed(1);
+            mApPortrait.Play("Idle");
+        }
         public void AnimSpeedSlowDownForAWhile(float speed, float controlTime)
         {
             if (ControlAnimSpeeding) return;
@@ -38,6 +45,7 @@ namespace Adv
         //动画事件
         public void AttackStart()
         {
+            Debug.Log($"开启");
             OnAttackStart?.Invoke();
         }
 

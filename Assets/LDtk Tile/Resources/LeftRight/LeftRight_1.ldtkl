@@ -81,18 +81,18 @@
 					"fieldInstances": []
 				},
 				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [13,7],
+					"__identifier": "DaoCaoRen",
+					"__grid": [12,7],
 					"__pivot": [0.5,0],
 					"__tags": [],
 					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "127d7770-7820-11ed-b09d-139a33ffd19c",
+					"__smartColor": "#90793F",
+					"iid": "4d9c7350-9f30-11ed-babd-b52031f146c1",
 					"width": 16,
 					"height": 16,
-					"defUid": 3,
-					"px": [216,112],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 15, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [15] }] }]
+					"defUid": 107,
+					"px": [200,112],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -5, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-5] }] }]
 				}
 			]
 		},

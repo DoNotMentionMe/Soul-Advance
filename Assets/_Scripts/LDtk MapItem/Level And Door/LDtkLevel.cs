@@ -14,8 +14,8 @@ namespace Adv
     {
         public bool IsShowing => gameObject.activeSelf;
         public event UnityAction<LDtkLevel> onClear = delegate { };
-        public List<Door_LDtk> DoorList = new List<Door_LDtk>();
-        public List<EnemyGenerate> GenerateList = new List<EnemyGenerate>();
+        public List<Door_LDtk> DoorList = new List<Door_LDtk>();//出入口信息
+        public List<EnemyGenerate> GenerateList = new List<EnemyGenerate>();//敌人生成位置信息
         public LDtkLevelEventChannel PlayerEnterLevel;//由SetPosprocessLevel配置
         public LDtkLevelEventChannel PlayerLeaveLevel;//由SetPosprocessLevel配置
 

@@ -45,13 +45,10 @@ SpriteAtlas:
     secondaryTextureSettings: {}
     variantMultiplier: 1
     packables:
-    - {fileID: 6146199261253409780, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 3634455612839581583, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 7222129504637682561, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -6113416472534604288, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 1553762504829886337, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -4948709513027305788, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 250381928175932441, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 4644027865897544505, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -120039486380356067, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 701037264790579359, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
@@ -59,91 +56,64 @@ SpriteAtlas:
     - {fileID: 1005806010583121191, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -2813907952987064507, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -5408528904233026357, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -1376440692007532094, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: 8098596267376903610, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 76631552481150365, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -971573960947161495, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 5276660620587037550, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 7030751621761663416, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -3373708170043754795, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 2947441768844939813, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 7008952458067801766, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 6797378461766794274, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -5807227422602502515, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: 181938103868111727, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -1257690592202999930, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     - {fileID: -3901588245439676258, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -3074680040508706826, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -3413858414338025790, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-    - {fileID: -5577189831371604119, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 181938103868111727, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -1376440692007532094, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 5479401263202125453, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 1005806010583121191, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -971573960947161495, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 7222129504637682561, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 6797378461766794274, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -6113416472534604288, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -3074680040508706826, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 1553762504829886337, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -5807227422602502515, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -5408528904233026357, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 7008952458067801766, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 6146199261253409780, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -2813907952987064507, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 5276660620587037550, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -4948709513027305788, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 250381928175932441, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 7030751621761663416, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 3634455612839581583, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -120039486380356067, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -1257690592202999930, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 701037264790579359, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 76631552481150365, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -3413858414338025790, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 2947441768844939813, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -5577189831371604119, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: -3901588245439676258, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   - {fileID: 4644027865897544505, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: 8098596267376903610, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
-  - {fileID: -3373708170043754795, guid: 659f22c1c3eb8b14ea7b0a9b71774836, type: 3}
   m_PackedSpriteNamesToIndex:
   - TilesTest 1_96_160_16_16
-  - TilesTest 1_64_48_16_16
   - TilesTest 1_32_160_16_16
   - TilesTest 1_48_80_16_16
   - TilesTest 1_64_128_16_16
   - TilesTest 1_16_112_16_16
   - TilesTest 1_96_112_16_16
   - TilesTest 1_16_128_16_16
-  - TilesTest 1_128_128_16_16
   - TilesTest 1_16_144_16_16
-  - TilesTest 1_96_128_16_16
   - TilesTest 1_48_160_16_16
   - TilesTest 1_96_96_16_16
-  - TilesTest 1_16_48_16_16
   - TilesTest 1_48_112_16_16
   - TilesTest 1_64_144_16_16
   - TilesTest 1_16_160_16_16
-  - TilesTest 1_32_48_16_16
   - TilesTest 1_64_160_16_16
-  - TilesTest 1_16_80_16_16
   - TilesTest 1_32_112_16_16
   - TilesTest 1_112_160_16_16
   - TilesTest 1_32_144_16_16
   - TilesTest 1_64_112_16_16
-  - TilesTest 1_128_160_16_16
   - TilesTest 1_96_80_16_16
-  - TilesTest 1_160_96_16_16
   - TilesTest 1_128_96_16_16
   - TilesTest 1_32_80_16_16
-  - TilesTest 1_64_80_16_16
-  - TilesTest 1_80_48_16_16
   m_RenderDataMap: {}
   m_Tag: Test1_Atlas
   m_IsVariant: 0

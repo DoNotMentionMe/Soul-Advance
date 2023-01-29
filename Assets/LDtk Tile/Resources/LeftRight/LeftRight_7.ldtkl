@@ -81,60 +81,18 @@
 					"fieldInstances": []
 				},
 				{
-					"__identifier": "EnemyGenerate",
+					"__identifier": "DaoCaoRen",
 					"__grid": [14,11],
 					"__pivot": [0.5,0],
 					"__tags": [],
 					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "17c28310-7820-11ed-9abe-abb1d94a0dd1",
+					"__smartColor": "#90793F",
+					"iid": "6df03510-9f30-11ed-babd-8d1274f2bbbc",
 					"width": 16,
 					"height": 16,
-					"defUid": 3,
+					"defUid": 107,
 					"px": [232,176],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 23, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [23] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [14,6],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "19d18cf0-7820-11ed-9abe-8fb370c9bde6",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [232,96],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 13, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [13] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate2",
-					"__grid": [7,16],
-					"__pivot": [1,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "24d8e260-7820-11ed-9abe-cfa9a1c52c0f",
-					"width": 16,
-					"height": 16,
-					"defUid": 89,
-					"px": [128,256],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 12, "__type": "Int", "__tile": null, "defUid": 90, "realEditorValues": [{ "id": "V_Int", "params": [12] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate2",
-					"__grid": [20,16],
-					"__pivot": [1,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "2898a980-7820-11ed-9abe-83704786974f",
-					"width": 16,
-					"height": 16,
-					"defUid": 89,
-					"px": [336,256],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 12, "__type": "Int", "__tile": null, "defUid": 90, "realEditorValues": [{ "id": "V_Int", "params": [12] }] }]
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -5, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-5] }] }]
 				}
 			]
 		},

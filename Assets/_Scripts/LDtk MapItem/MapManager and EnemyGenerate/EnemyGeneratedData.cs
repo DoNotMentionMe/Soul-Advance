@@ -8,11 +8,11 @@ namespace Adv
     public class EnemyGeneratedData : MonoBehaviour
     {
         public EnemyGenerate SelfRegion => selfRegion;
-        public float Occupation => occupation;
+        //public float Occupation => occupation;
         public float GeneratedOffsetY => generatedOffsetY;
         public bool RegionIsNull => regionIsNull;
-        public event UnityAction<EnemyGeneratedData> onDied = delegate { };
-        [SerializeField] float occupation;
+        public event UnityAction<EnemyGeneratedData> onDied = delegate { };//对象池调用，用于将对象放回对象池
+        //[SerializeField] float occupation=1;
         [SerializeField] float generatedOffsetY;
 
         /// <summary>
@@ -40,6 +40,7 @@ namespace Adv
             }
 
             onDied?.Invoke(this);
+            gameObject.SetActive(false);
         }
 
         private EnemyGenerate selfRegion;

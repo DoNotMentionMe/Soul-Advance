@@ -30,12 +30,13 @@ public class Trigger2D : MonoBehaviour
 
     private void OnEnable()
     {
-        SetCollEnable(true);
+        //SetCollEnable(true);
     }
 
     private void OnDisable()
     {
-        ResetTrigger();
+        mCollider2Ds.Clear();
+        isTriggeredWithLayer = false;
     }
 
     private void OnDestroy()
@@ -43,6 +44,7 @@ public class Trigger2D : MonoBehaviour
         mCol = null;
         mCollider2Ds.Clear();
         mCollider2Ds = null;
+        isTriggeredWithLayer = false;
     }
 
     public void ResetTrigger()

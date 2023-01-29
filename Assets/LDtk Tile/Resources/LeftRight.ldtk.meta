@@ -24,10 +24,6 @@ ScriptedImporter:
   - _key: GroundAndOneWay_2
     _asset: {fileID: 11400000, guid: 122b69c362badb84eab855f7260bd223, type: 2}
   _entities:
-  - _key: EnemyGenerate
-    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
-  - _key: EnemyGenerate2
-    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
   - _key: DoorLeft
     _asset: {fileID: 1354659135677703109, guid: 34771450517333c4e8a7d81e591a2c7c, type: 3}
   - _key: DoorRight
@@ -36,6 +32,12 @@ ScriptedImporter:
     _asset: {instanceID: 0}
   - _key: DoorDown
     _asset: {instanceID: 0}
+  - _key: JianDunBin
+    _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
+  - _key: DaoCaoRen
+    _asset: {fileID: 2674135870893880689, guid: 73fe4303092ce3247a25379f8bc7a534, type: 3}
+  - _key: ShiTouRen
+    _asset: {fileID: 2674135870893880689, guid: a3f896f9528bdff4088da5efdfff4136, type: 3}
   _enumGenerate: 0
   _enumPath: 
   _enumNamespace: 

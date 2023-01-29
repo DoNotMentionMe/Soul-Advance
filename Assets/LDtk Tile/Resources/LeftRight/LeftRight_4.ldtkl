@@ -53,76 +53,6 @@
 			"gridTiles": [],
 			"entityInstances": [
 				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [5,8],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "07309d20-7820-11ed-9abe-7da2d9a393c6",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [88,128],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 7, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [7] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [9,12],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "0a38d410-7820-11ed-9abe-fbea13954bfc",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [152,192],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 7, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [7] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [5,16],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "0dec1810-7820-11ed-9abe-b3cfc01fddb5",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [88,256],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 7, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [7] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [7,21],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "1547f1b0-7820-11ed-9abe-5983af00ea6f",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [120,336],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 11, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [11] }] }]
-				},
-				{
-					"__identifier": "EnemyGenerate",
-					"__grid": [7,28],
-					"__pivot": [0.5,0],
-					"__tags": [],
-					"__tile": null,
-					"__smartColor": "#0072FF",
-					"iid": "1b46fa70-7820-11ed-9abe-493f643e690d",
-					"width": 16,
-					"height": 16,
-					"defUid": 3,
-					"px": [120,448],
-					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 11, "__type": "Int", "__tile": null, "defUid": 80, "realEditorValues": [{ "id": "V_Int", "params": [11] }] }]
-				},
-				{
 					"__identifier": "DoorLeft",
 					"__grid": [1,8],
 					"__pivot": [0,0],
@@ -149,6 +79,20 @@
 					"defUid": 88,
 					"px": [224,448],
 					"fieldInstances": []
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [6,8],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "63c24fb0-9f30-11ed-babd-a993878c5000",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [104,128],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -5, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-5] }] }]
 				}
 			]
 		},

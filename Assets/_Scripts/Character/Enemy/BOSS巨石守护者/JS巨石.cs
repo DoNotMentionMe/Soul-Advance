@@ -134,7 +134,8 @@ namespace Adv
             if (ZS组数 == 巨石所属组数)
             {
                 //把静止点加到list中
-                静止点.position = 静止点位置[Random.Range(0, 2)];
+                //静止点.position = 静止点位置[Random.Range(0, 2)];
+                静止点.position = new Vector3(transform.position.x + 2.3f * Mathf.Sign(Random.Range(-2, 1)), transform.position.y + 4);
                 list.Add(静止点);
             }
         }

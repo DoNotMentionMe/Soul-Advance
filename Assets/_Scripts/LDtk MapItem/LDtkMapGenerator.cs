@@ -7,19 +7,29 @@ using NaughtyAttributes;
 namespace Adv
 {
     /// <summary>
+    /// 地图生成器
     /// 层级关系：LDtkMapGenerator->LDtkLevel->Door、EnemyGenerate
     /// 功能1：输入指定地块数生成一条水平方向的路径
     /// </summary>
     public class LDtkMapGenerator : PersistentSingleton<LDtkMapGenerator>
     {
+        public enum DTMS地图模式s
+        {
+            GD固定模式,
+            WX无限模式,
+        }
+        public DTMS地图模式s DTMS地图模式 = DTMS地图模式s.GD固定模式;
+        [ShowIf("OnDTMS地图模式等于GD固定模式")]
+        public int DTS地图数;
         private const string EntrancePath = "Entrance";
         private const string ExitPath = "Exit";
         private const string LeftRightPath = "LeftRight";
         [BoxGroup("Setting")][SerializeField] LDtkLevelEventChannel PlayerEnterLevel;
         [BoxGroup("Setting")][SerializeField] LDtkLevelEventChannel PlayerLeaveLevel;
-        [Foldout("LaodList")][SerializeField] List<LDtkLevel_Entrance> EntranceList;
-        [Foldout("LaodList")][SerializeField] List<LDtkLevel> ExitList;
-        [Foldout("LaodList")][SerializeField] List<LDtkLevel> LeftRightList;
+        [Foldout("LoadList")][SerializeField] List<LDtkLevel_Entrance> EntranceList;
+        [Foldout("LoadList")][SerializeField] List<LDtkLevel> ExitList;
+        [Foldout("LoadList")][SerializeField] List<LDtkLevel> LeftRightList;
+        [Foldout("BOSS")][SerializeField] LDtkLevel Level_BOSS巨石守护者;
         private LDtkLevel_Entrance currentEntrance;
         private LDtkLevel currentExit;
         private Door_LDtk CurrentDoor;//记录已经生成的最右侧地图块的出口
@@ -27,6 +37,7 @@ namespace Adv
         private List<LDtkLevel> ShowingLevels = new List<LDtkLevel>();//记录显示着的关卡，没有顺序
         private List<LDtkLevel> PlayerLocallevels = new List<LDtkLevel>();//当前玩家的位置
         private int PlayerLocalIndex;//当前玩家所在currentLevels中的位置
+
         /// <summary>
         /// 玩家位置变动时调用，激活玩家附近五个地图块
         /// </summary>
@@ -95,6 +106,9 @@ namespace Adv
             }
         }
 
+        #region 编辑器拓展
+#if UNITY_EDITOR
+
         [Button]
         public void LoadAllLDtkLevel()
         {
@@ -105,6 +119,12 @@ namespace Adv
             ExitList = Resources.LoadAll<LDtkLevel>(ExitPath).ToList();
             LeftRightList = Resources.LoadAll<LDtkLevel>(LeftRightPath).ToList();
         }
+
+        public bool OnDTMS地图模式等于GD固定模式() => DTMS地图模式 == DTMS地图模式s.GD固定模式;
+
+#endif
+        #endregion
+
 
         protected override void Awake()
         {
@@ -121,9 +141,10 @@ namespace Adv
 
         private void Start()
         {
-            GenerateTopThreeLevel();
+            StartGenerateMap();
         }
 
+        //清空当前地图，重新生成前三个地图块
         public void ReGenerateMap()
         {
             foreach (var level in currentLevels)
@@ -135,18 +156,40 @@ namespace Adv
             ShowingLevels.Clear();
             PlayerLocallevels.Clear();
 
-            GenerateTopThreeLevel();
+            StartGenerateMap();
+        }
+
+        private void StartGenerateMap()
+        {
+            if (DTMS地图模式 == DTMS地图模式s.WX无限模式)
+                GenerateTopThreeLevel();
+            else if (DTMS地图模式 == DTMS地图模式s.GD固定模式)
+                GenerateGD固定数量Level();
         }
 
         /// <summary>
-        /// 生成前三个地图块
+        /// 生成DTS地图数的地图块
+        /// </summary>
+        private void GenerateGD固定数量Level()
+        {
+            CurrentDoor = CreateEntrance();
+            for (var i = 0; i < DTS地图数 - 2; i++)
+            {
+                GenerateNewLevelInCurrentDoor();
+            }
+            //TODO 最后一个房间
+            CreateExit(CurrentDoor, Level_BOSS巨石守护者);
+        }
+
+        /// <summary>
+        /// 生成开头的前三个地图块
         /// </summary>
         private void GenerateTopThreeLevel()
         {
             //当前需要生成地块数 = 生成地图的地块数;
             CurrentDoor = CreateEntrance();
-            CurrentDoor = CreateMapHorizontal(CurrentDoor);
-            CurrentDoor = CreateMapHorizontal(CurrentDoor);
+            GenerateNewLevelInCurrentDoor();
+            GenerateNewLevelInCurrentDoor();
             Debug.Log($"生成3个地图块完成");
         }
 
@@ -157,8 +200,6 @@ namespace Adv
         {
             CurrentDoor = CreateMapHorizontal(CurrentDoor);
         }
-
-
 
         /// <summary>
         /// 从左往右路线：输入当前地块的右门，生成下一个地块，并返回下一个地块的右门
@@ -193,20 +234,35 @@ namespace Adv
             currentLevels.Add(currentExit);
         }
 
+        private void CreateExit(Door_LDtk curDoor, LDtkLevel nextLevel)
+        {
+            Door_LDtk nextDoor;
+            currentExit = PoolManager.Instance.ReleaseLDtkLevel(nextLevel); ;
+            nextDoor = currentExit.GetDoorWithType(LDtkDoorType.Left);
+            currentExit.SetLevelPositionAndStartGenerateEnemy(nextDoor.levelPositionOffset + curDoor.transform.position);
+            currentLevels.Add(currentExit);
+        }
+
         private void PlayerEnterLevelListener(LDtkLevel level)
         {
-            if (!PlayerLocallevels.Contains(level))
-                PlayerLocallevels.Add(level);
-            //显示玩家所在关卡附近的关卡，隐藏其他关卡
-            ResetShowingLevels();
+            if (DTMS地图模式 == DTMS地图模式s.WX无限模式)
+            {
+                if (!PlayerLocallevels.Contains(level))
+                    PlayerLocallevels.Add(level);
+                //显示玩家所在关卡附近的关卡，隐藏其他关卡
+                ResetShowingLevels();
+            }
         }
 
         private void PlayerLeaveLevelListener(LDtkLevel level)
         {
-            if (PlayerLocallevels.Contains(level))
-                PlayerLocallevels.Remove(level);
-            //显示玩家所在关卡附近的关卡，隐藏其他关卡
-            //ResetShowingLevels();
+            if (DTMS地图模式 == DTMS地图模式s.WX无限模式)
+            {
+                if (PlayerLocallevels.Contains(level))
+                    PlayerLocallevels.Remove(level);
+                //显示玩家所在关卡附近的关卡，隐藏其他关卡
+                //ResetShowingLevels();
+            }
         }
     }
 
