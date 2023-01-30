@@ -1810,7 +1810,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowProperty: 1
-  MaxHP: 7
+  MaxHP: 700
   HP: 0
   attack: 0
   mTree: {fileID: 1009536904090981104}
@@ -1994,7 +1994,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ccb86e8fb4f3834f8ce16fa0d4b8487, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  occupation: 1
   generatedOffsetY: 0.97
 --- !u!50 &1009536904090981107
 Rigidbody2D:

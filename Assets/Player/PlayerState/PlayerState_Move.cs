@@ -46,7 +46,7 @@ namespace Adv
                 {
                     if (input.JumpFrame.Value)
                         FSM.SwitchState(typeof(PlayerState_JumpUp));
-                    else if (input.RollFrame.Value)
+                    else if (input.RollFrame.Value && propertyController.CanRoll)
                         FSM.SwitchState(typeof(PlayerState_Roll));
                 }
                 else if (NotGroundedTime > ctler.LeaveGroundJumpBufferTime)
@@ -58,8 +58,8 @@ namespace Adv
                 FSM.SwitchState(typeof(PlayerState_Attack));
             }
             //翻滚
-            else if (input.RollFrame.Value
-                || input.RollFrame.IntervalWithLastTrue <= ctler.RollBufferTime)
+            else if ((input.RollFrame.Value
+                || input.RollFrame.IntervalWithLastTrue <= ctler.RollBufferTime) && propertyController.CanRoll)
             {
                 FSM.SwitchState(typeof(PlayerState_Roll));
             }

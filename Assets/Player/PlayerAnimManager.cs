@@ -18,6 +18,7 @@ namespace Adv
         [SerializeField] SpriteRenderer WeaponSpriteRenderer;
         [SerializeField] Trigger2D 攻击碰撞体;
         [SerializeField] PlayerFSM playerFSM;
+        [SerializeField] PlayerProperty property;
 
         private List<apAnimPlayData> animList = new List<apAnimPlayData>();
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
@@ -57,11 +58,10 @@ namespace Adv
                 //Debug.Log($"进行一次命中协程");
                 AttackHittedEffectCorotine = StartCoroutine(ExecuteAttackHittedEvent(speed, SecondFreezeTime));
             }
-
         }
 
         public void SetControlParamInt(string ParamName, int ParamInt) => mApPortrait.SetControlParamInt(ParamName, ParamInt);
-        public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed);
+        public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed * property.BL动画倍率);
         public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
         public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;
         public apAnimPlayData GetApAnimPlayData(AnimName animName) => animList[((int)animName)];

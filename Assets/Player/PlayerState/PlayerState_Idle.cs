@@ -59,8 +59,8 @@ namespace Adv
                 FSM.SwitchState(typeof(PlayerState_Attack));
             }
             //翻滚
-            else if (input.RollFrame.Value
-                || input.RollFrame.IntervalWithLastTrue <= ctler.RollBufferTime)
+            else if ((input.RollFrame.Value
+                || input.RollFrame.IntervalWithLastTrue <= ctler.RollBufferTime) && propertyController.CanRoll)
             {
                 FSM.SwitchState(typeof(PlayerState_Roll));
             }

@@ -12,7 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e49f8e77ccabe1438a4317f35d57c14, type: 3}
   m_Name: PlayerProperty
   m_EditorClassIdentifier: 
-  Attack: 1
+  "On\u73A9\u5BB6\u8FDE\u51FBEvent": {fileID: 11400000, guid: eac30826015c1b7489279ce412270663, type: 2}
+  "\u8FDB\u5165\u7B2C\u4E8C\u9636\u6BB5\u8FDE\u51FB\u6570": 20
+  "BLONE\u653B\u51FB\u500D\u7387": 1
+  "BLTWO\u653B\u51FB\u500D\u7387": 1.2
+  "BLONE\u80FD\u91CF\u63D0\u5347\u901F\u5EA6\u500D\u7387": 1
+  "BLTWO\u80FD\u91CF\u63D0\u5347\u901F\u5EA6\u500D\u7387": 2
+  "BLONE\u79FB\u901F\u589E\u52A0\u500D\u7387": 1
+  "BLTWO\u79FB\u901F\u589E\u52A0\u500D\u7387": 1.25
+  "BLONE\u52A8\u753B\u500D\u7387": 1
+  "BLTWO\u52A8\u753B\u500D\u7387": 1.5
+  Attack: 100
   InitialHP: 10
   ExtraHP: 0
-  HP: 10
+  HP: -12
+  "Max\u80FD\u91CF\u503C": 100
+  "NLTS\u80FD\u91CF\u63D0\u5347\u901F\u5EA6": 5

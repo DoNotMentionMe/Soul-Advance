@@ -20,7 +20,7 @@ namespace Adv
 
             //if (input.JumpFrame.Value && StateDuration > 0.1f) BtnJumpInThisState = true;
 
-            if (input.RollFrame.Value)
+            if (input.RollFrame.Value && propertyController.CanRoll)
                 FSM.SwitchState(typeof(PlayerState_Roll));
             else if (input.AttackFrame.Value)
             {

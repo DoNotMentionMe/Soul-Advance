@@ -60,6 +60,7 @@ namespace Adv
         {
             if (propertyController.GetHurt && FSM.currentState != FSM.GetIState(typeof(PlayerState_Hurt)))
             {
+                OnHurtStateSwitchFront();
                 FSM.SwitchState(typeof(PlayerState_Hurt));
                 return;
             }
@@ -83,6 +84,11 @@ namespace Adv
         public PlayerState()
         {
             OnAwake();
+        }
+
+        protected virtual void OnHurtStateSwitchFront()
+        {
+
         }
     }
 }

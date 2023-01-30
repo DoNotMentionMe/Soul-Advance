@@ -71,6 +71,11 @@ namespace Adv
             //effect.AttackEffect();
         }
 
+        protected override void OnHurtStateSwitchFront()
+        {
+            ResetAttackState();
+        }
+
         public override void LogicUpdate()
         {
             base.LogicUpdate();
@@ -89,7 +94,7 @@ namespace Adv
                 }
             }
 
-            if (input.RollFrame.Value)
+            if (input.RollFrame.Value && propertyController.CanRoll)
             {
                 ResetAttackState();
                 FSM.SwitchState(typeof(PlayerState_Roll));

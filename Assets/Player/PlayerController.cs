@@ -90,6 +90,7 @@ namespace Adv
         [Foldout("检测器")][SerializeField] PlayerDownBody 下半体;
         [Foldout("组件")][SerializeField] PlayerFSM playerFSM;
         [Foldout("组件")][SerializeField] Collider2D mColl;
+        [Foldout("组件")][SerializeField] PlayerProperty property;
 
         #endregion
 
@@ -241,16 +242,16 @@ namespace Adv
 
         public void Move(float AxesX)
         {
-            Move(AxesX, MoveSpeed);
+            Move(AxesX, MoveSpeed * property.BL移速增加倍率);
         }
 
         public void Attack(float AxesX)
         {
             if (AxesX == 0)
-                SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
+                SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed * property.BL移速增加倍率);
             else
             {
-                SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed + attackExtraMoveSpeed));
+                SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed * property.BL移速增加倍率 + attackExtraMoveSpeed));
             }
 
             if (mRigidbody.velocity.y < -0.1f)
@@ -264,14 +265,14 @@ namespace Adv
 
         public void MoveWhenAttack(float AxesX)
         {
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * speedRatio * Time.fixedDeltaTime);
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * property.BL移速增加倍率 * speedRatio * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
         }
 
         public void RollStart(float AxesX)
         {
             StopFullControlVelocity();
-            SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed);
+            SetVelocity(SetCoord.X, SetScale(AxesX) * RollStartSpeed * property.BL移速增加倍率);
             NotInjury(true);
         }
 
@@ -289,13 +290,13 @@ namespace Adv
                 acceleration = RollDeceleration + RollExtraDeceleration;
             else
                 acceleration = RollDeceleration;
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, acceleration * Time.fixedDeltaTime);
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, acceleration * property.BL移速增加倍率 * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
         }
 
         public void RollHold()
         {
-            SetVelocity(SetCoord.X, mTransform.localScale.x * RollHoldSpeed);
+            SetVelocity(SetCoord.X, mTransform.localScale.x * RollHoldSpeed * property.BL移速增加倍率);
         }
 
         public void Jump()
@@ -381,6 +382,7 @@ namespace Adv
                 onCompleted?.Invoke();
             }, false);
             mTransform.position -= Vector3.up * DownFallOffsetY;
+            SetVelocity(SetCoord.Y, -5f);
         }
 
         public void DecelerationWhenChangeableJump()
@@ -393,14 +395,14 @@ namespace Adv
         {
             mRigidbody.velocity = Vector2.zero;
             var wallJumpSpeed = WallJumpSpeed;
-            wallJumpSpeed.x *= mTransform.localScale.x;
+            wallJumpSpeed.x *= mTransform.localScale.x * property.BL移速增加倍率;
             mRigidbody.velocity += wallJumpSpeed;
         }
 
         public void WallLeave()
         {
             var wallLeaveSpeed = WallLeaveSpeed;
-            wallLeaveSpeed.x *= mTransform.localScale.x;
+            wallLeaveSpeed.x *= mTransform.localScale.x * property.BL移速增加倍率;
             mRigidbody.velocity = wallLeaveSpeed;
         }
 
@@ -430,12 +432,12 @@ namespace Adv
 
                 SetScale((int)direction);
 
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, direction * Speed, MoveAcceleration * property.BL移速增加倍率 * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
             else
             {
-                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * Time.fixedDeltaTime);
+                var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, Movedeceleration * property.BL移速增加倍率 * Time.fixedDeltaTime);
                 SetVelocity(SetCoord.X, VelocityX);
             }
         }

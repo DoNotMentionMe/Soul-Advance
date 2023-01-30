@@ -5232,7 +5232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowProperty: 1
-  MaxHP: 100
+  MaxHP: 20000
   HP: 0
   attack: 0
   mTree: {fileID: 4365271772178286566}
