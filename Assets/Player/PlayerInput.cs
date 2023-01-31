@@ -35,7 +35,7 @@ namespace Adv
 
         private void OnEnable()
         {
-            EnableGameplayInput();
+            //EnableGameplayInput();
         }
 
         private void OnDisable()

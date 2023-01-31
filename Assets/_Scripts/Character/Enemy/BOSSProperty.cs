@@ -35,5 +35,10 @@ namespace Adv
                 mTree.SendEvent("阶段改变信号");
             }
         }
+
+        protected override void HFXL回复血量(GameObject AttackerForPlayer)
+        {
+
+        }
     }
 }

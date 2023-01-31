@@ -4,6 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Events;
 using NaughtyAttributes;
+using System;
 
 namespace Adv
 {
@@ -76,7 +77,10 @@ namespace Adv
         [Foldout("玩家物理属性：单向平台")][SerializeField] float DownFallCollSetTrueDelay = 0.3f;
         [Foldout("玩家物理属性：受伤")][SerializeField] float hurtStateTime;
         [Foldout("玩家物理属性：受伤")][SerializeField] float HurtNotInjuryTime;
+        [Foldout("玩家物理属性：受伤")][SerializeField] float HurtHoriontalForce;
         [Foldout("玩家物理属性：受伤")][SerializeField] float HurtJumpForce;
+        [Foldout("玩家物理属性：受伤")][SerializeField] GameObjectEventChannel On玩家受伤Event;
+        [Foldout("玩家物理属性：受伤")][SerializeField] GameObject Attacker;
         [Foldout("检测器")][SerializeField] Trigger2D GroundCheck;
         [Foldout("检测器")][SerializeField] Trigger2D HeadCheck;
         [Foldout("检测器")][SerializeField] Trigger2D WallClimbCheck_Font;
@@ -125,6 +129,7 @@ namespace Adv
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
             waitForHurtNotInjuryTime = new WaitForSeconds(HurtNotInjuryTime);
+            On玩家受伤Event.AddListener(HurtHitBack);
         }
 
         private void Start()
@@ -136,6 +141,7 @@ namespace Adv
 
         private void OnEnable()
         {
+            FullControlVelocitying = false;
             if (HasGetEnablePos)
             {
                 mTransform.position = OnEnablePos;
@@ -148,6 +154,7 @@ namespace Adv
             mTransform = null;
             mRigidbody = null;
             effect = null;
+            On玩家受伤Event.RemoveListenner(HurtHitBack);
         }
 
         private void FixedUpdate()
@@ -230,9 +237,17 @@ namespace Adv
             speedRatio = 1;
         }
 
+        //受伤扣血前，获取攻击对象
+        public void HurtHitBack(GameObject attacker)
+        {
+            Attacker = attacker;
+        }
+
         public void StartHurt()
         {
             SetVelocity(SetCoord.Y, HurtJumpForce);
+            SetVelocity(SetCoord.X, Math.Sign(transform.position.x - Attacker.transform.position.x) * HurtHoriontalForce);
+            //mRigidbody.velocity += Vector2.right * Math.Sign(transform.position.x - Attacker.transform.position.x) * HurtHoriontalForce;
         }
 
         public void EndHurt()
@@ -248,10 +263,12 @@ namespace Adv
         public void Attack(float AxesX)
         {
             if (AxesX == 0)
-                SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed * property.BL移速增加倍率);
+                SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
+            //SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed * property.BL移速增加倍率);
             else
             {
-                SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed * property.BL移速增加倍率 + attackExtraMoveSpeed));
+                SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed + attackExtraMoveSpeed));
+                //SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed * property.BL移速增加倍率 + attackExtraMoveSpeed));
             }
 
             if (mRigidbody.velocity.y < -0.1f)
@@ -474,6 +491,10 @@ namespace Adv
             return mTransform.localScale.x;
         }
 
+        /// <summary>
+        /// 使用这个函数进行玩家无敌操作
+        /// </summary>
+        /// <param name="Enable"></param>
         private void NotInjury(bool Enable)
         {
             if (Enable)

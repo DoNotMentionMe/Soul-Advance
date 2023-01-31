@@ -45,9 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AutoGenerateEnemyWhenEnemyDied: 0
-  "\u654C\u4EBA\u751F\u6210\u95F4\u9694": 1
+  "\u654C\u4EBA\u751F\u6210\u95F4\u9694": 0.2
   "\u751F\u6210\u5BF9\u8C61": {fileID: 8530858300361370732, guid: 162b8e52b157fbc48b992ba07191198b, type: 3}
-  "Distance\u654C\u4EBA\u751F\u6210\u8DDD\u79BB": 0.2
+  "Distance\u654C\u4EBA\u751F\u6210\u8DDD\u79BB": 0.4
   "\u53EF\u751F\u6210\u654C\u4EBA\u603B\u6570": 0
   "\u751F\u6210\u654C\u4EBA\u8F6C\u5411": 0
   "\u5F53\u524D\u53EF\u751F\u6210\u6570": 0

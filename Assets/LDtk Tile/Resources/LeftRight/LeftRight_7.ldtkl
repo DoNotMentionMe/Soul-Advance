@@ -5,7 +5,7 @@
 		"doc": "https://ldtk.io/json",
 		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
 		"appAuthor": "Sebastien 'deepnight' Benard",
-		"appVersion": "1.1.3",
+		"appVersion": "1.2.5",
 		"url": "https://ldtk.io"
 	},
 	"identifier": "LeftRight_7",
@@ -93,6 +93,104 @@
 					"defUid": 107,
 					"px": [232,176],
 					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -5, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-5] }] }]
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [13,6],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "22ac8040-9f30-11ed-94b9-bfdea086050a",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [216,96],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -4, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-4] }] }]
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [8,11],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "276a5670-9f30-11ed-94b9-dfa277a8fd6a",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [136,176],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -3, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-3] }] }]
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [20,11],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "2951b410-9f30-11ed-94b9-4b8bd5a53216",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [328,176],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -3, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-3] }] }]
+				},
+				{
+					"__identifier": "JianDunBin",
+					"__grid": [7,16],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#A8C1B4",
+					"iid": "2d3779c0-9f30-11ed-94b9-b37a247cf7e0",
+					"width": 16,
+					"height": 16,
+					"defUid": 105,
+					"px": [120,256],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -2, "__type": "Int", "__tile": null, "defUid": 106, "realEditorValues": [{ "id": "V_Int", "params": [-2] }] }]
+				},
+				{
+					"__identifier": "ShiTouRen",
+					"__grid": [8,16],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#2E4281",
+					"iid": "354ba6e0-9f30-11ed-94b9-a7306f050d61",
+					"width": 16,
+					"height": 16,
+					"defUid": 109,
+					"px": [136,256],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": 1, "__type": "Int", "__tile": null, "defUid": 110, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }]
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [19,16],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "3d71ae50-9f30-11ed-94b9-6bdbede2b98d",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [312,256],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -3, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-3] }] }]
+				},
+				{
+					"__identifier": "DaoCaoRen",
+					"__grid": [23,16],
+					"__pivot": [0.5,0],
+					"__tags": [],
+					"__tile": null,
+					"__smartColor": "#90793F",
+					"iid": "411b5560-9f30-11ed-94b9-4ffa9a11a4ca",
+					"width": 16,
+					"height": 16,
+					"defUid": 107,
+					"px": [376,256],
+					"fieldInstances": [{ "__identifier": "EnemyCount", "__value": -2, "__type": "Int", "__tile": null, "defUid": 108, "realEditorValues": [{ "id": "V_Int", "params": [-2] }] }]
 				}
 			]
 		},
@@ -248,5 +346,5 @@
 			"entityInstances": []
 		}
 	],
-	"__neighbours": [{ "levelIid": "89a56d30-7820-11ed-9abe-55d5c85f6fe8", "levelUid": 103, "dir": "w" }]
+	"__neighbours": [{ "levelIid": "89a56d30-7820-11ed-9abe-55d5c85f6fe8", "dir": "w" }]
 }

@@ -1549,6 +1549,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4365271770923570939}
+  - component: {fileID: 7072523074546902695}
   m_Layer: 0
   m_Name: "BOSS\u5DE8\u77F3\u5B88\u62A4\u8005"
   m_TagString: Untagged
@@ -1578,6 +1579,33 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7072523074546902695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4365271770923570936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e929c428c93c54d8c14dafa2d17c42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnEnableEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4365271772178286565}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!1 &4365271770943765635
 GameObject:
   m_ObjectHideFlags: 0
@@ -5121,6 +5149,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bOSSProperty: {fileID: 4365271772178286573}
   mTree: {fileID: 4365271772178286566}
+  "OnBOSS\u88AB\u51FB\u6740Event": {fileID: 11400000, guid: fa24b3d4f4cf6cc489668bcac6521e56, type: 2}
   "\u4E00\u9636\u5DE8\u77F3\u7EC4\u9891\u9053": {fileID: 11400000, guid: 17dff655c99b50b4b9a7bcf3900de7dd, type: 2}
   "\u4E8C\u9636\u5DE8\u77F3\u7EC4\u9891\u9053": {fileID: 11400000, guid: 2bbd4494260704545a2a65e05a788ff8, type: 2}
   "\u4E09\u9636\u5DE8\u77F3\u7EC4\u9891\u9053": {fileID: 11400000, guid: 817bcfbb7cabcc242b0a8fc6757142ec, type: 2}
@@ -5232,9 +5261,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowProperty: 1
-  MaxHP: 20000
+  MaxHP: 12000
   HP: 0
   attack: 0
+  "On\u73A9\u5BB6\u53D7\u4F24Event": {fileID: 11400000, guid: 24685cae7e7c0d742910e8414711f491, type: 2}
   mTree: {fileID: 4365271772178286566}
   "\u53D7\u4F24\u4E8B\u4EF6": BeAttacked
   "\u6B7B\u4EA1\u4E8B\u4EF6": Died
@@ -5270,8 +5300,8 @@ MonoBehaviour:
         m_CallState: 2
   "\u9636\u6BB5\u6570": 3
   "\u9636\u6BB5\u5206\u754C\u7EBF":
-  - 50
-  - 20
+  - 70
+  - 40
 --- !u!114 &4365271772178286562
 MonoBehaviour:
   m_ObjectHideFlags: 0

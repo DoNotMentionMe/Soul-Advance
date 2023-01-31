@@ -42,6 +42,7 @@ namespace Adv
         [ShowNativeProperty] public float BL移速增加倍率 { get; set; } = 1;
         [ShowNativeProperty] public float BL动画倍率 { get; set; } = 1;
         [SerializeField] FloatEventChannel On玩家连击Event;
+        #region 连击加成倍率数据
         [Foldout("倍率数据")][SerializeField] int 进入第二阶段连击数 = 50;
         [Foldout("倍率数据")][Header("攻击力")][SerializeField] float BLONE攻击倍率 = 1f;
         [Foldout("倍率数据")][SerializeField] float BLTWO攻击倍率 = 1.2f;
@@ -51,6 +52,7 @@ namespace Adv
         [Foldout("倍率数据")][SerializeField] float BLTWO移速增加倍率 = 1.5f;
         [Foldout("倍率数据")][Header("动画速度增加")][SerializeField] float BLONE动画倍率 = 1f;
         [Foldout("倍率数据")][SerializeField] float BLTWO动画倍率 = 1.5f;
+        #endregion
         [Header("角色数据")]
         public int Attack;
         [SerializeField] int InitialHP;//初始血量
@@ -58,6 +60,8 @@ namespace Adv
         [ReadOnly] public int HP;//当前血量
         [SerializeField] int Max能量值 = 100;
         [SerializeField] int NLTS能量提升速度 = 5;
+        public float CD清空连击数时间 = 3;
+        public int XHNL消耗能量_Roll = 25;
 
         private void OnEnable()
         {
@@ -102,6 +106,7 @@ namespace Adv
         public void FullHP()
         {
             HP = InitialHP + ExtraHP;
+            DQNL当前能量 = Max能量值;
         }
     }
 }

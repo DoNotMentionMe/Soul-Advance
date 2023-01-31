@@ -141,11 +141,10 @@ namespace Adv
 
         private void Start()
         {
-            StartGenerateMap();
+            //StartGenerateMap();
         }
 
-        //清空当前地图，重新生成前三个地图块
-        public void ReGenerateMap()
+        public void QKCJ清空场景()
         {
             foreach (var level in currentLevels)
             {
@@ -155,6 +154,12 @@ namespace Adv
             currentLevels.Clear();
             ShowingLevels.Clear();
             PlayerLocallevels.Clear();
+        }
+
+        //清空当前地图，重新生成前三个地图块
+        public void ReGenerateMap()
+        {
+            QKCJ清空场景();
 
             StartGenerateMap();
         }

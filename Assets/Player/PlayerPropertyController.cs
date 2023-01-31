@@ -11,10 +11,8 @@ namespace Adv
     /// </summary>
     public class PlayerPropertyController : CharacterProperty, IBeAttacked
     {
-        public bool CanRoll => property.NLJS能量减少(XHNL_Roll);
+        public bool CanRoll => property.NLJS能量减少(property.XHNL消耗能量_Roll);
         public bool GetHurt { get; set; }
-        [SerializeField] float CD清空连击数时间 = 3;
-        [SerializeField] int XHNL_Roll = 25;
         [NaughtyAttributes.Expandable][SerializeField] PlayerProperty property;
 
         //真实攻击力
@@ -60,14 +58,14 @@ namespace Adv
 
         private void Awake()
         {
-            WaitForCD清空连击数时间 = new WaitForSeconds(CD清空连击数时间);
+            WaitForCD清空连击数时间 = new WaitForSeconds(property.CD清空连击数时间);
         }
 
         IEnumerator DQS倒计时清空连击数()
         {
-            Debug.Log($"开始清零");
+            //Debug.Log($"开始清零");
             yield return WaitForCD清空连击数时间;
-            Debug.Log($"完成清零");
+            //Debug.Log($"完成清零");
             property.DQLJS当前连击数 = 0;
             DQS清空连击数Coroutine = null;
         }

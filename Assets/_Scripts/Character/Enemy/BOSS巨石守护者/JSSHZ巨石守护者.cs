@@ -18,6 +18,7 @@ namespace Adv
 
         [SerializeField] BOSSProperty bOSSProperty;
         [SerializeField] BehaviorTree mTree;
+        [SerializeField] VoidEventChannel OnBOSS被击杀Event;
 
         #region 事件频道
 
@@ -126,6 +127,7 @@ namespace Adv
         private void Awake()
         {
             当前静止点组 = new List<Transform>();
+            bOSSProperty.DiedEvent.AddListener(OnBOSS被击杀Event.Broadcast);
 
             SZJD当前巨石组所在阶段 = 1;
             SZZS当前巨石组所在组数 = 1;
@@ -153,6 +155,11 @@ namespace Adv
         {
             mTree.DisableBehavior();
             //bOSSProperty.On阶段改变.RemoveListener(Listen阶段改变);
+        }
+
+        private void OnDestroy()
+        {
+            bOSSProperty.DiedEvent.RemoveListener(OnBOSS被击杀Event.Broadcast);
         }
 
         // private void Listen阶段改变(int 新阶段)
