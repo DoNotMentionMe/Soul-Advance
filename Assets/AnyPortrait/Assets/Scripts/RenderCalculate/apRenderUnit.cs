@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -50,7 +50,9 @@ namespace AnyPortrait
 
 		public int _level = 0;//Parent부터 내려오는 Level
 							  //public int _depth = 0;//<<이거 계산에 문제가 있다.
-		private int _depthForSort = 0;//변경 : Sorting을 위한 값으로만 사용
+		
+		
+		//private int _depthForSort = 0;//변경 : Sorting을 위한 값으로만 사용
 
 		public int _guiIndex = -1;
 
@@ -368,20 +370,24 @@ namespace AnyPortrait
 			_meshGroupTransform._linkedRenderUnit = this;
 
 			
-			_depthForSort = 0;
-			if (_meshTransform != null)
-			{
-				_depthForSort += _meshTransform._depth;
-			}
-			if (parentRenderUnit != null)
-			{
-				_depthForSort += parentRenderUnit._depthForSort;
-			}
-			if (meshGroupTransform != null)
-			{
-				//루트가 아니라면 Mesh Group Transform도 있다.
-				_depthForSort += _meshGroupTransform._depth;
-			}
+			//삭제
+			//_depthForSort = 0;
+			//if (_meshTransform != null)
+			//{
+			//	_depthForSort += _meshTransform._depth;
+			//}
+			//if (parentRenderUnit != null)
+			//{
+			//	_depthForSort += parentRenderUnit._depthForSort;
+			//}
+			//if (meshGroupTransform != null)
+			//{
+			//	//루트가 아니라면 Mesh Group Transform도 있다.
+			//	_depthForSort += _meshGroupTransform._depth;
+			//}
+
+			////변경 22.8.19 [v1.4.2]
+			//RefreshDepthForSort();
 
 			if (parentRenderUnit != null)
 			{
@@ -390,23 +396,38 @@ namespace AnyPortrait
 			}
 		}
 
-		public void RefreshDepth()
-		{	
-			_depthForSort = 0;
-			if (_meshTransform != null)
-			{
-				_depthForSort += _meshTransform._depth;
-			}
-			if (_parentRenderUnit != null)
-			{
-				_depthForSort += _parentRenderUnit._depthForSort;
-			}
-			if (_meshGroupTransform != null)
-			{
-				//루트가 아니라면 Mesh Group Transform도 있다.
-				_depthForSort += _meshGroupTransform._depth;
-			}
-		}
+
+		//삭제
+		//public void RefreshDepthForSort()
+		//{	
+		//	_depthForSort = 0;
+		//	//이전
+		//	//if (_meshTransform != null)
+		//	//{
+		//	//	_depthForSort += _meshTransform._depth;
+		//	//}
+		//	//if (_parentRenderUnit != null)
+		//	//{
+		//	//	_depthForSort += _parentRenderUnit._depthForSort;
+		//	//}
+		//	//if (_meshGroupTransform != null)
+		//	//{
+		//	//	//루트가 아니라면 Mesh Group Transform도 있다.
+		//	//	_depthForSort += _meshGroupTransform._depth;
+		//	//}
+
+		//	//변경 : 자식 메시 그룹이 있는 경우 순서가 이상하게 바뀌는 버그 수정 [v1.4.2]
+		//	//- 처음엔 DepthForSort가 상대값인 줄 알았는데, 절대값이다.
+		//	if (_meshTransform != null)
+		//	{
+		//		_depthForSort = _meshTransform._depth;
+		//	}
+		//	else if (_meshGroupTransform != null)
+		//	{
+		//		//루트가 아니라면 Mesh Group Transform도 있다.
+		//		_depthForSort = _meshGroupTransform._depth;
+		//	}
+		//}
 
 		public void SetMesh(apMeshGroup meshGroup, apTransform_Mesh meshTransform, apRenderUnit parentRenderUnit)
 		{
@@ -420,16 +441,20 @@ namespace AnyPortrait
 			_meshTransform._linkedRenderUnit = this;
 
 
-			_depthForSort = 0;
-			if (parentRenderUnit != null)
-			{
-				_depthForSort += parentRenderUnit._depthForSort;
-			}
-			if (_meshGroupTransform != null)
-			{
-				_depthForSort += _meshGroupTransform._depth;
-			}
-			_depthForSort += meshTransform._depth;
+			//이전
+			//_depthForSort = 0;
+			//if (parentRenderUnit != null)
+			//{
+			//	_depthForSort += parentRenderUnit._depthForSort;
+			//}
+			//if (_meshGroupTransform != null)
+			//{
+			//	_depthForSort += _meshGroupTransform._depth;
+			//}
+			//_depthForSort += meshTransform._depth;
+
+			////변경 22.8.19 [v1.4.2]
+			//RefreshDepthForSort();
 
 
 			if (parentRenderUnit != null)
@@ -2085,10 +2110,10 @@ namespace AnyPortrait
 		/// 일단 Sort 이후에는 이 함수 대신 GetDepth를 사용하자
 		/// </summary>
 		/// <returns></returns>
-		public int DepthForOnlySort
-		{
-			get { return _depthForSort; }
-		}
+		//public int DepthForOnlySort
+		//{
+		//	get { return _depthForSort; }//<<이게 문제였다
+		//}
 
 		public int SetDepth(int depth)
 		{
@@ -2097,33 +2122,23 @@ namespace AnyPortrait
 				if (_meshTransform != null)
 				{
 					_meshTransform._depth = depth;
-					//Debug.LogWarning("RenderUnit > MeshTF : " + _meshTransform._nickName + " / " + depth);
 				}
-				//else
-				//{
-				//	Debug.LogError("에러 : MeshTF를 찾을 수 없다.");
-				//}
 			}
 			else
 			{
 				if (_meshGroupTransform != null)
-				{
+				{	
 					_meshGroupTransform._depth = depth;
-					//Debug.Log("RenderUnit > MeshGroupTF : " + _meshGroupTransform._nickName + " / " + depth);
 				}
-				//else
-				//{
-				//	Debug.LogError("에러 : MeshGroupTF를 찾을 수 없다.");
-				//}
 			}
 			
 			return depth;
 		}
 
-		public void SetDepthForSort(int depthForSort)
-		{
-			_depthForSort = depthForSort;
-		}
+		//public void SetDepthForSort(int depthForSort)
+		//{
+		//	_depthForSort = depthForSort;
+		//}
 
 		public int GetLastDepth()
 		{

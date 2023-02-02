@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -155,6 +155,8 @@ namespace AnyPortrait
 		private static Color _iconColor2X_White = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 #endif
 
+
+
 		// Init
 		//---------------------------------------------
 		public apAnimEvent()
@@ -191,7 +193,12 @@ namespace AnyPortrait
 		/// 이 함수를 호출한 후, IsEventCallable, GetCalculatedParam를 순서대로 호출한다.
 		/// </summary>
 		/// <param name="frame"></param>
-		public void Calculate(float fFrame, int iFrame, bool isForwardPlay, bool isPlaying, float tDelta, float speed)
+		public void Calculate(	float fFrame,
+								int iFrame,
+								bool isForwardPlay,
+								bool isPlaying,
+								float tDelta,
+								float speed)
 		{
 			//추가 1.16 : 재생 방향 체크한다.
 			CheckPlayDirectionInverted(iFrame, isForwardPlay, isPlaying, tDelta, speed);
@@ -203,19 +210,22 @@ namespace AnyPortrait
 				return;
 			}
 
+			SubParameter curSubParam = null;
 			if(_nSubParams < 0)
 			{
 				_nSubParams = _subParams.Count;
 				if (_nSubParams == 1)
 				{
 					//1개일 때
-					switch (_subParams[0]._paramType)
+					curSubParam = _subParams[0];
+
+					switch (curSubParam._paramType)
 					{
-						case PARAM_TYPE.Bool:		_subParamToCallSingle = _subParams[0]._boolValue; break;
-						case PARAM_TYPE.Integer:	_subParamToCallSingle = _subParams[0]._intValue; break; 
-						case PARAM_TYPE.Float:		_subParamToCallSingle = _subParams[0]._floatValue; break;
-						case PARAM_TYPE.Vector2:	_subParamToCallSingle = _subParams[0]._vec2Value; break;
-						case PARAM_TYPE.String:		_subParamToCallSingle = _subParams[0]._strValue; break;
+						case PARAM_TYPE.Bool:		_subParamToCallSingle = curSubParam._boolValue; break;
+						case PARAM_TYPE.Integer:	_subParamToCallSingle = curSubParam._intValue; break; 
+						case PARAM_TYPE.Float:		_subParamToCallSingle = curSubParam._floatValue; break;
+						case PARAM_TYPE.Vector2:	_subParamToCallSingle = curSubParam._vec2Value; break;
+						case PARAM_TYPE.String:		_subParamToCallSingle = curSubParam._strValue; break;
 					}
 				}
 				else if (_nSubParams >= 2)
@@ -229,13 +239,15 @@ namespace AnyPortrait
 
 						for (int i = 0; i < _nSubParams; i++)
 						{
-							switch (_subParams[i]._paramType)
+							curSubParam = _subParams[i];
+
+							switch (curSubParam._paramType)
 							{
-								case PARAM_TYPE.Bool:		_subParamsToCallMultiple[i] = _subParams[i]._boolValue; break;
-								case PARAM_TYPE.Integer:	_subParamsToCallMultiple[i] = _subParams[i]._intValue; break;
-								case PARAM_TYPE.Float:		_subParamsToCallMultiple[i] = _subParams[i]._floatValue; break;
-								case PARAM_TYPE.Vector2:	_subParamsToCallMultiple[i] = _subParams[i]._vec2Value; break;
-								case PARAM_TYPE.String:		_subParamsToCallMultiple[i] = _subParams[i]._strValue; break;
+								case PARAM_TYPE.Bool:		_subParamsToCallMultiple[i] = curSubParam._boolValue; break;
+								case PARAM_TYPE.Integer:	_subParamsToCallMultiple[i] = curSubParam._intValue; break;
+								case PARAM_TYPE.Float:		_subParamsToCallMultiple[i] = curSubParam._floatValue; break;
+								case PARAM_TYPE.Vector2:	_subParamsToCallMultiple[i] = curSubParam._vec2Value; break;
+								case PARAM_TYPE.String:		_subParamsToCallMultiple[i] = curSubParam._strValue; break;
 							}
 
 						}
@@ -257,71 +269,62 @@ namespace AnyPortrait
 				float itp = 0.0f;
 				if(_frameIndex < _frameIndex_End)//정상적으로 Start < End 일때
 				{
-					//if (iFrame == _frameIndex)
-					//{
-					//	itp = 0.0f;
-					//	Debug.Log("[" + _eventName + "] Start [" + iFrame + " / " + fFrame + "] (" + _frameIndex + " ~ " + _frameIndex_End + ")");
-					//}
-					//else if (iFrame == _frameIndex_End)
-					//{
-					//	itp = 1.0f;
-					//}
-					//else
-					//{
-						
-					//}
 					itp = Mathf.Clamp01((float)(fFrame - _frameIndex) / (float)(_frameIndex_End - _frameIndex));
 				}
 
 				if (_nSubParams == 1)
 				{
-					switch (_subParams[0]._paramType)
-						{
-							case PARAM_TYPE.Bool:
-								_subParamToCallSingle = _subParams[0]._boolValue;//<<Bool은 보간이 안된다.
-								break;
+					curSubParam = _subParams[0];
 
-							case PARAM_TYPE.Integer:
-								_subParamToCallSingle = (int)(((float)_subParams[0]._intValue * ( 1- itp)) + ((float)_subParams[0]._intValue_End * itp) + 0.5f);
-								break;
+					switch (curSubParam._paramType)
+					{
+						case PARAM_TYPE.Bool:
+							_subParamToCallSingle = curSubParam._boolValue;//<<Bool은 보간이 안된다.
+							break;
 
-							case PARAM_TYPE.Float:
-								_subParamToCallSingle = (_subParams[0]._floatValue * (1- itp)) + (_subParams[0]._floatValue_End * itp);
-								break;
+						case PARAM_TYPE.Integer:
+							_subParamToCallSingle = (int)(((float)curSubParam._intValue * (1.0f - itp)) + ((float)curSubParam._intValue_End * itp) + 0.5f);
+							break;
 
-							case PARAM_TYPE.Vector2:
-								_subParamToCallSingle = (_subParams[0]._vec2Value * (1- itp)) + (_subParams[0]._vec2Value_End * itp);
-								break;
+						case PARAM_TYPE.Float:
+							_subParamToCallSingle = (curSubParam._floatValue * (1.0f - itp)) + (curSubParam._floatValue_End * itp);
+							break;
 
-							case PARAM_TYPE.String:
-								_subParamToCallSingle = _subParams[0]._strValue;//String도 보간이 안된다.
-								break;
-						}
+						case PARAM_TYPE.Vector2:
+							_subParamToCallSingle = (curSubParam._vec2Value * (1.0f - itp)) + (curSubParam._vec2Value_End * itp);
+							break;
+
+						case PARAM_TYPE.String:
+							_subParamToCallSingle = curSubParam._strValue;//String도 보간이 안된다.
+							break;
+					}
 				}
 				else if (_nSubParams >= 2)
 				{
 					for (int i = 0; i < _nSubParams; i++)
 					{
-						switch (_subParams[i]._paramType)
+						curSubParam = _subParams[i];
+
+						switch (curSubParam._paramType)
 						{
 							case PARAM_TYPE.Bool:
-								_subParamsToCallMultiple[i] = _subParams[i]._boolValue;//<<Bool은 보간이 안된다.
+								_subParamsToCallMultiple[i] = curSubParam._boolValue;//<<Bool은 보간이 안된다.
 								break;
 
 							case PARAM_TYPE.Integer:
-								_subParamsToCallMultiple[i] = (int)(((float)_subParams[i]._intValue * (1- itp)) + ((float)_subParams[i]._intValue_End * itp) + 0.5f);
+								_subParamsToCallMultiple[i] = (int)(((float)curSubParam._intValue * (1.0f - itp)) + ((float)curSubParam._intValue_End * itp) + 0.5f);
 								break;
 
 							case PARAM_TYPE.Float:
-								_subParamsToCallMultiple[i] = (_subParams[i]._floatValue * (1- itp)) + (_subParams[i]._floatValue_End * itp);
+								_subParamsToCallMultiple[i] = (curSubParam._floatValue * (1.0f - itp)) + (curSubParam._floatValue_End * itp);
 								break;
 
 							case PARAM_TYPE.Vector2:
-								_subParamsToCallMultiple[i] = (_subParams[i]._vec2Value * (1- itp)) + (_subParams[i]._vec2Value_End * itp);
+								_subParamsToCallMultiple[i] = (curSubParam._vec2Value * (1.0f - itp)) + (curSubParam._vec2Value_End * itp);
 								break;
 
 							case PARAM_TYPE.String:
-								_subParamsToCallMultiple[i] = _subParams[i]._strValue;//String도 보간이 안된다.
+								_subParamsToCallMultiple[i] = curSubParam._strValue;//String도 보간이 안된다.
 								break;
 						}
 
@@ -540,6 +543,189 @@ namespace AnyPortrait
 				Lock();
 			}
 		}
+
+
+		//------------------------------------------------------------------------------
+		// 루프시 남은 이벤트 강제로 계산하고 호출하기		
+		//------------------------------------------------------------------------------
+		// 이 함수 이후에 Calculate가 호출될 것이므로, 여기서는 범위 안에 있으면서 호출되지 않은 경우만 체크하자 
+		public void CalculateByLoop(int loopedFrame, bool isForwardPlay)
+		{
+			_isCalculated = false;//Calculated를 일단 false로 설정
+
+			if(_isEventCalled)
+			{
+				//이미 호출된 이벤트는 호출하지 않는다.
+				return;
+			}
+
+			//이 이벤트가 LoopedFrame을 가지고 있어야 한다.
+			bool isCallable = false;
+			if(_callType == CALL_TYPE.Once)
+			{
+				//Once인 경우
+				if(isForwardPlay)
+				{
+					if(loopedFrame >= _frameIndex)
+					{
+						isCallable = true;
+					}
+				}
+				else
+				{
+					if(loopedFrame <= _frameIndex)
+					{
+						isCallable = true;
+					}
+				}
+			}
+			else
+			{
+				//Continuous인 경우
+				if(isForwardPlay)
+				{
+					if(loopedFrame >= _frameIndex)
+					{
+						isCallable = true;
+					}
+				}
+				else
+				{
+					if(loopedFrame <= _frameIndex_End)
+					{
+						isCallable = true;
+					}
+				}
+			}
+			if(!isCallable)
+			{
+				//범위가 맞지 않아서 호출할만하다.
+				return;
+			}
+			
+			//이 이벤트는 호출할 수 있다.
+			_isCalculated = true;
+
+			//파라미터 설정
+			SubParameter curSubParam = null;
+			if(_nSubParams < 0)
+			{
+				_nSubParams = _subParams.Count;
+				if (_nSubParams == 1)
+				{
+					//1개일 때
+					curSubParam = _subParams[0];
+
+					switch (curSubParam._paramType)
+					{
+						case PARAM_TYPE.Bool:		_subParamToCallSingle = curSubParam._boolValue; break;
+						case PARAM_TYPE.Integer:	_subParamToCallSingle = curSubParam._intValue; break; 
+						case PARAM_TYPE.Float:		_subParamToCallSingle = curSubParam._floatValue; break;
+						case PARAM_TYPE.Vector2:	_subParamToCallSingle = curSubParam._vec2Value; break;
+						case PARAM_TYPE.String:		_subParamToCallSingle = curSubParam._strValue; break;
+					}
+				}
+				else if (_nSubParams >= 2)
+				{
+					_subParamsToCallMultiple = new object[_nSubParams];
+
+					if (_callType == CALL_TYPE.Once)
+					{
+						//2개 이상일 때
+						//Once는 한번만 파라미터를 넣으면 된다.
+
+						for (int i = 0; i < _nSubParams; i++)
+						{
+							curSubParam = _subParams[i];
+
+							switch (curSubParam._paramType)
+							{
+								case PARAM_TYPE.Bool:		_subParamsToCallMultiple[i] = curSubParam._boolValue; break;
+								case PARAM_TYPE.Integer:	_subParamsToCallMultiple[i] = curSubParam._intValue; break;
+								case PARAM_TYPE.Float:		_subParamsToCallMultiple[i] = curSubParam._floatValue; break;
+								case PARAM_TYPE.Vector2:	_subParamsToCallMultiple[i] = curSubParam._vec2Value; break;
+								case PARAM_TYPE.String:		_subParamsToCallMultiple[i] = curSubParam._strValue; break;
+							}
+
+						}
+
+					}
+				}
+			}
+
+			if(_callType == CALL_TYPE.Continuous)
+			{
+				//Contious 타입은 Frame 길이에 따라 보간을 한다.
+				//단, Loop 전환인 경우, FrameF를 체크할 필요가 없다. (이벤트 자체는 루프되지 않아서 정수 프레임에서 끝나기 때문)
+				float itp = 0.0f;
+				if(_frameIndex < _frameIndex_End)//정상적으로 Start < End 일때
+				{
+					itp = Mathf.Clamp01((float)(loopedFrame - _frameIndex) / (float)(_frameIndex_End - _frameIndex));
+				}
+
+				if (_nSubParams == 1)
+				{
+					curSubParam = _subParams[0];
+
+					switch (curSubParam._paramType)
+					{
+						case PARAM_TYPE.Bool:
+							_subParamToCallSingle = curSubParam._boolValue;//<<Bool은 보간이 안된다.
+							break;
+
+						case PARAM_TYPE.Integer:
+							_subParamToCallSingle = (int)(((float)curSubParam._intValue * (1.0f - itp)) + ((float)curSubParam._intValue_End * itp) + 0.5f);
+							break;
+
+						case PARAM_TYPE.Float:
+							_subParamToCallSingle = (curSubParam._floatValue * (1.0f - itp)) + (curSubParam._floatValue_End * itp);
+							break;
+
+						case PARAM_TYPE.Vector2:
+							_subParamToCallSingle = (curSubParam._vec2Value * (1.0f - itp)) + (curSubParam._vec2Value_End * itp);
+							break;
+
+						case PARAM_TYPE.String:
+							_subParamToCallSingle = curSubParam._strValue;//String도 보간이 안된다.
+							break;
+					}
+				}
+				else if (_nSubParams >= 2)
+				{
+					for (int i = 0; i < _nSubParams; i++)
+					{
+						curSubParam = _subParams[i];
+
+						switch (curSubParam._paramType)
+						{
+							case PARAM_TYPE.Bool:
+								_subParamsToCallMultiple[i] = curSubParam._boolValue;//<<Bool은 보간이 안된다.
+								break;
+
+							case PARAM_TYPE.Integer:
+								_subParamsToCallMultiple[i] = (int)(((float)curSubParam._intValue * (1.0f - itp)) + ((float)curSubParam._intValue_End * itp) + 0.5f);
+								break;
+
+							case PARAM_TYPE.Float:
+								_subParamsToCallMultiple[i] = (curSubParam._floatValue * (1.0f - itp)) + (curSubParam._floatValue_End * itp);
+								break;
+
+							case PARAM_TYPE.Vector2:
+								_subParamsToCallMultiple[i] = (curSubParam._vec2Value * (1.0f - itp)) + (curSubParam._vec2Value_End * itp);
+								break;
+
+							case PARAM_TYPE.String:
+								_subParamsToCallMultiple[i] = curSubParam._strValue;//String도 보간이 안된다.
+								break;
+						}
+
+					}
+				}
+			}
+		}
+
+
+
 
 		//------------------------------------------------------------------------------
 		// Copy For Bake

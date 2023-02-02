@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -53,6 +53,9 @@ namespace AnyPortrait
 		private static bool _isDelayedCursorEvent = false;
 		private static Vector2 _delayedCursorPos = Vector2.zero;
 		private static MouseCursor _delayedCursorType = MouseCursor.Zoom;
+
+		//본 그리기를 위한 임시 Matrix
+		private static apMatrix _cal_TmpMatrix;
 
 		// 이전 : Flag를 이용한 렌더 방식
 		//[Flags]
@@ -367,9 +370,13 @@ namespace AnyPortrait
 
 
 		//버텍스, 핀 렌더링 크기
-		public const float VERTEX_RENDER_SIZE = 20.0f;
-		public const float PIN_RENDER_SIZE = 26.0f;
-		public const float PIN_LINE_THICKNESS = 2.5f;
+		//변경 v1.4.2 : 고정 값이 아닌 옵션에 의해 결정된다.
+		//public const float VERTEX_RENDER_SIZE = 20.0f;
+		//public const float PIN_RENDER_SIZE = 26.0f;
+		//public const float PIN_LINE_THICKNESS = 2.5f;
+		private static float _vertexRenderSizeHalf = 0.0f;
+		private static float _pinRenderSizeHalf = 0.0f;
+		private static float _pinLineThickness = 0.0f;
 
 
 		//------------------------------------------------------------------------
@@ -1956,6 +1963,20 @@ namespace AnyPortrait
 			}
 			
 		}
+
+		/// <summary>
+		/// v1.4.2 : 버텍스, 핀의 크기값을 입력한다.
+		/// </summary>
+		public static void SetVertexPinRenderOption(	float vertRenderSizeHalf,
+														float pinRenderSizeHalf,
+														float pinLineThickness)
+		{
+			_vertexRenderSizeHalf = vertRenderSizeHalf;
+			_pinRenderSizeHalf = pinRenderSizeHalf;
+			_pinLineThickness = pinLineThickness;
+		}
+
+
 
 		public static Vector2 World2GL(Vector2 pos)
 		{
@@ -4007,7 +4028,9 @@ namespace AnyPortrait
 					//float pointSize = 10.0f / _zoom;
 
 					//변경 22.4.12 : 텍스쳐로 그려지는 GL 기준 사이즈
-					float halfPointSize = VERTEX_RENDER_SIZE * 0.5f;
+					//float halfPointSize = VERTEX_RENDER_SIZE * 0.5f; // 삭제 v1.4.2 : 옵션에 따른 변수값을 바로 사용
+					
+
 					Vector2 posGL = Vector2.zero;
 
 					//버텍스 투명도 설정
@@ -4028,7 +4051,7 @@ namespace AnyPortrait
 
 							posGL = World2GL(matrix.MultiplyPoint(curVert._pos_PinTest));
 							
-							DrawVertex(ref posGL, halfPointSize, ref vColor);
+							DrawVertex(ref posGL, _vertexRenderSizeHalf, ref vColor);
 						}
 					}
 					else if(renderRequest.PinVertWeight)
@@ -4044,7 +4067,7 @@ namespace AnyPortrait
 
 							posGL = World2GL(matrix.MultiplyPoint(curVert._pos));
 							
-							DrawVertex(ref posGL, halfPointSize, ref vColor);
+							DrawVertex(ref posGL, _vertexRenderSizeHalf, ref vColor);
 						}
 					}
 					else
@@ -4079,7 +4102,7 @@ namespace AnyPortrait
 							//DrawBox(posGL, pointSize, pointSize, vColor, isWireFramePoint, false);
 
 							//변경 22.4.12
-							DrawVertex(ref posGL, halfPointSize, ref vColor);
+							DrawVertex(ref posGL, _vertexRenderSizeHalf, ref vColor);
 
 							AddCursorRect(mousePosition, posGL, 10, 10, MouseCursor.MoveArrow);
 						}
@@ -4155,7 +4178,7 @@ namespace AnyPortrait
 										posLineA = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Test(apMeshPin.TMP_VAR_TYPE.MeshTest, 0.0f));
 										posLineB = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Test(apMeshPin.TMP_VAR_TYPE.MeshTest, 1.0f));
 
-										DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+										DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 									}
 									else
 									{
@@ -4167,7 +4190,7 @@ namespace AnyPortrait
 
 											posLineA = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Test(apMeshPin.TMP_VAR_TYPE.MeshTest, lerpA));
 											posLineB = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Test(apMeshPin.TMP_VAR_TYPE.MeshTest, lerpB));
-											DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+											DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 										}
 									}
 								}
@@ -4204,7 +4227,7 @@ namespace AnyPortrait
 										posLineA = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Default(0.0f));
 										posLineB = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Default(1.0f));
 
-										DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+										DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 									}
 									else
 									{
@@ -4216,7 +4239,7 @@ namespace AnyPortrait
 
 											posLineA = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Default(lerpA));
 											posLineB = matrix.MultiplyPoint(cur2NextCurve.GetCurvePos_Default(lerpB));
-											DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+											DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 										}
 									}
 								}
@@ -4256,13 +4279,14 @@ namespace AnyPortrait
 						Color pinColor_Selected = new Color(1.0f, 0.15f, 0.5f, 1.0f);
 						if (renderRequest.Pin == RenderTypeRequest.VISIBILITY.Transparent)
 						{
-							pinColor_None.a = 0.4f;
-							pinColor_Selected.a = 0.6f;
+							//투명도를 더 줄이자 (기존 0.4, 0.6 > 변경 0.3, 0.5 v1.4.2)
+							pinColor_None.a = 0.3f;
+							pinColor_Selected.a = 0.5f;
 						}
 
 						_matBatch.BeginPass_VertexAndPin(GL.TRIANGLES);
 
-						float halfPointSizeGL = PIN_RENDER_SIZE * 0.5f;
+						//float halfPointSizeGL = PIN_RENDER_SIZE * 0.5f;//삭제 v1.4.2 : 옵션에 따른 변수를 직접 사용
 
 						Vector2 posGL = Vector2.zero;
 						Color vColor = Color.black;
@@ -4290,7 +4314,7 @@ namespace AnyPortrait
 								cpPoint_Prev = matrix.MultiplyPoint(curPin.TmpControlPos_Prev_MeshTest);
 								cpPoint_Next = matrix.MultiplyPoint(curPin.TmpControlPos_Next_MeshTest);
 
-								DrawPin(ref posGL, halfPointSizeGL, ref vColor);
+								DrawPin(ref posGL, _pinRenderSizeHalf, ref vColor);
 
 								AddCursorRect(mousePosition, posGL, 14, 14, MouseCursor.MoveArrow);//이건 옵션 켤때만
 							}
@@ -4315,7 +4339,7 @@ namespace AnyPortrait
 								cpPoint_Prev = World2GL(matrix.MultiplyPoint(curPin._controlPointPos_Def_Prev));
 								cpPoint_Next = World2GL(matrix.MultiplyPoint(curPin._controlPointPos_Def_Next));
 
-								DrawPin(ref posGL, halfPointSizeGL, ref vColor);
+								DrawPin(ref posGL, _pinRenderSizeHalf, ref vColor);
 
 								AddCursorRect(mousePosition, posGL, 14, 14, MouseCursor.MoveArrow);//이건 옵션 켤때만
 							}
@@ -4458,7 +4482,10 @@ namespace AnyPortrait
 				if (vertexController.LinkedNextVertex != null && vertexController.LinkedNextVertex != vertexController.Vertex)
 				{
 					Vector2 linkedVertPosW = vertexController.LinkedNextVertex._pos - mesh._offsetPos;
-					float size = 24.0f / _zoom;
+					
+					//float size = 24.0f / _zoom;					
+					float size = (_vertexRenderSizeHalf * 2.4f) / _zoom;//변경 v1.4.2 옵션에 의한 크기 보다 조금 더 큰 정도
+
 					DrawBox(linkedVertPosW, size, size, Color.green, true);
 				}
 			}
@@ -4481,7 +4508,10 @@ namespace AnyPortrait
 				//if (vertexController.IsTmpSnapToEdge && vertexController.Vertex == null)
 				if (vertexController.IsTmpSnapToEdge)
 				{
-					float size = 20.0f / _zoom;
+					//float size = 20.0f / _zoom;//이전
+					float size = (_vertexRenderSizeHalf * 2.0f) / _zoom;//변경 v1.4.2
+
+
 					DrawBox(vertexController.TmpSnapToEdgePos - mesh._offsetPos, size, size, new Color(0.0f, 1.0f, 1.0f, 1.0f), true);
 				}
 			}
@@ -4501,8 +4531,6 @@ namespace AnyPortrait
 					return;
 				}
 
-
-				
 				if (vertexController.Vertex == null)
 				{
 					return;
@@ -4532,16 +4560,19 @@ namespace AnyPortrait
 				//	float size = 20.0f / _zoom;
 				//	DrawBox(linkedVertPosW, size, size, lineColor, true);
 				//}
+
+				//float size = 20.0f / _zoom;//이전
+				float size = (_vertexRenderSizeHalf * 2.0f) / _zoom;//변경 v1.4.2
+
 				if (isCross)
 				{
 					Vector2 crossPointW = matrix.MultiplyPoint(vertexController.EdgeWireCrossPoint());
-					float size = 20.0f / _zoom;
+					
 					DrawBox(crossPointW, size, size, Color.cyan, true);
 				}
 				else if (isCrossMultiple)
 				{
 					List<Vector2> crossVerts = vertexController.EdgeWireMultipleCrossPoints();
-					float size = 20.0f / _zoom;
 
 					for (int i = 0; i < crossVerts.Count; i++)
 					{
@@ -4580,9 +4611,12 @@ namespace AnyPortrait
 				Vector2 posPrev = Vector2.zero;
 				Vector2 posNext = Vector2.zero;
 
-				float pointSize = 10.0f / _zoom;//<<원래 크기
-				//float pointSize = 8.0f / _zoom;
-				float pointSize_Wire = 18.0f / _zoom;
+				//float pointSize = 10.0f / _zoom;//<<원래 크기
+				//float pointSize_Wire = 18.0f / _zoom;
+
+				//변경 v1.4.2
+				float pointSize = (_vertexRenderSizeHalf * 1.7f) / _zoom;
+				float pointSize_Wire = (_vertexRenderSizeHalf * 2.0f) / _zoom;
 
 				if(isPrevEnabled)
 				{
@@ -5277,7 +5311,7 @@ namespace AnyPortrait
 				//3. 버텍스를 렌더링하자
 				if (isVertexRender && nRenderVerts > 0)
 				{
-					float halfPointSize = VERTEX_RENDER_SIZE * 0.5f;
+					//float halfPointSize = VERTEX_RENDER_SIZE * 0.5f;//삭제 v1.4.2 : 옵션에 따른 변수값을 바로 사용
 
 					Vector2 posGL = Vector2.zero;
 					bool isVertSelected = false;
@@ -5385,11 +5419,11 @@ namespace AnyPortrait
 								if (isVertSelected && (isBoneWeightColor || isPhyVolumeWeightColor))
 								{
 									//하얀색 외곽선으로 보인다.
-									DrawVertex_WhiteOutline(ref posGL, halfPointSize, ref vColor);
+									DrawVertex_WhiteOutline(ref posGL, _vertexRenderSizeHalf, ref vColor);
 								}
 								else
 								{
-									DrawVertex(ref posGL, halfPointSize, ref vColor);
+									DrawVertex(ref posGL, _vertexRenderSizeHalf, ref vColor);
 								}
 
 								//선택 영역 : 박스 형태는 고정 크기이다.
@@ -5548,7 +5582,7 @@ namespace AnyPortrait
 									//두개의 핀 사이가 직선이라면
 									posLineA = cur2NextCurve.GetCurvePosW(0.0f);
 									posLineB = cur2NextCurve.GetCurvePosW(1.0f);
-									DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+									DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 								}
 								else
 								{
@@ -5560,7 +5594,7 @@ namespace AnyPortrait
 
 										posLineA = cur2NextCurve.GetCurvePosW(lerpA);
 										posLineB = cur2NextCurve.GetCurvePosW(lerpB);
-										DrawBoldLine(posLineA, posLineB, PIN_LINE_THICKNESS, curCurveColor, false);
+										DrawBoldLine(posLineA, posLineB, _pinLineThickness, curCurveColor, false);
 									}
 								}
 							}
@@ -5582,8 +5616,8 @@ namespace AnyPortrait
 
 						_matBatch.BeginPass_VertexAndPin(GL.TRIANGLES);
 
-						float halfPointSize = PIN_RENDER_SIZE * 0.5f;
-
+						//float halfPointSize = PIN_RENDER_SIZE * 0.5f;//삭제 v1.4.2 : 옵션에 따른 
+						
 						Vector2 posGL = Vector2.zero;
 						Color vColor = Color.black;
 
@@ -5615,7 +5649,7 @@ namespace AnyPortrait
 
 							posGL = World2GL(curPin._pos_World);
 							
-							DrawPin(ref posGL, halfPointSize, ref vColor);
+							DrawPin(ref posGL, _pinRenderSizeHalf, ref vColor);
 
 							AddCursorRect(mousePos, World2GL(posGL), 10, 10, MouseCursor.MoveArrow);//이건 옵션 켤때만
 						}
@@ -7988,6 +8022,150 @@ namespace AnyPortrait
 			//GL.End();//<나중에 일괄 EndPass>
 		}
 
+
+		public static void DrawBone_Virtual_V1(Vector2 startPosW,
+												Vector2 endPosW,
+												Color boneColor,
+												Color outlineColor,
+												int shapeWidth,
+												int shapeTaper)
+		{
+			float length = (endPosW - startPosW).magnitude;
+			float angle = 0.0f;
+
+			if (length > 0.0f)
+			{
+				angle = Mathf.Atan2(endPosW.y - startPosW.y, endPosW.x - startPosW.x) * Mathf.Rad2Deg;
+				angle += 90.0f;
+			}
+
+			angle += 180.0f;
+			angle = apUtil.AngleTo180(angle);
+
+			if (_cal_TmpMatrix == null)
+			{
+				_cal_TmpMatrix = new apMatrix();
+			}
+			_cal_TmpMatrix.SetIdentity();
+			_cal_TmpMatrix.SetTRS(startPosW, angle, Vector2.one, true);
+
+			//본 계산은 apBone의 GUIUpdate 중 V1 관련 코드를 기반으로 한다.
+
+			float boneWidth = shapeWidth * apBone.RenderSetting_ScaleRatio;
+			if (!apBone.RenderSetting_IsScaledByZoom)
+			{
+				boneWidth /= apBone.RenderSetting_WorkspaceZoom;
+			}
+			float boneRadius = boneWidth * 0.5f;
+			float taperRatio = Mathf.Clamp01((float)(100 - shapeTaper) / 100.0f);
+
+			Vector2 bonePos_End1 = apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(-boneRadius * taperRatio, length)));
+			Vector2 bonePos_End2 = apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(boneRadius * taperRatio, length)));
+			Vector2 bonePos_Mid1 = apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(-boneRadius, length * 0.2f)));
+			Vector2 bonePos_Mid2 = apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(boneRadius, length * 0.2f)));
+			Vector2 bonePos_Start = apGL.World2GL(startPosW);
+
+			//float orgSize = 10.0f * Zoom;
+			//float orgSize = bone._shapePoints_V1_Normal.Radius * Zoom;
+			float orgSize = apBone.RenderSetting_V1_Radius_Org * Zoom;
+			Vector3 orgPos_Up = new Vector3(bonePos_Start.x, bonePos_Start.y + orgSize, 0);
+			Vector3 orgPos_Left = new Vector3(bonePos_Start.x - orgSize, bonePos_Start.y, 0);
+			Vector3 orgPos_Down = new Vector3(bonePos_Start.x, bonePos_Start.y - orgSize, 0);
+			Vector3 orgPos_Right = new Vector3(bonePos_Start.x + orgSize, bonePos_Start.y, 0);
+
+
+
+			_matBatch.BeginPass_Color(GL.TRIANGLES);
+
+			GL.Color(boneColor);
+
+			//1. 사다리꼴 모양을 먼저 그리자
+			//    [End1]    [End2]
+			//
+			//
+			//
+			//[Mid1]            [Mid2]
+			//        [Start]
+
+			//1) Start - Mid1 - End1
+			//2) Start - Mid2 - End2
+			//3) Start - End1 - End2
+
+			//1) Start - Mid1 - End1
+			GL.Vertex(bonePos_Start);
+			GL.Vertex(bonePos_Mid1);
+			GL.Vertex(bonePos_End1);
+			GL.Vertex(bonePos_Start);
+			GL.Vertex(bonePos_End1);
+			GL.Vertex(bonePos_Mid1);
+
+			//2) Start - Mid2 - End2
+			GL.Vertex(bonePos_Start);
+			GL.Vertex(bonePos_Mid2);
+			GL.Vertex(bonePos_End2);
+			GL.Vertex(bonePos_Start);
+			GL.Vertex(bonePos_End2);
+			GL.Vertex(bonePos_Mid2);
+
+			//3) Start - End1 - End2 (taper가 100 미만일 때)
+			if (shapeTaper < 100)
+			{
+				GL.Vertex(bonePos_Start);
+				GL.Vertex(bonePos_End1);
+				GL.Vertex(bonePos_End2);
+				GL.Vertex(bonePos_Start);
+				GL.Vertex(bonePos_End2);
+				GL.Vertex(bonePos_End1);
+			}
+
+
+			//변경 5.18
+			_matBatch.BeginPass_Color(GL.LINES);
+
+			DrawLineGL(bonePos_Start,	bonePos_Mid1,	outlineColor, false);
+			DrawLineGL(bonePos_Mid1,	bonePos_End1,	outlineColor, false);
+			DrawLineGL(bonePos_End1,	bonePos_End2,	outlineColor, false);
+			DrawLineGL(bonePos_End2,	bonePos_Mid2,	outlineColor, false);
+			DrawLineGL(bonePos_Mid2,	bonePos_Start,	outlineColor, false);
+
+			
+			//2. 원점 부분은 다각형 형태로 다시 그려주자
+			_matBatch.BeginPass_Color(GL.TRIANGLES);
+
+			GL.Color(boneColor);
+			
+			//다이아몬드 형태로..
+			//       Up
+			// Left  |   Right
+			//      Down
+
+			GL.Vertex(orgPos_Up);
+			GL.Vertex(orgPos_Left);
+			GL.Vertex(orgPos_Down);
+			GL.Vertex(orgPos_Up);
+			GL.Vertex(orgPos_Down);
+			GL.Vertex(orgPos_Left);
+
+			GL.Vertex(orgPos_Up);
+			GL.Vertex(orgPos_Right);
+			GL.Vertex(orgPos_Down);
+			GL.Vertex(orgPos_Up);
+			GL.Vertex(orgPos_Down);
+			GL.Vertex(orgPos_Right);
+
+			
+			
+			_matBatch.BeginPass_Color(GL.LINES);
+
+			DrawLineGL(orgPos_Up, orgPos_Left,		outlineColor, false);
+			DrawLineGL(orgPos_Left, orgPos_Down,	outlineColor, false);
+			DrawLineGL(orgPos_Down, orgPos_Right,	outlineColor, false);
+			DrawLineGL(orgPos_Right, orgPos_Up,		outlineColor, false);
+
+			_matBatch.EndPass();
+		}
+
+
 		public static void DrawSelectedBonePost(apBone bone, bool isBoneIKUsing)
 		{
 			if (bone == null)
@@ -8060,7 +8238,9 @@ namespace AnyPortrait
 			}
 
 			float defaultAngle = bone._defaultMatrix._angleDeg;
-			if(bone._renderUnit != null)
+			if(bone._renderUnit != null 
+				&& bone._parentBone == null//버그 수정 v1.4.2 : 부모 본이 있다면 이미 부모 본이 회전하였으므로 그냥 따라가면 된다.
+				)
 			{
 				defaultAngle += bone._renderUnit.WorldMatrixWrap._angleDeg;
 			}
@@ -9031,6 +9211,132 @@ namespace AnyPortrait
 					_matBatch.EndPass();
 				}
 			}
+		}
+
+
+
+		//본은 아니지만 시작>끝>Width를 계산하여 가상으로 본 그리기
+		public static void DrawBone_Virtual_V2(	Vector2 startPosW,
+												Vector2 endPosW,
+												Color boneColor,
+												bool isNeedResetMat)
+		{	
+			float length = (endPosW - startPosW).magnitude;
+			float angle = 0.0f;
+
+			if(length > 0.0f)
+			{
+				angle = Mathf.Atan2(endPosW.y - startPosW.y, endPosW.x - startPosW.x) * Mathf.Rad2Deg;
+				angle += 90.0f;
+			}
+
+			angle += 180.0f;
+			angle = apUtil.AngleTo180(angle);
+
+			if(_cal_TmpMatrix == null)
+			{
+				_cal_TmpMatrix = new apMatrix();
+			}
+			_cal_TmpMatrix.SetIdentity();
+			_cal_TmpMatrix.SetTRS(startPosW, angle, Vector2.one, true);
+			
+			//실제 Bone Length, Width를 계산하자
+			//V2 에선 메시 여백때문에 약간 더 길어야 한다.
+			float boneLength = length * apBone.BONE_V2_REAL_LENGTH_RATIO;
+			float boneWidthHalf = apBone.RenderSetting_V2_WidthHalf;
+			
+			//이 계산+코드는 apBone의 GUIUpdate 함수 중 V2 코드를 참고한다.
+			Vector2 bonePos_End1 =	apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(-boneWidthHalf,	boneLength)));
+			Vector2 bonePos_End2 =	apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(boneWidthHalf,	boneLength)));
+			Vector2 bonePos_Back1 = apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(-boneWidthHalf,	-boneWidthHalf)));
+			Vector2 bonePos_Back2 =	apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(boneWidthHalf,	-boneWidthHalf)));
+			Vector2 bonePos_Mid1 =	apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(-boneWidthHalf,	0.0f)));
+			Vector2 bonePos_Mid2 =	apGL.World2GL(_cal_TmpMatrix.MulPoint2(new Vector2(boneWidthHalf,	0.0f)));
+
+
+			
+			Vector2 uv_Back1 = new Vector2(0.25f, 1.0f);
+			Vector2 uv_Back2 = new Vector2(0.0f, 1.0f);
+			Vector2 uv_Mid1 = new Vector2(0.25f, 0.9375f);
+			Vector2 uv_Mid2 = new Vector2(0.0f, 0.9375f);
+			Vector2 uv_End1 = new Vector2(0.25f, 0.0f);
+			Vector2 uv_End2 = new Vector2(0.0f, 0.0f);
+
+			//그려보자
+			if (isNeedResetMat)
+			{
+				//변경 21.5.18
+				_matBatch.BeginPass_BoneV2(GL.TRIANGLES);
+			}
+				
+			GL.Color(boneColor);
+
+			//CCW
+			GL.TexCoord(uv_Back1);	GL.Vertex(bonePos_Back1);
+			GL.TexCoord(uv_Back2);	GL.Vertex(bonePos_Back2);
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+			GL.TexCoord(uv_Back1);	GL.Vertex(bonePos_Back1);
+
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+			GL.TexCoord(uv_End2);	GL.Vertex(bonePos_End2);
+
+			GL.TexCoord(uv_End2);	GL.Vertex(bonePos_End2);
+			GL.TexCoord(uv_End1);	GL.Vertex(bonePos_End1);
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+
+			//CW
+			GL.TexCoord(uv_Back1);	GL.Vertex(bonePos_Back1);
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+			GL.TexCoord(uv_Back2);	GL.Vertex(bonePos_Back2);
+
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+			GL.TexCoord(uv_Back1);	GL.Vertex(bonePos_Back1);
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+			GL.TexCoord(uv_End2);	GL.Vertex(bonePos_End2);
+			GL.TexCoord(uv_Mid2);	GL.Vertex(bonePos_Mid2);
+
+			GL.TexCoord(uv_End2);	GL.Vertex(bonePos_End2);
+			GL.TexCoord(uv_Mid1);	GL.Vertex(bonePos_Mid1);
+			GL.TexCoord(uv_End1);	GL.Vertex(bonePos_End1);
+
+			//외곽선 렌더링이 아닌 경우에만 원점 그리기
+			//float orgRadius = bone._shapePoints_V2_Normal.Radius * Zoom;
+			float radius_Org = apBone.RenderSetting_V2_Radius_Org * Zoom;
+
+
+			Vector2 startPosGL = World2GL(startPosW);
+			Vector2 posGL_Org_LT = new Vector2(startPosGL.x - radius_Org, startPosGL.y + radius_Org);
+			Vector2 posGL_Org_RT = new Vector2(startPosGL.x + radius_Org, startPosGL.y + radius_Org);
+			Vector2 posGL_Org_LB = new Vector2(startPosGL.x - radius_Org, startPosGL.y - radius_Org);
+			Vector2 posGL_Org_RB = new Vector2(startPosGL.x + radius_Org, startPosGL.y - radius_Org);
+
+			Vector2 uv_Org_LT = new Vector2(0.75f, 1.0f);
+			Vector2 uv_Org_RT = new Vector2(1.0f, 1.0f);
+			Vector2 uv_Org_LB = new Vector2(0.75f, 0.875f);
+			Vector2 uv_Org_RB = new Vector2(1.0f, 0.875f);
+
+			//ORG
+			GL.TexCoord(uv_Org_LT);	GL.Vertex(posGL_Org_LT);
+			GL.TexCoord(uv_Org_LB);	GL.Vertex(posGL_Org_LB);
+			GL.TexCoord(uv_Org_RB);	GL.Vertex(posGL_Org_RB);
+
+			GL.TexCoord(uv_Org_RB);	GL.Vertex(posGL_Org_RB);
+			GL.TexCoord(uv_Org_RT);	GL.Vertex(posGL_Org_RT);
+			GL.TexCoord(uv_Org_LT);	GL.Vertex(posGL_Org_LT);
+
+			if (isNeedResetMat)
+			{
+				_matBatch.EndPass();
+			}
+
+				
+			
 		}
 
 		//------------------------------------------------------------------------------------------------

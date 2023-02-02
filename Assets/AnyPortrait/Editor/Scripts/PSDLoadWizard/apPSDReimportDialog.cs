@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -98,6 +98,9 @@ namespace AnyPortrait
 		private RELOAD_STEP _step = RELOAD_STEP.Step1_SelectPSDSet;
 
 		private Color _glBackGroundColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+
+
+
 
 		private apPSDSet _selectedPSDSet = null;
 		private apPSDSet.TextureDataSet _selectedTextureData = null;
@@ -271,6 +274,22 @@ namespace AnyPortrait
 
 		private GUIStyle _guiStyle_InfoBox = null;
 
+		private GUIStyle _guiStyle_GLText = null;
+		private GUIStyle _guiStyle_GLTextWarning = null;
+		private apStringWrapper _strWrapper_128 = null;
+
+
+		//Nearest 필터링이 들어간 텍스쳐를 생성한다. (Portrait의 모든 텍스쳐를 지정하자)
+		private Dictionary<Texture2D, Texture2D> _meshTexture2NearestTex = null;
+
+		private enum TEXTURE_SAMPLING
+		{
+			Default,
+			Nearest
+		}
+		private TEXTURE_SAMPLING _samplingMethod = TEXTURE_SAMPLING.Default;
+
+		
 		// Init
 		//----------------------------------------------------------
 		private void Init(apEditor editor, apPortrait portrait, FUNC_PSD_REIMPORT_RESULT funcResult, object loadKey)
@@ -371,6 +390,43 @@ namespace AnyPortrait
 			_psdSet2FileInfo.Clear();
 			_psdSecondary2FileInfo.Clear();
 
+			//Portrait의 이미지들을 복제하여 Nearest 샘플링이 들어간 텍스쳐 리스트를 만든다.
+			_meshTexture2NearestTex = new Dictionary<Texture2D, Texture2D>();
+			_meshTexture2NearestTex.Clear();
+			int nTextureData = _portrait._textureData != null ? _portrait._textureData.Count : 0;
+			if(nTextureData > 0)
+			{
+				apTextureData curTextureData = null;
+				for (int i = 0; i < nTextureData; i++)
+				{
+					curTextureData = _portrait._textureData[i];
+					if(curTextureData == null) { continue; }
+					if(curTextureData._image == null) { continue; }
+
+					Texture2D srcTexture = curTextureData._image;
+					Texture2D nearestTex = null;
+					if(srcTexture != null)
+					{
+						_meshTexture2NearestTex.TryGetValue(srcTexture, out nearestTex);
+					}
+
+					if(nearestTex == null)
+					{
+						//변환 정보가 없다면 새로 변환하자
+						nearestTex = new Texture2D(srcTexture.width, srcTexture.height, TextureFormat.RGBA32, false);
+						nearestTex.LoadRawTextureData(srcTexture.GetRawTextureData());
+						nearestTex.wrapMode = TextureWrapMode.Clamp;
+						nearestTex.filterMode = FilterMode.Point;
+						nearestTex.Apply();
+
+						_meshTexture2NearestTex.Add(srcTexture, nearestTex);
+					}
+				}
+			}
+
+			
+
+
 			RefreshPSDFileInfo();
 		}
 
@@ -457,6 +513,27 @@ namespace AnyPortrait
 					_guiStyle_InfoBox = new GUIStyle(GUI.skin.box);
 					_guiStyle_InfoBox.alignment = TextAnchor.MiddleLeft;
 				}
+
+				if(_guiStyle_GLText == null)
+				{
+					_guiStyle_GLText = new GUIStyle(GUI.skin.label);
+					_guiStyle_GLText.normal.textColor = Color.yellow;
+					_guiStyle_GLText.alignment = TextAnchor.UpperLeft;
+				}
+
+				if(_guiStyle_GLTextWarning == null)
+				{
+					_guiStyle_GLTextWarning = new GUIStyle(GUI.skin.label);
+					_guiStyle_GLTextWarning.normal.textColor = Color.red;
+					_guiStyle_GLTextWarning.alignment = TextAnchor.UpperLeft;
+				}
+
+				if(_strWrapper_128 == null)
+				{
+					_strWrapper_128 = new apStringWrapper(128);
+					_strWrapper_128.Clear();
+				}
+
 				
 
 				if (_selectedPSDSet == null 
@@ -596,10 +673,11 @@ namespace AnyPortrait
 		{
 			EditorGUILayout.BeginHorizontal(GUILayout.Width(width), GUILayout.Height(height));
 
-			int colorWidth = 180;
+			int colorWidth = 155;
+			int samplingBtnWidth = height + 20;
 			int btnWidth = 120;
 			int btnWidth_Cancel = 100;
-			int margin = width - (btnWidth * 2 + btnWidth_Cancel + 12 + 30 + (colorWidth * 3) + 10 + 2 + 20);
+			int margin = width - (btnWidth * 2 + btnWidth_Cancel + 12 + 30 + (colorWidth * 3) + samplingBtnWidth + 10 + 2 + 20 + 4);
 
 			GUILayout.Space(10);
 
@@ -651,6 +729,23 @@ namespace AnyPortrait
 
 			EditorGUILayout.EndVertical();
 
+			//추가 v1.4.2 : 텍스쳐 샘플링 방식
+			if(apEditorUtil.ToggledButton_2Side(	_editor.ImageSet.Get(apImageSet.PRESET.PSD_TextureSampling),
+												_samplingMethod == TEXTURE_SAMPLING.Nearest,
+												true,
+												samplingBtnWidth, height))
+			{
+				if(_samplingMethod == TEXTURE_SAMPLING.Default)
+				{
+					_samplingMethod = TEXTURE_SAMPLING.Nearest;
+				}
+				else
+				{
+					_samplingMethod = TEXTURE_SAMPLING.Default;
+				}
+			}
+				
+
 
 			GUILayout.Space(margin);
 
@@ -688,7 +783,20 @@ namespace AnyPortrait
 
 						if (GUILayout.Button(_editor.GetText(TEXT.DLG_PSD_Complete), GUILayout.Width(btnWidth), GUILayout.Height(height)))//Complete
 						{
-							_psdLoader.Step4_ConvertToAnyPortrait(OnConvertResult, _portrait, _selectedPSDSet, _meshTransform2PSDLayer);
+							bool isSuccess = _psdLoader.Step4_ConvertToAnyPortrait(	_selectedPSDSet._bakeOption_DstFilePath,
+																					OnConvertResult,
+																					_portrait,
+																					_selectedPSDSet,
+																					_meshTransform2PSDLayer);
+
+							if(!isSuccess)
+							{
+								//에러가 발생했다. (에러는 경로에 의해서만 발생한다.)
+								//경로가 유효하지 않다면 다시 설정해달라는 경고
+								EditorUtility.DisplayDialog(	_editor.GetText(TEXT.DLG_PSD_InvalidPath_Title),
+																_editor.GetText(TEXT.DLG_PSD_InvalidPath_Body),
+																_editor.GetText(TEXT.Okay));
+							}
 						}
 					}
 				}
@@ -703,7 +811,18 @@ namespace AnyPortrait
 
 						if (GUILayout.Button(_editor.GetText(TEXT.DLG_PSD_Complete), GUILayout.Width(btnWidth), GUILayout.Height(height)))//Complete
 						{
-							_psdLoader.Step4_ConvertToAnyPortrait_Secondary(OnConvertResult_Secondary, _selectedPSDSecondary);
+							bool isSuccess = _psdLoader.Step4_ConvertToAnyPortrait_Secondary(	_selectedPSDSecondary._dstFilePath,
+																								OnConvertResult_Secondary,
+																								_selectedPSDSecondary);
+
+							if(!isSuccess)
+							{
+								//에러가 발생했다. (에러는 경로에 의해서만 발생한다.)
+								//경로가 유효하지 않다면 다시 설정해달라는 경고
+								EditorUtility.DisplayDialog(	_editor.GetText(TEXT.DLG_PSD_InvalidPath_Title),
+																_editor.GetText(TEXT.DLG_PSD_InvalidPath_Body),
+																_editor.GetText(TEXT.Okay));
+							}
 						}
 					}
 				}
@@ -1471,16 +1590,41 @@ namespace AnyPortrait
 			{
 				RefreshTransform2PSDLayer();
 				_selectedPSDLayerData = null;
-				//_selectedPSDSetLayer = null;
 
-				if (_psdLoader.PSDLayerDataList != null && _psdLoader.PSDLayerDataList.Count > 0)
+				int nPSDLayerData = _psdLoader.PSDLayerDataList != null ? _psdLoader.PSDLayerDataList.Count : 0;
+				if (nPSDLayerData > 0)
 				{
-					_selectedPSDLayerData = _psdLoader.PSDLayerDataList[_psdLoader.PSDLayerDataList.Count - 1];
+					_selectedPSDLayerData = _psdLoader.PSDLayerDataList[nPSDLayerData - 1];
+
+					
+					//버그 v1.4.2
+					//Secondary 편집시 만약 PSD Set Layer중에 Secondary의 대상이 아닌 경우가 있다면,
+					//해당 레이어를 선택하지 말고, Secondary중 가장 최상단(뒤쪽)에 위치한 것을 찾아서 선택해야한다.
+					if(_selectedPSDSecondary != null
+						&& _selectedPSDLayerData._linkedBakedInfo_Secondary == null)
+					{
+						//Debug.Log("첫번째 선택된 레이어가 Secondary의 대상이 아니다.");
+						_selectedPSDLayerData = null;//일단 다시 선택 해제
+
+						//뒤에서부터 찾자
+						for (int iLayer = nPSDLayerData - 1; iLayer >= 0; iLayer--)
+						{
+							apPSDLayerData curLayerData = _psdLoader.PSDLayerDataList[iLayer];
+							if(curLayerData._linkedBakedInfo_Secondary != null)
+							{
+								//유효한 걸 찾았다.
+								_selectedPSDLayerData = curLayerData;
+								break;
+							}
+						}
+					}
 				}
 				else
 				{
 					_selectedPSDLayerData = null;
 				}
+
+				
 			}
 
 			_linkSrcLayerData = null;
@@ -1749,11 +1893,44 @@ namespace AnyPortrait
 				return;
 			}
 
-			_gl.DrawTexture(textureData._image,
+			if(_samplingMethod == TEXTURE_SAMPLING.Default)
+			{
+				//기본 텍스쳐로 렌더링
+				_gl.DrawTexture(textureData._image,
 										centerPosOffset,
 										textureData._width, textureData._height,
 										new Color(0.5f, 0.5f, 0.5f, 1.0f),
 										isDrawOutline);
+			}
+			else
+			{
+				//Nearest 텍스쳐로 렌더링
+				//Nearest 텍스쳐 사용
+				Texture2D defaultTexture = textureData._image;
+				Texture2D nearestTexture = null;
+				if (_meshTexture2NearestTex != null)
+				{
+					_meshTexture2NearestTex.TryGetValue(defaultTexture, out nearestTexture);
+				}
+
+				if (nearestTexture != null)
+				{
+					_gl.DrawTexture(nearestTexture,
+										centerPosOffset,
+										textureData._width, textureData._height,
+										new Color(0.5f, 0.5f, 0.5f, 1.0f),
+										isDrawOutline);
+				}
+				else
+				{
+					_gl.DrawTexture(textureData._image,
+										centerPosOffset,
+										textureData._width, textureData._height,
+										new Color(0.5f, 0.5f, 0.5f, 1.0f),
+										isDrawOutline);
+				}
+			}
+			
 		}
 
 		private void DrawTextureData_Transparent(apTextureData textureData, bool isDrawOutline, Vector2 centerPosOffset)
@@ -1763,12 +1940,46 @@ namespace AnyPortrait
 				return;
 			}
 
-			_gl.DrawTexture(textureData._image,
-										centerPosOffset,
-										textureData._width, textureData._height,
-										_meshOverlayColor,
-										isDrawOutline,
-										true);
+			if (_samplingMethod == TEXTURE_SAMPLING.Default)
+			{
+				//기본 텍스쳐로 렌더링
+				_gl.DrawTexture(textureData._image,
+											centerPosOffset,
+											textureData._width, textureData._height,
+											_meshOverlayColor,
+											isDrawOutline,
+											true);
+			}
+			else
+			{
+				//Nearest 텍스쳐로 렌더링
+				//Nearest 텍스쳐 사용
+				Texture2D defaultTexture = textureData._image;
+				Texture2D nearestTexture = null;
+				if (_meshTexture2NearestTex != null)
+				{
+					_meshTexture2NearestTex.TryGetValue(defaultTexture, out nearestTexture);
+				}
+
+				if (nearestTexture != null)
+				{
+					_gl.DrawTexture(nearestTexture,
+											centerPosOffset,
+											textureData._width, textureData._height,
+											_meshOverlayColor,
+											isDrawOutline,
+											true);
+				}
+				else
+				{
+					_gl.DrawTexture(textureData._image,
+											centerPosOffset,
+											textureData._width, textureData._height,
+											_meshOverlayColor,
+											isDrawOutline,
+											true);
+				}
+			}
 		}
 
 
@@ -1777,12 +1988,52 @@ namespace AnyPortrait
 
 		private void DrawMesh(apMesh mesh, bool isShowAllTexture, bool isDrawEdge, float scale)
 		{
-			if(mesh == null || mesh.LinkedTextureData == null)
+			if(mesh == null
+				|| mesh.LinkedTextureData == null
+				|| mesh.LinkedTextureData._image == null)
 			{
 				return;
 			}
+
+			if (_samplingMethod == TEXTURE_SAMPLING.Default)
+			{
+				//기본 텍스쳐 사용
+				_gl.DrawMesh(mesh,
+							apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+							new Color(0.5f, 0.5f, 0.5f, 1.0f),
+							isShowAllTexture, true, isDrawEdge, false);
+			}
+			else
+			{
+				//Nearest 텍스쳐 사용
+				Texture2D defaultTexture = mesh.LinkedTextureData._image;
+				Texture2D nearestTexture = null;
+				if (_meshTexture2NearestTex != null)
+				{
+					_meshTexture2NearestTex.TryGetValue(defaultTexture, out nearestTexture);
+				}
+
+				if (nearestTexture != null)
+				{
+					//Nearest Texture 샘플링으로 출력한다.
+					_gl.DrawMesh(mesh,
+									apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+									new Color(0.5f, 0.5f, 0.5f, 1.0f),
+									isShowAllTexture, true, isDrawEdge, false,
+									nearestTexture);
+				}
+				else
+				{
+					//기본 텍스쳐로 출력한다.
+					_gl.DrawMesh(mesh,
+									apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+									new Color(0.5f, 0.5f, 0.5f, 1.0f),
+									isShowAllTexture, true, isDrawEdge, false);
+				}
+			}
 			
-			_gl.DrawMesh(mesh, apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)), new Color(0.5f, 0.5f, 0.5f, 1.0f), isShowAllTexture, true, isDrawEdge);
+
+			
 		}
 
 
@@ -1792,7 +2043,48 @@ namespace AnyPortrait
 			{
 				return;
 			}
-			_gl.DrawMesh(mesh, apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)), _meshOverlayColor, isShowAllTexture, true, false, true);
+
+			if (_samplingMethod == TEXTURE_SAMPLING.Default)
+			{
+				//기본 텍스쳐 사용
+				_gl.DrawMesh(mesh,
+							apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+							_meshOverlayColor,
+							isShowAllTexture,
+							true, false,
+							true, //ToneColor
+							null);
+			}
+			else
+			{
+				//Nearest 텍스쳐 사용
+				Texture2D defaultTexture = mesh.LinkedTextureData._image;
+				Texture2D nearestTexture = null;
+				if (_meshTexture2NearestTex != null)
+				{
+					_meshTexture2NearestTex.TryGetValue(defaultTexture, out nearestTexture);
+				}
+
+				if (nearestTexture != null)
+				{
+					//Nearest Texture 샘플링으로 출력한다.
+					_gl.DrawMesh(mesh,
+									apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+									_meshOverlayColor,
+									isShowAllTexture, true, false, true,
+									nearestTexture);
+				}
+				else
+				{
+					//기본 텍스쳐로 출력한다.
+					_gl.DrawMesh(mesh,
+									apMatrix3x3.TRS(Vector2.zero, 0.0f, new Vector2(scale, scale)),
+									_meshOverlayColor,
+									isShowAllTexture, true, false, true);
+				}
+			}
+
+			
 		}
 
 		//private void DrawMesh(apMesh mesh, bool isShowAllTexture, bool isDrawEdge, Color color)
@@ -1813,7 +2105,11 @@ namespace AnyPortrait
 		}
 
 
-		private void DrawPSDLayer(apPSDLayerData layerData, float posX, float posY, int bakeScale100, bool isDrawOutline)
+		private void DrawPSDLayer(	apPSDLayerData layerData,
+									float posX,
+									float posY,
+									int bakeScale100,
+									bool isDrawOutline)
 		{
 			Vector2 renderOffset = new Vector2(posX, posY);
 			Vector2 renderScale = new Vector2((float)bakeScale100 * 0.01f, (float)bakeScale100 * 0.01f);
@@ -1831,11 +2127,24 @@ namespace AnyPortrait
 			{
 				meshColor = _psdOverlayColor;
 			}
-			_gl.DrawTexture(layerData._image,
+
+			if(_samplingMethod == TEXTURE_SAMPLING.Default)
+			{
+				_gl.DrawTexture(layerData._image,
 							worldMat.MtrxToSpace,
 							layerData._width, layerData._height,
 							meshColor,
 							0.0f, isDrawOutline);
+			}
+			else
+			{
+				//Nearest Texture를 사용한다.
+				_gl.DrawTexture(layerData._image_Nearest,
+							worldMat.MtrxToSpace,
+							layerData._width, layerData._height,
+							meshColor,
+							0.0f, isDrawOutline);
+			}
 		}
 
 
@@ -1857,6 +2166,28 @@ namespace AnyPortrait
 		//					color2X,
 		//					0.0f);
 		//}
+
+
+		private void DrawText(string strText, float posX, float posY)
+		{
+			if(string.IsNullOrEmpty(strText))
+			{
+				return;
+			}
+			int textWidth = (strText.Length * 24);
+			GUI.Label(new Rect(posX, posY, textWidth + 50, 30.0f), strText, _guiStyle_GLText);
+		}
+
+		private void DrawTextWarning(string strText, float posX, float posY)
+		{
+			if(string.IsNullOrEmpty(strText))
+			{
+				return;
+			}
+			int textWidth = (strText.Length * 24);
+			GUI.Label(new Rect(posX, posY, textWidth + 50, 30.0f), strText, _guiStyle_GLTextWarning);
+		}
+
 		//----------------------------------------------------------------------------------------------
 		private void SelectPSDSet(apPSDSet psdSet)
 		{
@@ -2594,6 +2925,9 @@ namespace AnyPortrait
 		{
 			_targetTransformList.Clear();
 
+			
+
+
 			if(_selectedPSDSet == null ||
 				_selectedPSDSet._linkedTargetMeshGroup == null)
 			{
@@ -2642,6 +2976,8 @@ namespace AnyPortrait
 					}
 				}
 			}
+
+			
 		}
 
 

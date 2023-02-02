@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1142,6 +1142,9 @@ namespace AnyPortrait
 			float minDist = 0.0f;
 			apMeshEdge minEdge = null;
 
+			//추가 v1.4.2 : AABB가 너무 타이트하게 들어가서 거리 비교가 아예 불가능한 버그 해결
+			float aabbBias = (offsetGL * 1.5f) + 5.0f;
+
 			for (int i = 0; i < mesh._edges.Count; i++)
 			{
 				curEdge = mesh._edges[i];
@@ -1160,8 +1163,16 @@ namespace AnyPortrait
 				minY = Mathf.Min(vPos1GL.y, vPos2GL.y);
 				maxY = Mathf.Max(vPos1GL.y, vPos2GL.y);
 				
-				if(posGL.x < minX || maxX < posGL.x ||
-					posGL.y < minY || maxY < posGL.y)
+				//이전 : 버그 (수직 수평선의 경우 X축 또는 Y축의 범위가 0에 수렴하여 OffsetGL과 비교하기도 전에 연산을 포기한다)
+				//if(posGL.x < minX || maxX < posGL.x ||
+				//	posGL.y < minY || maxY < posGL.y)
+				//{
+				//	continue;
+				//}
+
+				//수정 : 적절히 Bias를 둬서 AABB 체크가 빡세게 들어가지 않게 한다.
+				if(posGL.x < (minX - aabbBias) || (maxX + aabbBias) < posGL.x ||
+					posGL.y < (minY - aabbBias) || (maxY + aabbBias) < posGL.y)
 				{
 					continue;
 				}

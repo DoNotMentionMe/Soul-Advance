@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System;
 
 using AnyPortrait;
+using NUnit.Framework.Constraints;
 
 namespace AnyPortrait
 {
@@ -26,7 +27,7 @@ namespace AnyPortrait
 	{
 		// Members
 		//---------------------------------------------
-		public enum PRESET
+		public enum PRESET : int
 		{
 			ToolBtn_Select,
 			ToolBtn_Move,
@@ -117,6 +118,7 @@ namespace AnyPortrait
 			Hierarchy_BypassVisible,//추가 21.2.8
 
 			Hierarchy_NoKey,
+			Hierarchy_NoKeyDisabled,
 			
 			Hierarchy_Clipping,
 
@@ -420,6 +422,8 @@ namespace AnyPortrait
 			Rig_ShowAllBones,
 			Rig_TransculentBones,
 			Rig_HideBones,
+
+			Rig_Jiggle,
 			
 
 			Physic_Stretch,
@@ -519,6 +523,7 @@ namespace AnyPortrait
 			PSD_SetSecondaryOutline,
 			PSD_LinkedMain,
 			PSD_LinkedMainOutline,
+			PSD_TextureSampling,
 
 			ExtraOption_DepthCursor,
 			ExtraOption_DepthMidCursor,
@@ -612,12 +617,20 @@ namespace AnyPortrait
 			SetValueProp_Transform,
 			SetValueProp_Vert,
 			SetValueProp_Visibility,
+
+			SyncSettingToFile16px,
+			SyncSettingToFile12px,
+
 			
 		}
 
 		private Dictionary<PRESET, Texture2D> _images = new Dictionary<PRESET, Texture2D>();
-
-
+		
+		//개선 이미지 가져오기 속도 빠르게
+		private Texture2D[] _index2Image = null;
+		private int _nImages = -1;
+		private Texture2D _cal_Result = null;
+		
 		private bool _isAllLoaded = false;
 
 		public enum ReloadResult
@@ -637,7 +650,12 @@ namespace AnyPortrait
 		public apImageSet()
 		{
 			_isAllLoaded = false;
+
+			if(_images == null) { _images = new Dictionary<PRESET, Texture2D>(); }
 			_images.Clear();
+
+			_index2Image = null;
+			_nImages = -1;
 
 			_isProSkin = EditorGUIUtility.isProSkin;
 		}
@@ -654,7 +672,12 @@ namespace AnyPortrait
 					_isProSkin = EditorGUIUtility.isProSkin;
 
 					_isAllLoaded = false;
+					
+					if(_images == null) { _images = new Dictionary<PRESET, Texture2D>(); }
 					_images.Clear();
+
+					_index2Image = null;
+					_nImages = -1;
 				}
 			}
 			
@@ -667,9 +690,27 @@ namespace AnyPortrait
 				return ReloadResult.AlreadyLoaded;
 			}
 
-			
-
 			_isAllLoaded = true;
+
+			//이미지를 로드할 준비
+			if(_images == null) { _images = new Dictionary<PRESET, Texture2D>(); }
+			_images.Clear();
+
+			_index2Image = null;
+
+			//배열을 만들자
+			_nImages = apEditorUtil.GetEnumCount(typeof(PRESET));
+			if (_nImages > 0)
+			{
+				_index2Image = new Texture2D[_nImages];
+				//Null로 일단 초기화
+				for (int i = 0; i < _nImages; i++)
+				{
+					_index2Image[i] = null;
+				}
+			}
+			
+			
 			CheckImageAndLoad(PRESET.ToolBtn_Select, "ButtonIcon_Select", true);
 			CheckImageAndLoad(PRESET.ToolBtn_Move, "ButtonIcon_Move", true);
 			CheckImageAndLoad(PRESET.ToolBtn_Rotate, "ButtonIcon_Rotate", true);
@@ -757,6 +798,7 @@ namespace AnyPortrait
 			CheckImageAndLoad(PRESET.Hierarchy_BypassVisible, "HierarchyIcon_BypassVisible");
 			
 			CheckImageAndLoad(PRESET.Hierarchy_NoKey, "HierarchyIcon_NoKey");
+			CheckImageAndLoad(PRESET.Hierarchy_NoKeyDisabled, "HierarchyIcon_NoKeyDisabled");
 
 
 			CheckImageAndLoad(PRESET.Hierarchy_Clipping, "HierarchyIcon_Clipping", true);
@@ -1086,6 +1128,8 @@ namespace AnyPortrait
 			CheckImageAndLoad(PRESET.Rig_TransculentBones,	"Rig_TransculentBones");
 			CheckImageAndLoad(PRESET.Rig_HideBones,			"Rig_HideBones");
 
+			CheckImageAndLoad(PRESET.Rig_Jiggle,			"Rig_Jiggle");
+
 
 			CheckImageAndLoad(PRESET.Physic_Stretch, "Physic_Stretch");
 			CheckImageAndLoad(PRESET.Physic_Bend, "Physic_Bend");
@@ -1186,6 +1230,8 @@ namespace AnyPortrait
 			CheckImageAndLoad(PRESET.PSD_SetSecondaryOutline,	"PSD_SetSecondaryOutline");
 			CheckImageAndLoad(PRESET.PSD_LinkedMain,			"PSD_LinkedMain");
 			CheckImageAndLoad(PRESET.PSD_LinkedMainOutline,		"PSD_LinkedMainOutline");
+			CheckImageAndLoad(PRESET.PSD_TextureSampling,		"PSD_TextureSampling");
+			
 
 			CheckImageAndLoad(PRESET.ExtraOption_DepthCursor,		"ExtraOption_DepthCursor");
 			CheckImageAndLoad(PRESET.ExtraOption_DepthMidCursor,	"ExtraOption_DepthMidCursor");
@@ -1283,12 +1329,16 @@ namespace AnyPortrait
 			CheckImageAndLoad(PRESET.SetValueProp_Vert,			"SetValueProp_Vert");
 			CheckImageAndLoad(PRESET.SetValueProp_Visibility,	"SetValueProp_Visibility");
 
+			CheckImageAndLoad(PRESET.SyncSettingToFile16px,		"SyncSettingToFile16px");
+			CheckImageAndLoad(PRESET.SyncSettingToFile12px,		"SyncSettingToFile12px");
 			
 			if(!_isAllLoaded)
 			{
 				//문제가 발생했다.
 				return ReloadResult.Error;
 			}
+
+
 
 			//return true;
 			return ReloadResult.NewLoaded;
@@ -1299,51 +1349,83 @@ namespace AnyPortrait
 		{
 			bool isLoadProSkin = EditorGUIUtility.isProSkin && isProSkinVersion;
 
+
+			#region [미사용 코드] 비효율적인 코드
+			//if (_images.ContainsKey(imageType))
+			//{
+			//	if (_images[imageType] == null)
+			//	{
+			//		//기본 경로 변경
+			//		//"Assets/Editor/AnyPortraitTool/Images/" => apEditorUtil.ResourcePath_Icon
+
+			//		//이전 코드
+			//		//if (EditorGUIUtility.isProSkin && isProSkinVersion)//정식 코드
+			//		////if (!EditorGUIUtility.isProSkin && isProSkinVersion)//테스트 코드
+			//		//{
+			//		//	_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + "ProSkin/" + strFileNameWOExp + ".png");
+			//		//}
+			//		//else
+			//		//{
+			//		//	_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + strFileNameWOExp + ".png");
+			//		//}
+
+			//		//변경된 코드 20.3.17
+			//		_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin));
+			//	}
+			//}
+			//else
+			//{
+			//	//이전 코드
+			//	//if (EditorGUIUtility.isProSkin && isProSkinVersion)//정식 코드
+			//	////if (!EditorGUIUtility.isProSkin && isProSkinVersion)//테스트 코드
+			//	//{
+			//	//	_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + "ProSkin/" + strFileNameWOExp + ".png"));
+			//	//}
+			//	//else
+			//	//{
+			//	//	_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + strFileNameWOExp + ".png"));
+			//	//}
+
+			//	//변경된 코드 20.3.7
+			//	_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin)));
+
+			//}
+
+			//if (_images[imageType] == null)
+			//{
+			//	Debug.LogError("Editor Image Load Failed : " + imageType);
+			//	_isAllLoaded = false;
+			//} 
+			#endregion
+
+			//변경 v1.4.2
+			Texture2D loadedTexture = null;
+
 			if (_images.ContainsKey(imageType))
 			{
-				if (_images[imageType] == null)
-				{
-					//기본 경로 변경
-					//"Assets/Editor/AnyPortraitTool/Images/" => apEditorUtil.ResourcePath_Icon
-
-					//이전 코드
-					//if (EditorGUIUtility.isProSkin && isProSkinVersion)//정식 코드
-					////if (!EditorGUIUtility.isProSkin && isProSkinVersion)//테스트 코드
-					//{
-					//	_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + "ProSkin/" + strFileNameWOExp + ".png");
-					//}
-					//else
-					//{
-					//	_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + strFileNameWOExp + ".png");
-					//}
-
-					//변경된 코드 20.3.17
-					_images[imageType] = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin));
+				loadedTexture = _images[imageType];
+				if (loadedTexture == null)
+				{	
+					loadedTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin));
+					_images[imageType] = loadedTexture;
 				}
 			}
 			else
 			{
-				//이전 코드
-				//if (EditorGUIUtility.isProSkin && isProSkinVersion)//정식 코드
-				////if (!EditorGUIUtility.isProSkin && isProSkinVersion)//테스트 코드
-				//{
-				//	_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + "ProSkin/" + strFileNameWOExp + ".png"));
-				//}
-				//else
-				//{
-				//	_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.ResourcePath_Icon + strFileNameWOExp + ".png"));
-				//}
+				loadedTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin));
 
-				//변경된 코드 20.3.7
-				_images.Add(imageType, AssetDatabase.LoadAssetAtPath<Texture2D>(apEditorUtil.MakePath_Icon(strFileNameWOExp, isLoadProSkin)));
-				
+				_images.Add(imageType, loadedTexture);
 			}
 
-			if (_images[imageType] == null)
+			if (loadedTexture == null)
 			{
 				Debug.LogError("Editor Image Load Failed : " + imageType);
 				_isAllLoaded = false;
 			}
+
+			//추가 v1.4.2 : 빠른 접근을 위한 배열을 만들어서 넣자
+			_index2Image[(int)imageType] = loadedTexture;
+			
 		}
 
 
@@ -1352,19 +1434,42 @@ namespace AnyPortrait
 		//----------------------------------------------------------------------------
 		public Texture2D Get(PRESET imageType)
 		{
-			if (!_images.ContainsKey(imageType))
+			//이전 방식
+			//if (!_images.ContainsKey(imageType))
+			//{
+			//	_isAllLoaded = false;
+			//	return null;
+			//}
+
+			//if (_images[imageType] == null)
+			//{
+			//	_isAllLoaded = false;
+			//	return null;
+			//}
+
+			//return _images[imageType];
+
+			//변경 v1.4.2 : 배열을 이용해서 더 빠르게 수행
+			int iImageType = (int)imageType;
+
+			//초기화가 필요한 경우
+			if (!_isAllLoaded
+				|| _index2Image == null
+				|| iImageType >= _nImages)
 			{
 				_isAllLoaded = false;
 				return null;
 			}
 
-			if (_images[imageType] == null)
+			_cal_Result = _index2Image[iImageType];
+			if (_cal_Result == null)
 			{
+				//null 이미지가 있다면 다시 초기화를 해야한다.
 				_isAllLoaded = false;
 				return null;
 			}
 
-			return _images[imageType];
+			return _cal_Result;
 		}
 	}
 }

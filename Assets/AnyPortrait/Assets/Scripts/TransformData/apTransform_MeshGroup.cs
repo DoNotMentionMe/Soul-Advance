@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -51,8 +51,9 @@ namespace AnyPortrait
 		[SerializeField]
 		public int _depth = 0;
 
-		[SerializeField]
-		public int _level = 0;//Parent부터 내려오는 Level
+		//삭제 [v1.4.2]
+		//[SerializeField]
+		//public int _level = 0;//Parent부터 내려오는 Level
 
 
 		//추가 : Socket

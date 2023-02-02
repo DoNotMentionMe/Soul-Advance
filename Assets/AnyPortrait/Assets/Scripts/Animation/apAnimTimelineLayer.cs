@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -194,6 +194,11 @@ namespace AnyPortrait
 
 			_parentAnimClip._portrait.RegistUniqueID(apIDManager.TARGET.AnimTimelineLayer, _uniqueID);
 
+			
+			//[v1.4.2] TargetMeshGroup이 없는 경우에 대한 체크 코드 추가
+			//단, Target MeshGroup이 없는 경우에 바로 데이터를 -1로 초기화하지 않는다.
+			//Undo 같은 경우에 제대로 링크가 되지 않을 수 있기 때문
+
 			switch (_linkType)
 			{
 				case apAnimClip.LINK_TYPE.AnimatedModifier:
@@ -202,28 +207,59 @@ namespace AnyPortrait
 						{
 							case LINK_MOD_TYPE.MeshTransform:
 								//수정 : 재귀적으로 링크를 수행한다.
-								_linkedMeshTransform = _parentAnimClip._targetMeshGroup.GetMeshTransformRecursive(_transformID);
-								if (_linkedMeshTransform == null)
+								
+								if(_parentAnimClip._targetMeshGroup != null)
 								{
-									_transformID = -1;
+									_linkedMeshTransform = _parentAnimClip._targetMeshGroup.GetMeshTransformRecursive(_transformID);
+
+									if (_linkedMeshTransform == null)
+									{
+										_transformID = -1;
+									}
 								}
+								else
+								{	
+									_linkedMeshTransform = null;
+								}
+								
+								
 								break;
 
 							case LINK_MOD_TYPE.MeshGroupTransform:
 								//수정 : 재귀적으로 링크를 수행한다.
-								_linkedMeshGroupTransform = _parentAnimClip._targetMeshGroup.GetMeshGroupTransformRecursive(_transformID);
-								if (_linkedMeshGroupTransform == null)
+								if(_parentAnimClip._targetMeshGroup != null)
 								{
-									_transformID = -1;
+									_linkedMeshGroupTransform = _parentAnimClip._targetMeshGroup.GetMeshGroupTransformRecursive(_transformID);
+									
+									if (_linkedMeshGroupTransform == null)
+									{
+										_transformID = -1;
+									}
 								}
+								else
+								{
+									_linkedMeshGroupTransform = null;
+								}
+								
+								
 								break;
 
 							case LINK_MOD_TYPE.Bone:
-								_linkedBone = _parentAnimClip._targetMeshGroup.GetBoneRecursive(_boneID);//Recursive 방식으로 검색한다.
-								if (_linkedBone == null)
+								if(_parentAnimClip._targetMeshGroup != null)
 								{
-									_boneID = -1;
+									_linkedBone = _parentAnimClip._targetMeshGroup.GetBoneRecursive(_boneID);//Recursive 방식으로 검색한다.
+									
+									if (_linkedBone == null)
+									{
+										_boneID = -1;
+									}
 								}
+								else
+								{
+									_linkedBone = null;
+								}
+								
+								
 								break;
 
 							case LINK_MOD_TYPE.None:
@@ -259,10 +295,80 @@ namespace AnyPortrait
 			}
 		}
 
+
+
+
 		public void LinkParamSetGroup(apModifierParamSetGroup paramSetGroup)
 		{
 			_targetParamSetGroup = paramSetGroup;
 		}
+
+
+		//[1.4.2] Link를 해야할지 여부를 체크하는 Validate 함수.
+		//Link되어야 하는 데이터가 Null이면 false를 리턴한다.
+		public bool ValidateForLinkEditor()
+		{
+			if(_parentAnimClip == null
+				|| _parentTimeline == null)
+			{
+				return false;
+			}
+
+			if(_parentAnimClip._targetMeshGroup == null)
+			{
+				return false;
+			}
+
+			switch (_linkType)
+			{
+				case apAnimClip.LINK_TYPE.AnimatedModifier:
+					{
+						switch (_linkModType)
+						{
+							case LINK_MOD_TYPE.MeshTransform:
+								if(_linkedMeshTransform == null)
+								{
+									return false;
+								}
+								break;
+
+							case LINK_MOD_TYPE.MeshGroupTransform:
+								if(_linkedMeshGroupTransform == null)
+								{
+									return false;
+								}
+								break;
+
+							case LINK_MOD_TYPE.Bone:
+								if (_linkedBone == null)
+								{
+									return false;
+								}
+								break;
+
+							case LINK_MOD_TYPE.None:
+								break;
+						}
+					}
+					break;
+
+				case apAnimClip.LINK_TYPE.ControlParam:
+					if(_linkedControlParam == null)
+					{
+						return false;
+					}
+					break;
+			}
+
+			//키프레임은 체크하지 않는다.
+
+			//끝. 정상적이다.
+			return true;
+		}
+
+
+
+
 
 
 		public void LinkOpt(apAnimClip animClip, apAnimTimeline timeline)

@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 
 using AnyPortrait;
+using System.CodeDom.Compiler;
 
 namespace AnyPortrait
 {
@@ -35,12 +36,14 @@ namespace AnyPortrait
 		private string[] _colorSpaceNames = new string[] { "Gamma", "Linear" };
 
 		
-#if UNITY_2019_1_OR_NEWER
+//#if UNITY_2019_1_OR_NEWER
 		private string[] _renderPipelineNames = new string[] { "Default", "Scriptable Render Pipeline" };
-#endif
+//#endif
 
 		private string[] _sortingLayerNames = null;
 		private int[] _sortingLayerIDs = null;
+
+		private bool _isSortingLayerInit = false;
 
 		private string[] _billboardTypeNames = new string[] { "None", "Billboard", "Billboard with fixed Up Vector" };
 
@@ -74,6 +77,18 @@ namespace AnyPortrait
 
 		private apGUIContentWrapper _guiContent_BakeBtn_Normal = null;
 		private apGUIContentWrapper _guiContent_BakeBtn_Optimized = null;
+
+		private GUIStyle _guiStyle_Category = null;
+		private GUIStyle _guiStyle_SyncBtn = null;
+
+		private GUIStyle _guiStyle_Label_Default = null;
+		private GUIStyle _guiStyle_Label_Changed = null;
+
+		private GUIStyle _guiStyle_LabelWrapText = null;
+		private GUIStyle _guiStyle_LabelWrapText_Changed = null;
+
+		private GUIStyle _guiStyle_BoxMessage = null;
+		
 
 		// Show Window
 		//------------------------------------------------------------------
@@ -133,6 +148,8 @@ namespace AnyPortrait
 			//_loadKey = loadKey;
 			_targetPortrait = portrait;
 
+			_isSortingLayerInit = false;
+
 
 		}
 
@@ -159,22 +176,96 @@ namespace AnyPortrait
 
 
 			//Sorting Layer를 추가하자
-			if (_sortingLayerNames == null || _sortingLayerIDs == null)
+			if (!_isSortingLayerInit)
 			{
-				_sortingLayerNames = new string[SortingLayer.layers.Length];
-				_sortingLayerIDs = new int[SortingLayer.layers.Length];
+				if (_sortingLayerNames == null || _sortingLayerIDs == null)
+				{
+					_sortingLayerNames = new string[SortingLayer.layers.Length];
+					_sortingLayerIDs = new int[SortingLayer.layers.Length];
+				}
+				else if (_sortingLayerNames.Length != SortingLayer.layers.Length
+					|| _sortingLayerIDs.Length != SortingLayer.layers.Length)
+				{
+					_sortingLayerNames = new string[SortingLayer.layers.Length];
+					_sortingLayerIDs = new int[SortingLayer.layers.Length];
+				}
+
+				for (int i = 0; i < SortingLayer.layers.Length; i++)
+				{
+					_sortingLayerNames[i] = SortingLayer.layers[i].name;
+					_sortingLayerIDs[i] = SortingLayer.layers[i].id;
+				}
+
+				_isSortingLayerInit = true;
 			}
-			else if (_sortingLayerNames.Length != SortingLayer.layers.Length
-				|| _sortingLayerIDs.Length != SortingLayer.layers.Length)
+			
+			if(_guiStyle_Category == null)
 			{
-				_sortingLayerNames = new string[SortingLayer.layers.Length];
-				_sortingLayerIDs = new int[SortingLayer.layers.Length];
+				_guiStyle_Category = new GUIStyle(GUI.skin.box);
+				_guiStyle_Category.normal.background = apEditorUtil.WhiteTexture;
+				_guiStyle_Category.normal.textColor = Color.white;
+				_guiStyle_Category.alignment = TextAnchor.MiddleCenter;
+			}
+			if(_guiStyle_SyncBtn == null)
+			{
+				_guiStyle_SyncBtn = new GUIStyle(GUI.skin.button);
+				_guiStyle_SyncBtn.margin = new RectOffset(0, 0, 0, 0);
+				_guiStyle_SyncBtn.padding = new RectOffset(0, 0, 0, 0);
 			}
 
-			for (int i = 0; i < SortingLayer.layers.Length; i++)
+
+			if(_guiStyle_Label_Default == null)
 			{
-				_sortingLayerNames[i] = SortingLayer.layers[i].name;
-				_sortingLayerIDs[i] = SortingLayer.layers[i].id;
+				_guiStyle_Label_Default = new GUIStyle(GUI.skin.label);
+				_guiStyle_Label_Default.alignment = TextAnchor.UpperLeft;
+			}
+			
+			if(_guiStyle_Label_Changed == null)
+			{
+				_guiStyle_Label_Changed = new GUIStyle(GUI.skin.label);
+				_guiStyle_Label_Changed.alignment = TextAnchor.UpperLeft;
+				if (EditorGUIUtility.isProSkin)
+				{
+					//어두운 Pro 버전에선 노란색 Label
+					_guiStyle_Label_Changed.normal.textColor = Color.yellow;
+				}
+				else
+				{
+					//밝은 색이면 진한 보라색
+					_guiStyle_Label_Changed.normal.textColor = new Color(1.0f, 0.0f, 0.5f, 1.0f);
+				}
+			}
+
+			if(_guiStyle_LabelWrapText == null)
+			{
+				_guiStyle_LabelWrapText = new GUIStyle(GUI.skin.label);
+				_guiStyle_LabelWrapText.wordWrap = true;
+				_guiStyle_LabelWrapText.alignment = TextAnchor.UpperLeft;
+			}
+
+			if(_guiStyle_LabelWrapText_Changed == null)
+			{
+				_guiStyle_LabelWrapText_Changed = new GUIStyle(GUI.skin.label);
+				_guiStyle_LabelWrapText_Changed.wordWrap = true;
+				_guiStyle_LabelWrapText_Changed.alignment = TextAnchor.UpperLeft;
+
+				if (EditorGUIUtility.isProSkin)
+				{
+					//어두운 Pro 버전에선 노란색 Label
+					_guiStyle_LabelWrapText_Changed.normal.textColor = Color.yellow;
+				}
+				else
+				{
+					//밝은 색이면 진한 보라색
+					_guiStyle_LabelWrapText_Changed.normal.textColor = new Color(1.0f, 0.0f, 0.5f, 1.0f);
+				}
+			}
+			
+			if(_guiStyle_BoxMessage == null)
+			{
+				_guiStyle_BoxMessage = new GUIStyle(GUI.skin.box);
+				_guiStyle_BoxMessage.alignment = TextAnchor.MiddleCenter;
+				_guiStyle_BoxMessage.wordWrap = true;
 			}
 
 
@@ -194,393 +285,520 @@ namespace AnyPortrait
 
 			if (_tab == TAB.Bake)
 			{
-				GUILayout.Space(5);
-
-				// 1. Bake에 대한 UI
-
-
-				if(_guiContent_BakeBtn_Normal == null)
-				{
-					_guiContent_BakeBtn_Normal = apGUIContentWrapper.Make(4, _editor.GetText(TEXT.DLG_Bake), _editor.ImageSet.Get(apImageSet.PRESET.BakeBtn_Normal));
-				}
-				if(_guiContent_BakeBtn_Optimized == null)
-				{
-					_guiContent_BakeBtn_Optimized = apGUIContentWrapper.Make(4, _editor.GetText(TEXT.DLG_OptimizedBakeTo), _editor.ImageSet.Get(apImageSet.PRESET.BakeBtn_Optimized));
-				}
-
-				//Bake 설정
-				//EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_BakeSetting));//"Bake Setting"
-				//GUILayout.Space(5);
-
-				EditorGUILayout.ObjectField(_editor.GetText(TEXT.DLG_Portrait), _targetPortrait, typeof(apPortrait), true);//"Portait"
-
-				GUILayout.Space(5);
-
-				//"Bake Scale"
-				float prevBakeScale = _targetPortrait._bakeScale;
-				_targetPortrait._bakeScale = EditorGUILayout.FloatField(_editor.GetText(TEXT.DLG_BakeScale), _targetPortrait._bakeScale);
-
-				//"Z Per Depth"
-				float prevBakeZSize = _targetPortrait._bakeZSize;
-				_targetPortrait._bakeZSize = EditorGUILayout.FloatField(_editor.GetText(TEXT.DLG_ZPerDepth), _targetPortrait._bakeZSize);
-
-				if (_targetPortrait._bakeZSize < 0.5f)
-				{
-					_targetPortrait._bakeZSize = 0.5f;
-				}
-
-				if (prevBakeScale != _targetPortrait._bakeScale ||
-					prevBakeZSize != _targetPortrait._bakeZSize)
-				{
-					apEditorUtil.SetEditorDirty();
-				}
-
-
-				//Bake 버튼
-				GUILayout.Space(10);
-
-
-				//[ Bake ] 기능 실행
-				if (GUILayout.Button(_guiContent_BakeBtn_Normal.Content, GUILayout.Height(45)))//"Bake"//_editor.GetText(TEXT.DLG_Bake)
-				{
-					GUI.FocusControl(null);
-
-					//CheckChangedProperties(nextRootScale, nextZScale);
-					apEditorUtil.SetEditorDirty();
-
-					
-					//추가 22.1.7 : SRP 옵션이 적절한지 물어보고 자동으로 변경한다.
-					CheckSRPOption();
-
-
-					//-------------------------------------
-					// Bake 함수를 실행한다. << 중요오오오오
-					//-------------------------------------
-
-					apBakeResult bakeResult = _editor.Controller.Bake();
-
-					if (bakeResult != null)
-					{
-						_editor.Notification("[" + _targetPortrait.name + "] is Baked", false, false);
-
-						if (bakeResult.NumUnlinkedExternalObject > 0)
-						{
-							EditorUtility.DisplayDialog(_editor.GetText(TEXT.BakeWarning_Title),
-								_editor.GetTextFormat(TEXT.BakeWarning_Body, bakeResult.NumUnlinkedExternalObject),
-								_editor.GetText(TEXT.Okay));
-						}
-
-						//추가 3.29 : Bake 후에 Ambient를 체크하자
-						CheckAmbientAndCorrection();
-
-						//추가 22.1.6 : Bake 후에 URP 설정 체크를 하자 > 일단 보류. 문제가 확인되지 않는다.
-						//CheckURP2022SettingsIfAnyClippedMeshes();
-
-						//추가 22.5.16 : Bake가 끝난 후에 자동으로 선택하자
-						Selection.activeGameObject = _targetPortrait.gameObject;
-					}
-					else
-					{
-						//추가 20.11.7 : Bake가 실패한 경우
-						_editor.Notification("Bake is canceled", false, false);
-					}
-
-					
-				}
-
-
-				GUILayout.Space(10);
-				apEditorUtil.GUI_DelimeterBoxH(width - 10);
-				GUILayout.Space(10);
-
-
-				//최적화 Bake
-				EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_OptimizedBaking));//"Optimized Baking"
-
-				//"Target"
-				apPortrait nextOptPortrait = (apPortrait)EditorGUILayout.ObjectField(_editor.GetText(TEXT.DLG_Target), _targetPortrait._bakeTargetOptPortrait, typeof(apPortrait), true);
-
-				if (nextOptPortrait != _targetPortrait._bakeTargetOptPortrait)
-				{
-					//타겟을 바꾸었다.
-					bool isChanged = false;
-					if (nextOptPortrait != null)
-					{
-						//1. 다른 Portrait를 선택했다.
-						if (!nextOptPortrait._isOptimizedPortrait)
-						{
-							//1-1. 최적화된 객체가 아니다.
-							EditorUtility.DisplayDialog(_editor.GetText(TEXT.OptBakeError_Title),
-														_editor.GetText(TEXT.OptBakeError_NotOptTarget_Body),
-														_editor.GetText(TEXT.Close));
-						}
-						else if (nextOptPortrait._bakeSrcEditablePortrait != _targetPortrait)
-						{
-							//1-2. 다른 대상으로부터 Bake된 Portrait같다. (물어보고 계속)
-							bool isResult = EditorUtility.DisplayDialog(_editor.GetText(TEXT.OptBakeError_Title),
-														_editor.GetText(TEXT.OptBakeError_SrcMatchError_Body),
-														_editor.GetText(TEXT.Okay),
-														_editor.GetText(TEXT.Cancel));
-
-							if (isResult)
-							{
-								//뭐 선택하겠다는데요 뭐..
-								isChanged = true;
-
-							}
-						}
-						else
-						{
-							//1-3. 오케이. 변경 가능
-							isChanged = true;
-						}
-					}
-					else
-					{
-						//2. 선택을 해제했다.
-						isChanged = true;
-					}
-
-					if (isChanged)
-					{
-						//Target을 변경한다.
-						apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-															_editor, 
-															_targetPortrait, 
-															//null, 
-															false,
-															apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-						_targetPortrait._bakeTargetOptPortrait = nextOptPortrait;
-					}
-
-				}
-
-				string optBtnText = "";
-				if (_targetPortrait._bakeTargetOptPortrait != null)
-				{
-					//optBtnText = "Optimized Bake to\n[" + _targetPortrait._bakeTargetOptPortrait.gameObject.name + "]";
-					optBtnText = string.Format("{0}\n    [{1}]", _editor.GetText(TEXT.DLG_OptimizedBakeTo), _targetPortrait._bakeTargetOptPortrait.gameObject.name);
-				}
-				else
-				{
-					//optBtnText = "Optimized Bake\n(Make New GameObject)";
-					//optBtnText = _editor.GetText(TEXT.DLG_OptimizedBakeMakeNew).Replace("\n", "\n    ");
-					optBtnText = _editor.GetText(TEXT.DLG_OptimizedBakeMakeNew);
-				}
-
-				_guiContent_BakeBtn_Optimized.SetText(4, optBtnText);
-				GUILayout.Space(10);
-
-				// [ Optimized Bake ] 기능 실행
-				if (GUILayout.Button(_guiContent_BakeBtn_Optimized.Content, GUILayout.Height(45)))
-				{
-					GUI.FocusControl(null);
-
-					//CheckChangedProperties(nextRootScale, nextZScale);
-
-					//추가 22.1.7 : SRP 옵션이 적절한지 물어보고 자동으로 변경한다.
-					CheckSRPOption();
-
-
-					//Optimized Bake를 하자
-					apBakeResult bakeResult = _editor.Controller.Bake_Optimized(_targetPortrait, _targetPortrait._bakeTargetOptPortrait);
-
-					if (bakeResult != null)
-					{
-						if (bakeResult.NumUnlinkedExternalObject > 0)
-						{
-							EditorUtility.DisplayDialog(_editor.GetText(TEXT.BakeWarning_Title),
-								_editor.GetTextFormat(TEXT.BakeWarning_Body, bakeResult.NumUnlinkedExternalObject),
-								_editor.GetText(TEXT.Okay));
-						}
-
-						_editor.Notification("[" + _targetPortrait.name + "] is Baked (Optimized)", false, false);
-
-						//추가 3.29 : Bake 후에 Ambient를 체크하자
-						CheckAmbientAndCorrection();
-
-						//추가 22.1.6 : Bake 후에 URP 설정 체크를 하자 > 일단 보류. 문제가 확인되지 않는다.
-						//CheckURP2022SettingsIfAnyClippedMeshes();
-
-						if (_targetPortrait._bakeTargetOptPortrait != null)
-						{
-							//추가 22.5.16 : Bake가 끝난 후에 자동으로 선택하자
-							Selection.activeGameObject = _targetPortrait._bakeTargetOptPortrait.gameObject;
-						}
-						
-					}
-					else
-					{
-						//Bake가 취소되었다. (20.11.7)
-						_editor.Notification("Bake is canceled (Optimized)", false, false);
-					}
-				}
-
-
-
+				Draw_BakeTab(width, height);
 			}
 			else
 			{
-				//Vector2 curScroll = (_tab == TAB.Bake) ? _scroll_Bake : _scroll_Options;
+				Draw_SettingTab(width, height);
+			}
 
-				_scroll_Options = EditorGUILayout.BeginScrollView(_scroll_Options, false, true, GUILayout.Width(width), GUILayout.Height(height - 30));
+			GUILayout.Space(5);
+		}
 
-				EditorGUILayout.BeginVertical(GUILayout.Width(width - 24));
-				GUILayout.Space(5);
 
-				width -= 24;
 
-				// 2. Option에 대한 UI
-				//1. Gamma Space Space			
-				bool prevBakeGamma = _editor._isBakeColorSpaceToGamma;
-				int iPrevColorSpace = prevBakeGamma ? 0 : 1;
-				int iNextColorSpace = EditorGUILayout.Popup(_editor.GetUIWord(UIWORD.ColorSpace), iPrevColorSpace, _colorSpaceNames);
-				if (iNextColorSpace != iPrevColorSpace)
+
+
+		// 1. Bake에 대한 UI
+		private void Draw_BakeTab(int width, int height)
+		{
+			GUILayout.Space(5);
+
+			if (_guiContent_BakeBtn_Normal == null)
+			{
+				_guiContent_BakeBtn_Normal = apGUIContentWrapper.Make(4, _editor.GetText(TEXT.DLG_Bake), _editor.ImageSet.Get(apImageSet.PRESET.BakeBtn_Normal));
+			}
+			if (_guiContent_BakeBtn_Optimized == null)
+			{
+				_guiContent_BakeBtn_Optimized = apGUIContentWrapper.Make(4, _editor.GetText(TEXT.DLG_OptimizedBakeTo), _editor.ImageSet.Get(apImageSet.PRESET.BakeBtn_Optimized));
+			}
+
+			//Bake 설정
+			//EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_BakeSetting));//"Bake Setting"
+			//GUILayout.Space(5);
+
+			EditorGUILayout.ObjectField(_editor.GetText(TEXT.DLG_Portrait), _targetPortrait, typeof(apPortrait), true);//"Portait"
+
+			GUILayout.Space(5);
+
+			//"Bake Scale"
+			float prevBakeScale = _targetPortrait._bakeScale;
+			_targetPortrait._bakeScale = EditorGUILayout.FloatField(_editor.GetText(TEXT.DLG_BakeScale), _targetPortrait._bakeScale);
+
+			//"Z Per Depth"
+			float prevBakeZSize = _targetPortrait._bakeZSize;
+			_targetPortrait._bakeZSize = EditorGUILayout.FloatField(_editor.GetText(TEXT.DLG_ZPerDepth), _targetPortrait._bakeZSize);
+
+			if (_targetPortrait._bakeZSize < 0.5f)
+			{
+				_targetPortrait._bakeZSize = 0.5f;
+			}
+
+			if (prevBakeScale != _targetPortrait._bakeScale ||
+				prevBakeZSize != _targetPortrait._bakeZSize)
+			{
+				apEditorUtil.SetEditorDirty();
+			}
+
+
+			//Bake 버튼
+			GUILayout.Space(10);
+
+
+			//[ Bake ] 기능 실행
+			if (GUILayout.Button(_guiContent_BakeBtn_Normal.Content, GUILayout.Height(45)))//"Bake"//_editor.GetText(TEXT.DLG_Bake)
+			{
+				GUI.FocusControl(null);
+
+				//CheckChangedProperties(nextRootScale, nextZScale);
+				apEditorUtil.SetEditorDirty();
+
+
+				//추가 22.1.7 : SRP 옵션이 적절한지 물어보고 자동으로 변경한다.
+				CheckSRPOption();
+
+
+				//-------------------------------------
+				// Bake 함수를 실행한다. << 중요오오오오
+				//-------------------------------------
+
+				apBakeResult bakeResult = _editor.Controller.Bake();
+
+				if (bakeResult != null)
 				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
+					_editor.Notification("[" + _targetPortrait.name + "] is Baked", false, false);
 
-					if (iNextColorSpace == 0)
+					if (bakeResult.NumUnlinkedExternalObject > 0)
 					{
-						//Gamma
-						_editor._isBakeColorSpaceToGamma = true;
+						EditorUtility.DisplayDialog(_editor.GetText(TEXT.BakeWarning_Title),
+							_editor.GetTextFormat(TEXT.BakeWarning_Body, bakeResult.NumUnlinkedExternalObject),
+							_editor.GetText(TEXT.Okay));
+					}
+
+					//추가 3.29 : Bake 후에 Ambient를 체크하자
+					CheckAmbientAndCorrection();
+
+					//추가 22.1.6 : Bake 후에 URP 설정 체크를 하자 > 일단 보류. 문제가 확인되지 않는다.
+					//CheckURP2022SettingsIfAnyClippedMeshes();
+
+					//추가 22.5.16 : Bake가 끝난 후에 자동으로 선택하자
+					Selection.activeGameObject = _targetPortrait.gameObject;
+				}
+				else
+				{
+					//추가 20.11.7 : Bake가 실패한 경우
+					_editor.Notification("Bake is canceled", false, false);
+				}
+
+
+			}
+
+
+			GUILayout.Space(10);
+			apEditorUtil.GUI_DelimeterBoxH(width - 10);
+			GUILayout.Space(10);
+
+
+			//최적화 Bake
+			EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_OptimizedBaking));//"Optimized Baking"
+
+			//"Target"
+			apPortrait nextOptPortrait = (apPortrait)EditorGUILayout.ObjectField(_editor.GetText(TEXT.DLG_Target), _targetPortrait._bakeTargetOptPortrait, typeof(apPortrait), true);
+
+			if (nextOptPortrait != _targetPortrait._bakeTargetOptPortrait)
+			{
+				//타겟을 바꾸었다.
+				bool isChanged = false;
+				if (nextOptPortrait != null)
+				{
+					//1. 다른 Portrait를 선택했다.
+					if (!nextOptPortrait._isOptimizedPortrait)
+					{
+						//1-1. 최적화된 객체가 아니다.
+						EditorUtility.DisplayDialog(_editor.GetText(TEXT.OptBakeError_Title),
+													_editor.GetText(TEXT.OptBakeError_NotOptTarget_Body),
+													_editor.GetText(TEXT.Close));
+					}
+					else if (nextOptPortrait._bakeSrcEditablePortrait != _targetPortrait)
+					{
+						//1-2. 다른 대상으로부터 Bake된 Portrait같다. (물어보고 계속)
+						bool isResult = EditorUtility.DisplayDialog(_editor.GetText(TEXT.OptBakeError_Title),
+													_editor.GetText(TEXT.OptBakeError_SrcMatchError_Body),
+													_editor.GetText(TEXT.Okay),
+													_editor.GetText(TEXT.Cancel));
+
+						if (isResult)
+						{
+							//뭐 선택하겠다는데요 뭐..
+							isChanged = true;
+
+						}
 					}
 					else
 					{
-						//Linear
-						_editor._isBakeColorSpaceToGamma = false;
+						//1-3. 오케이. 변경 가능
+						isChanged = true;
 					}
 				}
-
-				DrawDelimeter(width);
-
-				//2. Sorting Layer
-				int prevSortingLayerID = _editor._portrait._sortingLayerID;
-				int prevSortingOrder = _editor._portrait._sortingOrder;
-				apPortrait.SORTING_ORDER_OPTION prevSortingLayerOption = _editor._portrait._sortingOrderOption;
-
-				int layerIndex = -1;
-				for (int i = 0; i < SortingLayer.layers.Length; i++)
+				else
 				{
-					if (SortingLayer.layers[i].id == _editor._portrait._sortingLayerID)
-					{
-						//찾았다.
-						layerIndex = i;
-						break;
-					}
+					//2. 선택을 해제했다.
+					isChanged = true;
 				}
-				if (layerIndex < 0)
+
+				if (isChanged)
 				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
+					//Target을 변경한다.
+					apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
 														//null, 
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
 
-					//어라 레이어가 없는데용..
-					//초기화해야겠다.
-					_editor._portrait._sortingLayerID = -1;
-					if (SortingLayer.layers.Length > 0)
-					{
-						_editor._portrait._sortingLayerID = SortingLayer.layers[0].id;
-						layerIndex = 0;
-					}
+					_targetPortrait._bakeTargetOptPortrait = nextOptPortrait;
 				}
-				int nextIndex = EditorGUILayout.Popup(_editor.GetText(TEXT.SortingLayer), layerIndex, _sortingLayerNames);//"Sorting Layer"
-				if (nextIndex != layerIndex)
+
+			}
+
+			string optBtnText = "";
+			if (_targetPortrait._bakeTargetOptPortrait != null)
+			{
+				optBtnText = string.Format("{0}\n    [{1}]", _editor.GetText(TEXT.DLG_OptimizedBakeTo), _targetPortrait._bakeTargetOptPortrait.gameObject.name);
+			}
+			else
+			{
+				optBtnText = _editor.GetText(TEXT.DLG_OptimizedBakeMakeNew);
+			}
+
+			_guiContent_BakeBtn_Optimized.SetText(4, optBtnText);
+			GUILayout.Space(10);
+
+			// [ Optimized Bake ] 기능 실행
+			if (GUILayout.Button(_guiContent_BakeBtn_Optimized.Content, GUILayout.Height(45)))
+			{
+				GUI.FocusControl(null);
+
+				//CheckChangedProperties(nextRootScale, nextZScale);
+
+				//추가 22.1.7 : SRP 옵션이 적절한지 물어보고 자동으로 변경한다.
+				CheckSRPOption();
+
+
+				//Optimized Bake를 하자
+				apBakeResult bakeResult = _editor.Controller.Bake_Optimized(_targetPortrait, _targetPortrait._bakeTargetOptPortrait);
+
+				if (bakeResult != null)
 				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
+					if (bakeResult.NumUnlinkedExternalObject > 0)
+					{
+						EditorUtility.DisplayDialog(_editor.GetText(TEXT.BakeWarning_Title),
+							_editor.GetTextFormat(TEXT.BakeWarning_Body, bakeResult.NumUnlinkedExternalObject),
+							_editor.GetText(TEXT.Okay));
+					}
+
+					_editor.Notification("[" + _targetPortrait.name + "] is Baked (Optimized)", false, false);
+
+					//추가 3.29 : Bake 후에 Ambient를 체크하자
+					CheckAmbientAndCorrection();
+
+					//추가 22.1.6 : Bake 후에 URP 설정 체크를 하자 > 일단 보류. 문제가 확인되지 않는다.
+					//CheckURP2022SettingsIfAnyClippedMeshes();
+
+					if (_targetPortrait._bakeTargetOptPortrait != null)
+					{
+						//추가 22.5.16 : Bake가 끝난 후에 자동으로 선택하자
+						Selection.activeGameObject = _targetPortrait._bakeTargetOptPortrait.gameObject;
+					}
+
+				}
+				else
+				{
+					//Bake가 취소되었다. (20.11.7)
+					_editor.Notification("Bake is canceled (Optimized)", false, false);
+				}
+			}
+		}
+
+
+		// 2. Setting에 대한 UI
+		private void Draw_SettingTab(int width, int height)
+		{
+			//Vector2 curScroll = (_tab == TAB.Bake) ? _scroll_Bake : _scroll_Options;
+
+			Color prevColor = GUI.backgroundColor;
+
+			_scroll_Options = EditorGUILayout.BeginScrollView(_scroll_Options, false, true, GUILayout.Width(width), GUILayout.Height(height - 30));
+
+			EditorGUILayout.BeginVertical(GUILayout.Width(width - 24));
+			GUILayout.Space(5);
+
+			width -= 24;
+
+			// [ 프로젝트 설정 ]
+			DrawCategoryTitle(_editor.GetText(TEXT.DLG_Project), width, 0);//카테고리 타이틀
+
+
+
+			//1. Color Space [Gamma / Linear]
+			//bool prevBakeGamma = _editor._isBakeColorSpaceToGamma;//이전
+			bool prevBakeGamma = _editor.ProjectSettingData.Project_IsColorSpaceGamma;//변경 v1.4.2
+
+			int iPrevColorSpace = prevBakeGamma ? 0 : 1;
+			//int iNextColorSpace = EditorGUILayout.Popup(_editor.GetUIWord(UIWORD.ColorSpace), iPrevColorSpace, _colorSpaceNames);
+			int iNextColorSpace = Layout_Popup(_editor.GetUIWord(UIWORD.ColorSpace), iPrevColorSpace, _colorSpaceNames, width);
+			if (iNextColorSpace != iPrevColorSpace)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				if (iNextColorSpace == 0)
+				{
+					//Gamma
+					//_editor._isBakeColorSpaceToGamma = true;
+					_editor.ProjectSettingData.SetColorSpaceGamma(true);//변경 v1.4.2
+				}
+				else
+				{
+					//Linear
+					//_editor._isBakeColorSpaceToGamma = false;
+					_editor.ProjectSettingData.SetColorSpaceGamma(false);//변경 v1.4.2
+				}
+			}
+
+			
+
+			//7. LWRP / URP
+			//LWRP 쉐이더를 쓸지 여부와 다시 강제로 생성하기 버튼을 만들자. : 이건 2019부터 적용 (그 전에는 SRP용 처리가 안된다.)
+//#if UNITY_2019_1_OR_NEWER
+			
+			//DrawDelimeter(width);
+			//GUILayout.Space(10);
+
+			//bool prevUseLWRP = _editor._isUseSRP;//이전
+			bool prevUseLWRP = _editor.ProjectSettingData.Project_IsUseSRP;//변경 [v1.4.2]
+
+			int iPrevUseLWRP = prevUseLWRP ? 1 : 0;
+			int iNextUseLWRP = Layout_Popup(_editor.GetText(TEXT.RenderPipeline), iPrevUseLWRP, _renderPipelineNames, width);//"Render Pipeline"
+			if (iNextUseLWRP != iPrevUseLWRP)
+			{
+				//이건 Undo 대상이 아니다.
+				//apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
+				//									_editor, 
+				//									_targetPortrait, 
+				//									false, 
+				//									apEditorUtil.UNDO_STRUCT.ValueOnly);
+				if (iNextUseLWRP == 0)
+				{
+					//사용 안함
+					//_editor._isUseSRP = false;
+					_editor.ProjectSettingData.SetUseSRP(false);
+				}
+				else
+				{
+					//LWRP 사용함
+					//_editor._isUseSRP = true;
+					_editor.ProjectSettingData.SetUseSRP(true);//URP 활성
+				}
+
+				_editor.SaveEditorPref();
+			}
+
+//#endif
+
+			GUILayout.Space(10);
+
+			//11.7 추가 : Ambient Light를 검은색으로 만든다.
+			if (GUILayout.Button(_editor.GetText(TEXT.DLG_AmbientToBlack), GUILayout.Height(24)))
+			{
+				MakeAmbientLightToBlack();
+			}
+
+
+			GUILayout.Space(25);
+
+
+
+			// [ 포트레이트 설정 ]
+			DrawCategoryTitle(_editor.GetText(TEXT.DLG_Portrait), width, 1);//카테고리 타이틀
+
+			//사용자가 기본값으로서 저장된 값이 있는지 확인한다.
+			bool isDefaultSaved = _editor.ProjectSettingData.IsCommonSettingSaved;
+			
+
+			//2. Sorting Layer
+			int curSortingLayerIndex = FindSortingLayerIndex(_targetPortrait._sortingLayerID);
+			int commonSortingLayerIndex = -1;
+
+			if(isDefaultSaved)
+			{
+				commonSortingLayerIndex = FindSortingLayerIndex(_editor.ProjectSettingData.Common_SortingLayerID);
+			}
+			
+			if (curSortingLayerIndex < 0)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				//어라 레이어가 없는데용..
+				//초기화해야겠다.
+				_targetPortrait._sortingLayerID = -1;
+				if (SortingLayer.layers.Length > 0)
+				{
+					_targetPortrait._sortingLayerID = SortingLayer.layers[0].id;
+					curSortingLayerIndex = 0;
+				}
+
+				apEditorUtil.SetEditorDirty();
+			}
+			//Sorting Layer
+			int nextIndex = Layout_Popup(	_editor.GetText(TEXT.SortingLayer),
+											curSortingLayerIndex,
+											_sortingLayerNames,
+											width,
+											isDefaultSaved && commonSortingLayerIndex >= 0,
+											commonSortingLayerIndex);
+
+			if (nextIndex != curSortingLayerIndex)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+				//레이어가 변경되었다.
+				if (nextIndex >= 0 && nextIndex < SortingLayer.layers.Length)
+				{
+					//LayerID 변경
+					_targetPortrait._sortingLayerID = SortingLayer.layers[nextIndex].id;
+				}
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			//추가 19.8.18 : Sorting Order를 지정하는 방식을 3가지 + 미적용 1가지로 더 세분화
+			apPortrait.SORTING_ORDER_OPTION nextSortingLayerOption = (apPortrait.SORTING_ORDER_OPTION)Layout_EnumPopup(	_editor.GetText(TEXT.SortingOrderOption),
+																														_targetPortrait._sortingOrderOption,
+																														width,
+																														isDefaultSaved,
+																														_editor.ProjectSettingData.Common_SortingLayerOption);
+			if (nextSortingLayerOption != _targetPortrait._sortingOrderOption)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._sortingOrderOption = nextSortingLayerOption;
+				apEditorUtil.SetEditorDirty();
+			}
+
+			if (_targetPortrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.SetOrder)
+			{
+				//Set Order인 경우에만 한정
+				int nextOrder = Layout_Int(	_editor.GetText(TEXT.SortingOrder),
+											_targetPortrait._sortingOrder,
+											width,
+											isDefaultSaved,
+											_editor.ProjectSettingData.Common_SortingOrder);
+
+				if (nextOrder != _targetPortrait._sortingOrder)
+				{
+					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
 														//null, 
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
-					//레이어가 변경되었다.
-					if (nextIndex >= 0 && nextIndex < SortingLayer.layers.Length)
-					{
-						//LayerID 변경
-						_editor._portrait._sortingLayerID = SortingLayer.layers[nextIndex].id;
-					}
-				}
 
-				//추가 19.8.18 : Sorting Order를 지정하는 방식을 3가지 + 미적용 1가지로 더 세분화
-				apPortrait.SORTING_ORDER_OPTION nextSortingLayerOption = (apPortrait.SORTING_ORDER_OPTION)EditorGUILayout.EnumPopup(_editor.GetText(TEXT.SortingOrderOption), _editor._portrait._sortingOrderOption);
-				if (nextSortingLayerOption != _editor._portrait._sortingOrderOption)
+					_targetPortrait._sortingOrder = nextOrder;
+					apEditorUtil.SetEditorDirty();
+				}
+			}
+			else if (_targetPortrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.DepthToOrder
+				|| _targetPortrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.ReverseDepthToOrder)
+			{
+				//추가 21.1.31 : Depth To Order일때, 1씩만 증가하는게 아닌 더 큰값으로 증가할 수도 있게 만들자
+				int nextOrderPerDepth = Layout_Int(	_editor.GetText(TEXT.OrderPerDepth),
+													_targetPortrait._sortingOrderPerDepth,
+													width,
+													isDefaultSaved,
+													_editor.ProjectSettingData.Common_SortingOrderPerDepth);
+
+
+				if (nextOrderPerDepth != _targetPortrait._sortingOrderPerDepth)
 				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
+					if (nextOrderPerDepth < 1)
+					{
+						nextOrderPerDepth = 1;
+					}
+
+					apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
 														//null, 
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
 
-					_editor._portrait._sortingOrderOption = nextSortingLayerOption;
+					_targetPortrait._sortingOrderPerDepth = nextOrderPerDepth;
+					apEditorUtil.SetEditorDirty();
 				}
+			}
 
-				if (_editor._portrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.SetOrder)
-				{
-					//Set Order인 경우에만 한정
-					int nextOrder = EditorGUILayout.IntField(_editor.GetText(TEXT.SortingOrder), _editor._portrait._sortingOrder);//"Sorting Order"
-					if(nextOrder != _editor._portrait._sortingOrder)
-					{
-						apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-															_editor, 
-															_targetPortrait, 
-															//null, 
-															false,
-															apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-						_editor._portrait._sortingOrder = nextOrder;
-					}
-				}
-				else if(_editor._portrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.DepthToOrder 
-					|| _editor._portrait._sortingOrderOption == apPortrait.SORTING_ORDER_OPTION.ReverseDepthToOrder)
-				{
-					//추가 21.1.31 : Depth To Order일때, 1씩만 증가하는게 아닌 더 큰값으로 증가할 수도 있게 만들자
-					int nextOrderPerDepth = EditorGUILayout.IntField(_editor.GetText(TEXT.OrderPerDepth), _editor._portrait._sortingOrderPerDepth);
-					if(nextOrderPerDepth != _editor._portrait._sortingOrderPerDepth)
-					{
-						if(nextOrderPerDepth < 1)
-						{
-							nextOrderPerDepth = 1;
-						}
-
-						apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-															_editor, 
-															_targetPortrait, 
-															//null, 
-															false,
-															apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-						_editor._portrait._sortingOrderPerDepth = nextOrderPerDepth;
-					}
-				}
+			DrawDelimeter(width);
 
 
-				DrawDelimeter(width);
+			//3. 메카님 사용 여부
 
+			//변경 [v1.4.2]
+			bool nextIsUseMecanim = Layout_Toggle(	_editor.GetText(TEXT.IsMecanimAnimation),
+																_targetPortrait._isUsingMecanim,
+																width,
+																isDefaultSaved,
+																_editor.ProjectSettingData.Common_IsUsingMecanim);
 
-				//3. 메카님 사용 여부
+			if(nextIsUseMecanim != _targetPortrait._isUsingMecanim)
+			{
+				apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_BakeOptionChanged,
+													_editor,
+													_targetPortrait,
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
 
-				//EditorGUILayout.LabelField("Animation Settings");
-				bool prevIsUsingMecanim = _targetPortrait._isUsingMecanim;
-				string prevMecanimPath = _targetPortrait._mecanimAnimClipResourcePath;
-				_targetPortrait._isUsingMecanim = EditorGUILayout.Toggle(_editor.GetText(TEXT.IsMecanimAnimation), _targetPortrait._isUsingMecanim);//"Is Mecanim Animation"
+				_targetPortrait._isUsingMecanim = nextIsUseMecanim;
+				apEditorUtil.SetEditorDirty();
+			}
+			
+			if (_targetPortrait._isUsingMecanim)
+			{
 				EditorGUILayout.LabelField(_editor.GetText(TEXT.AnimationClipExportPath));//"Animation Clip Export Path"
-
 				GUIStyle guiStyle_ChangeBtn = new GUIStyle(GUI.skin.button);
 				guiStyle_ChangeBtn.margin = GUI.skin.textField.margin;
 				guiStyle_ChangeBtn.border = GUI.skin.textField.border;
 
 				EditorGUILayout.BeginHorizontal(GUILayout.Width(width), GUILayout.Height(20));
 				GUILayout.Space(5);
-				EditorGUILayout.TextField(_targetPortrait._mecanimAnimClipResourcePath, GUILayout.Width(width - (70 + 15)));
+
+				if(string.IsNullOrEmpty(_targetPortrait._mecanimAnimClipResourcePath))
+				{
+					GUI.backgroundColor = new Color(1.0f, 0.5f, 0.5f, 1.0f);
+				}
+
+				EditorGUILayout.TextField(_targetPortrait._mecanimAnimClipResourcePath, GUILayout.Width(width - (70 + 9)));
+
+				GUI.backgroundColor = prevColor;
+
 				if (GUILayout.Button(_editor.GetText(TEXT.DLG_Change), guiStyle_ChangeBtn, GUILayout.Width(70), GUILayout.Height(18)))
 				{
 					string nextPath = EditorUtility.SaveFolderPanel("Select to export animation clips", "", "");
@@ -595,7 +813,7 @@ namespace AnyPortrait
 							//중요 : 경로가 절대 경로로 찍힌다.
 							//상대 경로로 바꾸자
 							apEditorUtil.PATH_INFO_TYPE pathInfoType = apEditorUtil.GetPathInfo(nextPath);
-							if(pathInfoType == apEditorUtil.PATH_INFO_TYPE.Absolute_InAssetFolder)
+							if (pathInfoType == apEditorUtil.PATH_INFO_TYPE.Absolute_InAssetFolder)
 							{
 								//절대 경로 + Asset 폴더 안쪽이라면
 								//Debug.LogError("절대 경로가 리턴 되었다. : " + nextPath);
@@ -603,14 +821,14 @@ namespace AnyPortrait
 								//Debug.LogError(">> 상대 경로로 변경 : " + nextPath);
 							}
 
-							apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_BakeOptionChanged, 
-																_editor, 
-																_targetPortrait, 
-																//_targetPortrait, 
+							apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_BakeOptionChanged,
+																_editor,
+																_targetPortrait,
 																false,
 																apEditorUtil.UNDO_STRUCT.ValueOnly);
 
 							_targetPortrait._mecanimAnimClipResourcePath = nextPath;
+							apEditorUtil.SetEditorDirty();
 						}
 						else
 						{
@@ -626,46 +844,62 @@ namespace AnyPortrait
 					GUI.FocusControl(null);
 
 				}
+
+				
 				EditorGUILayout.EndHorizontal();
+			}
+			
+
+			DrawDelimeter(width);
+
+			if (_guiContent_Setting_IsImportant == null)
+			{
+				_guiContent_Setting_IsImportant = apGUIContentWrapper.Make(_editor.GetText(TEXT.DLG_Setting_IsImportant), false, "When this setting is on, it always updates and the physics effect works.");
+			}
+			if (_guiContent_Setting_FPS == null)
+			{
+				_guiContent_Setting_FPS = apGUIContentWrapper.Make(_editor.GetText(TEXT.DLG_Setting_FPS), false, "This setting is used when <Important> is off");
+			}
 
 
+
+			//4. Important
+			bool nextImportant = Layout_Toggle(	_guiContent_Setting_IsImportant.Content,
+												_targetPortrait._isImportant,
+												width,
+												isDefaultSaved,
+												_editor.ProjectSettingData.Common_IsImportant);
+
+			if (nextImportant != _targetPortrait._isImportant)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._isImportant = nextImportant;
+				apEditorUtil.SetEditorDirty();
+			}
+
+			//"FPS (Important Off)"
+			if (!_targetPortrait._isImportant)
+			{
+				//[1.4.2 변경] : Important가 꺼질 때에만 FPS가 보이도록 한다.
 				
+				//변경 [v1.4.2]
+				int nextFPS = Layout_DelayedInt(	_guiContent_Setting_FPS.Content,
+													_targetPortrait._FPS,
+													width,
+													isDefaultSaved,
+													_editor.ProjectSettingData.Common_FPS);
 
-				DrawDelimeter(width);
-
-				if(_guiContent_Setting_IsImportant == null)
-				{
-					_guiContent_Setting_IsImportant = apGUIContentWrapper.Make(_editor.GetText(TEXT.DLG_Setting_IsImportant), false, "When this setting is on, it always updates and the physics effect works.");
-				}
-				if(_guiContent_Setting_FPS == null)
-				{
-					_guiContent_Setting_FPS = apGUIContentWrapper.Make(_editor.GetText(TEXT.DLG_Setting_FPS), false, "This setting is used when <Important> is off");
-				}
-				
-				
-
-				//4. Important
-				//"Is Important"
-				bool nextImportant = EditorGUILayout.Toggle(_guiContent_Setting_IsImportant.Content, _targetPortrait._isImportant);
-				if(nextImportant != _targetPortrait._isImportant)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._isImportant = nextImportant;
-				}
-
-				//"FPS (Important Off)"
-				int nextFPS = EditorGUILayout.DelayedIntField(_guiContent_Setting_FPS.Content, _targetPortrait._FPS);
 				if (_targetPortrait._FPS != nextFPS)
 				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
+					apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
 														//null, 
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
@@ -674,295 +908,397 @@ namespace AnyPortrait
 						nextFPS = 10;
 					}
 					_targetPortrait._FPS = nextFPS;
-				}
-
-
-				DrawDelimeter(width);
-
-
-				//5. Billboard + Perspective
-				
-				apPortrait.BILLBOARD_TYPE nextBillboardType = (apPortrait.BILLBOARD_TYPE)EditorGUILayout.Popup(_editor.GetText(TEXT.DLG_Billboard), (int)_targetPortrait._billboardType, _billboardTypeNames);
-				if(nextBillboardType != _targetPortrait._billboardType)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._billboardType = nextBillboardType;
-				}
-		
-				//추가 19.9.24 : Billboard인 경우 카메라의 SortMode를 OrthoGraphic으로 강제할지 여부
-				if(_targetPortrait._billboardType != apPortrait.BILLBOARD_TYPE.None)
-				{
-					GUILayout.Space(2);
-					EditorGUILayout.BeginHorizontal(GUILayout.Width(width));
-
-					int width_Value = 30;
-					int width_Label = width - (width_Value + 10);
-					GUIStyle guiStyle_LabelWrapText = new GUIStyle(GUI.skin.label);
-					guiStyle_LabelWrapText.wordWrap = true;
-
-					GUILayout.Space(5);
-					EditorGUILayout.LabelField(_editor.GetText(TEXT.SetSortMode2Orthographic), guiStyle_LabelWrapText, GUILayout.Width(width_Label));
-
-					bool nextForceSortModeToOrtho = EditorGUILayout.Toggle(_targetPortrait._isForceCamSortModeToOrthographic, GUILayout.Width(width_Value), GUILayout.Height(20));
-					if(nextForceSortModeToOrtho != _targetPortrait._isForceCamSortModeToOrthographic)
-					{
-						apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-															_editor, 
-															_targetPortrait, 
-															//null, 
-															false,
-															apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-						_targetPortrait._isForceCamSortModeToOrthographic = nextForceSortModeToOrtho;
-					}
-
-					EditorGUILayout.EndHorizontal();
-					
-				}
-
-
-				DrawDelimeter(width);
-
-				//6. Shadow
-
-				apPortrait.SHADOW_CASTING_MODE nextChastShadows = (apPortrait.SHADOW_CASTING_MODE)EditorGUILayout.EnumPopup(_editor.GetUIWord(UIWORD.CastShadows), _targetPortrait._meshShadowCastingMode);
-				bool nextReceiveShaodw = EditorGUILayout.Toggle(_editor.GetUIWord(UIWORD.ReceiveShadows), _targetPortrait._meshReceiveShadow);
-				if(nextChastShadows != _targetPortrait._meshShadowCastingMode
-					|| nextReceiveShaodw != _targetPortrait._meshReceiveShadow)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._meshShadowCastingMode = nextChastShadows;
-					_targetPortrait._meshReceiveShadow = nextReceiveShaodw;
-				}
-
-				DrawDelimeter(width);
-
-				
-				//7. LWRP / URP
-				//LWRP 쉐이더를 쓸지 여부와 다시 강제로 생성하기 버튼을 만들자. : 이건 2019부터 적용 (그 전에는 SRP용 처리가 안된다.)
-#if UNITY_2019_1_OR_NEWER
-				bool prevUseLWRP = _editor._isUseSRP;
-				int iPrevUseLWRP = prevUseLWRP ? 1 : 0;
-				int iNextUseLWRP = EditorGUILayout.Popup(_editor.GetText(TEXT.RenderPipeline), iPrevUseLWRP, _renderPipelineNames);//"Render Pipeline"
-				if (iNextUseLWRP != iPrevUseLWRP)
-				{
-					//이건 Undo 대상이 아니다.
-					//apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-					//									_editor, 
-					//									_targetPortrait, 
-					//									false, 
-					//									apEditorUtil.UNDO_STRUCT.ValueOnly);
-					if (iNextUseLWRP == 0)
-					{
-						//사용 안함
-						_editor._isUseSRP = false;
-					}
-					else
-					{
-						//LWRP 사용함
-						_editor._isUseSRP = true;
-					}
-
-					_editor.SaveEditorPref();
-				}
-
-				DrawDelimeter(width);
-#endif
-				
-				
-
-				//8. VR Supported 19.9.24 추가
-				//VR Supported
-				int iNextVRSupported = EditorGUILayout.Popup(_editor.GetText(TEXT.VROption), (int)_targetPortrait._vrSupportMode, _vrSupportModeLabel);
-				if(iNextVRSupported != (int)_targetPortrait._vrSupportMode)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._vrSupportMode = (apPortrait.VR_SUPPORT_MODE)iNextVRSupported;
-				}
-
-				if(_targetPortrait._vrSupportMode == apPortrait.VR_SUPPORT_MODE.SingleCamera)
-				{
-					//Single Camera인 경우, Clipping Mask의 크기를 결정해야한다.
-					int iNextVRRTSize = EditorGUILayout.Popup(_editor.GetUIWord(UIWORD.MaskTextureSize), (int)_targetPortrait._vrRenderTextureSize, _vrRTSizeLabel);
-					if(iNextVRRTSize != (int)_targetPortrait._vrRenderTextureSize)
-					{
-						apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-															_editor, 
-															_targetPortrait, 
-															//null, 
-															false,
-															apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-						_targetPortrait._vrRenderTextureSize = (apPortrait.VR_RT_SIZE)iNextVRRTSize;
-					}
-
-				}
-
-
-				DrawDelimeter(width);
-
-
-				//추가 20.8.11 : Flipped Mesh를 체크하는 방법을 정하도록 만들자
-				int iNextFlippedMeshOption = EditorGUILayout.Popup(_editor.GetText(TEXT.Setting_FlippedMesh), (int)_targetPortrait._flippedMeshOption, _flippedMeshOptionLabel);
-				if(iNextFlippedMeshOption != (int)_targetPortrait._flippedMeshOption)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._flippedMeshOption = (apPortrait.FLIPPED_MESH_CHECK)iNextFlippedMeshOption;
-				}
-
-				DrawDelimeter(width);
-
-
-				//추가 20.8.14 : 루트 본의 스케일 옵션을 직접 정한다. [Skew 문제]
-				int iNextRootBoneScaleOption = EditorGUILayout.Popup(_editor.GetText(TEXT.Setting_ScaleOfRootBone), (int)_targetPortrait._rootBoneScaleMethod, _rootBoneScaleOptionLabel);
-				if(iNextRootBoneScaleOption != (int)_targetPortrait._rootBoneScaleMethod)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._rootBoneScaleMethod = (apPortrait.ROOT_BONE_SCALE_METHOD)iNextRootBoneScaleOption;
-
-					//모든 본에 대해서 ScaleOption을 적용해야한다.
-					_editor.Controller.RefreshBoneScaleMethod_Editor();
-				}
-
-				DrawDelimeter(width);
-
-
-				//추가 22.5.15 : 다음 애니메이션에서 컨트롤 파라미터가 지정되지 않은 경우, 이전의 컨트롤 파라미터 값을 어떻게 처리할 것인가
-				//"애니메이션 전환시 지정되지 않은 값의 처리"
-				EditorGUILayout.LabelField(_editor.GetText(TEXT.Setting_UnspecifiedValueInAnimTransition));
-				GUILayout.Space(5);
-
-				apPortrait.UNSPECIFIED_ANIM_CONTROL_PARAM nextUnspecifiedAnimControlParam = 
-					(apPortrait.UNSPECIFIED_ANIM_CONTROL_PARAM)EditorGUILayout.EnumPopup(_editor.GetUIWord(UIWORD.ControlParameter), _targetPortrait._unspecifiedAnimControlParamOption);
-
-				if(nextUnspecifiedAnimControlParam != _targetPortrait._unspecifiedAnimControlParamOption)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._unspecifiedAnimControlParamOption = nextUnspecifiedAnimControlParam;
-				}
-
-				DrawDelimeter(width);
-
-
-				//추가 22.7.7 : 텔레포트가 발생한 경우
-				//"물리 텔레포트 인식"
-				bool nextTeleportOption = EditorGUILayout.Toggle(_editor.GetText(TEXT.TeleportCalibration), _targetPortrait._isTeleportCorrectionOption);
-				if(nextTeleportOption != _targetPortrait._isTeleportCorrectionOption)
-				{
-					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-					_targetPortrait._isTeleportCorrectionOption = nextTeleportOption;
-
 					apEditorUtil.SetEditorDirty();
-					_editor.SaveEditorPref();
 				}
-				if(_targetPortrait._isTeleportCorrectionOption)
-				{
-					EditorGUI.BeginChangeCheck();
-					float nextTeleportDist = EditorGUILayout.DelayedFloatField(_editor.GetText(TEXT.Threshold), _targetPortrait._teleportMovementDist);
-					if(EditorGUI.EndChangeCheck())
-					{
-						if(Mathf.Abs(nextTeleportDist - _targetPortrait._teleportMovementDist) > 0.0001f)
-						{
-							apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Portrait_SettingChanged, 
-														_editor, 
-														_targetPortrait, 
-														//null, 
-														false,
-														apEditorUtil.UNDO_STRUCT.ValueOnly);
-
-							_targetPortrait._teleportMovementDist = nextTeleportDist;
-
-							if(_targetPortrait._teleportMovementDist < 0.1f)
-							{
-								_targetPortrait._teleportMovementDist = 0.1f;
-							}
-						}
-
-						apEditorUtil.SetEditorDirty();
-						_editor.SaveEditorPref();
-
-						apEditorUtil.ReleaseGUIFocus();
-					}
-				}
-
-
-				DrawDelimeter(width);
-
-				//11.7 추가 : Ambient Light를 검은색으로 만든다.
-				
-				if (GUILayout.Button(_editor.GetText(TEXT.DLG_AmbientToBlack), GUILayout.Height(20)))
-				{
-					MakeAmbientLightToBlack();
-				}
-
-				//CheckChangedProperties(nextRootScale, nextZScale);
-				if (prevSortingLayerID != _editor._portrait._sortingLayerID ||
-					prevSortingOrder != _editor._portrait._sortingOrder ||
-					prevSortingLayerOption != _editor._portrait._sortingOrderOption ||
-					prevIsUsingMecanim != _targetPortrait._isUsingMecanim ||
-					!string.Equals(prevMecanimPath, _targetPortrait._mecanimAnimClipResourcePath) ||
-					prevBakeGamma != _editor._isBakeColorSpaceToGamma
-#if UNITY_2019_1_OR_NEWER
-					 || prevUseLWRP != _editor._isUseSRP
-#endif
-					 )
-				{
-					apEditorUtil.SetEditorDirty();
-					_editor.SaveEditorPref();
-				}
-
-				GUILayout.Space(height + 500);
-				EditorGUILayout.EndVertical();
-
-				EditorGUILayout.EndScrollView();
 			}
 
-			GUILayout.Space(5);
-		}
-		
 
+			DrawDelimeter(width);
+
+
+			//5. Billboard + Perspective
+
+			//변경 [v1.4.2]
+			apPortrait.BILLBOARD_TYPE nextBillboardType = (apPortrait.BILLBOARD_TYPE)Layout_Popup(	_editor.GetText(TEXT.DLG_Billboard),
+																									(int)_targetPortrait._billboardType,
+																									_billboardTypeNames,
+																									width,
+																									isDefaultSaved,
+																									(int)_editor.ProjectSettingData.Common_BillboardOption);
+			if (nextBillboardType != _targetPortrait._billboardType)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._billboardType = nextBillboardType;
+				apEditorUtil.SetEditorDirty();
+			}
+
+			
+			//추가 19.9.24 : Billboard인 경우 카메라의 SortMode를 OrthoGraphic으로 강제할지 여부
+			if (_targetPortrait._billboardType != apPortrait.BILLBOARD_TYPE.None)
+			{
+				GUILayout.Space(2);
+
+				//변경 [1.4.2]
+				bool nextForceSortModeToOrtho = Layout_Toggle_WrapLabel(	_editor.GetText(TEXT.SetSortMode2Orthographic),
+																			_targetPortrait._isForceCamSortModeToOrthographic,
+																			width,
+																			isDefaultSaved,
+																			_editor.ProjectSettingData.Common_IsForceCamSortModeToOrthographic);
+
+				if (nextForceSortModeToOrtho != _targetPortrait._isForceCamSortModeToOrthographic)
+				{
+					apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
+														//null, 
+														false,
+														apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+					_targetPortrait._isForceCamSortModeToOrthographic = nextForceSortModeToOrtho;
+					apEditorUtil.SetEditorDirty();
+				}
+			}
+
+
+
+
+			DrawDelimeter(width);
+
+			//6. Shadow
+
+			//변경 1.4.2
+			apPortrait.SHADOW_CASTING_MODE nextChastShadows = (apPortrait.SHADOW_CASTING_MODE)Layout_EnumPopup(	_editor.GetUIWord(UIWORD.CastShadows),
+																												_targetPortrait._meshShadowCastingMode,
+																												width,
+																												isDefaultSaved,
+																												_editor.ProjectSettingData.Common_CastShadows);
+			
+			bool nextReceiveShaodw = Layout_Toggle(	_editor.GetUIWord(UIWORD.ReceiveShadows),
+													_targetPortrait._meshReceiveShadow,
+													width,
+													isDefaultSaved,
+													_editor.ProjectSettingData.Common_IsReceiveShadows);
+
+
+			if (nextChastShadows != _targetPortrait._meshShadowCastingMode
+				|| nextReceiveShaodw != _targetPortrait._meshReceiveShadow)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._meshShadowCastingMode = nextChastShadows;
+				_targetPortrait._meshReceiveShadow = nextReceiveShaodw;
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			
+
+			DrawDelimeter(width);
+
+
+			
+
+
+
+			//8. VR Supported 19.9.24 추가
+
+			//VR Supported
+			//변경 1.4.2
+			int iNextVRSupported = Layout_Popup(	_editor.GetText(TEXT.VROption),
+													(int)_targetPortrait._vrSupportMode,
+													_vrSupportModeLabel,
+													width,
+													isDefaultSaved,
+													(int)_editor.ProjectSettingData.Common_VRSupported);
+
+			if (iNextVRSupported != (int)_targetPortrait._vrSupportMode)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._vrSupportMode = (apPortrait.VR_SUPPORT_MODE)iNextVRSupported;
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			
+
+			if (_targetPortrait._vrSupportMode == apPortrait.VR_SUPPORT_MODE.SingleCamera)
+			{
+				//Single Camera인 경우, Clipping Mask의 크기를 결정해야한다.
+
+				//변경 1.4.2
+				int iNextVRRTSize = Layout_Popup(	_editor.GetUIWord(UIWORD.MaskTextureSize),
+													(int)_targetPortrait._vrRenderTextureSize,
+													_vrRTSizeLabel,
+													width,
+													isDefaultSaved,
+													(int)_editor.ProjectSettingData.Common_VRRenterTextureSize
+													);
+
+
+				if (iNextVRRTSize != (int)_targetPortrait._vrRenderTextureSize)
+				{
+					apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+														_editor,
+														_targetPortrait,
+														//null, 
+														false,
+														apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+					_targetPortrait._vrRenderTextureSize = (apPortrait.VR_RT_SIZE)iNextVRRTSize;
+
+					apEditorUtil.SetEditorDirty();
+				}
+			}
+
+
+			DrawDelimeter(width);
+
+
+
+
+
+
+			//추가 20.8.11 : Flipped Mesh를 체크하는 방법을 정하도록 만들자
+			//변경 1.4.2
+			int iNextFlippedMeshOption = Layout_Popup(	_editor.GetText(TEXT.Setting_FlippedMesh),
+														(int)_targetPortrait._flippedMeshOption,
+														_flippedMeshOptionLabel,
+														width,
+														isDefaultSaved,
+														(int)_editor.ProjectSettingData.Common_FlippedMeshOption
+														);
+
+
+			if (iNextFlippedMeshOption != (int)_targetPortrait._flippedMeshOption)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._flippedMeshOption = (apPortrait.FLIPPED_MESH_CHECK)iNextFlippedMeshOption;
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			
+			DrawDelimeter(width);
+
+
+			//추가 20.8.14 : 루트 본의 스케일 옵션을 직접 정한다. [Skew 문제]
+			//변경
+			int iNextRootBoneScaleOption = Layout_Popup(	_editor.GetText(TEXT.Setting_ScaleOfRootBone),
+															(int)_targetPortrait._rootBoneScaleMethod,
+															_rootBoneScaleOptionLabel,
+															width,
+															isDefaultSaved,
+															(int)_editor.ProjectSettingData.Common_RootBoneScaleMethod);
+			if (iNextRootBoneScaleOption != (int)_targetPortrait._rootBoneScaleMethod)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._rootBoneScaleMethod = (apPortrait.ROOT_BONE_SCALE_METHOD)iNextRootBoneScaleOption;
+
+				//모든 본에 대해서 ScaleOption을 적용해야한다.
+				_editor.Controller.RefreshBoneScaleMethod_Editor();
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			DrawDelimeter(width);
+
+
+			//추가 22.5.15 : 다음 애니메이션에서 컨트롤 파라미터가 지정되지 않은 경우, 이전의 컨트롤 파라미터 값을 어떻게 처리할 것인가
+			//"애니메이션 전환시 지정되지 않은 값의 처리"
+			EditorGUILayout.LabelField(_editor.GetText(TEXT.Setting_UnspecifiedValueInAnimTransition));
+			GUILayout.Space(5);
+
+			apPortrait.UNSPECIFIED_ANIM_CONTROL_PARAM nextUnspecifiedAnimControlParam =
+				(apPortrait.UNSPECIFIED_ANIM_CONTROL_PARAM)Layout_EnumPopup(	_editor.GetUIWord(UIWORD.ControlParameter),
+																				_targetPortrait._unspecifiedAnimControlParamOption,
+																				width,
+																				isDefaultSaved,
+																				_editor.ProjectSettingData.Common_UnspecifiedAnimControlParam);
+
+			if (nextUnspecifiedAnimControlParam != _targetPortrait._unspecifiedAnimControlParamOption)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._unspecifiedAnimControlParamOption = nextUnspecifiedAnimControlParam;
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+			DrawDelimeter(width);
+
+
+			//추가 22.7.7 : 텔레포트가 발생한 경우
+			//"물리 텔레포트 인식"
+			bool nextTeleportOption = Layout_Toggle(	_editor.GetText(TEXT.TeleportCalibration),
+														_targetPortrait._isTeleportCorrectionOption,
+														width,
+														isDefaultSaved,
+														_editor.ProjectSettingData.Common_TeleportCorrection);
+
+			if (nextTeleportOption != _targetPortrait._isTeleportCorrectionOption)
+			{
+				apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+				_targetPortrait._isTeleportCorrectionOption = nextTeleportOption;
+
+				apEditorUtil.SetEditorDirty();
+			}
+
+
+			if (_targetPortrait._isTeleportCorrectionOption)
+			{
+				bool isGUIChanged = false;
+				float nextTeleportDist = Layout_DelayedFloat(	_editor.GetText(TEXT.Threshold),
+																_targetPortrait._teleportMovementDist,
+																width,
+																isDefaultSaved,
+																_editor.ProjectSettingData.Common_TeleportDist,
+																out isGUIChanged);
+				if (isGUIChanged)
+				{
+					if (Mathf.Abs(nextTeleportDist - _targetPortrait._teleportMovementDist) > 0.0001f)
+					{
+						apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+						_targetPortrait._teleportMovementDist = nextTeleportDist;
+
+						if (_targetPortrait._teleportMovementDist < 0.1f)
+						{
+							_targetPortrait._teleportMovementDist = 0.1f;
+						}
+					}
+
+					apEditorUtil.SetEditorDirty();
+
+					apEditorUtil.ReleaseGUIFocus();
+				}
+			}
+
+
+			DrawDelimeter(width);
+
+			//현재 설정을 파일로 내보내기 [v1.4.2]
+			if(GUILayout.Button(_editor.GetText(TEXT.DLG_Bake_SaveSettingsAsDefault), GUILayout.Height(20)))
+			{
+				apProjectSettingData.SAVE_RESULT saveResult = _editor.ProjectSettingData.SetPortraitCommonSettings(_targetPortrait);
+
+				if(saveResult == apProjectSettingData.SAVE_RESULT.FileSaved)
+				{
+					//파일이 저장되었다.
+					EditorUtility.DisplayDialog(	_editor.GetText(TEXT.DLG_Bake_SaveSettingsSuccess_Title),
+													_editor.GetText(TEXT.DLG_Bake_SaveSettingsSuccess_Body),
+													_editor.GetText(TEXT.Okay));
+				}
+				else if(saveResult == apProjectSettingData.SAVE_RESULT.Failed)
+				{
+					//파일 저장에 실패했다.
+					EditorUtility.DisplayDialog(	_editor.GetText(TEXT.DLG_Bake_SaveSettingsFailed_Title),
+													_editor.GetText(TEXT.DLG_Bake_SaveSettingsFailed_Body),
+													_editor.GetText(TEXT.Okay));
+				}
+			}
+
+			//내보낸 설정이 있다면 메시지/삭제 버튼을 보여주자
+			if(_editor.ProjectSettingData.IsCommonSettingSaved)
+			{
+				GUI.backgroundColor = new Color(	GUI.backgroundColor.r * 0.8f,
+													GUI.backgroundColor.g * 1.2f,
+													GUI.backgroundColor.b * 1.5f,
+													1.0f);
+
+				GUILayout.Box(_editor.GetText(TEXT.DLG_Bake_SettingSavedMessage), _guiStyle_BoxMessage, GUILayout.Width(width), GUILayout.Height(30));
+
+				GUI.backgroundColor = prevColor;
+
+				//기본 설정 삭제하기
+				if(GUILayout.Button(_editor.GetText(TEXT.DLG_Bake_RemoveDefaultSettings), GUILayout.Height(20)))
+				{
+					int iBtn = EditorUtility.DisplayDialogComplex(	_editor.GetText(TEXT.DLG_Bake_RemoveSettings_Title),
+																	_editor.GetText(TEXT.DLG_Bake_RemoveSettings_Body),
+																	_editor.GetText(TEXT.DLG_Bake_RemoveSettings_Btn_OnlyFileInfo),
+																	_editor.GetText(TEXT.DLG_Bake_RemoveSettings_Btn_RemoveAll),
+																	_editor.GetText(TEXT.DLG_Cancel));
+
+					if (iBtn == 0)
+					{
+						//파일 기록만 삭제
+						_editor.ProjectSettingData.ClearCommonSettingsAndSave();
+					}
+					else if (iBtn == 1)
+					{
+						//파일 기록 삭제 후 초기화
+						_editor.ProjectSettingData.ClearCommonSettingsAndSave();
+
+						apEditorUtil.SetRecord_Portrait(apUndoGroupData.ACTION.Portrait_SettingChanged,
+													_editor,
+													_targetPortrait,
+													//null, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+						_editor.ProjectSettingData.ResetPortraitBakeSettings(_targetPortrait);
+					}
+				}
+			}
+
+
+
+			GUILayout.Space(height + 500);
+			EditorGUILayout.EndVertical();
+
+			EditorGUILayout.EndScrollView();
+		}
+
+
+
+
+
+		// Functions
+		//------------------------------------------------------------------------------
 		private void MakeAmbientLightToBlack()
 		{	
 			RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
@@ -1117,7 +1453,11 @@ namespace AnyPortrait
 
 			//서로 다르다.
 			//Default를 URP로 바꿔야 하는 경우
-			if(!_editor._isUseSRP && renderPipelineResult == apEditorUtil.RENDER_PIPELINE_ENV_RESULT.URP)
+			//bool isCurURPUsed = _editor._isUseSRP;//이전
+			bool isCurURPUsed = _editor.ProjectSettingData.Project_IsUseSRP;//변경 v1.4.2
+
+			if(!isCurURPUsed 
+				&& renderPipelineResult == apEditorUtil.RENDER_PIPELINE_ENV_RESULT.URP)
 			{
 				//Default > SRP 물어보기
 				int iBtn = EditorUtility.DisplayDialogComplex(
@@ -1131,8 +1471,13 @@ namespace AnyPortrait
 				if(iBtn == 0)
 				{
 					//변경한다. (-> SRP)
-					_editor._isUseSRP = true;
-					_editor.SaveEditorPref();
+
+					//이전
+					//_editor._isUseSRP = true;
+					//_editor.SaveEditorPref();
+
+					//변경 v1.4.2
+					_editor.ProjectSettingData.SetUseSRP(true);
 				}
 				else if(iBtn == 2)
 				{
@@ -1141,7 +1486,7 @@ namespace AnyPortrait
 					_editor.SaveEditorPref();
 				}
 			}
-			else if(_editor._isUseSRP && renderPipelineResult == apEditorUtil.RENDER_PIPELINE_ENV_RESULT.BuiltIn)
+			else if(isCurURPUsed && renderPipelineResult == apEditorUtil.RENDER_PIPELINE_ENV_RESULT.BuiltIn)
 			{
 				//URP를 Default로 바꿔야 하는 경우
 				//SRP > Default 물어보기
@@ -1156,8 +1501,13 @@ namespace AnyPortrait
 				if(iBtn == 0)
 				{
 					//변경한다. (-> Default)
-					_editor._isUseSRP = false;
-					_editor.SaveEditorPref();
+					
+					//이전
+					//_editor._isUseSRP = false;
+					//_editor.SaveEditorPref();
+
+					//변경 v1.4.2
+					_editor.ProjectSettingData.SetUseSRP(false);
 				}
 				else if(iBtn == 2)
 				{
@@ -1176,6 +1526,487 @@ namespace AnyPortrait
 			GUILayout.Space(10);
 			apEditorUtil.GUI_DelimeterBoxH(width);
 			GUILayout.Space(10);
+		}
+
+
+		private void DrawCategoryTitle(string strTitle, int width, int colorIndex)
+		{
+
+			Color prevColor = GUI.backgroundColor;
+
+			//파란색/녹색 계열 (진한색)
+			if (EditorGUIUtility.isProSkin)
+			{
+				if(colorIndex == 0)
+				{
+					GUI.backgroundColor = new Color(0.3f, 0.5f, 0.8f, 1.0f);
+				}
+				else
+				{
+					GUI.backgroundColor = new Color(0.3f, 0.8f, 0.5f, 1.0f);
+				}
+				
+			}
+			else
+			{
+				if(colorIndex == 0)
+				{
+					GUI.backgroundColor = new Color(0.2f, 0.4f, 0.7f, 1.0f);
+				}
+				else
+				{
+					GUI.backgroundColor = new Color(0.2f, 0.7f, 0.4f, 1.0f);
+				}
+				
+			}
+
+			//GUILayout.Space(10);
+			GUILayout.Box(strTitle, _guiStyle_Category, apGUILOFactory.I.Width(width), apGUILOFactory.I.Height(20));			
+			GUILayout.Space(10);
+
+			GUI.backgroundColor = prevColor;
+		}
+
+		private bool DrawSyncButton(int width)
+		{
+			GUILayout.Space(4);
+
+			GUILayout.BeginHorizontal(GUILayout.Width(width), GUILayout.Height(20));
+			GUILayout.Space(width - 32);
+
+			bool isBtn = GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile16px), _guiStyle_SyncBtn, GUILayout.Width(32), GUILayout.Height(16));
+
+			GUILayout.EndHorizontal();
+
+			return isBtn;
+		}
+
+
+
+		private int FindSortingLayerIndex(int targetLayerIndex)
+		{	
+			int nLayers = SortingLayer.layers != null ? SortingLayer.layers.Length : 0;
+			if(nLayers == 0)
+			{
+				return -1;
+			}
+			
+			for (int i = 0; i < SortingLayer.layers.Length; i++)
+			{
+				SortingLayer sortingLayer = SortingLayer.layers[i];
+				if (sortingLayer.id == targetLayerIndex)
+				{
+					//찾았다.
+					return i;
+				}
+			}
+
+			//못찾았당.. ㅜㅜ
+			return -1;
+		}
+
+
+
+		// UI 코드 래핑
+		//------------------------------------------------------------------
+		private const int LEFT_MARGIN = 5;
+		private const int LABEL_WIDTH = 175;
+		private const int LAYOUT_HEIGHT = 22;
+		private const int SYNC_BTN_WIDTH = 18;
+		private const int SYNC_BTN_HEIGHT = 18;
+
+		private int Layout_Popup(string strLabel, int curPopupIndex, string[] names, int width)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			EditorGUILayout.LabelField(strLabel, _guiStyle_Label_Default, GUILayout.Width(LABEL_WIDTH));
+			int result = EditorGUILayout.Popup(curPopupIndex, names, GUILayout.Width(valueWidth));
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+		//파일로 저장된 별도의 기본값이 있는 경우
+		private int Layout_Popup(string strLabel, int curPopupIndex, string[] names, int width, bool isDefaultSaved, int defaultIndex)
+		{
+			if (!isDefaultSaved)
+			{
+				return Layout_Popup(strLabel, curPopupIndex, names, width);
+			}
+			
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curPopupIndex != defaultIndex)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			EditorGUILayout.LabelField(	strLabel, 
+										(defaultIndex == curPopupIndex) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+										GUILayout.Width(LABEL_WIDTH));
+			
+			int result = EditorGUILayout.Popup(curPopupIndex, names, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultIndex;
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+
+		private Enum Layout_EnumPopup(string strLabel, Enum curEnumValue, int width)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			EditorGUILayout.LabelField(strLabel, _guiStyle_Label_Default, GUILayout.Width(LABEL_WIDTH));
+			Enum result = EditorGUILayout.EnumPopup(curEnumValue, GUILayout.Width(valueWidth));
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+		private Enum Layout_EnumPopup(string strLabel, Enum curEnumValue, int width, bool isDefaultSaved, Enum defaultValue)
+		{
+			if(!isDefaultSaved)
+			{
+				return Layout_EnumPopup(strLabel, curEnumValue, width);
+			}
+
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && !Enum.Equals(defaultValue, curEnumValue))
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+
+			EditorGUILayout.LabelField(	strLabel,
+										Enum.Equals(defaultValue, curEnumValue) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+										GUILayout.Width(LABEL_WIDTH));
+
+			Enum result = EditorGUILayout.EnumPopup(curEnumValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+
+		private int Layout_Int(	string strLabel,
+								int curValue,
+								int width,
+								bool isDefaultSaved,
+								int defaultValue)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curValue != defaultValue)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											(curValue == defaultValue) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											_guiStyle_Label_Default,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			int result = EditorGUILayout.IntField(curValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+					apEditorUtil.ReleaseGUIFocus();
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+		private int Layout_DelayedInt(	GUIContent labelContent,
+										int curValue,
+										int width,
+										bool isDefaultSaved,
+										int defaultValue)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curValue != defaultValue)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{
+				EditorGUILayout.LabelField(	labelContent,
+											(curValue == defaultValue) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	labelContent,
+											_guiStyle_Label_Default,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			int result = EditorGUILayout.DelayedIntField(curValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+					apEditorUtil.ReleaseGUIFocus();
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+		private float Layout_DelayedFloat(	string strLabel,
+											float curValue,
+											int width,
+											bool isDefaultSaved,
+											float defaultValue,
+											out bool isGUIChanged)
+		{
+			float bias = 0.001f;
+
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && Mathf.Abs(curValue - defaultValue) > bias)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+			isGUIChanged = false;
+
+			EditorGUI.BeginChangeCheck();
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											(Mathf.Abs(curValue - defaultValue) < bias) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											_guiStyle_Label_Default,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			float result = EditorGUILayout.DelayedFloatField(curValue, GUILayout.Width(valueWidth));
+
+			isGUIChanged = EditorGUI.EndChangeCheck();
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+					isGUIChanged = true;
+					apEditorUtil.ReleaseGUIFocus();
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+
+		private bool Layout_Toggle(	string strLabel,
+									bool curValue,
+									int width,
+									bool isDefaultSaved,
+									bool defaultValue)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curValue != defaultValue)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											(curValue == defaultValue) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											_guiStyle_Label_Default,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			bool result = EditorGUILayout.Toggle(curValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+				}
+			}
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+		private bool Layout_Toggle(	GUIContent labelContent,
+									bool curValue,
+									int width,
+									bool isDefaultSaved,
+									bool defaultValue)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curValue != defaultValue)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{
+				EditorGUILayout.LabelField(	labelContent,
+											(curValue == defaultValue) ? _guiStyle_Label_Default : _guiStyle_Label_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	labelContent,
+											_guiStyle_Label_Default,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			bool result = EditorGUILayout.Toggle(curValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+				}
+			}
+
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
+		}
+
+
+		private bool Layout_Toggle_WrapLabel(	string strLabel,
+												bool curValue,
+												int width,
+												bool isDefaultSaved,
+												bool defaultValue)
+		{
+			int valueWidth = width - (LEFT_MARGIN * 2 + LABEL_WIDTH);
+			bool isShowSyncBtn = false;
+			if(isDefaultSaved && curValue != defaultValue)
+			{
+				isShowSyncBtn = true;
+				valueWidth -= SYNC_BTN_WIDTH + 3;
+			}
+
+
+			EditorGUILayout.BeginHorizontal(GUILayout.Height(LAYOUT_HEIGHT), GUILayout.Width(width));
+			GUILayout.Space(LEFT_MARGIN);
+			if(isDefaultSaved)
+			{	
+				EditorGUILayout.LabelField(	strLabel,
+											(curValue == defaultValue) ? _guiStyle_LabelWrapText : _guiStyle_LabelWrapText_Changed,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			else
+			{
+				EditorGUILayout.LabelField(	strLabel,
+											_guiStyle_LabelWrapText,
+											GUILayout.Width(LABEL_WIDTH));
+			}
+			
+			bool result = EditorGUILayout.Toggle(curValue, GUILayout.Width(valueWidth));
+
+			if(isShowSyncBtn)
+			{
+				if(GUILayout.Button(_editor.ImageSet.Get(apImageSet.PRESET.SyncSettingToFile12px), _guiStyle_SyncBtn, GUILayout.Width(SYNC_BTN_WIDTH), GUILayout.Height(SYNC_BTN_HEIGHT)))
+				{
+					result = defaultValue;
+				}
+			}
+
+
+			EditorGUILayout.EndHorizontal();
+
+			return result;
 		}
 	}
 

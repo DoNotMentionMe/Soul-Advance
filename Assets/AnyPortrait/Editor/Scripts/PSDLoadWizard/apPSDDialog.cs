@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -127,7 +127,7 @@ namespace AnyPortrait
 		private apPSDLoader.BAKE_SIZE _bakeHeight = apPSDLoader.BAKE_SIZE.s1024;
 		private string _bakeDstFilePath = "";//저장될 기본 경로 (폴더만 지정한다. 나머지는 파일 + 이미지 번호)
 
-		private string _bakeDstFileRelativePath = "";
+		//private string _bakeDstFileRelativePath = "";
 		private int _bakeMaximumNumAtlas = 2;
 		private int _bakePadding = 4;
 		private bool _isBakeWarning = false;
@@ -1424,30 +1424,36 @@ namespace AnyPortrait
 					if(isSelected)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						Color prevColor = GUI.backgroundColor;
-
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
-
-
-						//GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
+						int yOffset = 0;
 						int xPos = (int)(_scroll_LayerCheckList.x + 0.5f);
+
+						//Color prevColor = GUI.backgroundColor;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
+
+
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1 + xPos, lastRect.y + 1, width + 10, itemHeight + 1), "");
+							//GUI.Box(new Rect(lastRect.x + 1 + xPos, lastRect.y + 1, width + 10, itemHeight + 1), "");
+							yOffset = 1;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1 + xPos, lastRect.y + 30, width + 10, itemHeight + 1), "");
+							//GUI.Box(new Rect(lastRect.x + 1 + xPos, lastRect.y + 30, width + 10, itemHeight + 1), "");
+							yOffset = 30;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1 + xPos + 1, lastRect.y + yOffset, width + 10 - 2, itemHeight + 1, apEditorUtil.UNIT_BG_STYLE.Main);
 					}
 
 					int level = curLayer._hierarchyLevel;
@@ -1874,29 +1880,36 @@ namespace AnyPortrait
 					if (_selectedBakeData == curBakeData)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						Color prevColor = GUI.backgroundColor;
 
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+						int yOffset = 0;
 
+						//Color prevColor = GUI.backgroundColor;
 
-						//GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
+
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width + 10, itemHeight), "");
+							yOffset = 1;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width + 10, itemHeight), "");
+							yOffset = 30;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1 + 1, lastRect.y + yOffset, width + 10 - 2, itemHeight, apEditorUtil.UNIT_BG_STYLE.Main);
 
 						curGUIStyle = guiStyle_Btn_Selected;
 					}
@@ -1956,7 +1969,7 @@ namespace AnyPortrait
 			GUILayout.Space(5);
 			EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_PSD_SavePath), GUILayout.Width(width));//"Save path"
 			EditorGUILayout.BeginHorizontal(GUILayout.Width(width));
-			string prev_bakeDstFilePath = _bakeDstFilePath;
+			//string prev_bakeDstFilePath = _bakeDstFilePath;
 
 			Color prevColor = GUI.backgroundColor;
 			if(string.IsNullOrEmpty(_bakeDstFilePath))
@@ -1991,13 +2004,13 @@ namespace AnyPortrait
 					if (isValidPath)
 					{
 						_bakeDstFilePath = resultPathFull;
-						_bakeDstFileRelativePath = resultPathRelative;
+						//_bakeDstFileRelativePath = resultPathRelative;
 					}
 					else
 					{
 						//유효하지 않다면, 상대 경로는 걍 Assets
 						_bakeDstFilePath = next_bakeDstFilePath;
-						_bakeDstFileRelativePath = "Assets";
+						//_bakeDstFileRelativePath = "Assets";
 					}
 				}
 			}
@@ -2005,45 +2018,28 @@ namespace AnyPortrait
 			{
 				if (IsGUIUsable)
 				{
-					string defaultPath = _bakeDstFileRelativePath;
-					if(string.IsNullOrEmpty(defaultPath))
+					//기본 경로
+					//이전
+					//string defaultPath = _bakeDstFileRelativePath;
+					//if(string.IsNullOrEmpty(defaultPath))
+					//{
+					//	defaultPath = "Assets";
+					//}
+
+					//변경 v1.4.2 (상대 경로 변수를 삭제했으므로, 매번 절대 경롤르 바탕으로 상대 경로를 만든다.)
+
+					string strFullPath = "";
+					string strRelativePath = "";
+					bool isValidDefaultPath = apEditorUtil.MakeRelativeDirectoryPathFromAssets(_bakeDstFilePath, ref strFullPath, ref strRelativePath);
+					
+					string defaultPath = "Assets";
+					if(isValidDefaultPath && !string.IsNullOrEmpty(strRelativePath))
 					{
-						defaultPath = "Assets";
+						defaultPath = strRelativePath;
 					}
 					
-					//이전
-					//_bakeDstFilePath = EditorUtility.SaveFolderPanel("Save Path Folder", defaultPath, "");
 					
 
-					//if (!_bakeDstFilePath.StartsWith(Application.dataPath))
-					//{
-
-					//	//EditorUtility.DisplayDialog("Bake Destination Path Error", "Bake Destination Path is have to be in Asset Folder", "Okay");
-					//	EditorUtility.DisplayDialog(_editor.GetText(TEXT.PSDBakeError_Title_WrongDst),
-					//									_editor.GetText(TEXT.PSDBakeError_Body_WrongDst),
-					//									_editor.GetText(TEXT.Close)
-					//									);
-
-					//	_bakeDstFilePath = "";
-					//	_bakeDstFileRelativePath = "";
-					//}
-					//else
-					//{
-					//	//앞의 걸 빼고 나면 (..../Assets) + ....가 된다.
-					//	//Relatives는 "Assets/..."로 시작해야한다.
-					//	int subStartLength = Application.dataPath.Length;
-					//	_bakeDstFileRelativePath = "Assets";
-					//	if (_bakeDstFilePath.Length > subStartLength)
-					//	{
-					//		_bakeDstFileRelativePath += _bakeDstFilePath.Substring(subStartLength);
-					//	}
-
-					//	//추가 21.7.3 : 이스케이프 문자 삭제
-					//	_bakeDstFilePath = apUtil.ConvertEscapeToPlainText(_bakeDstFilePath);
-					//	_bakeDstFileRelativePath = apUtil.ConvertEscapeToPlainText(_bakeDstFileRelativePath);
-					//}
-
-					//변경 22.7.1					
 					string nextPathFromDialog = EditorUtility.SaveFolderPanel("Save Path Folder", defaultPath, "");
 
 					if (!string.IsNullOrEmpty(nextPathFromDialog))
@@ -2054,7 +2050,7 @@ namespace AnyPortrait
 						if (isValidPath)
 						{
 							_bakeDstFilePath = resultPathFull;
-							_bakeDstFileRelativePath = resultPathRelative;
+							//_bakeDstFileRelativePath = resultPathRelative;//삭제 1.4.2
 						}
 						else
 						{
@@ -2065,7 +2061,7 @@ namespace AnyPortrait
 														);
 
 							_bakeDstFilePath = "";
-							_bakeDstFileRelativePath = "Assets";
+							//_bakeDstFileRelativePath = "Assets";//삭제 1.4.2
 						}
 					}
 					apEditorUtil.ReleaseGUIFocus();
@@ -2157,7 +2153,7 @@ namespace AnyPortrait
 				prev_bakeHeight != _bakeHeight ||
 				prev_bakeMaximumNumAtlas != _bakeMaximumNumAtlas ||
 				prev_bakePadding != _bakePadding ||
-				!string.Equals(prev_bakeDstFilePath, _bakeDstFilePath) ||
+				//!string.Equals(prev_bakeDstFilePath, _bakeDstFilePath) ||//삭제 1.4.2
 				prev_bakeBlurOption != _bakeBlurOption)
 			{
 				_isNeedBakeCheck = true;
@@ -2169,7 +2165,8 @@ namespace AnyPortrait
 				//CheckBakable();
 
 				//Calculate를 하자
-				_psdLoader.Step2_Calculate(_bakeDstFilePath, _bakeDstFileRelativePath,
+				_psdLoader.Step2_Calculate(
+					//_bakeDstFilePath, _bakeDstFileRelativePath,//삭제 1.4.2
 					 GetBakeSize(_bakeWidth), GetBakeSize(_bakeHeight),
 					_bakeMaximumNumAtlas, _bakePadding,
 					_bakeBlurOption,
@@ -2183,8 +2180,21 @@ namespace AnyPortrait
 			guiStyle_Result.alignment = TextAnchor.MiddleLeft;
 			guiStyle_Result.normal.textColor = apEditorUtil.BoxTextColor;
 
+			//경로가 지정되지 않은 경우 오류 메시지를 별도로 관리
+			if(string.IsNullOrEmpty(_bakeDstFilePath))
+			{
+				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
+				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;
+				guiStyle_WarningBox.normal.textColor = apEditorUtil.BoxTextColor;
 
-			if (_isBakeWarning)
+
+				GUI.backgroundColor = new Color(1.0f, 0.6f, 0.6f, 1.0f);
+
+				GUILayout.Box(_editor.GetText(TEXT.DLG_PSD_Warning) + "\n[Save Path] is Empty", guiStyle_WarningBox, GUILayout.Width(width), GUILayout.Height(70));//Warning
+
+				GUI.backgroundColor = prevColor;
+			}
+			else if (_isBakeWarning)
 			{
 				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
 				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;
@@ -2440,8 +2450,19 @@ namespace AnyPortrait
 							{
 								//이전 코드
 								//StartBakedImageSave();
-
-								_psdLoader.Step4_ConvertToAnyPortrait(OnConvertResult, null, null, null);
+								
+								//처리 실패시 에러가 나온다. [v1.4.2]
+								bool isSuccess = _psdLoader.Step4_ConvertToAnyPortrait(_bakeDstFilePath, OnConvertResult, null, null, null);
+								
+								if(!isSuccess)
+								{
+									//에러가 발생했다. (에러는 경로에 의해서만 발생한다.)
+									//경로가 유효하지 않다면 다시 설정해달라는 경고
+									EditorUtility.DisplayDialog(	_editor.GetText(TEXT.DLG_PSD_InvalidPath_Title),
+																	_editor.GetText(TEXT.DLG_PSD_InvalidPath_Body),
+																	_editor.GetText(TEXT.Okay));
+								}
+								
 							}
 
 						}
@@ -3441,6 +3462,12 @@ namespace AnyPortrait
 		{
 			if (_funcResult != null)
 			{
+				//상대 경로를 다시 계산한다. [v1.4.2]
+				string strFullPath = "";
+				string strRelativePath = "";
+				apEditorUtil.MakeRelativeDirectoryPathFromAssets(_bakeDstFilePath, ref strFullPath, ref strRelativePath);
+
+
 				if (isResult)
 				{
 					//이전 코드
@@ -3460,7 +3487,9 @@ namespace AnyPortrait
 									_bakeMaximumNumAtlas,
 									_bakeBlurOption,
 									_bakeDstFilePath,
-									_bakeDstFileRelativePath
+
+									//_bakeDstFileRelativePath//이전
+									strRelativePath//변경 v1.4.2
 									);
 				}
 				else
@@ -3482,7 +3511,10 @@ namespace AnyPortrait
 						_bakeMaximumNumAtlas,
 						_bakeBlurOption,
 						_bakeDstFilePath,
-						_bakeDstFileRelativePath);
+						
+						//_bakeDstFileRelativePath//이전
+						strRelativePath//변경 v1.4.2
+						);
 				}
 			}
 			//CloseDialog();

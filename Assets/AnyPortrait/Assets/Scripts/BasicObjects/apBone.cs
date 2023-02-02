@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -262,8 +262,8 @@ namespace AnyPortrait
 		public ShapePoints_V2 _shapePoints_V2_IK = new ShapePoints_V2();
 
 		//private const float BONE_V2_REAL_LENGTH_RATIO = 1.0083f;//GUI상의 길이는 아주 약간 더 길어야 한다.
-		private const float BONE_V2_REAL_LENGTH_RATIO = 1.0198f;//GUI상의 길이는 아주 약간 더 길어야 한다.
-		private const float BONE_V2_DEFAULT_LINE_THICKNESS = 4.0f;
+		public const float BONE_V2_REAL_LENGTH_RATIO = 1.0198f;//GUI상의 길이는 아주 약간 더 길어야 한다.
+		public const float BONE_V2_DEFAULT_LINE_THICKNESS = 4.0f;
 		
 
 
@@ -288,6 +288,7 @@ namespace AnyPortrait
 			public RenderSettings() { } 
 		}
 		private static RenderSettings s_boneRenderSettings = new RenderSettings();
+		//public static RenderSettings BoneRenderSettings { get { return s_boneRenderSettings; } }
 
 
 		private const float BONE_V1_DEFAULT_RADIUS_ORG = 10.0f;
@@ -321,6 +322,10 @@ namespace AnyPortrait
 				s_boneRenderSettings._widthHalf_V2 /= workspaceZoom;
 			}
 		}
+
+		public static float RenderSetting_ScaleRatio { get { return s_boneRenderSettings._scaleRatio; } }
+		public static bool RenderSetting_IsScaledByZoom { get { return s_boneRenderSettings._isScaledByZoom; } }
+		public static float RenderSetting_WorkspaceZoom { get { return s_boneRenderSettings._workspaceZoom; } }
 
 		public static float RenderSetting_V1_Radius_Org { get { return s_boneRenderSettings._radius_V1_Org; } }
 		public static float RenderSetting_V2_Radius_Org { get { return s_boneRenderSettings._radius_V2_Org; } }
@@ -3061,7 +3066,7 @@ namespace AnyPortrait
 		/// Rule의 값을 체크하면서 Visible의 타입을 결정한다.
 		/// </summary>
 		/// <param name="isVisible"></param>
-		public void SetGUIVisible_Tmp_ByCheckRule(bool isVisible)
+		public void SetGUIVisible_Tmp_ByCheckRule(bool isVisible, bool isChildRecursive)
 		{
 			//_isBoneGUIVisible = isVisible;
 			if(isVisible)
@@ -3091,6 +3096,62 @@ namespace AnyPortrait
 					//그 외에는 Hide로 강제
 					_visibleType_Tmp = GUI_VISIBLE_TYPE.Hide;
 				}
+			}
+
+			//v1.4.2 : 
+			if(isChildRecursive)
+			{
+				int nChildBones = _childBones != null ? _childBones.Count : 0;
+				if(nChildBones == 0)
+				{
+					return;
+				}
+
+				apBone childBone = null;
+				for (int i = 0; i < nChildBones; i++)
+				{
+					childBone = _childBones[i];
+					if(childBone == null 
+						|| childBone == this)
+					{
+						continue;
+					}
+					childBone.SetGUIVisible_Tmp_ByCheckRule_Recursive(isVisible, this);
+				}
+			}
+		}
+
+		/// <summary>SetGUIVisible_Tmp_ByCheckRule 함수의 자식 본으로의 재귀 함수. 내용은 SetGUIVisible_Tmp_ByCheckRule를 참고하자.</summary>
+		private void SetGUIVisible_Tmp_ByCheckRule_Recursive(bool isVisible, apBone startBone)
+		{
+			if(isVisible)
+			{
+				if(_visibleType_Rule == GUI_VISIBLE_TYPE.Hide) { _visibleType_Tmp = GUI_VISIBLE_TYPE.Show; }
+				else { _visibleType_Tmp = GUI_VISIBLE_TYPE.None; }
+			}
+			else
+			{
+				if(_visibleType_Rule == GUI_VISIBLE_TYPE.Hide) { _visibleType_Tmp = GUI_VISIBLE_TYPE.None; }
+				else { _visibleType_Tmp = GUI_VISIBLE_TYPE.Hide; }
+			}
+
+			int nChildBones = _childBones != null ? _childBones.Count : 0;
+			if(nChildBones == 0)
+			{
+				return;
+			}
+
+			apBone childBone = null;
+			for (int i = 0; i < nChildBones; i++)
+			{
+				childBone = _childBones[i];
+				if(childBone == null 
+					|| childBone == startBone
+					|| childBone == this)
+				{
+					continue;
+				}
+				childBone.SetGUIVisible_Tmp_ByCheckRule_Recursive(isVisible, startBone);
 			}
 		}
 

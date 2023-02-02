@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1869,6 +1869,16 @@ namespace AnyPortrait
 			//변경 21.7.7
 			tDelta = Time.unscaledDeltaTime;
 
+			//v1.4.2 : Delta 시간이 고정 업데이트 시간을 넘겼다면
+			//앱이 백그라운드에서 대기를 했거나 FPS가 크게 떨어진 경우
+			//최대 시간으로 고정한다.
+			if(tDelta > PHYSIC_DELTA_TIME)
+			{
+				//물리 시간이 너무 크게 발생 > 보정한다.
+				tDelta = PHYSIC_DELTA_TIME;
+				
+			}
+
 
 			//tDelta *= 0.5f;
 			bool isValidFrame = false;
@@ -1881,10 +1891,22 @@ namespace AnyPortrait
 				//Debug.Log("Delta Time : " + tDelta + " >> " + PHYSIC_DELTA_TIME);
 				tDelta = PHYSIC_DELTA_TIME;
 				_tDeltaFixed -= PHYSIC_DELTA_TIME;
+
+				//만약 제외해도 고정 시간을 넘겼다면, (프레임 시간이 순간 너무 컸을 수 있다.)
+				if(_tDeltaFixed > PHYSIC_DELTA_TIME)
+				{
+					while(_tDeltaFixed > PHYSIC_DELTA_TIME)
+					{
+						_tDeltaFixed -= PHYSIC_DELTA_TIME;
+					}
+				}
+
+
 				isValidFrame = true;
 			}
 			else
 			{
+				//현재 프레임은 고정 프레임 업데이트가 아닌 그 사이에 호출된 시간이다.
 				tDelta = 0.0f;
 				isValidFrame = false;
 			}
@@ -5920,6 +5942,15 @@ namespace AnyPortrait
 			//변경 21.7.7
 			tDelta = Time.unscaledDeltaTime;
 
+			//v1.4.2 : Delta 시간이 고정 업데이트 시간을 넘겼다면
+			//앱이 백그라운드에서 대기를 했거나 FPS가 크게 떨어진 경우
+			//최대 시간으로 고정한다.
+			if (tDelta > PHYSIC_DELTA_TIME)
+			{
+				//물리 시간이 너무 크게 발생
+				tDelta = PHYSIC_DELTA_TIME;
+			}
+
 			//tDelta *= 0.5f;
 			bool isValidFrame = false;
 			bool isTeleportFrame = false;//추가 22.7.8 : 위치가 갑자기 이동했다면, 로컬 위치 변화를 새로 계산하지 않고 유지해야한다.
@@ -5935,10 +5966,22 @@ namespace AnyPortrait
 				//Debug.Log("Delta Time : " + tDelta + " >> " + PHYSIC_DELTA_TIME);
 				tDelta = PHYSIC_DELTA_TIME;
 				_tDeltaFixed -= PHYSIC_DELTA_TIME;
+
+				//만약 제외해도 고정 시간을 넘겼다면, (프레임 시간이 순간 너무 컸을 수 있다.)
+				if (_tDeltaFixed > PHYSIC_DELTA_TIME)
+				{
+					while (_tDeltaFixed > PHYSIC_DELTA_TIME)
+					{
+						_tDeltaFixed -= PHYSIC_DELTA_TIME;
+					}
+				}
+
+
 				isValidFrame = true;
 			}
 			else
 			{
+				//현재 프레임은 고정 프레임 업데이트가 아닌 그 사이에 호출된 시간이다.
 				tDelta = 0.0f;
 				isValidFrame = false;
 			}
@@ -6003,20 +6046,42 @@ namespace AnyPortrait
 				//삭제 19.5.20 : 이 변수를 더이상 사용하지 않음
 				//weightedVertData = calParam._weightedVertexData;
 
-				//일단 초기화
-
-				
-				//배열 초기화 방식 변경
-				Array.Clear(posList, 0, tmpNumVert);
 
 				calParam._result_IsVisible = true;
+				calParam._isAvailable = true;
+
+				//버텍스가 0개라면 처리하지 않는다. [v1.4.2]
+				if(tmpNumVert == 0)
+				{
+					continue;
+				}
+
+				//초기화
+				Array.Clear(posList, 0, tmpNumVert);
 
 				int iCalculatedSubParam = 0;
 
+				bool isPhysicEnabled = _portrait._isPhysicsPlay_Opt && _portrait._isImportant;
+				
+#if IS_APDEMO
+				isPhysicEnabled = false;//데모 버전에서는 씬에서 물리 기능이 작동하지 않습니다.
+#endif
+
+				if(!isPhysicEnabled)
+				{
+					//물리가 켜지지 않았다면 처리하지 않는다.
+					continue;
+				}
+
+				int nSubParamGroups = subParamGroupList.Count;
+				if(nSubParamGroups == 0)
+				{
+					continue;
+				}
 
 				//SubList (ParamSetGroup을 키값으로 레이어화된 데이터)를 순회하면서 먼저 계산한다.
 				//레이어간 병합 과정에 신경 쓸것
-				for (int iSubList = 0; iSubList < subParamGroupList.Count; iSubList++)
+				for (int iSubList = 0; iSubList < nSubParamGroups; iSubList++)
 				{
 					curSubList = subParamGroupList[iSubList];
 
@@ -6030,260 +6095,192 @@ namespace AnyPortrait
 					int nParamKeys = curSubList._subParamKeyValues.Count;//Sub Params
 					subParamKeyValueList = curSubList._subParamKeyValues;
 
-
-
 					paramKeyValue = null;
 
 					keyParamSetGroup = curSubList._keyParamSetGroup;
 
-
-
-					bool isFirstParam = true;
+					//bool isFirstParam = true;//사용하지 않는값
 
 					//레이어 내부의 임시 데이터를 먼저 초기화
 					
 					//변경 21.5.22 : 배열 초기화 방식 변경
 					Array.Clear(tmpPosList, 0, tmpNumVert);
 
-
-					float totalWeight = 0.0f;
-					int nCalculated = 0;
+					//float totalWeight = 0.0f;
+					//int nCalculated = 0;//사용하지 않는값
 
 
 					//Param (MorphKey에 따라서)을 기준으로 데이터를 넣어준다.
 					//Dist에 따른 ParamWeight를 가중치로 적용한다.
-
 					for (int iPV = 0; iPV < nParamKeys; iPV++)
 					{
 						paramKeyValue = subParamKeyValueList[iPV];
 
 						//if (!paramKeyValue._isCalculated) { continue; }
 
-						totalWeight += paramKeyValue._weight;
-
-
+						//삭제 v1.4.2
+						//totalWeight += paramKeyValue._weight;
 
 						//물리 계산 순서
 						//Vertex 각각의 이전프레임으로 부터의 속력 계산
-						//
-						if (tmpNumVert > 0
-							&& _portrait._isPhysicsPlay_Opt//<<Portrait에서 지원하는 경우만
-							&& _portrait._isImportant//<<Important 설정이 붙은 객체만
+						
+						//ModMeshSet 버전
+						tmpSubModMesh_Physics = paramKeyValue._modifiedMeshSet.SubModMesh_Physics;
+						tmpPhysicMeshParam = tmpSubModMesh_Physics._physicMeshParam;
+						tmpModPhysicsVert = null;
 
-#if IS_APDEMO
-							&& false//데모 버전에서는 씬에서 물리 기능이 작동하지 않습니다.
-#endif
-							)
+						tmpMass = tmpPhysicMeshParam._mass;
+						if (tmpMass < 0.001f)
 						{
-							//기존 버전
-							//tmpModVertWeight = null;
-							//tmpPhysicVertParam = null;
-							//tmpPhysicMeshParam = paramKeyValue._modifiedMesh.PhysicParam;
-
-							//ModMeshSet 버전
-							tmpSubModMesh_Physics = paramKeyValue._modifiedMeshSet.SubModMesh_Physics;
-							tmpPhysicMeshParam = tmpSubModMesh_Physics._physicMeshParam;
-							tmpModPhysicsVert = null;
-
-
-							//tmpNumVert = posList.Length;
-							tmpMass = tmpPhysicMeshParam._mass;
-							if (tmpMass < 0.001f)
-							{
-								tmpMass = 0.001f;
-							}
+							tmpMass = 0.001f;
+						}
 							
-							//Vertex에 상관없이 적용되는 힘
-							// 중력, 바람
-							//1) 중력 : mg
-							tmpF_gravity = tmpMass * tmpPhysicMeshParam.GetGravityAcc();
+						//Vertex에 상관없이 적용되는 힘
+						// 중력, 바람
+						//1) 중력 : mg
+						tmpF_gravity = tmpMass * tmpPhysicMeshParam.GetGravityAcc();
 
-							//2) 바람 : ma
-							tmpF_wind = tmpMass * tmpPhysicMeshParam.GetWindAcc(tDelta);
+						//2) 바람 : ma
+						tmpF_wind = tmpMass * tmpPhysicMeshParam.GetWindAcc(tDelta);
 
+						tmpF_stretch = Vector2.zero;
+						//tmpF_airDrag = Vector2.zero;
+
+						//tmpF_inertia = Vector2.zero;
+						tmpF_recover = Vector2.zero;
+						tmpF_ext = Vector2.zero;
+						tmpF_sum = Vector2.zero;
+
+						//tmpLinkedVert = null;//<<이전
+						tmpLinkedPhysicVert = null;//<<변경
+
+						tmpIsViscosity = tmpPhysicMeshParam._viscosity > 0.0f;
+
+
+						//수정
+						// "잡아 당기는 코드"를 미리 만들고, Weight를 지정한다.
+						//Weight에 따라서 힘의 결과가 속도로 계산되는 비율이 결정된다.
+						//Touch Weight가 클수록 Velocity는 0이 된다.
+
+
+						//Debug.Log("Wind : " + tmpF_wind + " / Gravity : " + tmpF_gravity);
+						//---------------------------- Pos List
+
+						//bool isFirstDebug = true;
+						//int iDebugLog = -1;
+						bool isTouchCalculated = false;
+						float touchCalculatedWeight = 0.0f;
+						Vector2 touchCalculatedDeltaPos = Vector2.zero;
+
+						for (int iPos = 0; iPos < tmpNumVert; iPos++)
+						{
+							//여기서 물리 계산을 하자
+								
+							//ModMeshSet용
+							tmpModPhysicsVert = tmpSubModMesh_Physics._vertWeights[iPos];
+							tmpModPhysicsVert.UpdatePhysicVertex(tDelta, isValidFrame, isTeleportFrame);//버텍스 위치 연산
 
 							tmpF_stretch = Vector2.zero;
-							//tmpF_airDrag = Vector2.zero;
 
-							//tmpF_inertia = Vector2.zero;
 							tmpF_recover = Vector2.zero;
 							tmpF_ext = Vector2.zero;
 							tmpF_sum = Vector2.zero;
 
-							//tmpLinkedVert = null;//<<이전
-							tmpLinkedPhysicVert = null;//<<변경
-
-							tmpIsViscosity = tmpPhysicMeshParam._viscosity > 0.0f;
-
-
-							//수정
-							// "잡아 당기는 코드"를 미리 만들고, Weight를 지정한다.
-							//Weight에 따라서 힘의 결과가 속도로 계산되는 비율이 결정된다.
-							//Touch Weight가 클수록 Velocity는 0이 된다.
-
-
-							//Debug.Log("Wind : " + tmpF_wind + " / Gravity : " + tmpF_gravity);
-							//---------------------------- Pos List
-
-							//bool isFirstDebug = true;
-							//int iDebugLog = -1;
-							bool isTouchCalculated = false;
-							float touchCalculatedWeight = 0.0f;
-							Vector2 touchCalculatedDeltaPos = Vector2.zero;
-
-							for (int iPos = 0; iPos < tmpNumVert; iPos++)
+							if (!tmpModPhysicsVert._isEnabled)
 							{
-								//여기서 물리 계산을 하자
-								
-								//ModMeshSet용
-								tmpModPhysicsVert = tmpSubModMesh_Physics._vertWeights[iPos];
-								tmpModPhysicsVert.UpdatePhysicVertex(tDelta, isValidFrame, isTeleportFrame);//버텍스 위치 연산
+								//계산하지 않음
+								tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
+								continue;
+							}
+							if (tmpModPhysicsVert._vertex == null)
+							{
+								break;
+							}
 
-								tmpF_stretch = Vector2.zero;
+							//이 버텍스와 연결된 다른 버텍스 개수[v1.4.2]
+							int nLinkedVertCount = tmpModPhysicsVert._linkedVertices.Count;
 
-								tmpF_recover = Vector2.zero;
-								tmpF_ext = Vector2.zero;
-								tmpF_sum = Vector2.zero;
+							//최적화는 나중에 하고 일단 업데이트만이라도 하자
+							tmpModPhysicsVert._isLimitPos = false;
+							tmpModPhysicsVert._limitScale = -1.0f;
 
-								if (!tmpModPhysicsVert._isEnabled)
+							//터치 이벤트 초기화
+							isTouchCalculated = false;
+							touchCalculatedWeight = 0.0f;
+							touchCalculatedDeltaPos = Vector2.zero;
+
+							//"잡아 당김"을 구현하자
+							if (isExtTouchProcessing)
+							{
+								Vector2 pullTouchPos = Vector2.zero;
+								float pullTouchTotalWeight = 0.0f;
+								//Weight를 새로 갱신하자
+								for (int i = 0; i < apForceManager.MAX_TOUCH_UNIT; i++)
 								{
-									//계산하지 않음
-									tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
-									continue;
-								}
-								if (tmpModPhysicsVert._vertex == null)
-								{
-									break;
-								}
+									apPullTouch touch = _portrait.GetTouch(i);
+									Vector2 touchPos = touch.Position;
+									//touchPos *= -1;
 
-								//최적화는 나중에 하고 일단 업데이트만이라도 하자
-								//이전
-								//tmpPhysicVertParam = tmpModVertWeight._physicParam;
-
-								//변경 : PhysicVertParam 자체가 없다.
-
-								//이전
-								//tmpModVertWeight._isLimitPos = false;
-								//tmpModVertWeight._limitScale = -1.0f;
-
-								//변경
-								tmpModPhysicsVert._isLimitPos = false;
-								tmpModPhysicsVert._limitScale = -1.0f;
-
-								//터치 이벤트 초기화
-								isTouchCalculated = false;
-								touchCalculatedWeight = 0.0f;
-								touchCalculatedDeltaPos = Vector2.zero;
-
-								//"잡아 당김"을 구현하자
-								if (isExtTouchProcessing)
-								{
-									Vector2 pullTouchPos = Vector2.zero;
-									float pullTouchTotalWeight = 0.0f;
-									//Weight를 새로 갱신하자
-									for (int i = 0; i < apForceManager.MAX_TOUCH_UNIT; i++)
+									if (isExtTouchWeightRefresh)
 									{
-										apPullTouch touch = _portrait.GetTouch(i);
-										Vector2 touchPos = touch.Position;
-										//touchPos *= -1;
-
-										if (isExtTouchWeightRefresh)
-										{
-											if (touch.IsLive)
-											{
-												//pos 1F 위치에 의한 Weight를 새로 갱신해야한다.
-												//이전
-												//tmpModVertWeight._touchedWeight[i] = touch.GetTouchedWeight(tmpModVertWeight._pos_1F);
-												//tmpModVertWeight._touchedPosDelta[i] = tmpModVertWeight._pos_1F - touch.Position;
-
-												//변경
-												tmpModPhysicsVert._touchedWeight[i] = touch.GetTouchedWeight(tmpModPhysicsVert._pos_1F);
-												tmpModPhysicsVert._touchedPosDelta[i] = tmpModPhysicsVert._pos_1F - touch.Position;
-											}
-											else
-											{
-												//이전
-												//tmpModVertWeight._touchedWeight[i] = -1.0f;//Weight를 초기화
-
-												//변경
-												tmpModPhysicsVert._touchedWeight[i] = -1.0f;//Weight를 초기화
-											}
-										}
-
 										if (touch.IsLive)
 										{
-											//Weight를 이용하여 보간을 하자
-											//이후 누적 후 평균값을 넣자
-											//이전
-											//pullTouchPos += (tmpModVertWeight._touchedPosDelta[i] + touch.Position - tmpModVertWeight._pos_1F) * tmpModVertWeight._touchedWeight[i];
-											//pullTouchTotalWeight += tmpModVertWeight._touchedWeight[i];
-
-											//변경
-											pullTouchPos += (tmpModPhysicsVert._touchedPosDelta[i] + touch.Position - tmpModPhysicsVert._pos_1F) * tmpModPhysicsVert._touchedWeight[i];
-											pullTouchTotalWeight += tmpModPhysicsVert._touchedWeight[i];
+											//pos 1F 위치에 의한 Weight를 새로 갱신해야한다.
+											tmpModPhysicsVert._touchedWeight[i] = touch.GetTouchedWeight(tmpModPhysicsVert._pos_1F);
+											tmpModPhysicsVert._touchedPosDelta[i] = tmpModPhysicsVert._pos_1F - touch.Position;
+										}
+										else
+										{
+											tmpModPhysicsVert._touchedWeight[i] = -1.0f;//Weight를 초기화
 										}
 									}
 
-									if (pullTouchTotalWeight > 0.0f)
+									if (touch.IsLive)
 									{
-										pullTouchPos /= pullTouchTotalWeight;
-
-										//이전
-										//pullTouchPos = paramKeyValue._modifiedMesh._targetTransform._rootUnit._transform.InverseTransformVector(pullTouchPos);
-
-										//변경
-										pullTouchPos = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(pullTouchPos);
-
-										pullTouchPos.x = -pullTouchPos.x;
-										pullTouchPos.y = -pullTouchPos.y;
-
-										float itpPull = Mathf.Clamp01(pullTouchTotalWeight);
-
-										//Debug.Log("Touch DeltaPos (" + pullTouchTotalWeight + ") " + limitedNextCalPos + " >> " + pullTouchPos + " / ITP : " + itpPull);
-
-										touchCalculatedDeltaPos = pullTouchPos;
-										isTouchCalculated = true;
-										touchCalculatedWeight = itpPull;
-
-
+										//Weight를 이용하여 보간을 하자
+										//이후 누적 후 평균값을 넣자
+										pullTouchPos += (tmpModPhysicsVert._touchedPosDelta[i] + touch.Position - tmpModPhysicsVert._pos_1F) * tmpModPhysicsVert._touchedWeight[i];
+										pullTouchTotalWeight += tmpModPhysicsVert._touchedWeight[i];
 									}
 								}
 
-
-								//추가
-								//> 유효한 프레임 : 물리 계산을 한다.
-								//> 생략하는 프레임 : 이전 속도를 그대로 이용한다.
-								if (isValidFrame)
+								if (pullTouchTotalWeight > 0.0f)
 								{
+									pullTouchPos /= pullTouchTotalWeight;
+
+									pullTouchPos = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(pullTouchPos);
+
+									pullTouchPos.x = -pullTouchPos.x;
+									pullTouchPos.y = -pullTouchPos.y;
+
+									float itpPull = Mathf.Clamp01(pullTouchTotalWeight);
+
+									touchCalculatedDeltaPos = pullTouchPos;
+									isTouchCalculated = true;
+									touchCalculatedWeight = itpPull;
 
 
-									tmpF_stretch = Vector2.zero;
+								}
+							}
 
 
-									//1) 장력 Strech : -k * (<delta Dist> * 기존 UnitVector)
+							//추가
+							//> 유효한 프레임 : 물리 계산을 한다.
+							//> 생략하는 프레임 : 이전 속도를 그대로 이용한다.
+							if (isValidFrame)
+							{
+								tmpF_stretch = Vector2.zero;
 
 
-									//for (int iLinkVert = 0; iLinkVert < tmpPhysicVertParam._linkedVertices.Count; iLinkVert++)//이전
-
-									for (int iLinkVert = 0; iLinkVert < tmpModPhysicsVert._linkedVertices.Count; iLinkVert++)//변경
+								//1) 장력 Strech : -k * (<delta Dist> * 기존 UnitVector)
+								
+								
+								if (nLinkedVertCount > 0)
+								{
+									for (int iLinkVert = 0; iLinkVert < nLinkedVertCount; iLinkVert++)//변경
 									{
-										//tmpLinkedVert = tmpPhysicVertParam._linkedVertices[iLinkVert];//이전
-										tmpLinkedPhysicVert = tmpModPhysicsVert._linkedVertices[iLinkVert];//이전
+										tmpLinkedPhysicVert = tmpModPhysicsVert._linkedVertices[iLinkVert];
 
-										//이전
-										//float linkWeight = tmpLinkedVert._distWeight;
-
-										//tmpSrcVertPos_NoMod = tmpModVertWeight._pos_World_NoMod;
-										//tmpLinkVertPos_NoMod = tmpLinkedVert._modVertWeight._pos_World_NoMod;
-										//tmpLinkedVert._deltaPosToTarget_NoMod = tmpSrcVertPos_NoMod - tmpLinkVertPos_NoMod;
-
-										//tmpSrcVertPos_Cur = tmpModVertWeight._pos_World_LocalTransform;
-										//tmpLinkVertPos_Cur = tmpLinkedVert._modVertWeight._pos_World_LocalTransform;
-
-										//tmpDeltaVec_0 = tmpSrcVertPos_NoMod - tmpLinkVertPos_NoMod;
-										//tmpDeltaVec_Cur = tmpSrcVertPos_Cur - tmpLinkVertPos_Cur;
-
-										//변경
 										float linkWeight = tmpLinkedPhysicVert._distWeight;
 
 										tmpSrcVertPos_NoMod = tmpModPhysicsVert._pos_World_NoMod;
@@ -6313,450 +6310,316 @@ namespace AnyPortrait
 											//정상 면
 											tmpF_stretch += -1.0f * tmpPhysicMeshParam._stretchK * (tmpDeltaVec_Cur.magnitude - tmpDeltaVec_0.magnitude) * tmpDeltaVec_Cur.normalized * linkWeight;
 										}
-
-
-
 									}
-									tmpF_stretch *= -1;//<<위치기반인 경우 좌표계가 반대여서 -1을 넣는다. <<< 이게 왜이리 힘들던지;;
+								}
+								tmpF_stretch *= -1;//<<위치기반인 경우 좌표계가 반대여서 -1을 넣는다. <<< 이게 왜이리 힘들던지;;
 
 
-									//3) 공기 저항 : "현재 이동 방향의 반대 방향"
-									//..삭제됨
+								//3) 공기 저항 : "현재 이동 방향의 반대 방향"
+								//..삭제됨
 
 
-									//5) 복원력
-									//tmpF_recover = -1.0f * tmpPhysicMeshParam._restoring * tmpModVertWeight._calculatedDeltaPos;//이전
-									tmpF_recover = -1.0f * tmpPhysicMeshParam._restoring * tmpModPhysicsVert._calculatedDeltaPos;//변경
+								//5) 복원력
+								tmpF_recover = -1.0f * tmpPhysicMeshParam._restoring * tmpModPhysicsVert._calculatedDeltaPos;//변경
+
+								//변동
+								//중력과 바람은 크기는 그대로 두고, 방향은 World였다고 가정
+								//Local로 오기 위해서는 Inverse를 해야한다.
+								float gravitySize = tmpF_gravity.magnitude;
+								float windSize = tmpF_wind.magnitude;
+								Vector2 tmpF_gravityL = Vector2.zero;
+								Vector2 tmpF_windL = Vector2.zero;
+								if (gravitySize > 0.0f)
+								{
+									tmpF_gravityL = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_gravity.normalized).normalized * gravitySize;
+
+									tmpF_gravityL.y = -tmpF_gravityL.y;
+									tmpF_gravityL.x = -tmpF_gravityL.x;
+								}
+								if (windSize > 0.0f)
+								{
+									tmpF_windL = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_wind.normalized).normalized * windSize;
+
+									tmpF_windL.y = -tmpF_windL.y;
+									tmpF_windL.x = -tmpF_windL.x;
+								}
+
+								//6) 추가 : 외부 힘
+								if (_portrait.IsAnyForceEvent)
+								{
+									//이전 프레임에서의 힘을 이용한다.
+									//해당 위치가 Local이고, 요청된 힘은 World이다.
+									//World로 계산한 뒤의 위치를 잡자...는 이미 World였네요.
+									//그대로 하고, 힘만 로컬로 바구면 될 듯
+
+									Vector2 F_extW = _portrait.GetForce(tmpModPhysicsVert._pos_1F);//변경
+
+									float powerSize = F_extW.magnitude;
+
+									tmpF_ext = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(F_extW).normalized * powerSize;
+
+									tmpF_ext.x = -tmpF_ext.x;
+									tmpF_ext.y = -tmpF_ext.y;
+								}
+
+								float inertiaK = Mathf.Clamp01(tmpPhysicMeshParam._inertiaK);
+
+								//5) 힘의 합력을 구한다.
+								//-------------------------------------------
+								if (tmpModPhysicsVert._isMain)
+								{
+									tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + tmpF_recover + tmpF_ext;//관성 제외 (중력, 바람 W2L) - 공기 저항 제외
+								}
+								else
+								{
+									tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + ((tmpF_recover + tmpF_ext) * 0.5f);//관성 제외 (중력, 바람 W2L) - 공기저항 제외
+
+									inertiaK *= 0.5f;//<<관성 감소
+								}
+
+								//-------------------------------------------
+
+
+								if (isTouchCalculated)
+								{
+									tmpF_sum *= (1.0f - touchCalculatedWeight);
+								}
+
+								//F = ma
+								//a = F / m
+								//Vector2 acc = F_sum / mass;
+
+								//S = vt + S0
+								//-------------------------------
+
+
+								//<<수정>>
+								tmpModPhysicsVert._velocity_Next =
+										tmpModPhysicsVert._velocity_1F
+										+ (tmpModPhysicsVert._velocity_1F - tmpModPhysicsVert._velocity_Real) * inertiaK
+										+ (tmpF_sum / tmpMass) * tDelta
+										;
+
+
+								//Air Drag식 수정
+								if (tmpPhysicMeshParam._airDrag > 0.0f)
+								{
+									tmpModPhysicsVert._velocity_Next *= Mathf.Clamp01((1.0f - (tmpPhysicMeshParam._airDrag * tDelta) / (tmpMass + 0.5f)));
+								}
+								//-------------------------------
+							}
+							else
+							{
+								tmpModPhysicsVert._velocity_Next = tmpModPhysicsVert._velocity_1F;//변경
+							}
 
 
 
-									//변동
-									//중력과 바람은 크기는 그대로 두고, 방향은 World였다고 가정
-									//Local로 오기 위해서는 Inverse를 해야한다.
-									float gravitySize = tmpF_gravity.magnitude;
-									float windSize = tmpF_wind.magnitude;
-									Vector2 tmpF_gravityL = Vector2.zero;
-									Vector2 tmpF_windL = Vector2.zero;
-									if (gravitySize > 0.0f)
+							//여기서 일단 속력을 미리 적용하자
+							if (isValidFrame)
+							{
+								tmpNextVelocity = tmpModPhysicsVert._velocity_Next;
+
+								Vector2 limitedNextCalPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);//변경
+
+								//터치 이벤트에 의해서 속도가 보간된다.
+								if (isTouchCalculated)
+								{
+									limitedNextCalPos = (limitedNextCalPos * (1.0f - touchCalculatedWeight)) + (touchCalculatedDeltaPos * touchCalculatedWeight);
+
+									tmpNextVelocity = (limitedNextCalPos - tmpModPhysicsVert._calculatedDeltaPos) / tDelta;//변경
+								}
+
+								//V += at
+								//마음대로 증가하지 않도록 한다.
+								if (tmpPhysicMeshParam._isRestrictMoveRange)
+								{
+									float radiusFree = tmpPhysicMeshParam._moveRange * 0.5f;
+									float radiusMax = tmpPhysicMeshParam._moveRange;
+
+									if (radiusMax <= radiusFree)
 									{
-										//이전
-										//tmpF_gravityL = paramKeyValue._modifiedMesh._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_gravity.normalized).normalized * gravitySize;
-										//변경
-										tmpF_gravityL = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_gravity.normalized).normalized * gravitySize;
-
-										tmpF_gravityL.y = -tmpF_gravityL.y;
-										tmpF_gravityL.x = -tmpF_gravityL.x;
-									}
-									if (windSize > 0.0f)
-									{
-										//이전
-										//tmpF_windL = paramKeyValue._modifiedMesh._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_wind.normalized).normalized * windSize;
-										//변경
-										tmpF_windL = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(tmpF_wind.normalized).normalized * windSize;
-
-										tmpF_windL.y = -tmpF_windL.y;
-										tmpF_windL.x = -tmpF_windL.x;
-									}
-
-									//6) 추가 : 외부 힘
-									if (_portrait.IsAnyForceEvent)
-									{
-										//이전 프레임에서의 힘을 이용한다.
-										//해당 위치가 Local이고, 요청된 힘은 World이다.
-										//World로 계산한 뒤의 위치를 잡자...는 이미 World였네요.
-										//그대로 하고, 힘만 로컬로 바구면 될 듯
-
-										//Vector2 F_extW = _portrait.GetForce(tmpModVertWeight._pos_1F);//이전
-										Vector2 F_extW = _portrait.GetForce(tmpModPhysicsVert._pos_1F);//변경
-
-										float powerSize = F_extW.magnitude;
-
-										//이전
-										//tmpF_ext = paramKeyValue._modifiedMesh._targetTransform._rootUnit._transform.InverseTransformVector(F_extW).normalized * powerSize;
-										//변경
-										tmpF_ext = paramKeyValue._modifiedMeshSet._targetTransform._rootUnit._transform.InverseTransformVector(F_extW).normalized * powerSize;
-
-										tmpF_ext.x = -tmpF_ext.x;
-										tmpF_ext.y = -tmpF_ext.y;
-									}
-
-									float inertiaK = Mathf.Clamp01(tmpPhysicMeshParam._inertiaK);
-
-									//5) 힘의 합력을 구한다.
-									//-------------------------------------------
-									//이전
-									//if (tmpModVertWeight._physicParam._isMain)
-									//{
-									//	tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + tmpF_recover + tmpF_ext;//관성 제외 (중력, 바람 W2L) - 공기 저항 제외
-									//}
-									//else
-									//{
-									//	tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + ((tmpF_recover + tmpF_ext) * 0.5f);//관성 제외 (중력, 바람 W2L) - 공기저항 제외
-
-									//	inertiaK *= 0.5f;//<<관성 감소
-									//}
-
-
-									if (tmpModPhysicsVert._isMain)
-									{
-										tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + tmpF_recover + tmpF_ext;//관성 제외 (중력, 바람 W2L) - 공기 저항 제외
+										tmpNextVelocity *= 0.0f;
+										//둘다 0이라면 아예 이동이 불가
+										if (!tmpModPhysicsVert._isLimitPos)
+										{
+											tmpModPhysicsVert._isLimitPos = true;
+											tmpModPhysicsVert._limitScale = 0.0f;
+										}
 									}
 									else
 									{
-										tmpF_sum = tmpF_gravityL + tmpF_windL + tmpF_stretch + ((tmpF_recover + tmpF_ext) * 0.5f);//관성 제외 (중력, 바람 W2L) - 공기저항 제외
+										float curDeltaPosSize = (limitedNextCalPos).magnitude;
 
-										inertiaK *= 0.5f;//<<관성 감소
-									}
-
-
-
-									//-------------------------------------------
-
-
-									if (isTouchCalculated)
-									{
-										tmpF_sum *= (1.0f - touchCalculatedWeight);
-									}
-
-									//F = ma
-									//a = F / m
-									//Vector2 acc = F_sum / mass;
-
-									//S = vt + S0
-									//-------------------------------
-
-
-									//<<수정>>
-									//이전
-									//tmpModVertWeight._velocity_Next = 
-									//		tmpModVertWeight._velocity_1F 
-									//		+ (tmpModVertWeight._velocity_1F - tmpModVertWeight._velocity_Real) * inertiaK
-									//		+ (tmpF_sum / tmpMass) * tDelta											
-									//		;
-
-									//변경
-									tmpModPhysicsVert._velocity_Next =
-											tmpModPhysicsVert._velocity_1F
-											+ (tmpModPhysicsVert._velocity_1F - tmpModPhysicsVert._velocity_Real) * inertiaK
-											+ (tmpF_sum / tmpMass) * tDelta
-											;
-
-
-									//Air Drag식 수정
-									if (tmpPhysicMeshParam._airDrag > 0.0f)
-									{
-										//이전
-										//tmpModVertWeight._velocity_Next *= Mathf.Clamp01((1.0f - (tmpPhysicMeshParam._airDrag * tDelta) / (tmpMass + 0.5f)));
-
-										//변경
-										tmpModPhysicsVert._velocity_Next *= Mathf.Clamp01((1.0f - (tmpPhysicMeshParam._airDrag * tDelta) / (tmpMass + 0.5f)));
-									}
-									//-------------------------------
-								}
-								else
-								{
-									//-------------------------------------
-									//tmpModVertWeight._velocity_Next = tmpModVertWeight._velocity_1F;//이전
-									tmpModPhysicsVert._velocity_Next = tmpModPhysicsVert._velocity_1F;//변경
-																									  //-------------------------------------
-								}
-
-
-
-								//변경.
-								//여기서 일단 속력을 미리 적용하자
-								if (isValidFrame)
-								{
-									//tmpNextVelocity = tmpModVertWeight._velocity_Next;//이전
-									tmpNextVelocity = tmpModPhysicsVert._velocity_Next;//변경
-
-									//Vector2 limitedNextCalPos = tmpModVertWeight._calculatedDeltaPos + (tmpNextVelocity * tDelta);//이전
-									Vector2 limitedNextCalPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);//변경
-
-									//터치 이벤트에 의해서 속도가 보간된다.
-									if (isTouchCalculated)
-									{
-										limitedNextCalPos = (limitedNextCalPos * (1.0f - touchCalculatedWeight)) + (touchCalculatedDeltaPos * touchCalculatedWeight);
-
-										//tmpNextVelocity = (limitedNextCalPos - tmpModVertWeight._calculatedDeltaPos) / tDelta;//이전
-										tmpNextVelocity = (limitedNextCalPos - tmpModPhysicsVert._calculatedDeltaPos) / tDelta;//변경
-									}
-
-									//V += at
-									//마음대로 증가하지 않도록 한다.
-									if (tmpPhysicMeshParam._isRestrictMoveRange)
-									{
-										float radiusFree = tmpPhysicMeshParam._moveRange * 0.5f;
-										float radiusMax = tmpPhysicMeshParam._moveRange;
-
-										if (radiusMax <= radiusFree)
+										if (curDeltaPosSize < radiusFree)
 										{
-											tmpNextVelocity *= 0.0f;
-											//둘다 0이라면 아예 이동이 불가
-											//이전
-											//if (!tmpModVertWeight._isLimitPos)
-											//{
-											//	tmpModVertWeight._isLimitPos = true;
-											//	tmpModVertWeight._limitScale = 0.0f;
-											//}
-
-											if (!tmpModPhysicsVert._isLimitPos)
-											{
-												tmpModPhysicsVert._isLimitPos = true;
-												tmpModPhysicsVert._limitScale = 0.0f;
-											}
+											//moveRatio = 1.0f;
+											//별일 없슴다
 										}
 										else
 										{
-											float curDeltaPosSize = (limitedNextCalPos).magnitude;
+											//기본은 선형의 사이즈이지만,
+											//돌아가는 힘은 유지해야한다.
+											//[deltaPos unitVector dot newVelocity] = 1일때 : 바깥으로 나가려는 힘
+											// = -1일때 : 안으로 들어오려는 힘
+											// -1 ~ 1 => 0 ~ 1 : 0이면 moveRatio가 1, 1이면 moveRatio가 거리에 따라 1>0
 
-											if (curDeltaPosSize < radiusFree)
+											float dotVector = Vector2.Dot(tmpModPhysicsVert._calculatedDeltaPos.normalized, tmpNextVelocity.normalized);
+
+											dotVector = (dotVector * 0.5f) + 0.5f; //0: 속도 느려짐 없음 (안쪽으로 들어가려고 함), 1:증가하는 방향
+
+											float outerItp = Mathf.Clamp01((curDeltaPosSize - radiusFree) / (radiusMax - radiusFree));//0 : 속도 느려짐 없음, 1:속도 0
+
+											tmpNextVelocity *= Mathf.Clamp01(1.0f - (dotVector * outerItp));//적절히 느려지게 만들자
+
+											if (curDeltaPosSize > radiusMax)
 											{
-												//moveRatio = 1.0f;
-												//별일 없슴다
-											}
-											else
-											{
-												//기본은 선형의 사이즈이지만,
-												//돌아가는 힘은 유지해야한다.
-												//[deltaPos unitVector dot newVelocity] = 1일때 : 바깥으로 나가려는 힘
-												// = -1일때 : 안으로 들어오려는 힘
-												// -1 ~ 1 => 0 ~ 1 : 0이면 moveRatio가 1, 1이면 moveRatio가 거리에 따라 1>0
-
-												//float dotVector = Vector2.Dot(tmpModVertWeight._calculatedDeltaPos.normalized, tmpNextVelocity.normalized);//이전
-												float dotVector = Vector2.Dot(tmpModPhysicsVert._calculatedDeltaPos.normalized, tmpNextVelocity.normalized);//변경
-
-												dotVector = (dotVector * 0.5f) + 0.5f; //0: 속도 느려짐 없음 (안쪽으로 들어가려고 함), 1:증가하는 방향
-
-												float outerItp = Mathf.Clamp01((curDeltaPosSize - radiusFree) / (radiusMax - radiusFree));//0 : 속도 느려짐 없음, 1:속도 0
-
-												tmpNextVelocity *= Mathf.Clamp01(1.0f - (dotVector * outerItp));//적절히 느려지게 만들자
-
-												if (curDeltaPosSize > radiusMax)
+												if (!tmpModPhysicsVert._isLimitPos || radiusMax < tmpModPhysicsVert._limitScale)
 												{
-													//이전
-													//if (!tmpModVertWeight._isLimitPos || radiusMax < tmpModVertWeight._limitScale)
-													//{
-													//	tmpModVertWeight._isLimitPos = true;
-													//	tmpModVertWeight._limitScale = radiusMax;
-													//}
-
-													//변경
-													if (!tmpModPhysicsVert._isLimitPos || radiusMax < tmpModPhysicsVert._limitScale)
-													{
-														tmpModPhysicsVert._isLimitPos = true;
-														tmpModPhysicsVert._limitScale = radiusMax;
-													}
+													tmpModPhysicsVert._isLimitPos = true;
+													tmpModPhysicsVert._limitScale = radiusMax;
 												}
 											}
 										}
 									}
+								}
 
-									//장력에 의한 길이 제한도 처리한다.
-									if (tmpPhysicMeshParam._isRestrictStretchRange)
+								//장력에 의한 길이 제한도 처리한다.
+								if (tmpPhysicMeshParam._isRestrictStretchRange && nLinkedVertCount > 0)
+								{
+									bool isLimitVelocity2Max = false;
+									Vector2 stretchLimitPos = Vector2.zero;
+									float limitCalPosDist = 0.0f;
+
+									for (int iLinkVert = 0; iLinkVert < nLinkedVertCount; iLinkVert++)
 									{
+										tmpLinkedPhysicVert = tmpModPhysicsVert._linkedVertices[iLinkVert];
 
-										bool isLimitVelocity2Max = false;
-										Vector2 stretchLimitPos = Vector2.zero;
-										float limitCalPosDist = 0.0f;
+										//길이의 Min/Max가 있다.
+										float distStretchBase = tmpLinkedPhysicVert._deltaPosToTarget_NoMod.magnitude;
 
-										//for (int iLinkVert = 0; iLinkVert < tmpPhysicVertParam._linkedVertices.Count; iLinkVert++)//이전
-										for (int iLinkVert = 0; iLinkVert < tmpModPhysicsVert._linkedVertices.Count; iLinkVert++)//변경
+										float stretchRangeMax = (tmpPhysicMeshParam._stretchRangeRatio_Max) * distStretchBase;
+										float stretchRangeMax_Half = (tmpPhysicMeshParam._stretchRangeRatio_Max * 0.5f) * distStretchBase;
+
+										Vector2 curDeltaFromLinkVert = limitedNextCalPos - tmpLinkedPhysicVert._modVertWeight._calculatedDeltaPos_Prev;
+
+										float curDistFromLinkVert = curDeltaFromLinkVert.magnitude;
+
+										//너무 멀면 제한한다.
+										//단, 제한 권장은 Weight에 맞게
+
+										isLimitVelocity2Max = false;
+
+										if (curDistFromLinkVert > stretchRangeMax_Half)
 										{
-											//tmpLinkedVert = tmpPhysicVertParam._linkedVertices[iLinkVert];//이전
-											tmpLinkedPhysicVert = tmpModPhysicsVert._linkedVertices[iLinkVert];//변경
+											isLimitVelocity2Max = true;//늘어나는 한계점으로 이동하는 중
 
-											//길이의 Min/Max가 있다.
-											//float distStretchBase = tmpLinkedVert._deltaPosToTarget_NoMod.magnitude;//이전
-											float distStretchBase = tmpLinkedPhysicVert._deltaPosToTarget_NoMod.magnitude;//변경
-
-											float stretchRangeMax = (tmpPhysicMeshParam._stretchRangeRatio_Max) * distStretchBase;
-											float stretchRangeMax_Half = (tmpPhysicMeshParam._stretchRangeRatio_Max * 0.5f) * distStretchBase;
-
-											//Vector2 curDeltaFromLinkVert = limitedNextCalPos - tmpLinkedVert._modVertWeight._calculatedDeltaPos_Prev;//이전
-											Vector2 curDeltaFromLinkVert = limitedNextCalPos - tmpLinkedPhysicVert._modVertWeight._calculatedDeltaPos_Prev;//변경
-
-											float curDistFromLinkVert = curDeltaFromLinkVert.magnitude;
-
-											//너무 멀면 제한한다.
-											//단, 제한 권장은 Weight에 맞게
-
-											//float weight = Mathf.Clamp01(tmpLinkedVert._distWeight);
-											isLimitVelocity2Max = false;
-
-											if (curDistFromLinkVert > stretchRangeMax_Half)
-											{
-												isLimitVelocity2Max = true;//늘어나는 한계점으로 이동하는 중
-																		   //이전
-																		   //stretchLimitPos = tmpLinkedVert._modVertWeight._calculatedDeltaPos_Prev + curDeltaFromLinkVert.normalized * stretchRangeMax;
-																		   //stretchLimitPos -= tmpModVertWeight._calculatedDeltaPos_Prev;
-
-												//변경
-												stretchLimitPos = tmpLinkedPhysicVert._modVertWeight._calculatedDeltaPos_Prev + curDeltaFromLinkVert.normalized * stretchRangeMax;
-												stretchLimitPos -= tmpModPhysicsVert._calculatedDeltaPos_Prev;
+											stretchLimitPos = tmpLinkedPhysicVert._modVertWeight._calculatedDeltaPos_Prev + curDeltaFromLinkVert.normalized * stretchRangeMax;
+											stretchLimitPos -= tmpModPhysicsVert._calculatedDeltaPos_Prev;
 
 
-												limitCalPosDist = (stretchLimitPos).magnitude;
-											}
+											limitCalPosDist = (stretchLimitPos).magnitude;
+										}
 
+										if (isLimitVelocity2Max)
+										{
+											//LinkVert간의 벡터를 기준으로 nextVelocity가 확대/축소하는 방향이라면 그 반대의 값을 넣는다.
+											float dotVector = Vector2.Dot(curDeltaFromLinkVert.normalized, tmpNextVelocity.normalized);
+											//-1 : 축소하려는 방향으로 이동하는 중
+											//1 : 확대하려는 방향으로 이동하는 중
+
+
+											float outerItp = 0.0f;
 											if (isLimitVelocity2Max)
 											{
-												//LinkVert간의 벡터를 기준으로 nextVelocity가 확대/축소하는 방향이라면 그 반대의 값을 넣는다.
-												float dotVector = Vector2.Dot(curDeltaFromLinkVert.normalized, tmpNextVelocity.normalized);
-												//-1 : 축소하려는 방향으로 이동하는 중
-												//1 : 확대하려는 방향으로 이동하는 중
-
-
-												float outerItp = 0.0f;
-												if (isLimitVelocity2Max)
+												//너무 바깥으로 이동하려고 할때, 속도를 줄인다.
+												dotVector = Mathf.Clamp01(dotVector);
+												if (stretchRangeMax > stretchRangeMax_Half)
 												{
-													//너무 바깥으로 이동하려고 할때, 속도를 줄인다.
-													dotVector = Mathf.Clamp01(dotVector);
-													if (stretchRangeMax > stretchRangeMax_Half)
+													outerItp = Mathf.Clamp01((curDistFromLinkVert - stretchRangeMax_Half) / (stretchRangeMax - stretchRangeMax_Half));
+												}
+												else
+												{
+													outerItp = 1.0f;//무조건 속도 0
+
+													if (!tmpModPhysicsVert._isLimitPos || limitCalPosDist < tmpModPhysicsVert._limitScale)
 													{
-														outerItp = Mathf.Clamp01((curDistFromLinkVert - stretchRangeMax_Half) / (stretchRangeMax - stretchRangeMax_Half));
+														tmpModPhysicsVert._isLimitPos = true;
+														tmpModPhysicsVert._limitScale = limitCalPosDist;
 													}
-													else
-													{
-														outerItp = 1.0f;//무조건 속도 0
-
-														//이전
-														//if (!tmpModVertWeight._isLimitPos || limitCalPosDist < tmpModVertWeight._limitScale)
-														//{
-														//	tmpModVertWeight._isLimitPos = true;
-														//	tmpModVertWeight._limitScale = limitCalPosDist;
-														//}
-
-														//변경
-														if (!tmpModPhysicsVert._isLimitPos || limitCalPosDist < tmpModPhysicsVert._limitScale)
-														{
-															tmpModPhysicsVert._isLimitPos = true;
-															tmpModPhysicsVert._limitScale = limitCalPosDist;
-														}
-													}
-
 												}
 
-												tmpNextVelocity *= Mathf.Clamp01(1.0f - (dotVector * outerItp));//적절히 느려지게 만들자
 											}
 
-
+											tmpNextVelocity *= Mathf.Clamp01(1.0f - (dotVector * outerItp));//적절히 느려지게 만들자
 										}
-
 									}
 
-									//limitedNextCalPos = tmpModVertWeight._calculatedDeltaPos + (tmpNextVelocity * tDelta);//이전
-									limitedNextCalPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);//변경
-
-
-									//이걸 한번더 해서 위치 보정
-									if (isTouchCalculated)
-									{
-										Vector2 nextTouchPos = (limitedNextCalPos * (1.0f - touchCalculatedWeight)) + (touchCalculatedDeltaPos * touchCalculatedWeight);
-
-										limitedNextCalPos = nextTouchPos;
-
-										//tmpNextVelocity = (limitedNextCalPos - tmpModVertWeight._calculatedDeltaPos) / tDelta;//이전
-										tmpNextVelocity = (limitedNextCalPos - tmpModPhysicsVert._calculatedDeltaPos) / tDelta;//변경
-									}
-									//이전
-									//tmpModVertWeight._velocity_Next = tmpNextVelocity;
-									//tmpModVertWeight._calculatedDeltaPos_Prev = tmpModVertWeight._calculatedDeltaPos;
-									//tmpModVertWeight._calculatedDeltaPos = limitedNextCalPos;
-
-									//변경
-									tmpModPhysicsVert._velocity_Next = tmpNextVelocity;
-									tmpModPhysicsVert._calculatedDeltaPos_Prev = tmpModPhysicsVert._calculatedDeltaPos;
-									tmpModPhysicsVert._calculatedDeltaPos = limitedNextCalPos;
 								}
-								else
+
+								limitedNextCalPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);
+
+
+								//이걸 한번더 해서 위치 보정
+								if (isTouchCalculated)
 								{
-									//이전
-									//tmpModVertWeight._calculatedDeltaPos_Prev = tmpModVertWeight._calculatedDeltaPos;
-									//tmpNextVelocity = tmpModVertWeight._velocity_Next;
-									//tmpModVertWeight._calculatedDeltaPos = tmpModVertWeight._calculatedDeltaPos + (tmpNextVelocity * tDelta);
+									Vector2 nextTouchPos = (limitedNextCalPos * (1.0f - touchCalculatedWeight)) + (touchCalculatedDeltaPos * touchCalculatedWeight);
 
-									//변경
-									tmpModPhysicsVert._calculatedDeltaPos_Prev = tmpModPhysicsVert._calculatedDeltaPos;
-									tmpNextVelocity = tmpModPhysicsVert._velocity_Next;
-									tmpModPhysicsVert._calculatedDeltaPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);
+									limitedNextCalPos = nextTouchPos;
+
+									tmpNextVelocity = (limitedNextCalPos - tmpModPhysicsVert._calculatedDeltaPos) / tDelta;//변경
 								}
+								
+								tmpModPhysicsVert._velocity_Next = tmpNextVelocity;
+								tmpModPhysicsVert._calculatedDeltaPos_Prev = tmpModPhysicsVert._calculatedDeltaPos;
+								tmpModPhysicsVert._calculatedDeltaPos = limitedNextCalPos;
+							}
+							else
+							{
+								tmpModPhysicsVert._calculatedDeltaPos_Prev = tmpModPhysicsVert._calculatedDeltaPos;
+								tmpNextVelocity = tmpModPhysicsVert._velocity_Next;
+								tmpModPhysicsVert._calculatedDeltaPos = tmpModPhysicsVert._calculatedDeltaPos + (tmpNextVelocity * tDelta);
+							}
+						}
+
+						//1차로 계산된 값을 이용하여 점성력을 체크한다.
+						//수정 : 이미 위치는 계산되었다. 위치를 중심으로 처리를 하자 점성/이동한계를 계산하자
+						for (int iPos = 0; iPos < tmpNumVert; iPos++)
+						{
+							tmpModPhysicsVert = tmpSubModMesh_Physics._vertWeights[iPos];
+
+							if (!tmpModPhysicsVert._isEnabled)
+							{
+								//처리 안함다
+								tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
+								continue;
+							}
+							if (tmpModPhysicsVert._vertex == null)
+							{
+								Debug.LogError("Render Vertex is Not linked");
+								break;
 							}
 
-							//1차로 계산된 값을 이용하여 점성력을 체크한다.
-							//수정 : 이미 위치는 계산되었다. 위치를 중심으로 처리를 하자 점성/이동한계를 계산하자
-							for (int iPos = 0; iPos < tmpNumVert; iPos++)
+							int nLinkedVertCount = tmpModPhysicsVert._linkedVertices.Count;
+
+							if (isValidFrame)
 							{
-								//이전
-								//tmpModVertWeight = paramKeyValue._modifiedMesh._vertWeights[iPos];
-								//tmpPhysicVertParam = tmpModVertWeight._physicParam;
+								tmpNextVelocity = tmpModPhysicsVert._velocity_Next;
+								tmpNextCalPos = tmpModPhysicsVert._calculatedDeltaPos;
 
-								//변경
-								tmpModPhysicsVert = tmpSubModMesh_Physics._vertWeights[iPos];
-
-								//이전
-								//if (!tmpModVertWeight._isEnabled)
-								//{
-								//	//처리 안함다
-								//	tmpModVertWeight._calculatedDeltaPos = Vector2.zero;
-								//	continue;
-								//}
-								//if (tmpModVertWeight._vertex == null)
-								//{
-								//	Debug.LogError("Render Vertex is Not linked");
-								//	break;
-								//}
-
-								//변경
-								if (!tmpModPhysicsVert._isEnabled)
+								if (tmpIsViscosity && !tmpModPhysicsVert._isMain)//변경
 								{
-									//처리 안함다
-									tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
-									continue;
-								}
-								if (tmpModPhysicsVert._vertex == null)
-								{
-									Debug.LogError("Render Vertex is Not linked");
-									break;
-								}
+									//점성 로직 추가
+									//ID가 같으면 DeltaPos가 비슷해야한다.
+									tmpLinkedViscosityWeight = 0.0f;
+									tmpLinkedTotalCalPos = Vector2.zero;
 
-								if (isValidFrame)
-								{
-									//이전
-									//tmpNextVelocity = tmpModVertWeight._velocity_Next;
-									//tmpNextCalPos = tmpModVertWeight._calculatedDeltaPos;
+									int curViscosityID = tmpModPhysicsVert._viscosityGroupID;//변경
 
-									//변경
-									tmpNextVelocity = tmpModPhysicsVert._velocity_Next;
-									tmpNextCalPos = tmpModPhysicsVert._calculatedDeltaPos;
-
-
-									//if (tmpIsViscosity && !tmpModVertWeight._physicParam._isMain)//이전
-									if (tmpIsViscosity && !tmpModPhysicsVert._isMain)//변경
+									if (nLinkedVertCount > 0)
 									{
-
-										//점성 로직 추가
-										//ID가 같으면 DeltaPos가 비슷해야한다.
-										tmpLinkedViscosityWeight = 0.0f;
-										tmpLinkedTotalCalPos = Vector2.zero;
-
-										//int curViscosityID = tmpModVertWeight._physicParam._viscosityGroupID;//이전
-										int curViscosityID = tmpModPhysicsVert._viscosityGroupID;//변경
-
-										//for (int iLinkVert = 0; iLinkVert < tmpPhysicVertParam._linkedVertices.Count; iLinkVert++)//이전
-										for (int iLinkVert = 0; iLinkVert < tmpModPhysicsVert._linkedVertices.Count; iLinkVert++)//변경
+										for (int iLinkVert = 0; iLinkVert < nLinkedVertCount; iLinkVert++)//변경
 										{
-											//이전
-											//tmpLinkedVert = tmpPhysicVertParam._linkedVertices[iLinkVert];
-											//float linkWeight = tmpLinkedVert._distWeight;
-
-											//if ((tmpLinkedVert._modVertWeight._physicParam._viscosityGroupID & curViscosityID) != 0)
-											//{
-											//	tmpLinkedTotalCalPos += tmpLinkedVert._modVertWeight._calculatedDeltaPos * linkWeight;//<<Vel 대신 Pos로 바꾸자
-											//	tmpLinkedViscosityWeight += linkWeight;
-											//}
-
-											//변경
 											tmpLinkedPhysicVert = tmpModPhysicsVert._linkedVertices[iLinkVert];
 											float linkWeight = tmpLinkedPhysicVert._distWeight;
 
@@ -6766,115 +6629,75 @@ namespace AnyPortrait
 												tmpLinkedViscosityWeight += linkWeight;
 											}
 										}
-
-										//점성도를 추가한다.
-										if (tmpLinkedViscosityWeight > 0.0f)
-										{
-											float clampViscosity = Mathf.Clamp01(tmpPhysicMeshParam._viscosity) * 0.7f;
-
-
-											tmpNextCalPos = tmpNextCalPos * (1.0f - clampViscosity) + tmpLinkedTotalCalPos * clampViscosity;
-										}
-
 									}
 
-									//이동 한계 한번 더 계산
-									//이전
-									//if (tmpModVertWeight._isLimitPos && tmpNextCalPos.magnitude > tmpModVertWeight._limitScale)
-									//{
-									//	tmpNextCalPos = tmpNextCalPos.normalized * tmpModVertWeight._limitScale;
-									//}
-
-									//변경
-									if (tmpModPhysicsVert._isLimitPos && tmpNextCalPos.magnitude > tmpModPhysicsVert._limitScale)
+									//점성도를 추가한다.
+									if (tmpLinkedViscosityWeight > 0.0f)
 									{
-										tmpNextCalPos = tmpNextCalPos.normalized * tmpModPhysicsVert._limitScale;
+										float clampViscosity = Mathf.Clamp01(tmpPhysicMeshParam._viscosity) * 0.7f;
+
+
+										tmpNextCalPos = tmpNextCalPos * (1.0f - clampViscosity) + tmpLinkedTotalCalPos * clampViscosity;
 									}
 
-
-									//계산 끝!
-									//새로운 변위를 넣어주자
-									//tmpModVertWeight._calculatedDeltaPos = tmpNextCalPos;//이전
-									tmpModPhysicsVert._calculatedDeltaPos = tmpNextCalPos;//변경
-
-
-									//속도를 다시 계산해주자
-									//이전
-									//tmpNextVelocity = (tmpModVertWeight._calculatedDeltaPos - tmpModVertWeight._calculatedDeltaPos_Prev) / tDelta;
-									//변경
-									tmpNextVelocity = (tmpModPhysicsVert._calculatedDeltaPos - tmpModPhysicsVert._calculatedDeltaPos_Prev) / tDelta;
-
-
-									//-----------------------------------------------------------------------------------------
-									//속도 갱신
-									//tmpModVertWeight._velocity_Next = tmpNextVelocity;//이전
-									tmpModPhysicsVert._velocity_Next = tmpNextVelocity;//변경
-
-
-									//속도 차이가 크다면 Real의 비중이 커야 한다.
-									//같은 방향이면 -> 버티기 관성이 더 잘보이는게 좋다
-									//다른 방향이면 Real을 관성으로 사용해야한다. (그래야 다음 프레임에 관성이 크게 보임)
-									//속도 변화에 따라서 체크
-									//이전
-									//float velocityRefreshITP_X = Mathf.Clamp01(Mathf.Abs(((tmpModVertWeight._velocity_Real.x - tmpModVertWeight._velocity_Real1F.x) / (Mathf.Abs(tmpModVertWeight._velocity_Real1F.x) + 0.1f)) * 0.5f));
-									//float velocityRefreshITP_Y = Mathf.Clamp01(Mathf.Abs(((tmpModVertWeight._velocity_Real.y - tmpModVertWeight._velocity_Real1F.y) / (Mathf.Abs(tmpModVertWeight._velocity_Real1F.y) + 0.1f)) * 0.5f));
-
-									//tmpModVertWeight._velocity_1F.x = tmpNextVelocity.x * (1.0f - velocityRefreshITP_X) + (tmpNextVelocity.x * 0.5f + tmpModVertWeight._velocity_Real.x * 0.5f) * velocityRefreshITP_X;
-									//tmpModVertWeight._velocity_1F.y = tmpNextVelocity.y * (1.0f - velocityRefreshITP_Y) + (tmpNextVelocity.y * 0.5f + tmpModVertWeight._velocity_Real.y * 0.5f) * velocityRefreshITP_Y;
-
-									//tmpModVertWeight._pos_1F = tmpModVertWeight._pos_Real;
-
-									//변경
-									float velocityRefreshITP_X = Mathf.Clamp01(Mathf.Abs(((tmpModPhysicsVert._velocity_Real.x - tmpModPhysicsVert._velocity_Real1F.x) / (Mathf.Abs(tmpModPhysicsVert._velocity_Real1F.x) + 0.1f)) * 0.5f));
-									float velocityRefreshITP_Y = Mathf.Clamp01(Mathf.Abs(((tmpModPhysicsVert._velocity_Real.y - tmpModPhysicsVert._velocity_Real1F.y) / (Mathf.Abs(tmpModPhysicsVert._velocity_Real1F.y) + 0.1f)) * 0.5f));
-
-									tmpModPhysicsVert._velocity_1F.x = tmpNextVelocity.x * (1.0f - velocityRefreshITP_X) + (tmpNextVelocity.x * 0.5f + tmpModPhysicsVert._velocity_Real.x * 0.5f) * velocityRefreshITP_X;
-									tmpModPhysicsVert._velocity_1F.y = tmpNextVelocity.y * (1.0f - velocityRefreshITP_Y) + (tmpNextVelocity.y * 0.5f + tmpModPhysicsVert._velocity_Real.y * 0.5f) * velocityRefreshITP_Y;
-
-									tmpModPhysicsVert._pos_1F = tmpModPhysicsVert._pos_Real;
-
-									//-----------------------------------------------------------------------------------------
-
-
-									//Damping
-									//이전
-									//if (tmpModVertWeight._calculatedDeltaPos.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping
-									//	&& tmpNextVelocity.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping)
-									//{
-									//	tmpModVertWeight._calculatedDeltaPos = Vector2.zero;
-									//	tmpModVertWeight.DampPhysicVertex();
-									//}
-
-									//변경
-									if (tmpModPhysicsVert._calculatedDeltaPos.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping
-										&& tmpNextVelocity.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping)
-									{
-										tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
-										tmpModPhysicsVert.DampPhysicVertex();
-									}
 								}
 
-								//이전
-								//tmpPosList[iPos] +=
-								//		(tmpModVertWeight._calculatedDeltaPos * tmpModVertWeight._weight)
-								//		* paramKeyValue._weight;
+								//이동 한계 한번 더 계산
+								if (tmpModPhysicsVert._isLimitPos && tmpNextCalPos.magnitude > tmpModPhysicsVert._limitScale)
+								{
+									tmpNextCalPos = tmpNextCalPos.normalized * tmpModPhysicsVert._limitScale;
+								}
 
-								//변경
-								tmpPosList[iPos] +=
-											(tmpModPhysicsVert._calculatedDeltaPos * tmpModPhysicsVert._weight)
-											* paramKeyValue._weight;
+								//계산 끝!
+								//새로운 변위를 넣어주자
+								tmpModPhysicsVert._calculatedDeltaPos = tmpNextCalPos;
+
+								//속도를 다시 계산해주자
+								tmpNextVelocity = (tmpModPhysicsVert._calculatedDeltaPos - tmpModPhysicsVert._calculatedDeltaPos_Prev) / tDelta;
 
 
+								//-----------------------------------------------------------------------------------------
+								//속도 갱신
+								tmpModPhysicsVert._velocity_Next = tmpNextVelocity;
+
+
+								//속도 차이가 크다면 Real의 비중이 커야 한다.
+								//같은 방향이면 -> 버티기 관성이 더 잘보이는게 좋다
+								//다른 방향이면 Real을 관성으로 사용해야한다. (그래야 다음 프레임에 관성이 크게 보임)
+								//속도 변화에 따라서 체크
+								float velocityRefreshITP_X = Mathf.Clamp01(Mathf.Abs(((tmpModPhysicsVert._velocity_Real.x - tmpModPhysicsVert._velocity_Real1F.x) / (Mathf.Abs(tmpModPhysicsVert._velocity_Real1F.x) + 0.1f)) * 0.5f));
+								float velocityRefreshITP_Y = Mathf.Clamp01(Mathf.Abs(((tmpModPhysicsVert._velocity_Real.y - tmpModPhysicsVert._velocity_Real1F.y) / (Mathf.Abs(tmpModPhysicsVert._velocity_Real1F.y) + 0.1f)) * 0.5f));
+
+								tmpModPhysicsVert._velocity_1F.x = tmpNextVelocity.x * (1.0f - velocityRefreshITP_X) + (tmpNextVelocity.x * 0.5f + tmpModPhysicsVert._velocity_Real.x * 0.5f) * velocityRefreshITP_X;
+								tmpModPhysicsVert._velocity_1F.y = tmpNextVelocity.y * (1.0f - velocityRefreshITP_Y) + (tmpNextVelocity.y * 0.5f + tmpModPhysicsVert._velocity_Real.y * 0.5f) * velocityRefreshITP_Y;
+
+								tmpModPhysicsVert._pos_1F = tmpModPhysicsVert._pos_Real;
+
+								//-----------------------------------------------------------------------------------------
+
+
+								//Damping
+								if (tmpModPhysicsVert._calculatedDeltaPos.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping
+									&& tmpNextVelocity.sqrMagnitude < tmpPhysicMeshParam._damping * tmpPhysicMeshParam._damping)
+								{
+									tmpModPhysicsVert._calculatedDeltaPos = Vector2.zero;
+									tmpModPhysicsVert.DampPhysicVertex();
+								}
 							}
-							//---------------------------- Pos List
-						}
-						if (isFirstParam)
-						{
-							isFirstParam = false;
-						}
 
+							//이전
+							tmpPosList[iPos] +=
+										(tmpModPhysicsVert._calculatedDeltaPos * tmpModPhysicsVert._weight)
+										* paramKeyValue._weight;
+						}
+						//---------------------------- Pos List
+						//if (isFirstParam)
+						//{
+						//	isFirstParam = false;
+						//}
 
-						nCalculated++;//Visible 계산을 위해 "paramKey 계산 횟수"를 카운트하자
+						//삭제 v1.4.2 : 필요없당
+						//nCalculated++;//Visible 계산을 위해 "paramKey 계산 횟수"를 카운트하자
 
 					}//--- Params
 
@@ -6893,7 +6716,7 @@ namespace AnyPortrait
 					//if (keyParamSetGroup._layerIndex == 0)
 					if (iCalculatedSubParam == 0)//<<변경
 					{
-						for (int iPos = 0; iPos < posList.Length; iPos++)
+						for (int iPos = 0; iPos < tmpNumVert; iPos++)
 						{
 							posList[iPos] = tmpPosList[iPos] * layerWeight;
 						}
@@ -6905,7 +6728,7 @@ namespace AnyPortrait
 							case apModifierParamSetGroup.BLEND_METHOD.Additive:
 								{
 									//변경됨 19.5.20
-									for (int iPos = 0; iPos < posList.Length; iPos++)
+									for (int iPos = 0; iPos < tmpNumVert; iPos++)
 									{
 										posList[iPos] += tmpPosList[iPos] * layerWeight;
 									}
@@ -6915,7 +6738,7 @@ namespace AnyPortrait
 							case apModifierParamSetGroup.BLEND_METHOD.Interpolation:
 								{
 									//변경됨 19.5.20
-									for (int iPos = 0; iPos < posList.Length; iPos++)
+									for (int iPos = 0; iPos < tmpNumVert; iPos++)
 									{
 										posList[iPos] = (posList[iPos] * (1.0f - layerWeight)) +
 														(tmpPosList[iPos] * layerWeight);
@@ -6932,7 +6755,7 @@ namespace AnyPortrait
 					iCalculatedSubParam++;
 
 				}//-SubList (ParamSetGroup을 키값으로 따로 적용한다.)
-				calParam._isAvailable = true;
+				
 
 
 			}

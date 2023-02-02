@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -43,7 +43,7 @@ namespace AnyPortrait
 		public enum SELECTED_AXIS { None, Axis_X, Axis_Y, All }
 		private SELECTED_AXIS _selectedAxis = SELECTED_AXIS.None;
 
-		private bool _isGizmoDrag = false;
+		private bool _isGizmoDragging = false;
 		private Vector2 _mousePosGL_Down = Vector2.zero;
 		private Vector2 _mousePosW_Down = Vector2.zero;
 		private Vector2 _mousePosW_Prev = Vector2.zero;
@@ -238,8 +238,19 @@ namespace AnyPortrait
 				_prevOrgData = orgData;
 			}
 		}
-		private List<TransformControlPoint> _transformControlPoints = new List<TransformControlPoint>();
-		private List<TransformedObject> _transformedObjects = new List<TransformedObject>();
+		private List<TransformControlPoint> _FFD_ControlPoints = new List<TransformControlPoint>();
+		private List<TransformedObject> _FFD_LinkedObjects = new List<TransformedObject>();
+
+		private enum FFD_TARGET_TYPE
+		{
+			Mesh, MeshGroupModifier, AnimModifier
+		}
+
+		private FFD_TARGET_TYPE _FFD_TargetType = FFD_TARGET_TYPE.Mesh;
+		private apMesh _FFD_Mesh = null;
+		private apMeshGroup _FFD_MeshGroup = null;
+		private apAnimClip _FFD_AnimClip = null;
+		private apModifierBase _FFD_Modifier = null;//Undo 기록을 위해 FFD가 동작한 대상 모디파이어를 저장해야한다.
 
 
 
@@ -828,6 +839,7 @@ namespace AnyPortrait
 
 		private bool _isMovePressed = false;
 
+		
 		private float _tMouseUpdate = 0.0f;
 		//private Vector2 _checkPrevMousePos = Vector2.zero;
 
@@ -845,6 +857,9 @@ namespace AnyPortrait
 		}
 		private KEYBOARD_CONT_EVENT _keyboardContEventStatus = KEYBOARD_CONT_EVENT.None;
 		private KEYBOARD_CONT_EVENT _prevKeyboardContEventStatus = KEYBOARD_CONT_EVENT.None;
+
+		//기즈모에서 화살표 단축키를 등록했는지 여부 (외부에서 사용하기 위함)
+		private bool _isArrowHotKeyOccupied = false;
 
 		// Init
 		//--------------------------------------------------------------------------
@@ -1057,64 +1072,6 @@ namespace AnyPortrait
 
 				return this;
 			}
-
-			//public GizmoEventSet(FUNC_GIZMO_EVENT__SELECT funcGizmoSelect,
-			//						FUNC_GIZMO_EVENT_UNSELECT funcGizmoUnselect,
-			//						FUNC_GIZMO_EVENT__MOVE funcGizmoMove,
-			//						FUNC_GIZMO_EVENT__ROTATE funcGizmoRotate,
-			//						FUNC_GIZMO_EVENT__SCALE funcGizmoScale,
-			//						FUNC_TRANSFORM__POSITION funcTransformPosition,
-			//						FUNC_TRANSFORM__ROTATE funcTransformRotate,
-			//						FUNC_TRANSFORM__SCALE funcTransformScale,
-			//						FUNC_TRANSFORM__DEPTH funcTransformDepth,
-			//						FUNC_TRANSFORM__COLOR funcTransformColor,
-			//						FUNC_TRANSFORM__EXTRA funcTransformExtra,
-			//						//FUNC_TRANSFORM__BONE_IK_MIXWeight funcTransformBoneIKMixWeight,//추가
-			//						FUNC_PIVOT_RETURM funcPivotReturn,
-			//						FUNC_GIZMO_EVENT__MULTIPLE_SELECT funcGizmoMultipleSelect,
-			//						FUNC_GIZMO_EVENT__FFD_TRANSFORM funcGizmoTransform,
-			//						FUNC_GIZMO_EVENT__START_FFD_TRANSFORM funcGizmoTransformStart,
-			//						FUNC_GIZMO_EVENT__START_SOFT_SELECTION funcGizmoSoftSelection,
-			//						FUNC_GIZMO_EVENT__SYNC_BRUSH_STATUS funcGizmoGetBrushInfo,
-			//						FUNC_GIZMO_EVENT__PRESS_BRUSH funcGizmoPressBrush,
-			//						TRANSFORM_UI transformUIVisible,
-			//						FUNC_GIZMO_EVENT__GET_NUM_SELECT_AFTER_LINK funcGizmoGetNumSelectAfterLink,
-			//						FUNC_GIZMO_EVENT__ADD_HOTKEYS func_AddHotKeys,
-			//						FUNC_GIZMO_EVENT__KEYBOARD_MOVE func_KeyboardMove,
-			//						FUNC_GIZMO_EVENT__KEYBOARD_ROTATE func_KeyboardRotate,
-			//						FUNC_GIZMO_EVENT__KEYBOARD_SCALE func_KeyboardScale
-			//	)
-			//{
-			//	_funcGizmoSelect = funcGizmoSelect;
-			//	_funcGizmoUnselect = funcGizmoUnselect;
-			//	_funcGizmoMove = funcGizmoMove;
-			//	_funcGizmoRotate = funcGizmoRotate;
-			//	_funcGizmoScale = funcGizmoScale;
-			//	_funcTransformPosition = funcTransformPosition;
-			//	_funcTransformRotate = funcTransformRotate;
-			//	_funcTransformScale = funcTransformScale;
-			//	_funcTransformDepth = funcTransformDepth;
-			//	_funcTransformColor = funcTransformColor;
-			//	_funcTransformExtra = funcTransformExtra;
-			//	//_funcTransformBoneIKMixWeight = funcTransformBoneIKMixWeight;
-			//	_funcPivotReturn = funcPivotReturn;
-			//	_funcGizmoMultipleSelect = funcGizmoMultipleSelect;
-			//	_funcGizmoFFD = funcGizmoTransform;
-			//	_funcGizmoFFDStart = funcGizmoTransformStart;
-			//	_funcGizmoSoftSelection = funcGizmoSoftSelection;
-
-			//	_funcGizmoGetBrushInfo = funcGizmoGetBrushInfo;
-			//	_funcGizmoPressBrush = funcGizmoPressBrush;
-
-			//	_transformUIVisible = transformUIVisible;
-			//	_funcGizmoGetNumSelectAfterLink = funcGizmoGetNumSelectAfterLink;
-
-			//	_func_AddHotKeys = func_AddHotKeys;
-
-			//	_func_KeyboardMove = func_KeyboardMove;
-			//	_func_KeyboardRotate = func_KeyboardRotate;
-			//	_func_KeyboardScale = func_KeyboardScale;
-			//}
 		}
 
 		public void LinkObject(GizmoEventSet gizmoEventSet)
@@ -1184,7 +1141,7 @@ namespace AnyPortrait
 
 			_isGizmoEventRegistered = true;
 			_selectedAxis = SELECTED_AXIS.None;
-			_isGizmoDrag = false;
+			_isGizmoDragging = false;
 			//Debug.Log("LinkObject");
 
 			//_lastSelectResult = SELECT_RESULT.None;
@@ -1198,12 +1155,18 @@ namespace AnyPortrait
 
 			_isMouseEventProcessing = false;
 
+			//추가 [v1.4.2] FFD가 켜져있다면 그냥 Off를 할 게 아니라, Revert를 제대로 처리해야한다.
+			if(_isFFDMode)
+			{
+				RevertFFDTransformForce();
+			}
+
 			_isFFDMode = false;
 			_isSoftSelectionMode = false;
 			_isBrushMode = false;
 
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
 
 			_isMovePressed = false;
 
@@ -1232,6 +1195,7 @@ namespace AnyPortrait
 			{
 				//만약 Transform 중이었다면
 				//Cancel은 코드상 어렵겠지;
+				//Debug.LogWarning("Unlink > FFD");
 				bool isResult = EditorUtility.DisplayDialog(_editor.GetText(TEXT.AdaptFFDTransformEdit_Title),
 																_editor.GetText(TEXT.AdaptFFDTransformEdit_Body),
 																_editor.GetText(TEXT.AdaptFFDTransformEdit_Okay),
@@ -1239,11 +1203,11 @@ namespace AnyPortrait
 																);
 				if (isResult)
 				{
-					AdaptTransformObjects(null);
+					AdaptFFD(true);
 				}
 				else
 				{
-					RevertTransformObjects(null);
+					RevertFFD(true);
 				}
 			}
 
@@ -1285,8 +1249,8 @@ namespace AnyPortrait
 
 			_isGizmoEventRegistered = false;
 			_selectedAxis = SELECTED_AXIS.None;
-			_isGizmoDrag = false;
-			//Debug.LogError("Unlink");
+			_isGizmoDragging = false;
+			
 
 			_curTransformParam = null;
 
@@ -1294,9 +1258,10 @@ namespace AnyPortrait
 
 			_isFFDMode = false;
 			_isFFDModeAvailable = false;
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
 
+			//Debug.LogError("Unlink");
 
 			_isMovePressed = false;
 
@@ -1443,7 +1408,7 @@ namespace AnyPortrait
 				else
 				{
 					//2. Transform 모드일 때
-					_curTransformParam = GetTransformControlPointParam();
+					_curTransformParam = GetFFDPointParam();
 				}
 
 				_isForceUpdateFlag = false;
@@ -1479,6 +1444,10 @@ namespace AnyPortrait
 				_func_AddHotKeys(IsVisible, _controlType, _isFFDMode);
 			}
 
+			//[1.4.2] 추가 22.12.14 : 화살표 단축키를 점유했는지 여부 (일단 초기화)
+			_isArrowHotKeyOccupied = false;
+
+
 			//추가 20.1.26 : 기본 단축키 이벤트가 존재하면 HotKey에 이벤트를 등록한다.
 			//이 이벤트는 고정 Reserved 이벤트로 별도로 저장한다. (PopEvent 제외 대상)
 			//컨트롤 타입 / FFD 여부에 따라서 이벤트 사용 여부가 결정된다.
@@ -1493,6 +1462,8 @@ namespace AnyPortrait
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Move, apHotKey.RESERVED_KEY.Arrow, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Move, apHotKey.RESERVED_KEY.Arrow_Shift, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_EnterOrEscape, apHotKey.RESERVED_KEY.EnterOrEscape, null);
+							
+							_isArrowHotKeyOccupied = true;
 						}
 						else
 						{
@@ -1501,8 +1472,9 @@ namespace AnyPortrait
 								//일반 이벤트
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Move, apHotKey.RESERVED_KEY.Arrow, null);
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Move, apHotKey.RESERVED_KEY.Arrow_Shift, null);
+
+								_isArrowHotKeyOccupied = true;
 							}
-							
 						}
 						break;
 
@@ -1513,6 +1485,8 @@ namespace AnyPortrait
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Rotate, apHotKey.RESERVED_KEY.Arrow, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Rotate, apHotKey.RESERVED_KEY.Arrow_Shift, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_EnterOrEscape, apHotKey.RESERVED_KEY.EnterOrEscape, null);
+
+							_isArrowHotKeyOccupied = true;
 						}
 						else
 						{
@@ -1521,6 +1495,8 @@ namespace AnyPortrait
 								//일반 이벤트
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Rotate, apHotKey.RESERVED_KEY.Arrow, null);
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Rotate, apHotKey.RESERVED_KEY.Arrow_Shift, null);
+
+								_isArrowHotKeyOccupied = true;
 							}
 						}
 						break;
@@ -1532,6 +1508,8 @@ namespace AnyPortrait
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Scale, apHotKey.RESERVED_KEY.Arrow, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_Scale, apHotKey.RESERVED_KEY.Arrow_Shift, null);
 							Editor.AddReservedHotKeyEvent(OnKeyboardEvent_FFD_EnterOrEscape, apHotKey.RESERVED_KEY.EnterOrEscape, null);
+
+							_isArrowHotKeyOccupied = true;
 						}
 						else
 						{
@@ -1540,6 +1518,8 @@ namespace AnyPortrait
 								//일반 이벤트
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Scale, apHotKey.RESERVED_KEY.Arrow, null);
 								Editor.AddReservedHotKeyEvent(OnKeyboardEvent_Normal_Scale, apHotKey.RESERVED_KEY.Arrow_Shift, null);
+
+								_isArrowHotKeyOccupied = true;
 							}
 						}
 						break;
@@ -1745,7 +1725,7 @@ namespace AnyPortrait
 			else
 			{
 				//2. Transform 모드일 때
-				_curTransformParam = GetTransformControlPointParam();
+				_curTransformParam = GetFFDPointParam();
 			}
 			if (_curTransformParam != null)
 			{
@@ -2012,7 +1992,7 @@ namespace AnyPortrait
 						{
 							//추가 : Transform 모드
 							//_numSelected = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
-							selectResult = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
+							selectResult = OnSelectFFDPoint(mousePosGL, mousePosW, GetSelectType());
 							if (selectResult == null)
 							{
 								SelectResult.Main.Init();
@@ -2079,7 +2059,7 @@ namespace AnyPortrait
 							SelectResult.Prev.SetResult(SelectResult.Main);
 
 							_selectedAxis = SELECTED_AXIS.None;
-							_isGizmoDrag = false;
+							_isGizmoDragging = false;
 						}
 					}
 					break;
@@ -2110,7 +2090,7 @@ namespace AnyPortrait
 						//다른 오브젝트는 아니어도 된다.
 						//그 경우는 Select 이후 All Move로 판별한다.
 						_selectedAxis = SELECTED_AXIS.None;
-						_isGizmoDrag = false;
+						_isGizmoDragging = false;
 
 						bool isAxisClick_Origin = IsGizmoClickable_Move(mousePosW, SELECTED_AXIS.All);
 						bool isAxisClick_X = IsGizmoClickable_Move(mousePosW, SELECTED_AXIS.Axis_X);
@@ -2139,7 +2119,7 @@ namespace AnyPortrait
 							{
 								//추가 : Transform 모드
 								//_numSelected = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
-								selectResult = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
+								selectResult = OnSelectFFDPoint(mousePosGL, mousePosW, GetSelectType());
 							}
 							else
 							{
@@ -2165,13 +2145,14 @@ namespace AnyPortrait
 							if (SelectResult.Main.NumSelected == 0)
 							{
 								_selectedAxis = SELECTED_AXIS.None;
-								_isGizmoDrag = false;
+								_isGizmoDragging = false;
 							}
 							else
 							{
 								//변경 내역
 								//이전에는 Move에 한해서
 								//선택된 객체가 있다면, 클릭하지 않아도 일단 이동 가능하게 만들었다.
+
 								//> 옵션에 따라 선택된 객체가 있어도 Area 선택이 가능한 경우엔,
 								//Gizmo를 선택해야만 Drag를 허용할 수 있다.
 								if (SelectResult.Main.IsAreaStartableIfGizmoNotSelected)
@@ -2181,39 +2162,64 @@ namespace AnyPortrait
 									//> 기즈모가 선택된 경우에만 Drag 활성화
 									if (isAxisClick_Origin || isAxisClick_X || isAxisClick_Y)
 									{
-										_isGizmoDrag = true;
+										_isGizmoDragging = true;
 										_selectedAxis = SELECTED_AXIS.All;
 									}
 								}
 								else
-								{
-									//기존
+								{	
 									//객체가 선택되어 있다면 기즈모를 클릭하지 않아도 드래그를 허용한다.
 									if (	SelectResult.Main.NumSelected == 1
 											&& (SelectResult.Prev.NumSelected == 0 || SelectResult.Prev.NumSelected == 1)
 											&& GetSelectType() == SELECT_TYPE.New)
 									{
-										_isGizmoDrag = true;
-										_selectedAxis = SELECTED_AXIS.All;
+										//추가 [v1.4.2]
+										//Move 툴의 기본값은 선택 직후 이동이 가능한 것이다. (Make Mesh의 UX와 유사하게)
+										//그러다보니 클릭 직후 바로 마우스 위치로 붙어버리는 문제가 발생해서 (IK 본)
+										//옵션에 따라선 기즈모를 클릭하지 않았다면 선택 직후에 바로 움직이지는 못하게 만들자
+										if(!_editor._option_ObjMovableWithoutClickGizmo)
+										{	
+											//"기즈모를 클릭하지 않아도 바로 Move툴 작동" 옵션이 꺼진 상태
+											if(isAxisClick_Origin || isAxisClick_X || isAxisClick_Y)
+											{
+												//다행히 기즈모 UI를 클릭했으므로 제어 가능
+												_isGizmoDragging = true;
+												_selectedAxis = SELECTED_AXIS.All;
+											}
+											else
+											{
+												//기즈모를 클릭하지 않고 선택만 한 상태다.
+												_isGizmoDragging = false;
+											}
+										}
+										else
+										{
+											//편집을 막는 옵션이 꺼진 상태 (기본)
+											_isGizmoDragging = true;
+											_selectedAxis = SELECTED_AXIS.All;
+										}
+										
 									}
 								}
 							}
+
+							
 						}
 						else if (isAxisClick_Origin)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.All;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
 						else if (isAxisClick_X)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.Axis_X;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
 						else if (isAxisClick_Y)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.Axis_Y;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
@@ -2222,17 +2228,13 @@ namespace AnyPortrait
 						_mousePosW_Down = mousePosW;
 						_mousePosW_Prev = mousePosW;
 
-						//Debug.Log("Move -> Check [" + _numSelected + " <- " + prevNumSelected + "]");
-						//CheckAndStartAreaSelect((_numSelected != prevNumSelected) && _numSelected != 0);
-						//CheckAndStartAreaSelect(_numSelected, prevNumSelected);//<이전
-						//CheckAndStartAreaSelect(	SelectResult.Main, 
-						//							isAxisClick_Origin || isAxisClick_X || isAxisClick_Y);
 
+						//선택된게 없다면 Area 생성을 시작한다.
 						CheckAndStartAreaSelect(	SelectResult.Main, 
 													isAxisClick_Origin || isAxisClick_X || isAxisClick_Y);
 
 
-						if (_isGizmoDrag)
+						if (_isGizmoDragging)
 						{
 							_isAreaSelecting = false;
 						}
@@ -2244,7 +2246,7 @@ namespace AnyPortrait
 						//Pressed가 아닌 Down에서 Undo 저장을 하기 위해 0의 위치 변화를 준다.
 						if (_isFFDMode)
 						{
-							OnMoveTransformControlPoint(mousePosGL, mousePosW, Vector2.zero);
+							OnMoveFFDPoint(mousePosGL, mousePosW, Vector2.zero);
 						}
 						else
 						{
@@ -2268,10 +2270,8 @@ namespace AnyPortrait
 
 				case apMouse.MouseBtnStatus.Pressed:
 					{
-
-						if (!_isGizmoDrag
+						if (!_isGizmoDragging
 							|| _selectedAxis == SELECTED_AXIS.None
-							//|| _numSelected == 0
 							|| SelectResult.Main.NumSelected == 0
 							)
 						{
@@ -2314,7 +2314,7 @@ namespace AnyPortrait
 						{
 							if (_isFFDMode)
 							{
-								OnMoveTransformControlPoint(mousePosGL, mousePosW, deltaMove);
+								OnMoveFFDPoint(mousePosGL, mousePosW, deltaMove);
 							}
 							else
 							{
@@ -2352,7 +2352,7 @@ namespace AnyPortrait
 
 
 							_selectedAxis = SELECTED_AXIS.None;
-							_isGizmoDrag = false;
+							_isGizmoDragging = false;
 
 							//_lastSelectResult = multipleResult;
 
@@ -2392,7 +2392,7 @@ namespace AnyPortrait
 						//다른 오브젝트는 아니어도 된다.
 						//그 경우는 Select 이후 All Move로 판별한다.
 						_selectedAxis = SELECTED_AXIS.None;
-						_isGizmoDrag = false;
+						_isGizmoDragging = false;
 
 						bool isAxisClick_Rotate = IsGizmoClickable_Rotate(mousePosW);
 
@@ -2418,7 +2418,7 @@ namespace AnyPortrait
 							{
 								//추가 : Transform 모드
 								//_numSelected = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
-								selectResult = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
+								selectResult = OnSelectFFDPoint(mousePosGL, mousePosW, GetSelectType());
 							}
 							else
 							{
@@ -2444,12 +2444,12 @@ namespace AnyPortrait
 							if (SelectResult.Main.NumSelected == 0)
 							{
 								_selectedAxis = SELECTED_AXIS.None;
-								_isGizmoDrag = false;
+								_isGizmoDragging = false;
 							}
 						}
 						else if (isAxisClick_Rotate)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.All;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
@@ -2465,7 +2465,7 @@ namespace AnyPortrait
 						//CheckAndStartAreaSelect(_numSelected, prevNumSelected);
 						CheckAndStartAreaSelect(SelectResult.Main, isAxisClick_Rotate);
 
-						if (_isGizmoDrag)
+						if (_isGizmoDragging)
 						{
 							_isAreaSelecting = false;
 						}
@@ -2477,7 +2477,7 @@ namespace AnyPortrait
 						//Pressed가 아닌 Down에서 Undo 저장을 하기 위해 0도짜리 회전을 준다. 
 						if (_isFFDMode)
 						{
-							OnRotateTransformControlPoint(0.0f);
+							OnRotateFFDPoint(0.0f);
 						}
 						else
 						{
@@ -2497,7 +2497,7 @@ namespace AnyPortrait
 
 				case apMouse.MouseBtnStatus.Pressed:
 					{
-						if (!_isGizmoDrag
+						if (!_isGizmoDragging
 							|| _selectedAxis == SELECTED_AXIS.None
 							//|| _numSelected == 0
 							|| SelectResult.Main.NumSelected == 0
@@ -2517,7 +2517,7 @@ namespace AnyPortrait
 
 						if (_isFFDMode)
 						{
-							OnRotateTransformControlPoint(deltaAngle);
+							OnRotateFFDPoint(deltaAngle);
 						}
 						else
 						{
@@ -2553,7 +2553,7 @@ namespace AnyPortrait
 							}
 
 							_selectedAxis = SELECTED_AXIS.None;
-							_isGizmoDrag = false;
+							_isGizmoDragging = false;
 
 							//_lastSelectResult = multipleResult;
 
@@ -2604,7 +2604,7 @@ namespace AnyPortrait
 						//다른 오브젝트는 아니어도 된다.
 						//그 경우는 Select 이후 All Move로 판별한다.
 						_selectedAxis = SELECTED_AXIS.None;
-						_isGizmoDrag = false;
+						_isGizmoDragging = false;
 
 						bool isAxisClick_Origin = IsGizmoClickable_Scale(mousePosW, SELECTED_AXIS.All);
 						bool isAxisClick_X = IsGizmoClickable_Scale(mousePosW, SELECTED_AXIS.Axis_X);
@@ -2630,7 +2630,7 @@ namespace AnyPortrait
 							{
 								//추가 : Transform 모드
 								//_numSelected = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
-								selectResult = OnSelectTransformControlPoint(mousePosGL, mousePosW, GetSelectType());
+								selectResult = OnSelectFFDPoint(mousePosGL, mousePosW, GetSelectType());
 
 							}
 							else
@@ -2656,24 +2656,24 @@ namespace AnyPortrait
 							if (SelectResult.Main.NumSelected == 0)
 							{
 								_selectedAxis = SELECTED_AXIS.None;
-								_isGizmoDrag = false;
+								_isGizmoDragging = false;
 							}
 						}
 						else if (isAxisClick_Origin)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.All;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
 						else if (isAxisClick_X)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.Axis_X;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
 						else if (isAxisClick_Y)
 						{
-							_isGizmoDrag = true;
+							_isGizmoDragging = true;
 							_selectedAxis = SELECTED_AXIS.Axis_Y;
 							//selectResult = SELECT_RESULT.SameSelected;
 						}
@@ -2687,7 +2687,7 @@ namespace AnyPortrait
 						CheckAndStartAreaSelect(	SelectResult.Main,
 													isAxisClick_Origin || isAxisClick_X || isAxisClick_Y);
 
-						if (_isGizmoDrag)
+						if (_isGizmoDragging)
 						{
 							_isAreaSelecting = false;
 						}
@@ -2698,7 +2698,7 @@ namespace AnyPortrait
 						//Pressed가 아닌 Down에서 Undo 저장을 하기 위해 0의 크기 변화를 준다.
 						if (_isFFDMode)
 						{
-							OnScaleTransformControlPoint(Vector2.zero);
+							OnScaleFFDPoint(Vector2.zero);
 						}
 						else
 						{
@@ -2723,7 +2723,7 @@ namespace AnyPortrait
 
 				case apMouse.MouseBtnStatus.Pressed:
 					{
-						if (!_isGizmoDrag
+						if (!_isGizmoDragging
 							|| _selectedAxis == SELECTED_AXIS.None
 							//|| _numSelected == 0
 							|| SelectResult.Main.NumSelected == 0
@@ -2785,7 +2785,7 @@ namespace AnyPortrait
 
 						if (_isFFDMode)
 						{
-							OnScaleTransformControlPoint(scaleValue);
+							OnScaleFFDPoint(scaleValue);
 						}
 						else
 						{
@@ -2817,7 +2817,7 @@ namespace AnyPortrait
 						}
 
 						_selectedAxis = SELECTED_AXIS.None;
-						_isGizmoDrag = false;
+						_isGizmoDragging = false;
 
 						//_lastSelectResult = multipleResult;
 
@@ -2982,9 +2982,6 @@ namespace AnyPortrait
 
 		// 다중 선택에 대한 처리
 		//--------------------------------------------------------------------------
-		//private bool CheckAndStartAreaSelect(SELECT_RESULT singleSelectResult)
-		//private bool CheckAndStartAreaSelect(bool isSingleClickUsed)
-		//private bool CheckAndStartAreaSelect(int curNumSelected, int prevNumSelected)
 		private bool CheckAndStartAreaSelect(	SelectResult curSelectResult, 
 												//추가 22.7.11 : 기즈모를 클릭했는지 판단한다.
 												//경우에 따라선 기즈모 클릭 안했을 경우에 특수 조건에서 Area 선택이 가능해진다.
@@ -3021,20 +3018,15 @@ namespace AnyPortrait
 			}
 
 
-			//if (_isAreaSelectable && singleSelectResult == SELECT_RESULT.None)
-			//if (_isAreaSelectable && !isSingleClickUsed)
 			if (_isAreaSelectable && isAreaStartable)
 			{
 				//클릭으로 [단일 선택시] 아무것도 선택되지 않았고,
 				//영역 선택이 가능하다면
 				_isAreaSelecting = true;
 
-				if (_isShiftKey || _isCtrlKey)
-				{ _areaSelectType = SELECT_TYPE.Add; }
-				else if (_isAltKey)
-				{ _areaSelectType = SELECT_TYPE.Subtract; }
-				else
-				{ _areaSelectType = SELECT_TYPE.New; }
+				if (_isShiftKey || _isCtrlKey)	{ _areaSelectType = SELECT_TYPE.Add; }
+				else if (_isAltKey)				{ _areaSelectType = SELECT_TYPE.Subtract; }
+				else							{ _areaSelectType = SELECT_TYPE.New; }
 
 
 				_areaPosStart_GL = _mousePosGL_Down;
@@ -3092,7 +3084,7 @@ namespace AnyPortrait
 					//		_areaSelectType
 					//		);
 
-					selectResult = OnMultipleSelectTransformControlPoint(
+					selectResult = OnMultipleSelectFFDPoints(
 								new Vector2(Mathf.Min(_areaPosStart_W.x, _areaPosEnd_W.x), Mathf.Min(_areaPosStart_W.y, _areaPosEnd_W.y)),
 								new Vector2(Mathf.Max(_areaPosStart_W.x, _areaPosEnd_W.x), Mathf.Max(_areaPosStart_W.y, _areaPosEnd_W.y)),
 								_areaSelectType
@@ -3160,25 +3152,77 @@ namespace AnyPortrait
 			apMesh targetMesh = null;
 			apMeshGroup targetMeshGroup = null;
 			apModifierBase targetModifier = null;
+			apAnimClip targetAnimClip = null;
+
+			
+
+			
+
+			
+
+			_nFFDPointX = numX;
+			_nFFDPointY = numY;
+			if (_nFFDPointX < 2) { _nFFDPointX = 2; }
+			if (_nFFDPointY < 2) { _nFFDPointY = 2; }
+
+			_isFFDMode = false;
+
+			//FFD 모드값을 초기화한다.
+			if(_FFD_ControlPoints == null) { _FFD_ControlPoints = new List<TransformControlPoint>(); }
+			if(_FFD_LinkedObjects == null) { _FFD_LinkedObjects = new List<TransformedObject>(); }
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
+
+			//연결 정보를 초기화한다.
+			_FFD_TargetType = FFD_TARGET_TYPE.Mesh;
+			_FFD_Mesh = null;
+			_FFD_MeshGroup = null;
+			_FFD_AnimClip = null;
+			_FFD_Modifier = null;//Undo 기록을 위해 FFD가 동작한 대상 모디파이어를 저장해야한다.
+
+
+			//apAnimClip targetAnimClipIfExist,
+			//										apMeshGroup targetMeshGroup,
+			//										apModifierBase targetModifier
+			bool isStartResult = _funcGizmoFFDStart();//이 함수 내에서 RegistTransformedObjectList 함수가 호출될 것이다.
+
+			if (isStartResult)
+			{
+				if (_FFD_LinkedObjects.Count <= 1)
+				{
+					isStartResult = false;
+				}
+			}
+
+			if(!isStartResult)
+			{
+				//시작 조건에 맞지 않는다.
+				return false;
+			}
+
+			//Undo 등록과 동시에 대상 등록
 			if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Mesh)
 			{
 				targetMesh = editor.Select.Mesh;
 
 				if(targetMesh != null)
 				{
-					apEditorUtil.SetRecord_Mesh(	apUndoGroupData.ACTION.MeshEdit_VertexMoved, 
+					apEditorUtil.SetRecord_Mesh(	apUndoGroupData.ACTION.MeshEdit_FFDStart, 
 													Editor, 
 													targetMesh, 
 													//targetMesh, 
 													false,
 													apEditorUtil.UNDO_STRUCT.ValueOnly);
 				}
-				
+
+				_FFD_TargetType = FFD_TARGET_TYPE.Mesh;
+				_FFD_Mesh = targetMesh;
 			}
 			else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.MeshGroup)
 			{
 				//MeshGroup인 경우
 				targetMeshGroup = editor.Select.MeshGroup;
+
 				if (targetMeshGroup != null)
 				{
 					targetModifier = editor.Select.Modifier;
@@ -3193,13 +3237,19 @@ namespace AnyPortrait
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
 				}
+
+				_FFD_TargetType = FFD_TARGET_TYPE.MeshGroupModifier;
+				_FFD_MeshGroup = targetMeshGroup;
+				_FFD_Modifier = targetModifier;
 			}
 			else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Animation)
 			{
-				apAnimClip animClip = editor.Select.AnimClip;
-				if (animClip != null)
+				targetAnimClip = editor.Select.AnimClip;
+
+				if (targetAnimClip != null)
 				{
-					targetMeshGroup = animClip._targetMeshGroup;
+					targetMeshGroup = targetAnimClip._targetMeshGroup;
+
 					if (targetMeshGroup != null)
 					{
 						apAnimTimeline timeline = editor.Select.AnimTimeline;
@@ -3219,123 +3269,82 @@ namespace AnyPortrait
 															apEditorUtil.UNDO_STRUCT.ValueOnly);
 					}
 				}
+
+				_FFD_TargetType = FFD_TARGET_TYPE.AnimModifier;
+				_FFD_AnimClip = targetAnimClip;
+				_FFD_MeshGroup = targetMeshGroup;
+				_FFD_Modifier = targetModifier;
 			}
 
-			//if (targetMeshGroup == null)
-			//{
-			//	//MeshGroup이 없다면 => 엥 작업이 가능해요?
-			//	//Debug.LogError("No MeshGroup FFD Start");
-			//}
-			//else
-			//{
-			//	if (targetModifier != null)
-			//	{
-			//		apEditorUtil.SetRecord_MeshGroupAndModifier(apUndoGroupData.ACTION.Modifier_FFDStart, editor, targetMeshGroup, targetModifier, targetMeshGroup, false);
-			//	}
-			//	else
-			//	{
-			//		//사실 모디파이어가 없다면 그것도 말이 안되는데;;
-			//		//Debug.LogError("No Modifier FFD Start");
-			//	}
-			//}
+			Vector2 posMin = Vector2.zero;
+			Vector2 posMax = Vector2.zero;
 
-
-			_nFFDPointX = numX;
-			_nFFDPointY = numY;
-			if (_nFFDPointX < 2) { _nFFDPointX = 2; }
-			if (_nFFDPointY < 2) { _nFFDPointY = 2; }
-
-			_isFFDMode = false;
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
-
-			bool isStartResult = _funcGizmoFFDStart();
-			if (isStartResult)
+			for (int i = 0; i < _FFD_LinkedObjects.Count; i++)
 			{
-				if (_transformedObjects.Count <= 1)
+				TransformedObject obj = _FFD_LinkedObjects[i];
+				if (i == 0)
 				{
-					isStartResult = false;
+					posMin = obj._prevWorldPos;
+					posMax = obj._prevWorldPos;
+				}
+				else
+				{
+					if (obj._prevWorldPos.x < posMin.x) { posMin.x = obj._prevWorldPos.x; }
+					if (obj._prevWorldPos.y < posMin.y) { posMin.y = obj._prevWorldPos.y; }
+
+					if (obj._prevWorldPos.x > posMax.x) { posMax.x = obj._prevWorldPos.x; }
+					if (obj._prevWorldPos.y > posMax.y) { posMax.y = obj._prevWorldPos.y; }
 				}
 			}
 
-			if (isStartResult)
+			Vector2 lengthArea = new Vector2(posMax.x - posMin.x, posMax.y - posMin.y);
+
+			if (lengthArea.x < 0.0001f) { lengthArea.x = 0.0001f; }
+			if (lengthArea.y < 0.0001f) { lengthArea.y = 0.0001f; }
+
+			//Min, Max에 대해서 컨트롤 포인트를 추가하자
+			//총 9개
+			//6, 7, 8
+			//3, 4, 5
+			//0, 1, 2
+
+			//>> 수정
+			//ControlPoint 개수를 커스텀하게 만들자
+
+			//Debug.Log("Start Transform Mode [" + _nFFDPointX + " / " + _nFFDPointY + "]  - Min:" + posMin + " ~ Max:" + posMax);
+
+			int iPoint = 0;
+			for (int iY = 0; iY < _nFFDPointY; iY++)
 			{
-				Vector2 posMin = Vector2.zero;
-				Vector2 posMax = Vector2.zero;
+				float fY = (float)iY / (float)(_nFFDPointY - 1);
 
-				for (int i = 0; i < _transformedObjects.Count; i++)
+				float curV = (posMin.y * (1 - fY)) + (posMax.y * fY);
+
+				for (int iX = 0; iX < _nFFDPointX; iX++)
 				{
-					TransformedObject obj = _transformedObjects[i];
-					if (i == 0)
-					{
-						posMin = obj._prevWorldPos;
-						posMax = obj._prevWorldPos;
-					}
-					else
-					{
-						if (obj._prevWorldPos.x < posMin.x) { posMin.x = obj._prevWorldPos.x; }
-						if (obj._prevWorldPos.y < posMin.y) { posMin.y = obj._prevWorldPos.y; }
+					float fX = (float)iX / (float)(_nFFDPointX - 1);
+					float curU = (posMin.x * (1 - fX)) + (posMax.x * fX);
 
-						if (obj._prevWorldPos.x > posMax.x) { posMax.x = obj._prevWorldPos.x; }
-						if (obj._prevWorldPos.y > posMax.y) { posMax.y = obj._prevWorldPos.y; }
-					}
+					_FFD_ControlPoints.Add(new TransformControlPoint(new Vector2(fX, fY), new Vector2(curU, curV)));
+					//Debug.Log("[" + iPoint + ":" + iX + ", " + iY + "] (" + fX + ", " + fY + ") (" + curU + ", " + curV + ")");
+					iPoint++;
 				}
-
-				Vector2 lengthArea = new Vector2(posMax.x - posMin.x, posMax.y - posMin.y);
-
-				if (lengthArea.x < 0.0001f)
-				{ lengthArea.x = 0.0001f; }
-				if (lengthArea.y < 0.0001f)
-				{ lengthArea.y = 0.0001f; }
-
-				//Min, Max에 대해서 컨트롤 포인트를 추가하자
-				//총 9개
-				//6, 7, 8
-				//3, 4, 5
-				//0, 1, 2
-
-				//>> 수정
-				//ControlPoint 개수를 커스텀하게 만들자
-
-				//Debug.Log("Start Transform Mode [" + _nFFDPointX + " / " + _nFFDPointY + "]  - Min:" + posMin + " ~ Max:" + posMax);
-
-				int iPoint = 0;
-				for (int iY = 0; iY < _nFFDPointY; iY++)
-				{
-					float fY = (float)iY / (float)(_nFFDPointY - 1);
-
-					float curV = (posMin.y * (1 - fY)) + (posMax.y * fY);
-
-					for (int iX = 0; iX < _nFFDPointX; iX++)
-					{
-						float fX = (float)iX / (float)(_nFFDPointX - 1);
-						float curU = (posMin.x * (1 - fX)) + (posMax.x * fX);
-
-						_transformControlPoints.Add(new TransformControlPoint(new Vector2(fX, fY), new Vector2(curU, curV)));
-						//Debug.Log("[" + iPoint + ":" + iX + ", " + iY + "] (" + fX + ", " + fY + ") (" + curU + ", " + curV + ")");
-						iPoint++;
-					}
-				}
-
-
-				for (int i = 0; i < _transformedObjects.Count; i++)
-				{
-					TransformedObject obj = _transformedObjects[i];
-
-					obj._normalizePos = new Vector2(
-						Mathf.Clamp01((obj._prevWorldPos.x - posMin.x) / lengthArea.x),
-						Mathf.Clamp01((obj._prevWorldPos.y - posMin.y) / lengthArea.y)
-						);
-				}
-
-				_isFFDMode = true;
-
-				return true;
 			}
-			else
+
+
+			for (int i = 0; i < _FFD_LinkedObjects.Count; i++)
 			{
-				return false;
+				TransformedObject obj = _FFD_LinkedObjects[i];
+
+				obj._normalizePos = new Vector2(
+					Mathf.Clamp01((obj._prevWorldPos.x - posMin.x) / lengthArea.x),
+					Mathf.Clamp01((obj._prevWorldPos.y - posMin.y) / lengthArea.y)
+					);
 			}
+
+			_isFFDMode = true;
+
+			return true;
 		}
 
 		/// <summary>
@@ -3344,10 +3353,17 @@ namespace AnyPortrait
 		/// </summary>
 		/// <param name="srcObject"></param>
 		/// <param name="worldPos"></param>
-		public void RegistTransformedObjectList(List<object> srcObject, List<Vector2> worldPos, List<Vector2> orgData)
+		public void RegistTransformedObjectList(	List<object> srcObject,
+													List<Vector2> worldPos,
+													List<Vector2> orgData)
 		{
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
+			//변경점 v1.4.2
+			//FFD 종료 시점이 예상과 다를 수 있으므로, 종료 가능한 상황인지 확인해야한다.
+			if(_FFD_ControlPoints == null) { _FFD_ControlPoints = new List<TransformControlPoint>(); }
+			if(_FFD_LinkedObjects == null) { _FFD_LinkedObjects = new List<TransformedObject>(); }
+
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
 
 			if (srcObject.Count != worldPos.Count
 				|| srcObject.Count != orgData.Count)
@@ -3357,7 +3373,7 @@ namespace AnyPortrait
 			}
 			for (int i = 0; i < srcObject.Count; i++)
 			{
-				_transformedObjects.Add(new TransformedObject(srcObject[i], worldPos[i], orgData[i]));
+				_FFD_LinkedObjects.Add(new TransformedObject(srcObject[i], worldPos[i], orgData[i]));
 			}
 		}
 
@@ -3371,12 +3387,76 @@ namespace AnyPortrait
 			//Revert로 변경한다.
 			if(IsFFDMode)
 			{
-				RevertTransformObjects(Editor);
+				RevertFFD(true);
 			}
 			
 		}
 
-		private void RefreshTransformObjects()
+		/// <summary>
+		/// FFD인지 확인하고, Adapt/Revert를 물어본 후 처리하며 종료한다.
+		/// Adapt나 Revert를 했다면 true를 리턴하고, 아예 취소를 했다면 false를 리턴한다.
+		/// </summary>
+		/// <param name="editor"></param>
+		public bool CheckAdaptOrRevertFFD()
+		{
+			if (_isFFDMode)
+			{
+				
+				//만약 Transform 중이었다면 Cancel은 코드상 어렵겠지;
+				int iBtn = EditorUtility.DisplayDialogComplex(_editor.GetText(TEXT.AdaptFFDTransformEdit_Title),
+																//_editor.GetText(TEXT.DLG_EndFFDWhenControlParamChanged_Body),
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_Body),
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_Okay),//Apply
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_No),//Revert
+																_editor.GetText(TEXT.Cancel)//Cancel
+																);
+				if (iBtn == 0)
+				{
+					AdaptFFD(true);
+					return true;
+				}
+				else if(iBtn == 1)
+				{
+					RevertFFD(true);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				//FFD Mode가 아니라면 처리 결과 상관없이 true
+				return true;
+			}
+		}
+
+		public void CheckAdaptOrRevertFFD_WithoutCancel()
+		{
+			if (_isFFDMode)
+			{
+				//만약 Transform 중이었다면 Cancel은 코드상 어렵겠지;
+				//Debug.Log("FFD > Check WO Cancel");
+				bool isResult = EditorUtility.DisplayDialog(_editor.GetText(TEXT.AdaptFFDTransformEdit_Title),
+																//_editor.GetText(TEXT.DLG_EndFFDWhenControlParamChanged_Body),
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_Body),
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_Okay),//Apply
+																_editor.GetText(TEXT.AdaptFFDTransformEdit_No)//Revert
+																);
+				if (isResult)
+				{
+					AdaptFFD(true);
+				}
+				else
+				{
+					RevertFFD(true);
+				}
+			}
+		}
+
+
+		private void RefreshFFD()
 		{
 			if (!_isFFDMode)
 			{
@@ -3411,9 +3491,9 @@ namespace AnyPortrait
 
 
 
-			for (int iObj = 0; iObj < _transformedObjects.Count; iObj++)
+			for (int iObj = 0; iObj < _FFD_LinkedObjects.Count; iObj++)
 			{
-				TransformedObject transformedObj = _transformedObjects[iObj];
+				TransformedObject transformedObj = _FFD_LinkedObjects[iObj];
 				Vector2 norPos = transformedObj._normalizePos;
 				Vector2 itp = new Vector2(norPos.x, norPos.y);
 
@@ -3466,10 +3546,10 @@ namespace AnyPortrait
 				int iLT = (curXIndex + 0) + (curYIndex + 1) * _nFFDPointX;
 				int iRT = (curXIndex + 1) + (curYIndex + 1) * _nFFDPointX;
 
-				conPoint_LB = _transformControlPoints[iLB];
-				conPoint_RB = _transformControlPoints[iRB];
-				conPoint_LT = _transformControlPoints[iLT];
-				conPoint_RT = _transformControlPoints[iRT];
+				conPoint_LB = _FFD_ControlPoints[iLB];
+				conPoint_RB = _FFD_ControlPoints[iRB];
+				conPoint_LT = _FFD_ControlPoints[iLT];
+				conPoint_RT = _FFD_ControlPoints[iRT];
 
 
 
@@ -3492,82 +3572,150 @@ namespace AnyPortrait
 			_resultFFD_Pos.Clear();
 			
 
-			for (int i = 0; i < _transformedObjects.Count; i++)
+			for (int i = 0; i < _FFD_LinkedObjects.Count; i++)
 			{
-				_resultFFD_Objects.Add(_transformedObjects[i]._srcObject);
-				_resultFFD_Pos.Add(_transformedObjects[i]._nextWorldPos);//Adapt : Next Pos 를 넣자
+				_resultFFD_Objects.Add(_FFD_LinkedObjects[i]._srcObject);
+				_resultFFD_Pos.Add(_FFD_LinkedObjects[i]._nextWorldPos);//Adapt : Next Pos 를 넣자
 			}
 
 			if (_funcGizmoFFD != null)
 			{
 				//bool isResult = _funcGizmoFFD(resultObject, resultPos, false);
 				bool isResult = _funcGizmoFFD(_resultFFD_Objects, _resultFFD_Pos, FFD_ASSIGN_TYPE.WorldPos, false, false);
+				
 				//추가) 만약 처리 실패시 해당 데이터가 없는 걸로 처리하여 자동 Revert한다.
 				if (!isResult)
-				{
-					//Debug.LogError("Revert On FFD");
-					RevertTransformObjects(null);
-				}
-				else
-				{
-					//Debug.LogWarning("Refreshed On FFD");
+				{	
+					RevertFFD(false);//Revert하여 FFD 종료
 				}
 			}
 		}
 
-		public void AdaptTransformObjects(apEditor editor)
+		public void AdaptFFD(bool isRecordUndo)
 		{
 			//Editor가 있다면 일단 Record를 한다.
 			bool isRecordedComplete = false;
-			if (editor != null)
+			
+			
+			if (isRecordUndo)
 			{
-				//Record를 해야한다. 버그가 있다고 합니다.
-				apMeshGroup targetMeshGroup = null;
-				apModifierBase targetModifier = null;
-				if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.MeshGroup)
+				//이전 : 
+				#region [미사용 코드]
+				////Record를 해야한다. 버그가 있다고 합니다.
+				//apMeshGroup targetMeshGroup = null;
+				//apModifierBase targetModifier = null;
+				//if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.MeshGroup)
+				//{
+				//	//MeshGroup인 경우
+				//	targetMeshGroup = editor.Select.MeshGroup;
+				//	if (targetMeshGroup != null) { targetModifier = editor.Select.Modifier; }
+				//}
+				//else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Animation)
+				//{
+				//	apAnimClip animClip = editor.Select.AnimClip;
+				//	if (animClip != null)
+				//	{
+				//		targetMeshGroup = animClip._targetMeshGroup;
+				//		if (targetMeshGroup != null)
+				//		{
+				//			apAnimTimeline timeline = editor.Select.AnimTimeline;
+				//			if (timeline != null && timeline._linkedModifier != null)
+				//			{
+				//				targetModifier = timeline._linkedModifier;
+				//			}
+				//		}
+				//	}
+				//}
+
+				//if (targetMeshGroup == null)
+				//{
+				//	//MeshGroup이 없다면 => 엥 작업이 가능해요?
+				//	//Debug.LogError("No MeshGroup FFD Adapt");
+				//}
+				//else
+				//{
+				//	if (targetModifier != null)
+				//	{
+				//		apEditorUtil.SetRecord_MeshGroupAndModifier(	apUndoGroupData.ACTION.Modifier_FFDAdapt, 
+				//														editor, targetMeshGroup, targetModifier, 
+				//														//targetMeshGroup, 
+				//														false,
+				//														apEditorUtil.UNDO_STRUCT.ValueOnly);
+				//		isRecordedComplete = true;
+				//	}
+				//	else
+				//	{
+				//		//사실 모디파이어가 없다면 그것도 말이 안되는데;;
+				//		//Debug.LogError("No Modifier FFD Adapt");
+				//	}
+				//} 
+				#endregion
+
+				//변경 v1.4.2
+				//기존에는 "현재 화면"을 기준으로 Undo를 작성했는데,
+				//상황에 따라선 이미 현재 작업 중인 대상과 화면이 변경된 상태에서 이 함수가 호출될 수 있다.
+				//이 경우 FFD의 대상과 현재 편집 대상이 서로 맞지 않아서 Undo 대상이 잘못 되므로, FFD를 시작할 시점의 대상을 Undo하도록 변경한다.
+				switch (_FFD_TargetType)
 				{
-					//MeshGroup인 경우
-					targetMeshGroup = editor.Select.MeshGroup;
-					if (targetMeshGroup != null) { targetModifier = editor.Select.Modifier; }
-				}
-				else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Animation)
-				{
-					apAnimClip animClip = editor.Select.AnimClip;
-					if (animClip != null)
-					{
-						targetMeshGroup = animClip._targetMeshGroup;
-						if (targetMeshGroup != null)
+					case FFD_TARGET_TYPE.Mesh:
 						{
-							apAnimTimeline timeline = editor.Select.AnimTimeline;
-							if (timeline != null && timeline._linkedModifier != null)
+							if(_FFD_Mesh != null)
 							{
-								targetModifier = timeline._linkedModifier;
+								apEditorUtil.SetRecord_Mesh(	apUndoGroupData.ACTION.MeshEdit_FFDAdapt, 
+													Editor, 
+													_FFD_Mesh, 
+													//targetMesh, 
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Adapt 에러 : 메시가 존재하지 않는다.");
 							}
 						}
-					}
-				}
+						break;
 
-				if (targetMeshGroup == null)
-				{
-					//MeshGroup이 없다면 => 엥 작업이 가능해요?
-					//Debug.LogError("No MeshGroup FFD Adapt");
-				}
-				else
-				{
-					if (targetModifier != null)
-					{
-						apEditorUtil.SetRecord_MeshGroupAndModifier(	apUndoGroupData.ACTION.Modifier_FFDAdapt, 
-																		editor, targetMeshGroup, targetModifier, 
-																		//targetMeshGroup, 
-																		false,
-																		apEditorUtil.UNDO_STRUCT.ValueOnly);
-						isRecordedComplete = true;
-					}
-					else
-					{
-						//사실 모디파이어가 없다면 그것도 말이 안되는데;;
-						//Debug.LogError("No Modifier FFD Adapt");
-					}
+					case FFD_TARGET_TYPE.MeshGroupModifier:
+						{
+							if(_FFD_MeshGroup != null && _FFD_Modifier != null)
+							{
+								apEditorUtil.SetRecord_Modifier(	apUndoGroupData.ACTION.Modifier_FFDAdapt, 
+																	Editor, 
+																	_FFD_Modifier, 
+																	//targetMeshGroup, 
+																	false,
+																	apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Adapt 에러 : 메시그룹+모디파이어가 존재하지 않는다.");
+							}
+						}
+						break;
+
+					case FFD_TARGET_TYPE.AnimModifier:
+						{
+							if(_FFD_AnimClip != null && _FFD_MeshGroup != null && _FFD_Modifier != null)
+							{
+								apEditorUtil.SetRecord_Modifier(	apUndoGroupData.ACTION.Modifier_FFDAdapt, 
+																	Editor, 
+																	_FFD_Modifier, 
+																	//targetMeshGroup, 
+																	false,
+																	apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Adapt 에러 : 애니메이션+메시그룹+모디파이어가 존재하지 않는다.");
+							}
+						}
+						break;
 				}
 			}
 
@@ -3581,10 +3729,10 @@ namespace AnyPortrait
 
 			bool isNeedToRecord = isRecordedComplete ? false : true;//이미 위에서 Undo에 저장 했으면 Record를 할 필요가 없다.
 
-			for (int i = 0; i < _transformedObjects.Count; i++)
+			for (int i = 0; i < _FFD_LinkedObjects.Count; i++)
 			{
-				_resultFFD_Objects.Add(_transformedObjects[i]._srcObject);
-				_resultFFD_Pos.Add(_transformedObjects[i]._nextWorldPos);//Adapt : Next Pos 를 넣자
+				_resultFFD_Objects.Add(_FFD_LinkedObjects[i]._srcObject);
+				_resultFFD_Pos.Add(_FFD_LinkedObjects[i]._nextWorldPos);//Adapt : Next Pos 를 넣자
 			}
 
 			if (_funcGizmoFFD != null)
@@ -3592,67 +3740,146 @@ namespace AnyPortrait
 				_funcGizmoFFD(_resultFFD_Objects, _resultFFD_Pos, FFD_ASSIGN_TYPE.WorldPos, true, isNeedToRecord);//Adapt는 WorldPos를 넣는다.
 			}
 
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
 			_isFFDMode = false;
+
+			_FFD_AnimClip = null;
+			_FFD_MeshGroup = null;
+			_FFD_Modifier = null;
 		}
 
-		public void RevertTransformObjects(apEditor editor)
+
+
+		public void RevertFFD(bool isRecordUndo)
 		{
 			//Debug.Log("Revert Transform Objects");
 			//Editor가 있다면 일단 Record를 한다.
 			bool isRecordedComplete = false;
-			if (editor != null)
+			
+			
+			if (isRecordUndo)
 			{
+				#region [미사용 코드]
 				//Record를 해야한다. 버그가 있다고 합니다.
-				apMeshGroup targetMeshGroup = null;
-				apModifierBase targetModifier = null;
-				if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.MeshGroup)
+				//apMeshGroup targetMeshGroup = null;
+				//apModifierBase targetModifier = null;
+				//if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.MeshGroup)
+				//{
+				//	//MeshGroup인 경우
+				//	targetMeshGroup = editor.Select.MeshGroup;
+				//	if (targetMeshGroup != null) { targetModifier = editor.Select.Modifier; }
+				//}
+				//else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Animation)
+				//{
+				//	apAnimClip animClip = editor.Select.AnimClip;
+				//	if (animClip != null)
+				//	{
+				//		targetMeshGroup = animClip._targetMeshGroup;
+				//		if (targetMeshGroup != null)
+				//		{
+				//			apAnimTimeline timeline = editor.Select.AnimTimeline;
+				//			if (timeline != null && timeline._linkedModifier != null)
+				//			{
+				//				targetModifier = timeline._linkedModifier;
+				//			}
+				//		}
+				//	}
+				//}
+
+				//if (targetMeshGroup == null)
+				//{
+				//	//MeshGroup이 없다면 => 엥 작업이 가능해요?
+				//	//Debug.LogError("No MeshGroup FFD Revert");
+				//}
+				//else
+				//{
+				//	if (targetModifier != null)
+				//	{
+				//		apEditorUtil.SetRecord_MeshGroupAndModifier(	apUndoGroupData.ACTION.Modifier_FFDRevert, 
+				//														editor, 
+				//														targetMeshGroup, 
+				//														targetModifier, 
+				//														//targetMeshGroup, 
+				//														false,
+				//														apEditorUtil.UNDO_STRUCT.ValueOnly);
+				//		isRecordedComplete = true;
+				//	}
+				//	else
+				//	{
+				//		//사실 모디파이어가 없다면 그것도 말이 안되는데;;
+				//		//Debug.LogError("No Modifier FFD Revert");
+				//	}
+				//} 
+				#endregion
+
+
+
+				//변경 v1.4.2
+				//기존에는 "현재 화면"을 기준으로 Undo를 작성했는데,
+				//상황에 따라선 이미 현재 작업 중인 대상과 화면이 변경된 상태에서 이 함수가 호출될 수 있다.
+				//이 경우 FFD의 대상과 현재 편집 대상이 서로 맞지 않아서 Undo 대상이 잘못 되므로, FFD를 시작할 시점의 대상을 Undo하도록 변경한다.
+				switch (_FFD_TargetType)
 				{
-					//MeshGroup인 경우
-					targetMeshGroup = editor.Select.MeshGroup;
-					if (targetMeshGroup != null) { targetModifier = editor.Select.Modifier; }
-				}
-				else if (editor.Select.SelectionType == apSelection.SELECTION_TYPE.Animation)
-				{
-					apAnimClip animClip = editor.Select.AnimClip;
-					if (animClip != null)
-					{
-						targetMeshGroup = animClip._targetMeshGroup;
-						if (targetMeshGroup != null)
+					case FFD_TARGET_TYPE.Mesh:
 						{
-							apAnimTimeline timeline = editor.Select.AnimTimeline;
-							if (timeline != null && timeline._linkedModifier != null)
+							if(_FFD_Mesh != null)
 							{
-								targetModifier = timeline._linkedModifier;
+								apEditorUtil.SetRecord_Mesh(	apUndoGroupData.ACTION.MeshEdit_FFDRevert, 
+																Editor, 
+																_FFD_Mesh, 
+																//targetMesh, 
+																false,
+																apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Revert 에러 : 메시가 존재하지 않는다.");
 							}
 						}
-					}
-				}
+						break;
 
-				if (targetMeshGroup == null)
-				{
-					//MeshGroup이 없다면 => 엥 작업이 가능해요?
-					//Debug.LogError("No MeshGroup FFD Revert");
-				}
-				else
-				{
-					if (targetModifier != null)
-					{
-						apEditorUtil.SetRecord_MeshGroupAndModifier(	apUndoGroupData.ACTION.Modifier_FFDRevert, 
-																		editor, 
-																		targetMeshGroup, 
-																		targetModifier, 
-																		//targetMeshGroup, 
-																		false,
-																		apEditorUtil.UNDO_STRUCT.ValueOnly);
-						isRecordedComplete = true;
-					}
-					else
-					{
-						//사실 모디파이어가 없다면 그것도 말이 안되는데;;
-						//Debug.LogError("No Modifier FFD Revert");
-					}
+					case FFD_TARGET_TYPE.MeshGroupModifier:
+						{
+							if(_FFD_MeshGroup != null && _FFD_Modifier != null)
+							{
+								apEditorUtil.SetRecord_Modifier(	apUndoGroupData.ACTION.Modifier_FFDRevert, 
+																	Editor, 
+																	_FFD_Modifier, 
+																	//targetMeshGroup, 
+																	false,
+																	apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Revert 에러 : 메시그룹+모디파이어가 존재하지 않는다.");
+							}
+						}
+						break;
+
+					case FFD_TARGET_TYPE.AnimModifier:
+						{
+							if(_FFD_AnimClip != null && _FFD_MeshGroup != null && _FFD_Modifier != null)
+							{
+								apEditorUtil.SetRecord_Modifier(	apUndoGroupData.ACTION.Modifier_FFDRevert, 
+																	Editor, 
+																	_FFD_Modifier, 
+																	//targetMeshGroup, 
+																	false,
+																	apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+								isRecordedComplete = true;
+							}
+							else
+							{
+								Debug.LogError("FFD Revert 에러 : 애니메이션+메시그룹+모디파이어가 존재하지 않는다.");
+							}
+						}
+						break;
 				}
 			}
 
@@ -3669,11 +3896,11 @@ namespace AnyPortrait
 			bool isNeedToRecord = isRecordedComplete ? false : true;//이미 위에서 Undo에 저장 했으면 Record를 할 필요가 없다.
 
 			
-			for (int i = 0; i < _transformedObjects.Count; i++)
+			for (int i = 0; i < _FFD_LinkedObjects.Count; i++)
 			{
-				_resultFFD_Objects.Add(_transformedObjects[i]._srcObject);
+				_resultFFD_Objects.Add(_FFD_LinkedObjects[i]._srcObject);
 				//_resultFFD_Pos.Add(_transformedObjects[i]._prevWorldPos);//Revert : Prev Pos를 넣자
-				_resultFFD_Pos.Add(_transformedObjects[i]._prevOrgData);//변경 : Revert : 원래의 데이터를 넣자
+				_resultFFD_Pos.Add(_FFD_LinkedObjects[i]._prevOrgData);//변경 : Revert : 원래의 데이터를 넣자
 			}
 
 			if (_funcGizmoFFD != null)
@@ -3681,21 +3908,25 @@ namespace AnyPortrait
 				_funcGizmoFFD(_resultFFD_Objects, _resultFFD_Pos, FFD_ASSIGN_TYPE.LocalData, true, isNeedToRecord);
 			}
 
-			_transformControlPoints.Clear();
-			_transformedObjects.Clear();
+			_FFD_ControlPoints.Clear();
+			_FFD_LinkedObjects.Clear();
 			_isFFDMode = false;
+
+			_FFD_AnimClip = null;
+			_FFD_MeshGroup = null;
+			_FFD_Modifier = null;
 		}
 
 
-		private TransformParam GetTransformControlPointParam()
+		private TransformParam GetFFDPointParam()
 		{
 			int nControlPoint = 0;
 			Vector2 centerPos = Vector2.zero;
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					centerPos += _transformControlPoints[i]._worldPos;
+					centerPos += _FFD_ControlPoints[i]._worldPos;
 					nControlPoint++;
 				}
 			}
@@ -3716,15 +3947,15 @@ namespace AnyPortrait
 										);
 		}
 
-		private Vector2 GetTransformControlCenterPos()
+		private Vector2 GetFFDCenterPos()
 		{
 			int nControlPoint = 0;
 			Vector2 centerPos = Vector2.zero;
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					centerPos += _transformControlPoints[i]._worldPos;
+					centerPos += _FFD_ControlPoints[i]._worldPos;
 					nControlPoint++;
 				}
 			}
@@ -3740,12 +3971,12 @@ namespace AnyPortrait
 			return centerPos;
 		}
 
-		private int GetNumSelectedTransformControlPoint()
+		private int GetNumSelectedFFDPoints()
 		{
 			int nControlPoint = 0;
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
 					nControlPoint++;
 				}
@@ -3753,20 +3984,22 @@ namespace AnyPortrait
 
 			return nControlPoint;
 		}
-		private List<TransformControlPoint> GetSelectedTransformControlPoints()
+
+
+		private List<TransformControlPoint> GetSelectedFFDPoints()
 		{
 			List<TransformControlPoint> result = new List<TransformControlPoint>();
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					result.Add(_transformControlPoints[i]);
+					result.Add(_FFD_ControlPoints[i]);
 				}
 			}
 			return result;
 		}
 
-		private SelectResult OnSelectTransformControlPoint(Vector2 mousePosGL, Vector2 mousePosW, SELECT_TYPE selectType)
+		private SelectResult OnSelectFFDPoint(Vector2 mousePosGL, Vector2 mousePosW, SELECT_TYPE selectType)
 		{
 			Vector2 pointSize = GetImageSize(IMAGE_TYPE.TransformController);
 			Vector2 pointSize_Half = pointSize * 0.5f / apGL.Zoom;
@@ -3774,57 +4007,57 @@ namespace AnyPortrait
 			if (selectType == SELECT_TYPE.New)
 			{
 				//일단 초기화
-				for (int i = 0; i < _transformControlPoints.Count; i++)
+				for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 				{
-					_transformControlPoints[i]._isSelected = false;
+					_FFD_ControlPoints[i]._isSelected = false;
 				}
 			}
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
 				//클릭한 영역에 있는 걸 찾자
-				if (mousePosW.x > _transformControlPoints[i]._worldPos.x - pointSize_Half.x &&
-					mousePosW.x < _transformControlPoints[i]._worldPos.x + pointSize_Half.x &&
-					mousePosW.y > _transformControlPoints[i]._worldPos.y - pointSize_Half.y &&
-					mousePosW.y < _transformControlPoints[i]._worldPos.y + pointSize_Half.y)
+				if (mousePosW.x > _FFD_ControlPoints[i]._worldPos.x - pointSize_Half.x &&
+					mousePosW.x < _FFD_ControlPoints[i]._worldPos.x + pointSize_Half.x &&
+					mousePosW.y > _FFD_ControlPoints[i]._worldPos.y - pointSize_Half.y &&
+					mousePosW.y < _FFD_ControlPoints[i]._worldPos.y + pointSize_Half.y)
 				{
 					if (selectType == SELECT_TYPE.New || selectType == SELECT_TYPE.Add)
 					{
-						_transformControlPoints[i]._isSelected = true;
+						_FFD_ControlPoints[i]._isSelected = true;
 					}
 					else
 					{
-						_transformControlPoints[i]._isSelected = false;
+						_FFD_ControlPoints[i]._isSelected = false;
 					}
 					break;
 				}
 			}
 
 			//return GetNumSelectedTransformControlPoint();
-			return SelectResult.Main.SetMultiple<TransformControlPoint>(GetSelectedTransformControlPoints());
+			return SelectResult.Main.SetMultiple<TransformControlPoint>(GetSelectedFFDPoints());
 		}
 
-		private void OnMoveTransformControlPoint(Vector2 mousePosGL, Vector2 mousePosW, Vector2 deltaMoveW)
+		private void OnMoveFFDPoint(Vector2 mousePosGL, Vector2 mousePosW, Vector2 deltaMoveW)
 		{
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					_transformControlPoints[i]._worldPos += deltaMoveW;
+					_FFD_ControlPoints[i]._worldPos += deltaMoveW;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 		}
 
-		private void OnRotateTransformControlPoint(float deltaAngleW)
+		private void OnRotateFFDPoint(float deltaAngleW)
 		{
-			if (GetNumSelectedTransformControlPoint() == 0)
+			if (GetNumSelectedFFDPoints() == 0)
 			{
 				return;
 			}
 
-			Vector2 centerPos = GetTransformControlCenterPos();
+			Vector2 centerPos = GetFFDCenterPos();
 
 			//if(deltaAngleW > 180.0f)
 			//{
@@ -3839,80 +4072,97 @@ namespace AnyPortrait
 				* apMatrix3x3.TRS(Vector2.zero, deltaAngleW, Vector2.one)
 				* apMatrix3x3.TRS(-centerPos, 0, Vector2.one);
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
 					//Vector2 worldPos3 = new Vector3(_transformControlPoints[i]._worldPos.x, _transformControlPoints[i]._worldPos.y, 0);
 
-					Vector2 nextWorldPos2 = matrix_Rotate.MultiplyPoint(_transformControlPoints[i]._worldPos);
+					Vector2 nextWorldPos2 = matrix_Rotate.MultiplyPoint(_FFD_ControlPoints[i]._worldPos);
 
-					_transformControlPoints[i]._worldPos = nextWorldPos2;
+					_FFD_ControlPoints[i]._worldPos = nextWorldPos2;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 		}
 
-		private void OnScaleTransformControlPoint(Vector2 deltaScale)
+		private void OnScaleFFDPoint(Vector2 deltaScale)
 		{
-			if (GetNumSelectedTransformControlPoint() == 0)
+			if (GetNumSelectedFFDPoints() == 0)
 			{
 				return;
 			}
 
-			Vector2 centerPos = GetTransformControlCenterPos();
+			Vector2 centerPos = GetFFDCenterPos();
 
 			apMatrix3x3 matrix_Scale = apMatrix3x3.TRS(centerPos, 0, Vector2.one)
 				* apMatrix3x3.TRS(Vector2.zero, 0, new Vector2(1.0f + deltaScale.x, 1.0f + deltaScale.y))
 				* apMatrix3x3.TRS(-centerPos, 0, Vector2.one);
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
 					//Vector3 worldPos3 = new Vector3(_transformControlPoints[i]._worldPos.x, _transformControlPoints[i]._worldPos.y, 0);
 					//Vector3 nextWorldPos3 = matrix_Scale.MultiplyPoint3x4(worldPos3);
-					Vector2 nextWorldPos = matrix_Scale.MultiplyPoint(_transformControlPoints[i]._worldPos);
+					Vector2 nextWorldPos = matrix_Scale.MultiplyPoint(_FFD_ControlPoints[i]._worldPos);
 
-					_transformControlPoints[i]._worldPos = nextWorldPos;
+					_FFD_ControlPoints[i]._worldPos = nextWorldPos;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 		}
 
-		private SelectResult OnMultipleSelectTransformControlPoint(Vector2 areaPosW_Min, Vector2 areaPosW_Max, apGizmos.SELECT_TYPE areaSelectType)
+		private SelectResult OnMultipleSelectFFDPoints(Vector2 areaPosW_Min, Vector2 areaPosW_Max, apGizmos.SELECT_TYPE areaSelectType)
 		{
 			if (areaSelectType == SELECT_TYPE.New)
 			{
 				//일단 초기화
-				for (int i = 0; i < _transformControlPoints.Count; i++)
+				for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 				{
-					_transformControlPoints[i]._isSelected = false;
+					_FFD_ControlPoints[i]._isSelected = false;
 				}
 			}
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				Vector2 worldPos = _transformControlPoints[i]._worldPos;
+				Vector2 worldPos = _FFD_ControlPoints[i]._worldPos;
 				//클릭한 영역에 있는 걸 찾자
 				if (worldPos.x > areaPosW_Min.x && worldPos.x < areaPosW_Max.x &&
 					worldPos.y > areaPosW_Min.y && worldPos.y < areaPosW_Max.y)
 				{
 					if (areaSelectType == SELECT_TYPE.New || areaSelectType == SELECT_TYPE.Add)
 					{
-						_transformControlPoints[i]._isSelected = true;
+						_FFD_ControlPoints[i]._isSelected = true;
 					}
 					else
 					{
-						_transformControlPoints[i]._isSelected = false;
+						_FFD_ControlPoints[i]._isSelected = false;
 					}
 				}
 			}
 
 			//return GetNumSelectedTransformControlPoint();
-			return SelectResult.Main.SetMultiple<TransformControlPoint>(GetSelectedTransformControlPoints());
+			return SelectResult.Main.SetMultiple<TransformControlPoint>(GetSelectedFFDPoints());
+		}
+
+		/// <summary>
+		/// 모든 FFD 포인트를 선택하자
+		/// </summary>
+		public void SelectAllFFDPoints()
+		{
+			int nFFDPoints = _FFD_ControlPoints != null ? _FFD_ControlPoints.Count : 0;
+			if(nFFDPoints == 0)
+			{
+				return;
+			}
+
+			for (int i = 0; i < nFFDPoints; i++)
+			{
+				_FFD_ControlPoints[i]._isSelected = true;
+			}
 		}
 
 
@@ -4060,6 +4310,12 @@ namespace AnyPortrait
 		}
 
 
+		/// <summary>
+		/// [1.4.2] 방향키가 단축키로서 점유되었는가
+		/// </summary>
+		/// <returns></returns>
+		public bool IsArrowHotKeyOccupied { get { return _isArrowHotKeyOccupied; } }
+
 		//--------------------------------------------------------------------------
 		/// <summary>
 		/// 단축키나 외부의 함수에서 SelectResult를 갱신하는 경우..
@@ -4094,22 +4350,8 @@ namespace AnyPortrait
 		}
 		//--------------------------------------------------------------------------
 
-		//public void OnTransformChanged_BoneIKController(float boneIKMixWeight)
-		//{
-		//	if(_funcTransformBoneIKMixWeight != null)
-		//	{
-		//		_funcTransformBoneIKMixWeight(Mathf.Clamp01(boneIKMixWeight));
-		//	}
-		//}
-		//--------------------------------------------------------------------------
-		//public void GUI_Render_Controller(Vector2 localPosOffset, apMatrix3x3 matrixLocal, apMatrix3x3 matrixToParent, apMatrix3x3 matrixToWorld)
 		public void GUI_Render_Controller(apEditor editor)
 		{
-			//if(_isGizmoLock || _selectedObject == null)
-			//if(_isGizmoLock || !_isGizmoEventRegistered)
-
-			//_isForceUpdateFlagRequest = false;
-
 			//여기서 GL을 다시 사용한다.
 
 			if (!_isGizmoEventRegistered)
@@ -4135,27 +4377,10 @@ namespace AnyPortrait
 			{
 				return;
 			}
-			//apMatrix3x3 transformMtrx = apMatrix3x3.identity;
-
-			//switch (_coordinate)
-			//{
-			//	case COORDINATE_TYPE.World:
-			//		transformMtrx = matrixToWorld;
-			//		break;
-
-			//	case COORDINATE_TYPE.Parent:
-			//		transformMtrx = matrixToParent;
-			//		break;
-
-			//	case COORDINATE_TYPE.Local:
-			//		transformMtrx = matrixLocal;
-			//		break;
-			//}
-
+			
 			switch (_controlType)
 			{
 				case CONTROL_TYPE.Move:
-					//RenderControl_Move(localPosOffset, transformMtrx);
 					RenderControl_Move();
 					break;
 
@@ -4451,7 +4676,7 @@ namespace AnyPortrait
 		{
 			if (!_isFFDMode
 				//|| _transformControlPoints.Count < 9
-				|| _transformControlPoints.Count < 4
+				|| _FFD_ControlPoints.Count < 4
 				)
 			{
 				return;
@@ -4488,15 +4713,15 @@ namespace AnyPortrait
 
 					if (iY == 0)
 					{
-						apGL.DrawBoldLine(_transformControlPoints[iPoint_LB]._worldPos, _transformControlPoints[iPoint_RB]._worldPos, 4, FFDLineColor, false);
+						apGL.DrawBoldLine(_FFD_ControlPoints[iPoint_LB]._worldPos, _FFD_ControlPoints[iPoint_RB]._worldPos, 4, FFDLineColor, false);
 					}
 
-					apGL.DrawBoldLine(_transformControlPoints[iPoint_RB]._worldPos, _transformControlPoints[iPoint_RT]._worldPos, 4, FFDLineColor, false);
-					apGL.DrawBoldLine(_transformControlPoints[iPoint_RT]._worldPos, _transformControlPoints[iPoint_LT]._worldPos, 4, FFDLineColor, false);
+					apGL.DrawBoldLine(_FFD_ControlPoints[iPoint_RB]._worldPos, _FFD_ControlPoints[iPoint_RT]._worldPos, 4, FFDLineColor, false);
+					apGL.DrawBoldLine(_FFD_ControlPoints[iPoint_RT]._worldPos, _FFD_ControlPoints[iPoint_LT]._worldPos, 4, FFDLineColor, false);
 
 					if (iX == 0)
 					{
-						apGL.DrawBoldLine(_transformControlPoints[iPoint_LT]._worldPos, _transformControlPoints[iPoint_LB]._worldPos, 4, FFDLineColor, false);
+						apGL.DrawBoldLine(_FFD_ControlPoints[iPoint_LT]._worldPos, _FFD_ControlPoints[iPoint_LB]._worldPos, 4, FFDLineColor, false);
 					}
 				}
 			}
@@ -4517,9 +4742,9 @@ namespace AnyPortrait
 			//삭제 21.5.19
 			//apGL.EndBatch();
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				TransformControlPoint controlPoint = _transformControlPoints[i];
+				TransformControlPoint controlPoint = _FFD_ControlPoints[i];
 				if (controlPoint._isSelected)
 				{
 					apGL.DrawTexture(pointImg, controlPoint._worldPos, pointSize.x, pointSize.y, pointColor_Selected);
@@ -4688,7 +4913,7 @@ namespace AnyPortrait
 			}
 
 			if (!_isFFDMode
-				|| GetNumSelectedTransformControlPoint() == 0)
+				|| GetNumSelectedFFDPoints() == 0)
 			{
 				return null;
 			}
@@ -4708,15 +4933,15 @@ namespace AnyPortrait
 				case KeyCode.DownArrow:	deltaMoveW.y = -moveSize;	break;//-Y
 			}
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					_transformControlPoints[i]._worldPos += deltaMoveW;
+					_FFD_ControlPoints[i]._worldPos += deltaMoveW;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 
 			_prevKeyboardContEventStatus = _keyboardContEventStatus;
 
@@ -4735,7 +4960,7 @@ namespace AnyPortrait
 			}
 
 			if (!_isFFDMode
-				|| GetNumSelectedTransformControlPoint() == 0)
+				|| GetNumSelectedFFDPoints() == 0)
 			{
 				return null;
 			}
@@ -4753,25 +4978,25 @@ namespace AnyPortrait
 				case KeyCode.RightArrow:	deltaAngle = -angleSize;	break;//-X (CW)
 			}
 
-			Vector2 centerPos = GetTransformControlCenterPos();
+			Vector2 centerPos = GetFFDCenterPos();
 
 			apMatrix3x3 matrix_Rotate = apMatrix3x3.TRS(centerPos, 0, Vector2.one)
 				* apMatrix3x3.TRS(Vector2.zero, deltaAngle, Vector2.one)
 				* apMatrix3x3.TRS(-centerPos, 0, Vector2.one);
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
 					//Vector2 worldPos3 = new Vector3(_transformControlPoints[i]._worldPos.x, _transformControlPoints[i]._worldPos.y, 0);
 
-					Vector2 nextWorldPos2 = matrix_Rotate.MultiplyPoint(_transformControlPoints[i]._worldPos);
+					Vector2 nextWorldPos2 = matrix_Rotate.MultiplyPoint(_FFD_ControlPoints[i]._worldPos);
 
-					_transformControlPoints[i]._worldPos = nextWorldPos2;
+					_FFD_ControlPoints[i]._worldPos = nextWorldPos2;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 
 			_prevKeyboardContEventStatus = _keyboardContEventStatus;
 
@@ -4790,7 +5015,7 @@ namespace AnyPortrait
 			}
 
 			if (!_isFFDMode
-				|| GetNumSelectedTransformControlPoint() == 0)
+				|| GetNumSelectedFFDPoints() == 0)
 			{
 				return null;
 			}
@@ -4810,23 +5035,23 @@ namespace AnyPortrait
 				case KeyCode.DownArrow:		deltaScale.y = -scaleSize;	break;//-Y
 			}
 
-			Vector2 centerPos = GetTransformControlCenterPos();
+			Vector2 centerPos = GetFFDCenterPos();
 
 			apMatrix3x3 matrix_Scale = apMatrix3x3.TRS(centerPos, 0, Vector2.one)
 				* apMatrix3x3.TRS(Vector2.zero, 0, new Vector2(1.0f + deltaScale.x, 1.0f + deltaScale.y))
 				* apMatrix3x3.TRS(-centerPos, 0, Vector2.one);
 
-			for (int i = 0; i < _transformControlPoints.Count; i++)
+			for (int i = 0; i < _FFD_ControlPoints.Count; i++)
 			{
-				if (_transformControlPoints[i]._isSelected)
+				if (_FFD_ControlPoints[i]._isSelected)
 				{
-					Vector2 nextWorldPos = matrix_Scale.MultiplyPoint(_transformControlPoints[i]._worldPos);
+					Vector2 nextWorldPos = matrix_Scale.MultiplyPoint(_FFD_ControlPoints[i]._worldPos);
 
-					_transformControlPoints[i]._worldPos = nextWorldPos;
+					_FFD_ControlPoints[i]._worldPos = nextWorldPos;
 				}
 			}
 
-			RefreshTransformObjects();
+			RefreshFFD();
 
 			_prevKeyboardContEventStatus = _keyboardContEventStatus;
 
@@ -4851,11 +5076,11 @@ namespace AnyPortrait
 			//Debug.Log("OnKeyboardEvent_FFD_EnterOrEscape : " + keyCode + " / isShift : " + (isShift));
 			if(keyCode == KeyCode.Return || keyCode == KeyCode.KeypadEnter)
 			{
-				AdaptTransformObjects(_editor);
+				AdaptFFD(true);
 			}
 			else if(keyCode == KeyCode.Escape)
 			{
-				RevertTransformObjects(_editor);
+				RevertFFD(true);
 			}
 
 			//Enter / Esc는 키보드 입력에 연속성이 없다.

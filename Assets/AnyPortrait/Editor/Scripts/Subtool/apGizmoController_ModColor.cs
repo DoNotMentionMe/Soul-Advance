@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -305,9 +305,11 @@ namespace AnyPortrait
 					//Mesh Group 자체를 선택해야 한다.
 					apMeshGroup parentMeshGroup = Editor.Select.MeshGroup.FindParentMeshGroupOfMeshTransform(selectedMeshTransform);
 
+					object selectedObject = null;
 					if (parentMeshGroup == null || parentMeshGroup == Editor.Select.MeshGroup || isChildMeshTransformSelectable)
 					{
 						Editor.Select.SelectSubObject(selectedMeshTransform, null, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택 옵션
+						selectedObject = selectedMeshTransform;
 					}
 					else
 					{
@@ -315,10 +317,12 @@ namespace AnyPortrait
 						if (childMeshGroupTransform != null)
 						{
 							Editor.Select.SelectSubObject(null, childMeshGroupTransform, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택
+							selectedObject = childMeshGroupTransform;
 						}
 						else
 						{
 							Editor.Select.SelectSubObject(selectedMeshTransform, null, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택
+							selectedObject = selectedMeshTransform;
 						}
 					}
 
@@ -326,8 +330,20 @@ namespace AnyPortrait
 
 					//>> [GizmoMain] >>
 					selectedMeshTransform = Editor.Select.MeshTF_Mod_Gizmo;
-						
+
 					prevSelectedObj = selectedMeshTransform;
+
+
+					//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+					if(Editor._option_AutoScrollWhenObjectSelected)
+					{
+						//스크롤 가능한 상황인지 체크하고
+						if(Editor.IsAutoScrollableWhenClickObject_MeshGroup(selectedObject, true))
+						{
+							//자동 스크롤을 요청한다.
+							Editor.AutoScroll_HierarchyMeshGroup(selectedObject);
+						}
+					}
 				}
 
 				if(!isSelectionCompleted && multiSelect == apSelection.MULTI_SELECT.Main)//변경 20.5.27 : "추가 선택"이 아닌데 선택된게 없다면 취소.

@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -314,11 +314,22 @@ namespace AnyPortrait
 				//속도는 0
 				_velocity_Real = Vector2.zero;
 				_velocity_Real1F = Vector2.zero;
+				_velocity_1F = Vector2.zero;
 				_pos_1F = _pos_Real;
 				_pos_Predict = _pos_Real;
 				_acc_Ex = Vector2.zero;
 
 				_tDelta_1F = tDelta;
+
+				//관성도 없애자 [v1.4.2]
+				_F_inertia_Prev = Vector2.zero;
+				_F_inertia_RecordMax = Vector2.zero;
+				_tReduceInertia = 0.0f;
+				_isUsePrevInertia = false;
+
+				_calculatedDeltaPos = Vector2.zero;
+				_calculatedDeltaPos_Prev = _calculatedDeltaPos;
+
 
 
 				if (_isUsePrevInertia)
@@ -337,8 +348,7 @@ namespace AnyPortrait
 					}
 				}
 			}
-			else if (isValidFrame
-				&& tDelta > 0.0f)
+			else if (isValidFrame && tDelta > 0.0f)
 			{
 				//이전 프레임의 값을 저장하여 딜레이를 시키자
 				Vector2 vertPosWorld = _vertex._vertPos_World;

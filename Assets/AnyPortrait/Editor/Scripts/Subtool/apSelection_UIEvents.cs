@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -40,18 +40,16 @@ namespace AnyPortrait
 				return null;
 			}
 
+			//v1.4.2 : FFD일땐 토글이 제한될 수 있다.
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
+			{
+				return null;
+			}
+
+
 			ToggleRigEditBinding();
 
-			//결과에 따라서 단축키 결과를 표시하자
-			//if(Modifier.ModifierType == apModifierBase.MODIFIER_TYPE.Rigging)
-			//{	
-			//	return apHotKey.HotKeyResult.MakeResult(_rigEdit_isBindingEdit ? apStringFactory.I.ON : apStringFactory.I.OFF);
-			//}
-			//else
-			//{
-			//	return apHotKey.HotKeyResult.MakeResult(_exclusiveEditing != EX_EDIT.None ? apStringFactory.I.ON : apStringFactory.I.OFF);
-			//}
-			
 			//변경 22.5.15
 			return apHotKey.HotKeyResult.MakeResult(_exclusiveEditing != EX_EDIT.None ? apStringFactory.I.ON : apStringFactory.I.OFF);
 			
@@ -309,6 +307,14 @@ namespace AnyPortrait
 
 			int iParam = (int)paramObj;
 
+			//v1.4.2 탭 전환 전에 모달 상태를 확인하자
+			bool isExecutable = Editor.CheckModalAndExecutable();
+
+			if (!isExecutable)
+			{
+				return null;
+			}
+
 			switch (iParam)
 			{
 				case 0://Setting탭
@@ -329,34 +335,74 @@ namespace AnyPortrait
 
 				case 1://Make Mesh - Add
 					{
-						//일단 Make Mesh 체크
-						if(Editor._meshEditMode != apEditor.MESH_EDIT_MODE.MakeMesh)
-						{
-							Editor.Controller.CheckMeshEdgeWorkRemained();
-							Editor._meshEditMode = apEditor.MESH_EDIT_MODE.MakeMesh;
-							Editor._isMeshEdit_AreaEditing = false;
-							_meshAreaPointEditType = MESH_AREA_POINT_EDIT.NotSelected;
+						//v1.4.2 : 이미 MakeMesh / AddTools 탭이 선택된 상태라면
+						//AddTool의 대상을 하나씩 전환한다.
+						//그 외의 경우엔 MakeMesh / AddTools를 연다.
 
-							Editor.Controller.StartMeshEdgeWork();
-							Editor.VertController.SetMesh(_mesh);
-							Editor.VertController.UnselectVertex();
-
-							Editor.Gizmos.Unlink();
-						}
-						//Make Mesh 모드 체크
-						if(Editor._meshEditeMode_MakeMesh_Tab != apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.AddTools)
+						if (Editor._meshEditMode == apEditor.MESH_EDIT_MODE.MakeMesh
+							&& Editor._meshEditeMode_MakeMesh_Tab == apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.AddTools)
 						{
-							//Add Tools로 변경
-							Editor._meshEditeMode_MakeMesh_Tab = apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.AddTools;
-							Editor._meshEditMirrorMode = apEditor.MESH_EDIT_MIRROR_MODE.None;
-							Editor._isMeshEdit_AreaEditing = false;
-							_meshAreaPointEditType = MESH_AREA_POINT_EDIT.NotSelected;
+							//< MakeMesh / AddTools 탭이 선택된 상태 >
 							
-							//미러도 초기화
-							Editor.MirrorSet.Clear();
-							Editor.MirrorSet.ClearMovedVertex();
+							//다음 툴로 순서대로 넘어간다.
+							apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS nextTool = apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.VertexAndEdge;
+
+							switch (Editor._meshEditeMode_MakeMesh_AddTool)
+							{
+								case apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.VertexAndEdge:
+									nextTool = apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.VertexOnly;
+									break;
+
+								case apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.VertexOnly:
+									nextTool = apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.EdgeOnly;
+									break;
+
+								case apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.EdgeOnly:
+									nextTool = apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.Polygon;
+									break;
+
+								case apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.Polygon:
+									nextTool = apEditor.MESH_EDIT_MODE_MAKEMESH_ADDTOOLS.VertexAndEdge;
+									break;
+							}
+
+							Editor._meshEditeMode_MakeMesh_AddTool = nextTool;
 							Editor.VertController.UnselectVertex();
 						}
+						else
+						{
+							//< 다른 화면이 열린 상태 >
+							//일단 Make Mesh 체크
+							if (Editor._meshEditMode != apEditor.MESH_EDIT_MODE.MakeMesh)
+							{
+								Editor.Controller.CheckMeshEdgeWorkRemained();
+								Editor._meshEditMode = apEditor.MESH_EDIT_MODE.MakeMesh;
+								Editor._isMeshEdit_AreaEditing = false;
+								_meshAreaPointEditType = MESH_AREA_POINT_EDIT.NotSelected;
+
+								Editor.Controller.StartMeshEdgeWork();
+								Editor.VertController.SetMesh(_mesh);
+								Editor.VertController.UnselectVertex();
+
+								Editor.Gizmos.Unlink();
+							}
+
+							//이어서 Make Mesh 모드 체크
+							if (Editor._meshEditeMode_MakeMesh_Tab != apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.AddTools)
+							{
+								//Add Tools로 변경
+								Editor._meshEditeMode_MakeMesh_Tab = apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.AddTools;
+								Editor._meshEditMirrorMode = apEditor.MESH_EDIT_MIRROR_MODE.None;
+								Editor._isMeshEdit_AreaEditing = false;
+								_meshAreaPointEditType = MESH_AREA_POINT_EDIT.NotSelected;
+
+								//미러도 초기화
+								Editor.MirrorSet.Clear();
+								Editor.MirrorSet.ClearMovedVertex();
+								Editor.VertController.UnselectVertex();
+							}
+						}
+						
 
 						return apHotKey.HotKeyResult.MakeResult(apStringFactory.I.AddTool);
 					}
@@ -473,6 +519,29 @@ namespace AnyPortrait
 							Editor.Gizmos.Unlink();
 							//기즈모 추가 필요
 							RefreshPinModeEvent();
+						}
+						else
+						{
+							//v1.4.2 : 이미 핀 화면이라면 순서대로 다음 Pin 툴로 넘어간다.
+
+							switch (Editor._meshEditMode_Pin_ToolMode)
+							{
+								case apEditor.MESH_EDIT_PIN_TOOL_MODE.Select:
+									SetPinMode(apEditor.MESH_EDIT_PIN_TOOL_MODE.Add);
+									break;
+
+								case apEditor.MESH_EDIT_PIN_TOOL_MODE.Add:
+									SetPinMode(apEditor.MESH_EDIT_PIN_TOOL_MODE.Link);
+									break;
+
+								case apEditor.MESH_EDIT_PIN_TOOL_MODE.Link:
+									SetPinMode(apEditor.MESH_EDIT_PIN_TOOL_MODE.Test);
+									break;
+
+								case apEditor.MESH_EDIT_PIN_TOOL_MODE.Test:
+									SetPinMode(apEditor.MESH_EDIT_PIN_TOOL_MODE.Select);
+									break;
+							}
 						}
 
 						return apHotKey.HotKeyResult.MakeResult(apStringFactory.I.Pin);
@@ -673,6 +742,14 @@ namespace AnyPortrait
 				return null;
 			}
 
+			//v1.4.2 탭 전환 전에 모달 상태를 확인하자
+			bool isExecutable = Editor.CheckModalAndExecutable();
+
+			if (!isExecutable)
+			{
+				return null;
+			}
+
 			apEditorUtil.SetRecord_Mesh(	apUndoGroupData.ACTION.MeshEdit_MakeEdges, 
 											Editor, 
 											Mesh, 
@@ -713,6 +790,14 @@ namespace AnyPortrait
 				|| Editor.Gizmos.IsFFDMode
 				|| Editor.VertController.Vertex == null
 				|| Editor.VertController.Vertices.Count == 0)
+			{
+				return null;
+			}
+
+			//v1.4.2 탭 전환 전에 모달 상태를 확인하자
+			bool isExecutable = Editor.CheckModalAndExecutable();
+
+			if (!isExecutable)
 			{
 				return null;
 			}
@@ -862,6 +947,122 @@ namespace AnyPortrait
 
 
 
+		//메시의 버텍스/핀 붙여넣기
+		private object _loadKey_PasteMestVertPin = null;
+
+		public void OnCopyMeshVerts(bool isSuccess,
+												object loadKey, 
+												apMesh dstMesh,
+												apDialog_CopyMeshVertPin.POSITION_SPACE positionSpace)
+		{
+			if(!isSuccess
+				|| _loadKey_PasteMestVertPin == null
+				|| _loadKey_PasteMestVertPin != loadKey
+				|| Mesh == null
+				|| Mesh != dstMesh)
+			{
+				_loadKey_PasteMestVertPin = null;
+				return;
+			}
+
+			_loadKey_PasteMestVertPin = null;
+
+			//붙여넣기를 하자
+
+			//아래 코드 참조
+			apEditorUtil.SetRecord_Mesh(apUndoGroupData.ACTION.MeshEdit_VertexCopied,
+													Editor,
+													Mesh,
+													//mesh,
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+			List<apVertex> copiedVert = apSnapShotManager.I.Paste_MeshVertices(Mesh, positionSpace);
+
+			Mesh.RefreshPolygonsToIndexBuffer();
+
+			//복사된걸 선택하자
+			if (copiedVert != null)
+			{
+				Editor.VertController.UnselectVertex();
+				Editor.VertController.SelectVertices(copiedVert, apGizmos.SELECT_TYPE.New);
+			}
+
+			int nVerts = copiedVert != null ? copiedVert.Count : 0;
+
+			if(nVerts > 1)
+			{
+				Editor.Notification(nVerts + " Vertices have been copied.", false, false);
+			}
+			else
+			{
+				Editor.Notification(nVerts + " Vertex has been copied.", false, false);
+			}
+
+			Editor.SetRepaint();
+			Editor.OnAnyObjectAddedOrRemoved();
+			
+		}
+
+
+
+		public void OnCopyMeshPins(bool isSuccess,
+									object loadKey, 
+									apMesh dstMesh,
+									apDialog_CopyMeshVertPin.POSITION_SPACE positionSpace)
+		{
+			if(!isSuccess
+				|| _loadKey_PasteMestVertPin == null
+				|| _loadKey_PasteMestVertPin != loadKey
+				|| Mesh == null
+				|| Mesh != dstMesh)
+			{
+				_loadKey_PasteMestVertPin = null;
+				return;
+			}
+
+			_loadKey_PasteMestVertPin = null;
+
+			//붙여넣기를 하자
+
+			//아래 코드 참조
+			apEditorUtil.SetRecord_Mesh(apUndoGroupData.ACTION.MeshEdit_AddPin,
+													Editor,
+													Mesh,
+													//mesh,
+													false,
+													apEditorUtil.UNDO_STRUCT.ValueOnly);
+
+			List<apMeshPin> copiedPin = apSnapShotManager.I.Paste_MeshPins(Mesh, positionSpace);
+
+			//붙여넣기를 했다면 핀 그룹을 전체 갱신하자
+			if(Mesh._pinGroup != null)
+			{
+				Mesh._pinGroup.Refresh(apMeshPinGroup.REFRESH_TYPE.RecalculateAll);
+			}
+			//복사된걸 선택하자
+			if (copiedPin != null)
+			{
+				Editor.Select.SelectMeshPins(copiedPin, apGizmos.SELECT_TYPE.New);
+			}
+
+			int nPins = copiedPin != null ? copiedPin.Count : 0;
+
+			if(nPins > 1)
+			{
+				Editor.Notification(nPins + " Pins have been copied.", false, false);
+			}
+			else
+			{
+				Editor.Notification(nPins + " Pin has been copied.", false, false);
+			}
+
+			Editor.SetRepaint();
+			Editor.OnAnyObjectAddedOrRemoved();
+			
+		}
+
+
 		//----------------------------------------------------------------------
 		// 메시 그룹 UI에서의 이벤트
 		//----------------------------------------------------------------------
@@ -982,8 +1183,12 @@ namespace AnyPortrait
 			
 			List<apTransform_Mesh> selectedMeshTFs = GetSubSeletedMeshTFs(false);
 			List<apTransform_MeshGroup> selectedMeshGroupTFs = GetSubSeletedMeshGroupTFs(false);
-			int nSubSelectedMeshTFs_All = selectedMeshTFs.Count;
-			int nSubSelectedMeshGroupTFs_All = selectedMeshGroupTFs.Count;
+			int nSubSelectedMeshTFs_All = selectedMeshTFs != null ? selectedMeshTFs.Count : 0;
+			int nSubSelectedMeshGroupTFs_All = selectedMeshGroupTFs != null ? selectedMeshGroupTFs.Count : 0;
+
+
+			//변경사항 v1.4.2
+			//이제 MeshTF와 MeshGroupTF가 섞여있어도 삭제 가능하다.
 
 			if(nSubSelectedMeshTFs_All == 0 && nSubSelectedMeshGroupTFs_All == 0)
 			{
@@ -991,48 +1196,58 @@ namespace AnyPortrait
 				return null;
 			}
 
-			if(nSubSelectedMeshTFs_All > 0 && nSubSelectedMeshGroupTFs_All > 0)
-			{
-				//두 종류가 섞여서 선택되었어도 동작하지 않는다.
-				return null;
-			}
+			//삭제 > 혼합되어도 가능합
+			//if(nSubSelectedMeshTFs_All > 0 && nSubSelectedMeshGroupTFs_All > 0)
+			//{
+			//	//두 종류가 섞여서 선택되었어도 동작하지 않는다.
+			//	return null;
+			//}
 
 			string strDialogInfo = Editor.GetText(TEXT.Detach_Body);
 
-			
+
 			//다이얼로그 메시지를 만들자
-			if(nSubSelectedMeshTFs_All > 0)
-			{
-				//메시가 선택되었을 때
-				if(nSubSelectedMeshTFs_All == 1 && MeshTF_Main != null)
-				{
-					//메시 단일 선택
-					strDialogInfo = Editor.Controller.GetRemoveItemMessage(
-																		_portrait,
-																		MeshTF_Main,
+			#region [미사용 코드]
+			//if(nSubSelectedMeshTFs_All > 0)
+			//{
+			//	//메시가 선택되었을 때
+			//	if(nSubSelectedMeshTFs_All == 1 && MeshTF_Main != null)
+			//	{
+			//		//메시 단일 선택
+			//		strDialogInfo = Editor.Controller.GetRemoveItemMessage(
+			//															_portrait,
+			//															MeshTF_Main,
+			//															5,
+			//															Editor.GetText(TEXT.Detach_Body),
+			//															Editor.GetText(TEXT.DLG_RemoveItemChangedWarning));
+			//	}
+			//}
+			//else if(nSubSelectedMeshGroupTFs_All > 0)
+			//{
+			//	//메시 그룹이 선택되었을 때
+			//	if(nSubSelectedMeshGroupTFs_All == 1 && MeshGroupTF_Main != null)
+			//	{
+			//		//메시 그룹 단일 선택
+			//		strDialogInfo = Editor.Controller.GetRemoveItemMessage(
+			//															_portrait,
+			//															MeshGroupTF_Main,
+			//															5,
+			//															Editor.GetText(TEXT.Detach_Body),
+			//															Editor.GetText(TEXT.DLG_RemoveItemChangedWarning));
+			//	}
+			//}
+			//else
+			//{
+			//	return null;
+			//} 
+			#endregion
+
+			//변경 v1.4.2 : 여러개의 타입에 대해 동시에 변경 기록 조회하기
+			strDialogInfo = Editor.Controller.GetRemoveItemsMessage(	_portrait,
+																		selectedMeshTFs, selectedMeshGroupTFs,
 																		5,
 																		Editor.GetText(TEXT.Detach_Body),
 																		Editor.GetText(TEXT.DLG_RemoveItemChangedWarning));
-				}
-			}
-			else if(nSubSelectedMeshGroupTFs_All > 0)
-			{
-				//메시 그룹이 선택되었을 때
-				if(nSubSelectedMeshGroupTFs_All == 1 && MeshGroupTF_Main != null)
-				{
-					//메시 그룹 단일 선택
-					strDialogInfo = Editor.Controller.GetRemoveItemMessage(
-																		_portrait,
-																		MeshGroupTF_Main,
-																		5,
-																		Editor.GetText(TEXT.Detach_Body),
-																		Editor.GetText(TEXT.DLG_RemoveItemChangedWarning));
-				}
-			}
-			else
-			{
-				return null;
-			}
 
 			bool isResult = EditorUtility.DisplayDialog(Editor.GetText(TEXT.Detach_Title),
 																				//Editor.GetText(TEXT.Detach_Body),
@@ -1045,37 +1260,59 @@ namespace AnyPortrait
 				return null;
 			}
 
-			if (nSubSelectedMeshTFs_All > 0)
+			//이전
+			//if (nSubSelectedMeshTFs_All > 0)
+			//{
+			//	//메시가 선택되었을 때
+			//	if (nSubSelectedMeshTFs_All == 1 && MeshTF_Main != null)
+			//	{
+			//		//단일 메시 삭제
+			//		Editor.Controller.DetachMeshTransform(MeshTF_Main, MeshGroup);
+			//		Editor.Select.SelectMeshTF(null, MULTI_SELECT.Main);
+			//	}
+			//	else
+			//	{
+			//		//다중 메시 삭제
+			//		Editor.Controller.DetachMeshTransforms(selectedMeshTFs, MeshGroup);
+			//		Editor.Select.SelectMeshTF(null, MULTI_SELECT.Main);
+			//	}
+			//}
+			//else if (nSubSelectedMeshGroupTFs_All > 0)
+			//{
+			//	//메시 그룹이 선택되었을 때
+			//	if (nSubSelectedMeshGroupTFs_All == 1 && MeshGroupTF_Main != null)
+			//	{
+			//		//단일 메시 그룹 삭제
+			//		Editor.Controller.DetachMeshGroupTransform(MeshGroupTF_Main, MeshGroup);
+			//		Editor.Select.SelectMeshGroupTF(null, MULTI_SELECT.Main);
+			//	}
+			//	else
+			//	{
+			//		//다중 메시 그룹 삭제
+			//		Editor.Controller.DetachMeshGroupTransforms(selectedMeshGroupTFs, MeshGroup);
+			//		Editor.Select.SelectMeshGroupTF(null, MULTI_SELECT.Main);
+			//	}
+			//}
+
+			//변경 v1.4.2 : 타입에 관계없이 다중 Detach 지원
+			//단일 제거부터 하자
+			if (nSubSelectedMeshTFs_All == 1 && MeshTF_Main != null && nSubSelectedMeshGroupTFs_All == 0)
 			{
-				//메시가 선택되었을 때
-				if (nSubSelectedMeshTFs_All == 1 && MeshTF_Main != null)
-				{
-					//단일 메시 삭제
-					Editor.Controller.DetachMeshInMeshGroup(MeshTF_Main, MeshGroup);
-					Editor.Select.SelectMeshTF(null, MULTI_SELECT.Main);
-				}
-				else
-				{
-					//다중 메시 삭제
-					Editor.Controller.DetachMeshesInMeshGroup(selectedMeshTFs, MeshGroup);
-					Editor.Select.SelectMeshTF(null, MULTI_SELECT.Main);
-				}
+				//단일 메시 삭제
+				Editor.Controller.DetachMeshTransform(MeshTF_Main, MeshGroup);
+				Editor.Select.SelectMeshTF(null, MULTI_SELECT.Main);
 			}
-			else if (nSubSelectedMeshGroupTFs_All > 0)
+			else if (nSubSelectedMeshGroupTFs_All == 1 && MeshGroupTF_Main != null && nSubSelectedMeshTFs_All == 0)
 			{
-				//메시 그룹이 선택되었을 때
-				if (nSubSelectedMeshGroupTFs_All == 1 && MeshGroupTF_Main != null)
-				{
-					//단일 메시 그룹 삭제
-					Editor.Controller.DetachMeshGroupInMeshGroup(MeshGroupTF_Main, MeshGroup);
-					Editor.Select.SelectMeshGroupTF(null, MULTI_SELECT.Main);
-				}
-				else
-				{
-					//다중 메시 그룹 삭제
-					Editor.Controller.DetachMeshGroupsInMeshGroup(selectedMeshGroupTFs, MeshGroup);
-					Editor.Select.SelectMeshGroupTF(null, MULTI_SELECT.Main);
-				}
+				//단일 메시 그룹 삭제
+				Editor.Controller.DetachMeshGroupTransform(MeshGroupTF_Main, MeshGroup);
+				Editor.Select.SelectMeshGroupTF(null, MULTI_SELECT.Main);
+			}
+			else
+			{
+				//그 외에는 다중 삭제
+				Editor.Controller.DetachMultipleTransforms(selectedMeshTFs, selectedMeshGroupTFs, MeshGroup);
+				Editor.Select.SelectSubObject(null, null, null, MULTI_SELECT.Main, TF_BONE_SELECT.Exclusive);
 			}
 
 			MeshGroup.SetDirtyToSort();//TODO : Sort에서 자식 객체 변한것 체크 : Clip 그룹 체크
@@ -2064,12 +2301,23 @@ namespace AnyPortrait
 			_animClip._timelines.Clear();//<<그냥 클리어
 			bool isChanged = _animClip._targetMeshGroup != meshGroup;
 			_animClip._targetMeshGroup = meshGroup;
-			_animClip._targetMeshGroupID = meshGroup._uniqueID;
+			
+			if(meshGroup != null)
+			{
+				_animClip._targetMeshGroupID = meshGroup._uniqueID;
+			}
+			else
+			{
+				_animClip._targetMeshGroupID = -1;
+			}
+			
 
 
 			if (meshGroup != null)
 			{
-				meshGroup._modifierStack.RefreshAndSort(true);
+				//meshGroup._modifierStack.RefreshAndSort(true);
+				meshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible,
+															apModifierStack.REFRESH_OPTION_REMOVE.Ignore);//변경 22.12.13
 				meshGroup.ResetBoneGUIVisible();
 			}
 			if (isChanged)
@@ -2096,7 +2344,10 @@ namespace AnyPortrait
 					_animClip._targetMeshGroup.RefreshForce(true, 0.0f, apUtil.LinkRefresh);
 					_animClip._targetMeshGroup.RefreshModifierLink(apUtil.LinkRefresh);
 
-					_animClip._targetMeshGroup._modifierStack.RefreshAndSort(true);
+					//_animClip._targetMeshGroup._modifierStack.RefreshAndSort(true);
+					//변경 22.12.13
+					_animClip._targetMeshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible,
+																				apModifierStack.REFRESH_OPTION_REMOVE.Ignore);
 
 
 					//변경 20.4.13 : VisibilityController를 이용하여 작업용 출력 여부를 초기화 및 복구하자
@@ -2213,6 +2464,9 @@ namespace AnyPortrait
 			if(retargetData.IsAnimFileLoaded)
 			{
 				Editor.Controller.ImportAnimClip(retargetData, targetMeshGroup, targetAnimClip, isMerge);
+
+				//[v1.4.2] Import 후에 기즈모 이벤트를 다시 체크해야한다.
+				SetAnimClipGizmoEvent();
 			}
 		}
 
@@ -2227,6 +2481,14 @@ namespace AnyPortrait
 		public apHotKey.HotKeyResult OnHotKey_AnimEditingToggle(object paramObject)
 		{
 			if (_selectionType != SELECTION_TYPE.Animation || _animClip == null)
+			{
+				return null;
+			}
+
+
+			//v1.4.2 : FFD 모드에서는 토글이 되지 않을 수 있다.
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
 			{
 				return null;
 			}
@@ -2264,6 +2526,13 @@ namespace AnyPortrait
 		{
 			if (_selectionType != SELECTION_TYPE.Animation
 				|| _animClip == null)
+			{
+				return null;
+			}
+
+			//v1.4.2 : FFD 모드에서는 키프레임 추가가 제한될 수 있다.
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
 			{
 				return null;
 			}
@@ -2320,126 +2589,139 @@ namespace AnyPortrait
 				return null;
 			}
 
-			if(paramObject is int)
+			bool isValidParam = paramObject is int;
+
+			if(!isValidParam)
 			{
-				int iParam = (int)paramObject;
-
-				switch (iParam)
-				{
-					case 0:
-						//Play/Pause Toggle
-						{
-							if (AnimClip.IsPlaying_Editor)
-							{
-								// 플레이 -> 일시 정지
-								AnimClip.Pause_Editor();
-							}
-							else
-							{
-								//마지막 프레임이라면 첫 프레임으로 이동하여 재생한다.
-								if (AnimClip.CurFrame == AnimClip.EndFrame)
-								{
-									AnimClip.SetFrame_Editor(AnimClip.StartFrame);
-									Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-								}
-								// 일시 정지 -> 플레이
-								AnimClip.Play_Editor();
-							}
-
-							//Play 전환 여부에 따라서도 WorkKeyframe을 전환한다.
-							AutoSelectAnimWorkKeyframe();
-							Editor.SetRepaint();
-							Editor.Gizmos.SetUpdate();
-						}
-						break;
-
-					case 1:
-						//Move [Prev Frame]
-						{
-							int prevFrame = AnimClip.CurFrame - 1;
-							if (prevFrame < AnimClip.StartFrame)
-							{
-								if (AnimClip.IsLoop)
-								{
-									prevFrame = AnimClip.EndFrame;
-								}
-							}
-							AnimClip.SetFrame_Editor(prevFrame);
-							AutoSelectAnimWorkKeyframe();
-
-							Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-						}
-						break;
-
-					case 2:
-						//Move [Next Frame]
-						{
-							int nextFrame = AnimClip.CurFrame + 1;
-							if (nextFrame > AnimClip.EndFrame)
-							{
-								if (AnimClip.IsLoop)
-								{
-									nextFrame = AnimClip.StartFrame;
-								}
-							}
-							AnimClip.SetFrame_Editor(nextFrame);
-							AutoSelectAnimWorkKeyframe();
-
-							Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-						}
-						break;
-
-					case 3:
-						//Move [First Frame]
-						{
-							AnimClip.SetFrame_Editor(AnimClip.StartFrame);
-							AutoSelectAnimWorkKeyframe();
-
-							Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-						}
-						break;
-
-					case 4:
-						//Move [Last Frame]
-						{
-							AnimClip.SetFrame_Editor(AnimClip.EndFrame);
-							AutoSelectAnimWorkKeyframe();
-
-							Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-						}
-						break;
-
-					case 5:
-						//Move [Prev Keyframe]
-						{
-							//추가 20.12.4
-							//이전의 가장 가까운 키프레임을 찾아서 이동한다.
-							FindAndMoveToNearestKeyframe(false);
-							AutoSelectAnimWorkKeyframe();
-							Editor.SetMeshGroupChanged();//강제 업데이트를 해야한다.
-						}
-						break;
-
-					case 6:
-						//Move [Next Keyframe]
-						{
-							//추가 20.12.4
-							//다음의 가장 가까운 키프레임을 찾아서 이동한다.
-							FindAndMoveToNearestKeyframe(true);
-							AutoSelectAnimWorkKeyframe();
-							Editor.SetMeshGroupChanged();//강제 업데이트를 해야한다.
-						}
-						break;
-
-					default:
-						Debug.LogError("애니메이션 단축키 처리 실패 - 알 수 없는 코드");
-						break;
-				}
+				//유효하지 않은 단축키
+				return null;
 			}
-			//else
-			//{
-			//	//Debug.LogError("애니메이션 단축키 처리 실패 - 알 수 없는 파라미터");
-			//}
+
+			//[v1.4.2] 모든 애니메이션 제어 단축키를 처리하기 위해서는 FFD가 해제되어야 한다.
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
+			{
+				return null;
+			}
+
+
+			int iParam = (int)paramObject;
+
+			bool isWorkKeyframeChanged = false;
+
+			switch (iParam)
+			{
+				case 0:						
+					{
+						// Play/Pause 전환하기
+						if (AnimClip.IsPlaying_Editor)
+						{
+							// 플레이 -> 일시 정지
+							AnimClip.Pause_Editor();
+						}
+						else
+						{
+							//마지막 프레임이라면 첫 프레임으로 이동하여 재생한다.
+							if (AnimClip.CurFrame == AnimClip.EndFrame)
+							{
+								AnimClip.SetFrame_Editor(AnimClip.StartFrame);
+								Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+							}
+							// 일시 정지 -> 플레이
+							AnimClip.Play_Editor();
+						}
+
+						//Play 전환 여부에 따라서도 WorkKeyframe을 전환한다.
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+						Editor.SetRepaint();
+						Editor.Gizmos.SetUpdate();
+					}
+					break;
+
+				case 1:
+					// [Prev Frame] : 이전 프레임으로 이동
+					{
+						int prevFrame = AnimClip.CurFrame - 1;
+						if (prevFrame < AnimClip.StartFrame)
+						{
+							if (AnimClip.IsLoop)
+							{
+								prevFrame = AnimClip.EndFrame;
+							}
+						}
+						AnimClip.SetFrame_Editor(prevFrame);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+					}
+					break;
+
+				case 2:
+					// [Next Frame] : 다음 프레임으로 이동
+					{
+						int nextFrame = AnimClip.CurFrame + 1;
+						if (nextFrame > AnimClip.EndFrame)
+						{
+							if (AnimClip.IsLoop)
+							{
+								nextFrame = AnimClip.StartFrame;
+							}
+						}
+						AnimClip.SetFrame_Editor(nextFrame);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+					}
+					break;
+
+				case 3:
+					// [First Frame] : 첫 프레임으로 이동
+					{
+						AnimClip.SetFrame_Editor(AnimClip.StartFrame);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+					}
+					break;
+
+				case 4:
+					// [Last Frame] : 마지막 프레임으로 이동
+					{
+						AnimClip.SetFrame_Editor(AnimClip.EndFrame);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+					}
+					break;
+
+				case 5:
+					// [Prev Keyframe] : 이전 "키프레임"을 찾아서 이동
+					{
+						//추가 20.12.4
+						//이전의 가장 가까운 키프레임을 찾아서 이동한다.
+						FindAndMoveToNearestKeyframe(false);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//강제 업데이트를 해야한다.
+					}
+					break;
+
+				case 6:
+					// [Next Keyframe] : 다음 "키프레임"을 찾아서 이동
+					{
+						//추가 20.12.4
+						//다음의 가장 가까운 키프레임을 찾아서 이동한다.
+						FindAndMoveToNearestKeyframe(true);
+						AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+						Editor.SetMeshGroupChanged();//강제 업데이트를 해야한다.
+					}
+					break;
+
+				default:
+					Debug.LogError("애니메이션 단축키 처리 실패 - 알 수 없는 코드");
+					break;
+			}
 
 			return apHotKey.HotKeyResult.MakeResult();
 		}
@@ -2595,6 +2877,14 @@ namespace AnyPortrait
 			{
 				return null;
 			}
+
+			//[v1.4.2] FFD 체크
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
+			{
+				return null;
+			}
+
 			Editor.Controller.CopyAnimKeyframeFromSnapShot(AnimClip, AnimClip.CurFrame);
 			
 			return apHotKey.HotKeyResult.MakeResult();

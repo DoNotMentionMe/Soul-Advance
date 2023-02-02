@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -53,12 +53,15 @@ namespace AnyPortrait
 			Remove = 64,
 			RemoveMultiple = 128,//이건 좌측 UI에서만 나온다. (다른건 다중 선택을 지원하므로)
 			Edit = 256,//<<추가 22.7.13 : 바로 편집화면으로 이동하기 (메시 그룹 하이라키에서 메시만 대상으로 한다.)
-
 		}
+
+		
+
+		
 
 		private int _hierarchyUnitType = 0;
 		private object _requestedObj = null;
-
+		private apEditorHierarchyUnit _clickedUnit = null;
 
 		//public class MenuCallbackParam
 		//{
@@ -66,9 +69,28 @@ namespace AnyPortrait
 		//	public object _requestedObj = 
 		//}
 
-		public delegate void FUNC_MENU_SELECTED(MENU_ITEM_HIERARCHY menuType, int hierachyUnitType, object requestedObj);
+		public delegate void FUNC_MENU_SELECTED(MENU_ITEM_HIERARCHY menuType, int hierachyUnitType, object requestedObj, apEditorHierarchyUnit clickedUnit);
 		private FUNC_MENU_SELECTED _funcMenuSelected = null;
 		private const string STR_EMPTY = "";
+
+		private const int MAX_TITLE_LENGTH = 25;
+		private apStringWrapper _strWrapper = null;
+
+
+		private bool _isMenu_Rename = false;
+		private bool _isMenu_MoveUpDown = false;
+		private bool _isMenu_Search = false;
+		private bool _isMenu_SelectAll = false;
+		private bool _isMenu_Duplicate = false;
+		private bool _isMenu_Remove = false;
+		private bool _isMenu_RemoveMultiple = false;
+		private bool _isMenu_Edit = false;
+
+
+		
+
+
+
 
 		// Init
 		//---------------------------------------------
@@ -76,22 +98,93 @@ namespace AnyPortrait
 		{
 			_editor = editor;
 			_funcMenuSelected = funcMenuSelected;
+			_strWrapper = new apStringWrapper(128);
 		}
 
 
 		// Functions
 		//---------------------------------------------
-		public void ShowMenu(MENU_ITEM_HIERARCHY menus, int hierachyUnitType, object requestObj)
+		//메뉴 만들기
+		public void ReadyToMakeMenu()
+		{
+			_isMenu_Rename = false;
+			_isMenu_MoveUpDown = false;
+			_isMenu_Search = false;
+			_isMenu_SelectAll = false;
+			_isMenu_Duplicate = false;
+			_isMenu_Remove = false;
+			_isMenu_RemoveMultiple = false;
+			_isMenu_Edit = false;
+		}
+
+		public void SetMenu_Rename() { _isMenu_Rename = true; }
+		public void SetMenu_MoveUpDown() { _isMenu_MoveUpDown = true; }
+		public void SetMenu_Search() { _isMenu_Search = true; }
+		public void SetMenu_SelectAll() { _isMenu_SelectAll = true; }
+		public void SetMenu_Duplicate() { _isMenu_Duplicate = true; }
+		public void SetMenu_Remove() { _isMenu_Remove = true; }
+		public void SetMenu_RemoveMultiple() { _isMenu_RemoveMultiple = true; }
+		public void SetMenu_Edit() { _isMenu_Edit = true; }
+
+
+
+		//메뉴 보여주기
+		public void ShowMenu(string title, int numSelectedObjects, int hierachyUnitType, object requestObj, apEditorHierarchyUnit clickedUnit)
 		{
 			_hierarchyUnitType = hierachyUnitType;
 			_requestedObj = requestObj;
+			_clickedUnit = clickedUnit;
 
 			GenericMenu newMenu = new GenericMenu();
 
+			//타이틀을 추가하자
+			if(!string.IsNullOrEmpty(title))
+			{
+				//타이틀 양식은
+				//1개 이하 선택시 > "타이틀"
+				//2개 이상 선택시 > "타이틀" + (개수 - 1)
+
+				//길이가 길다면
+				//자르고 ...추가
+
+				if(_strWrapper == null)
+				{
+					_strWrapper = new apStringWrapper(128);
+				}
+				_strWrapper.Clear();
+
+				//글자수 체크
+				if(title.Length > MAX_TITLE_LENGTH)
+				{
+					_strWrapper.Append(title.Substring(0, MAX_TITLE_LENGTH), false);
+					_strWrapper.Append("..", false);
+				}
+				else
+				{
+					_strWrapper.Append(title, false);
+				}
+
+				//복수개를 선택했다면
+				if(numSelectedObjects > 1)
+				{
+					_strWrapper.Append(" (+", false);
+					_strWrapper.Append(numSelectedObjects - 1, false);
+					_strWrapper.Append(")", false);
+				}
+				_strWrapper.MakeString();
+
+				newMenu.AddDisabledItem(new GUIContent(_strWrapper.ToString()));
+				newMenu.AddSeparator(STR_EMPTY);
+			}
+
+
 			MENU_ITEM_HIERARCHY lastMenu = MENU_ITEM_HIERARCHY.None;
 
+
+
 			//이름
-			if((int)(menus & MENU_ITEM_HIERARCHY.Rename) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.Rename) != 0)
+			if(_isMenu_Rename)
 			{
 				//검색
 				//"Rename"
@@ -100,7 +193,8 @@ namespace AnyPortrait
 			}
 
 			//이동 (Up, Down)
-			if ((int)(menus & MENU_ITEM_HIERARCHY.MoveUp) != 0)
+			//if ((int)(menus & MENU_ITEM_HIERARCHY.MoveUp) != 0)
+			if(_isMenu_MoveUpDown)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None)
 				{
@@ -109,9 +203,8 @@ namespace AnyPortrait
 				//"Move Up"
 				newMenu.AddItem(new GUIContent(_editor.GetUIWord(UIWORD.MoveUp)), false, OnMenuSelected, MENU_ITEM_HIERARCHY.MoveUp);
 				lastMenu = MENU_ITEM_HIERARCHY.MoveUp;
-			}
-			if ((int)(menus & MENU_ITEM_HIERARCHY.MoveDown) != 0)
-			{
+			
+
 				if(lastMenu != MENU_ITEM_HIERARCHY.None
 					&& lastMenu != MENU_ITEM_HIERARCHY.MoveUp)
 				{
@@ -123,7 +216,8 @@ namespace AnyPortrait
 			}
 
 			//검색
-			if((int)(menus & MENU_ITEM_HIERARCHY.Search) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.Search) != 0)
+			if(_isMenu_Search)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None)
 				{
@@ -133,8 +227,10 @@ namespace AnyPortrait
 				newMenu.AddItem(new GUIContent(_editor.GetUIWord(UIWORD.Search)), false, OnMenuSelected, MENU_ITEM_HIERARCHY.Search);
 				lastMenu = MENU_ITEM_HIERARCHY.Search;
 			}
+			
 			//모두 선택
-			if((int)(menus & MENU_ITEM_HIERARCHY.SelectAll) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.SelectAll) != 0)
+			if(_isMenu_SelectAll)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None
 					&& lastMenu != MENU_ITEM_HIERARCHY.Search)
@@ -148,7 +244,8 @@ namespace AnyPortrait
 			
 
 			//복제
-			if((int)(menus & MENU_ITEM_HIERARCHY.Duplicate) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.Duplicate) != 0)
+			if(_isMenu_Duplicate)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None)
 				{
@@ -160,7 +257,8 @@ namespace AnyPortrait
 			}
 
 			//편집하기 (추가 22.7.13)
-			if((int)(menus & MENU_ITEM_HIERARCHY.Edit) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.Edit) != 0)
+			if(_isMenu_Edit)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None)
 				{
@@ -172,7 +270,8 @@ namespace AnyPortrait
 			}
 
 			//삭제
-			if((int)(menus & MENU_ITEM_HIERARCHY.Remove) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.Remove) != 0)
+			if(_isMenu_Remove)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None)
 				{
@@ -184,14 +283,15 @@ namespace AnyPortrait
 			}
 
 			//추가 21.10.8 : 여러개 삭제
-			if((int)(menus & MENU_ITEM_HIERARCHY.RemoveMultiple) != 0)
+			//if((int)(menus & MENU_ITEM_HIERARCHY.RemoveMultiple) != 0)
+			if(_isMenu_RemoveMultiple)
 			{
 				if(lastMenu != MENU_ITEM_HIERARCHY.None
 					&& lastMenu != MENU_ITEM_HIERARCHY.Remove)
 				{
 					newMenu.AddSeparator(STR_EMPTY);
 				}
-				//TODO : 언어
+				
 				newMenu.AddItem(new GUIContent(_editor.GetUIWord(UIWORD.GUIMenu_RemoveMultiple)), false, OnMenuSelected, MENU_ITEM_HIERARCHY.RemoveMultiple);
 				lastMenu = MENU_ITEM_HIERARCHY.RemoveMultiple;
 			}
@@ -214,7 +314,7 @@ namespace AnyPortrait
 
 			MENU_ITEM_HIERARCHY menuType = (MENU_ITEM_HIERARCHY)obj;
 			
-			_funcMenuSelected(menuType, _hierarchyUnitType, _requestedObj);
+			_funcMenuSelected(menuType, _hierarchyUnitType, _requestedObj, _clickedUnit);
 
 		}
 	}

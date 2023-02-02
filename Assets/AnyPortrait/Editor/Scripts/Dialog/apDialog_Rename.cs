@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -30,16 +30,18 @@ namespace AnyPortrait
 		private apEditor _editor = null;
 		private object _loadKey = null;
 		private object _targetObject = null;
+		private apEditorHierarchyUnit _targetHierarchyUnit = null;
 		
-		public delegate void FUNC_RENAME_OBJECT(bool isSuccess, object loadKey, object targetObject, string name);
+		public delegate void FUNC_RENAME_OBJECT(bool isSuccess, object loadKey, object targetObject, apEditorHierarchyUnit targetHierarchyUnit, string name);
 		private FUNC_RENAME_OBJECT _funcResult = null;
 
 		private string _newName = "";
+		private string _prevName = "";
 		private bool _isInitFocused = false;
 
 		// Show Window
 		//------------------------------------------------------------------
-		public static object ShowDialog(apEditor editor, object targetObject, string curName, FUNC_RENAME_OBJECT funcResult)
+		public static object ShowDialog(apEditor editor, object targetObject, apEditorHierarchyUnit targetHierarchyUnit, string curName, FUNC_RENAME_OBJECT funcResult)
 		{
 			CloseDialog();
 
@@ -61,7 +63,7 @@ namespace AnyPortrait
 												(editor.position.yMin + editor.position.yMax) / 2 - (height / 2),
 												width, height);
 
-				s_window.Init(editor, loadKey, targetObject, curName, funcResult);
+				s_window.Init(editor, loadKey, targetObject, targetHierarchyUnit, curName, funcResult);
 
 				return loadKey;
 			}
@@ -89,13 +91,24 @@ namespace AnyPortrait
 
 		// Init
 		//------------------------------------------------------------------
-		public void Init(apEditor editor, object loadKey, object targetObject, string curName, FUNC_RENAME_OBJECT funcResult)
+		public void Init(apEditor editor, object loadKey, object targetObject, apEditorHierarchyUnit targetHierarchyUnit, string curName, FUNC_RENAME_OBJECT funcResult)
 		{
 			_editor = editor;
 			_loadKey = loadKey;
+
 			_targetObject = targetObject;
+			_targetHierarchyUnit = targetHierarchyUnit;
+
 			_funcResult = funcResult;
+
 			_newName = curName;
+			_prevName = curName;
+
+			if(_prevName.Length > 20)
+			{
+				_prevName = _prevName.Substring(0, 20) + "...";
+			}
+
 			_isInitFocused = false;
 		}
 
@@ -118,9 +131,25 @@ namespace AnyPortrait
 				return;
 			}
 
+			
 			width -= 10;
-			//Bake 설정
-			EditorGUILayout.LabelField(_editor.GetUIWord(UIWORD.Name), GUILayout.Width(width));
+
+			bool isPressedEnter = false;
+			if(Event.current != null && _isInitFocused)
+			{
+				if(Event.current.type == EventType.KeyUp)
+				{
+					if(Event.current.keyCode == KeyCode.Return)
+					{
+						isPressedEnter = true;
+						Event.current.Use();
+						apEditorUtil.ReleaseGUIFocus();
+					}
+				}
+			}
+
+			//이름
+			EditorGUILayout.LabelField(_editor.GetUIWord(UIWORD.Name) + " (" + _prevName + ")", GUILayout.Width(width));
 			
 			GUILayout.Space(10);
 
@@ -132,12 +161,12 @@ namespace AnyPortrait
 			int width_Btn = ((width - 10) / 2) - 4;
 			if (GUILayout.Button(_editor.GetText(TEXT.DLG_Apply), GUILayout.Width(width_Btn), GUILayout.Height(30)))//"Make Portrait"
 			{
-				_funcResult(true, _loadKey, _targetObject, _newName);
+				_funcResult(true, _loadKey, _targetObject, _targetHierarchyUnit, _newName);
 				CloseDialog();
 			}
 			if (GUILayout.Button(_editor.GetText(TEXT.DLG_Cancel), GUILayout.Width(width_Btn), GUILayout.Height(30)))//"Cancel"
 			{
-				_funcResult(false, _loadKey, _targetObject, null);
+				_funcResult(false, _loadKey, _targetObject, _targetHierarchyUnit, null);
 				CloseDialog();
 			}
 			EditorGUILayout.EndHorizontal();
@@ -148,6 +177,13 @@ namespace AnyPortrait
 			{
 				_isInitFocused = true;
 				apEditorUtil.SetGUIFocus_TextField(apStringFactory.I.GUI_ID__Rename);
+			}
+
+			
+			if(isPressedEnter)
+			{
+				_funcResult(true, _loadKey, _targetObject, _targetHierarchyUnit, _newName);
+				CloseDialog();
 			}
 		}
 	}

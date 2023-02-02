@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -857,17 +857,25 @@ namespace AnyPortrait
 				if (_selectedTextureData == texDataSet)
 				{
 					Rect lastRect = GUILayoutUtility.GetLastRect();
-					if (EditorGUIUtility.isProSkin)
-					{
-						GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-					}
-					else
-					{
-						GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-					}
-					//GUI.Box(new Rect(lastRect.x, lastRect.y + 19, width_Left, 22), "");
-					GUI.Box(new Rect(lastRect.x, lastRect.y + 2, width_Left, 24), "");
-					GUI.backgroundColor = prevColor;
+
+					#region [미사용 코드]
+					//if (EditorGUIUtility.isProSkin)
+					//{
+					//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+					//}
+					//else
+					//{
+					//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+					//}
+					//GUI.Box(new Rect(lastRect.x, lastRect.y + 2, width_Left, 24), "");
+					//GUI.backgroundColor = prevColor; 
+					#endregion
+
+
+					//변경 v1.4.2
+					apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + 2, width_Left - 2, 24, apEditorUtil.UNIT_BG_STYLE.Main);
+
+
 					curGUIStyle = guiStyle_Selected;
 				}
 
@@ -1339,17 +1347,26 @@ namespace AnyPortrait
 							&& texDataInfo._linkedTextureData != null)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
-						//GUI.Box(new Rect(lastRect.x, lastRect.y + 19, width_Left, 22), "");
-						GUI.Box(new Rect(lastRect.x, lastRect.y + 2, width_Left, 24), "");
-						GUI.backgroundColor = prevColor;
+
+
+						#region [미사용 코드]
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + 2, width_Left, 24), "");
+						//GUI.backgroundColor = prevColor; 
+						#endregion
+
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + 2, width_Left - 2, 24, apEditorUtil.UNIT_BG_STYLE.Main);
+
+
 						curGUIStyle = guiStyle_Selected;
 					}
 
@@ -1831,25 +1848,35 @@ namespace AnyPortrait
 				if (_selectedPSDLayerData == curPSDLayer)
 				{
 					Rect lastRect = GUILayoutUtility.GetLastRect();
-					if (EditorGUIUtility.isProSkin)
-					{
-						GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-					}
-					else
-					{
-						GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-					}
+
+					float yOffset = 0.0f;
+
+					//if (EditorGUIUtility.isProSkin)
+					//{
+					//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+					//}
+					//else
+					//{
+					//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+					//}
 
 					if (iList == 0)
 					{
-						GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						yOffset = 4;
 					}
 					else
 					{
-						GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						yOffset = height_ListHeight - 1;
 					}
 
-					GUI.backgroundColor = prevColor;
+					//GUI.backgroundColor = prevColor;
+
+
+					//변경 v1.4.2
+					apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
+
 				}
 				else if(_isLinkGUIColoredList)
 				{
@@ -1858,26 +1885,44 @@ namespace AnyPortrait
 					if (curPSDLayer._isBakable && curPSDLayer._isRemapSelected)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = curPSDLayer._randomGUIColor_Pro;
-						}
-						else
-						{
-							GUI.backgroundColor = curPSDLayer._randomGUIColor;
-						}
-						
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = curPSDLayer._randomGUIColor_Pro;
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = curPSDLayer._randomGUIColor;
+						//}
 
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = 4;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = height_ListHeight - 1;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//v1.4.2
+						Color customBGColor = EditorGUIUtility.isProSkin ? curPSDLayer._randomGUIColor_Pro : curPSDLayer._randomGUIColor;
+						//밝기가 일정 레벨을 넘어가면 제한하자 (새로운 리스트 배경은 White Texture를 사용하므로 기존보다 많이 밝다)
+						float colorLuminous = (customBGColor.r * 0.3f) + (customBGColor.g * 0.6f) * (customBGColor.b * 0.1f);
+						if(colorLuminous > 0.7f)
+						{
+							float lumCorrection = 0.7f / colorLuminous;
+							customBGColor.r *= lumCorrection;
+							customBGColor.g *= lumCorrection;
+							customBGColor.b *= lumCorrection;
+						}
+
+						//변경 v1.4.2 (이건 커스텀색상)
+						apEditorUtil.DrawListUnitBG_CustomColor(lastRect.x + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, customBGColor);
 					}
 				}
 				EditorGUILayout.BeginHorizontal(GUILayout.Width(width_Line1InScroll), GUILayout.Height(height_ListHeight));
@@ -2058,25 +2103,34 @@ namespace AnyPortrait
 				{
 					isLinked = true;
 					Rect lastRect = GUILayoutUtility.GetLastRect();
-					if (EditorGUIUtility.isProSkin)
-					{
-						GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-					}
-					else
-					{
-						GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-					}
+
+					int yOffset = 0;
+
+					//if (EditorGUIUtility.isProSkin)
+					//{
+					//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+					//}
+					//else
+					//{
+					//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+					//}
 
 					if (iList == 0)
 					{
-						GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						yOffset = 4;
 					}
 					else
 					{
-						GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+						yOffset = height_ListHeight - 1;
 					}
 
-					GUI.backgroundColor = prevColor;
+					//GUI.backgroundColor = prevColor;
+
+
+					//변경 v1.4.2
+					apEditorUtil.DrawListUnitBG(lastRect.x + 1 + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
 				}
 
 				if (_isLinkGUIColoredList && !isLinked)
@@ -2100,26 +2154,45 @@ namespace AnyPortrait
 					if(linkedLayerData != null && linkedLayerData._isBakable)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = linkedLayerData._randomGUIColor_Pro;
-						}
-						else
-						{
-							GUI.backgroundColor = linkedLayerData._randomGUIColor;
-						}
-						
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = linkedLayerData._randomGUIColor_Pro;
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = linkedLayerData._randomGUIColor;
+						//}
 
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = 4;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = height_ListHeight - 1;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//v1.4.2
+						Color customBGColor = EditorGUIUtility.isProSkin ? linkedLayerData._randomGUIColor_Pro : linkedLayerData._randomGUIColor;
+
+						//밝기가 일정 레벨을 넘어가면 제한하자 (새로운 리스트 배경은 White Texture를 사용하므로 기존보다 많이 밝다)
+						float colorLuminous = (customBGColor.r * 0.3f) + (customBGColor.g * 0.6f) * (customBGColor.b * 0.1f);
+						if(colorLuminous > 0.7f)
+						{
+							float lumCorrection = 0.7f / colorLuminous;
+							customBGColor.r *= lumCorrection;
+							customBGColor.g *= lumCorrection;
+							customBGColor.b *= lumCorrection;
+						}
+
+						//변경 v1.4.2 (이건 커스텀색상)
+						apEditorUtil.DrawListUnitBG_CustomColor(lastRect.x + 1 + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, customBGColor);
 					}
 
 				}
@@ -2399,25 +2472,34 @@ namespace AnyPortrait
 					if (_selectedPSDLayerData == curPSDLayer)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
 
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = 4;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = height_ListHeight - 1;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
+
+
 					}
 					else if (_isLinkGUIColoredList)
 					{
@@ -2427,26 +2509,44 @@ namespace AnyPortrait
 						if (curPSDLayer._isBakable && curPSDLayer._linkedBakedInfo_Secondary != null)//Secondary
 						{
 							Rect lastRect = GUILayoutUtility.GetLastRect();
-							if (EditorGUIUtility.isProSkin)
-							{
-								GUI.backgroundColor = curPSDLayer._randomGUIColor_Pro;
-							}
-							else
-							{
-								GUI.backgroundColor = curPSDLayer._randomGUIColor;
-							}
-
+							int yOffset = 0;
+							
+							//if (EditorGUIUtility.isProSkin)
+							//{
+							//	GUI.backgroundColor = curPSDLayer._randomGUIColor_Pro;
+							//}
+							//else
+							//{
+							//	GUI.backgroundColor = curPSDLayer._randomGUIColor;
+							//}
 
 							if (iList == 0)
 							{
-								GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								yOffset = 4;
 							}
 							else
 							{
-								GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								yOffset = height_ListHeight - 1;
 							}
 
-							GUI.backgroundColor = prevColor;
+							//GUI.backgroundColor = prevColor;
+
+							//v1.4.2
+							Color customBGColor = EditorGUIUtility.isProSkin ? curPSDLayer._randomGUIColor_Pro : curPSDLayer._randomGUIColor;
+							//밝기가 일정 레벨을 넘어가면 제한하자 (새로운 리스트 배경은 White Texture를 사용하므로 기존보다 많이 밝다)
+							float colorLuminous = (customBGColor.r * 0.3f) + (customBGColor.g * 0.6f) * (customBGColor.b * 0.1f);
+							if(colorLuminous > 0.7f)
+							{
+								float lumCorrection = 0.7f / colorLuminous;
+								customBGColor.r *= lumCorrection;
+								customBGColor.g *= lumCorrection;
+								customBGColor.b *= lumCorrection;
+							}
+
+							//변경 v1.4.2 (이건 커스텀색상)
+							apEditorUtil.DrawListUnitBG_CustomColor(lastRect.x + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, customBGColor);
 						}
 					}
 					EditorGUILayout.BeginHorizontal(GUILayout.Width(width_Line1InScroll), GUILayout.Height(height_ListHeight));
@@ -2633,25 +2733,33 @@ namespace AnyPortrait
 					{
 						isLinked = true;
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
 
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = 4;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+							yOffset = height_ListHeight - 1;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1 + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
 					}
 
 					if (_isLinkGUIColoredList && !isLinked)
@@ -2667,26 +2775,46 @@ namespace AnyPortrait
 						if (linkedLayerData != null && linkedLayerData._isBakable)
 						{
 							Rect lastRect = GUILayoutUtility.GetLastRect();
-							if (EditorGUIUtility.isProSkin)
-							{
-								GUI.backgroundColor = linkedLayerData._randomGUIColor_Pro;
-							}
-							else
-							{
-								GUI.backgroundColor = linkedLayerData._randomGUIColor;
-							}
+
+							int yOffset = 0;
+
+							//if (EditorGUIUtility.isProSkin)
+							//{
+							//	GUI.backgroundColor = linkedLayerData._randomGUIColor_Pro;
+							//}
+							//else
+							//{
+							//	GUI.backgroundColor = linkedLayerData._randomGUIColor;
+							//}
 
 
 							if (iList == 0)
 							{
-								GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 5 - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								yOffset = 4;
 							}
 							else
 							{
-								GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + height_ListHeight - 1, width_Line1InScroll + 10, height_ListHeight + 2), "");
+								yOffset = height_ListHeight - 1;
 							}
 
-							GUI.backgroundColor = prevColor;
+							//GUI.backgroundColor = prevColor;
+
+							//v1.4.2
+							Color customBGColor = EditorGUIUtility.isProSkin ? linkedLayerData._randomGUIColor_Pro : linkedLayerData._randomGUIColor;
+							//밝기가 일정 레벨을 넘어가면 제한하자 (새로운 리스트 배경은 White Texture를 사용하므로 기존보다 많이 밝다)
+							float colorLuminous = (customBGColor.r * 0.3f) + (customBGColor.g * 0.6f) * (customBGColor.b * 0.1f);
+							if(colorLuminous > 0.7f)
+							{
+								float lumCorrection = 0.7f / colorLuminous;
+								customBGColor.r *= lumCorrection;
+								customBGColor.g *= lumCorrection;
+								customBGColor.b *= lumCorrection;
+							}
+
+							//변경 v1.4.2 (이건 커스텀색상)
+							apEditorUtil.DrawListUnitBG_CustomColor(lastRect.x + 1, lastRect.y + yOffset, width_Line1InScroll + 10 - 2, height_ListHeight + 2, customBGColor);
 						}
 
 					}
@@ -2917,10 +3045,17 @@ namespace AnyPortrait
 			GUILayout.Space(5);
 			EditorGUILayout.LabelField("  " + _editor.GetText(TEXT.DLG_PSD_PSDLayers));//PSD Layers
 			GUILayout.Space(5);
+			
+			
 			_scroll_Step4_Left = EditorGUILayout.BeginScrollView(_scroll_Step4_Left, false, true, GUILayout.Width(width_Left), GUILayout.Height(height - 30));
+			
+			
 			int width_LeftInScroll = (width_Left) - (20);
 			EditorGUILayout.BeginVertical(GUILayout.Width(width_LeftInScroll));
 			GUILayout.Space(5);
+
+			
+
 			//PSD 레이어를 출력한다. (Bake안되는것은 나오지 않는다)
 			apPSDLayerData curPSDLayer = null;
 			int iList = 0;
@@ -2966,25 +3101,32 @@ namespace AnyPortrait
 				if (_selectedPSDLayerData == curPSDLayer)
 				{
 					Rect lastRect = GUILayoutUtility.GetLastRect();
-					if (EditorGUIUtility.isProSkin)
-					{
-						GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-					}
-					else
-					{
-						GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-					}
+					int yOffset = 0;
+
+					//if (EditorGUIUtility.isProSkin)
+					//{
+					//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+					//}
+					//else
+					//{
+					//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+					//}
 
 					if (iList == 0)
 					{
-						GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+						yOffset = 4;
 					}
 					else
 					{
-						GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+						yOffset = height_ListHeight - 1;
 					}
 
-					GUI.backgroundColor = prevColor;
+					//GUI.backgroundColor = prevColor;
+
+					//변경 v1.4.2
+					apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + yOffset, width_LeftInScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
 				}
 				
 				EditorGUILayout.BeginHorizontal(GUILayout.Width(width_LeftInScroll), GUILayout.Height(height_ListHeight));
@@ -3044,6 +3186,7 @@ namespace AnyPortrait
 
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndScrollView();
+
 			EditorGUILayout.EndVertical();
 			//--------------------------------------
 
@@ -3108,7 +3251,46 @@ namespace AnyPortrait
 				{
 					DrawMeshEdgeOnly(_selectedPSDLayerData._remap_MeshTransform._mesh, meshScale);
 				}
+
+
+				//추가 v1.4.2 : 현재 선택된 객체들의 정보를 텍스트로 보여준다.
+				_strWrapper_128.Clear();
+				_strWrapper_128.Append("[ ", false);
+				_strWrapper_128.Append(_selectedPSDLayerData._name, false);
+
+				if (_selectedPSDLayerData._isImageLayer)
+				{
+					//Image Layer (MeshTF)인 경우
+					if (_selectedPSDLayerData._remap_MeshTransform != null)
+					{
+						//연결될 TF가 있을 때
+						_strWrapper_128.Append(" > ", false);
+						_strWrapper_128.Append(_selectedPSDLayerData._remap_MeshTransform._nickName, false);
+					}
+					else
+					{
+						//연결될 TF가 없을 때
+						_strWrapper_128.Append(" (New!)", false);
+					}
+				}
+				else
+				{
+					//Image Layer가 아닌 경우
+					if (_selectedPSDLayerData._remap_MeshGroupTransform != null)
+					{
+						//연결될 TF가 있을 때
+						_strWrapper_128.Append(" > ", false);
+						_strWrapper_128.Append(_selectedPSDLayerData._remap_MeshGroupTransform._nickName, false);
+					}
+					else
+					{
+						//연결될 TF가 없을 때
+						_strWrapper_128.Append(" (New!)", false);
+					}
+				}
 				
+				_strWrapper_128.Append(" ]", true);
+				DrawText(_strWrapper_128.ToString(), guiRect.x + 5.0f, guiRect.y + 5.0f);
 			}
 
 
@@ -3504,25 +3686,33 @@ namespace AnyPortrait
 					if (_selectedPSDLayerData == curPSDLayer)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
 
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + 5 - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+							yOffset = 4;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+							//GUI.Box(new Rect(lastRect.x, lastRect.y + height_ListHeight - 1, width_LeftInScroll + 10, height_ListHeight + 2), "");
+							yOffset = height_ListHeight - 1;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + yOffset, width_LeftInScroll + 10 - 2, height_ListHeight + 2, apEditorUtil.UNIT_BG_STYLE.Main);
 					}
 
 					EditorGUILayout.BeginHorizontal(GUILayout.Width(width_LeftInScroll), GUILayout.Height(height_ListHeight));
@@ -3681,6 +3871,13 @@ namespace AnyPortrait
 				//	DrawMeshEdgeOnly(_selectedPSDLayerData._remap_MeshTransform._mesh, meshScale);
 				//}
 				
+				//추가 v1.4.2 : 현재 선택된 객체들의 정보를 텍스트로 보여준다.
+				_strWrapper_128.Clear();
+				_strWrapper_128.Append("[ ", false);
+				_strWrapper_128.Append(_selectedPSDLayerData._name, false);
+				_strWrapper_128.Append(" ]", true);
+
+				DrawText(_strWrapper_128.ToString(), guiRect.x + 5.0f, guiRect.y + 5.0f);
 				
 			}
 
@@ -4217,28 +4414,34 @@ namespace AnyPortrait
 					if (_selectedPSDBakeData == curBakeData)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
+						int yOffset = 0;
 						
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
 
-
-						//GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width_Line2InScroll + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width_Line2InScroll + 10, itemHeight), "");
+							yOffset = 1;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width_Line2InScroll + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width_Line2InScroll + 10, itemHeight), "");
+							yOffset = 30;
 						}
 
 						GUI.backgroundColor = prevColor;
+
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1 + 1, lastRect.y + yOffset, width_Line2InScroll + 10 - 2, itemHeight, apEditorUtil.UNIT_BG_STYLE.Main);
+
 
 						curGUIStyle = guiStyle_Btn_Selected;
 					}
@@ -4299,7 +4502,7 @@ namespace AnyPortrait
 			EditorGUILayout.BeginHorizontal(GUILayout.Width(width_3));
 
 
-			string prev_bakeDstFilePath = _selectedPSDSet._bakeOption_DstFilePath;
+			//string prev_bakeDstFilePath = _selectedPSDSet._bakeOption_DstFilePath;
 
 
 			EditorGUI.BeginChangeCheck();
@@ -4481,7 +4684,7 @@ namespace AnyPortrait
 				prev_bakeHeight != BakeSizePSDSet2Loader(_selectedPSDSet._bakeOption_Height) ||
 				prev_bakeMaximumNumAtlas != _selectedPSDSet._bakeOption_MaximumNumAtlas ||
 				prev_bakePadding != _selectedPSDSet._bakeOption_Padding ||
-				!string.Equals(prev_bakeDstFilePath, _selectedPSDSet._bakeOption_DstFilePath) ||
+				//!string.Equals(prev_bakeDstFilePath, _selectedPSDSet._bakeOption_DstFilePath) ||//삭제 v1.4.2
 				prev_bakeBlurOption != _selectedPSDSet._bakeOption_BlurOption)
 			{
 				_isNeedBakeCheck = true;
@@ -4494,7 +4697,7 @@ namespace AnyPortrait
 
 				//Calculate를 하자
 				_psdLoader.Step2_Calculate(
-					_selectedPSDSet._bakeOption_DstFilePath, _selectedPSDSet._bakeOption_DstFileRelativePath,
+					//_selectedPSDSet._bakeOption_DstFilePath, _selectedPSDSet._bakeOption_DstFileRelativePath,//삭제 v1.4.2
 					 GetBakeIntSize(_selectedPSDSet._bakeOption_Width),
 					 GetBakeIntSize(_selectedPSDSet._bakeOption_Height),
 					_selectedPSDSet._bakeOption_MaximumNumAtlas, 
@@ -4509,8 +4712,22 @@ namespace AnyPortrait
 			guiStyle_Result.alignment = TextAnchor.MiddleLeft;
 			guiStyle_Result.normal.textColor = apEditorUtil.BoxTextColor;
 
+			//경로가 없을때도 오류 메시지가 나오도록
+			if(string.IsNullOrEmpty(_selectedPSDSet._bakeOption_DstFilePath))
+			{
+				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
+				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;
+				guiStyle_WarningBox.normal.textColor = apEditorUtil.BoxTextColor;
 
-			if (_isBakeWarning)
+
+				GUI.backgroundColor = new Color(1.0f, 0.6f, 0.6f, 1.0f);
+
+				//Warning
+				GUILayout.Box(_editor.GetText(TEXT.DLG_PSD_Warning) + "\n[Save Path] is Empty", guiStyle_WarningBox, GUILayout.Width(width_3), GUILayout.Height(70));
+
+				GUI.backgroundColor = prevColor;
+			}
+			else if (_isBakeWarning)
 			{
 				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
 				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;
@@ -4737,28 +4954,34 @@ namespace AnyPortrait
 					if (_selectedPSDBakeData == curBakeData)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						
-						if (EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+						int yOffset = 0;
+
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
 
 
 						//GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
 						if (iList == 0)
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width_Line2InScroll + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 1, width_Line2InScroll + 10, itemHeight), "");
+							yOffset = 1;
 						}
 						else
 						{
-							GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width_Line2InScroll + 10, itemHeight), "");
+							//GUI.Box(new Rect(lastRect.x + 1, lastRect.y + 30, width_Line2InScroll + 10, itemHeight), "");
+							yOffset = 30;
 						}
 
-						GUI.backgroundColor = prevColor;
+						//GUI.backgroundColor = prevColor;
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1 + 1, lastRect.y + yOffset, width_Line2InScroll + 10 - 2, itemHeight, apEditorUtil.UNIT_BG_STYLE.Main);
 
 						curGUIStyle = guiStyle_Btn_Selected;
 					}
@@ -4813,7 +5036,7 @@ namespace AnyPortrait
 			EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_PSD_SavePath), GUILayout.Width(width_3));//Save Path
 			EditorGUILayout.BeginHorizontal(GUILayout.Width(width_3));
 			//string prev_bakeDstFilePath = _selectedPSDSet._bakeOption_DstFilePath;
-			string prev_bakeDstFilePath = _selectedPSDSecondary._dstFilePath;
+			//string prev_bakeDstFilePath = _selectedPSDSecondary._dstFilePath;
 
 			EditorGUI.BeginChangeCheck();
 			string next_bakeDstFilePath = EditorGUILayout.DelayedTextField(_selectedPSDSecondary._dstFilePath, GUILayout.Width(width_3 - 64));
@@ -4975,8 +5198,8 @@ namespace AnyPortrait
 				//prev_bakeHeight != BakeSizePSDSet2Loader(_selectedPSDSet._bakeOption_Height) ||
 				//prev_bakeMaximumNumAtlas != _selectedPSDSet._bakeOption_MaximumNumAtlas ||
 				//prev_bakePadding != _selectedPSDSet._bakeOption_Padding ||
-				!string.Equals(prev_bakeDstFilePath, _selectedPSDSecondary._dstFilePath)
-				|| isBGChanged
+				//!string.Equals(prev_bakeDstFilePath, _selectedPSDSecondary._dstFilePath)//삭제 v1.4.2
+				isBGChanged
 				//|| prev_bakeBlurOption != _selectedPSDSet._bakeOption_BlurOption
 				)
 			{
@@ -4991,8 +5214,10 @@ namespace AnyPortrait
 				//Calculate를 하자
 				_psdLoader.Step2_Calculate_Secondary(
 					
-					_selectedPSDSecondary._dstFilePath,
-					_selectedPSDSecondary._dstFilePath_Relative,
+					//삭제 v1.4.2
+					//_selectedPSDSecondary._dstFilePath,
+					//_selectedPSDSecondary._dstFilePath_Relative,
+
 					 GetBakeIntSize(_selectedPSDSecondary._linkedMainSet._bakeOption_Width),
 					 GetBakeIntSize(_selectedPSDSecondary._linkedMainSet._bakeOption_Height),
 					//_selectedPSDSet._bakeOption_MaximumNumAtlas, 
@@ -5011,7 +5236,21 @@ namespace AnyPortrait
 
 			_isBakeWarning = false;
 
-			if (_isBakeWarning)
+			//오류 메시지는 별도로 체크
+			if(string.IsNullOrEmpty(_selectedPSDSecondary._dstFilePath))
+			{
+				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
+				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;
+				guiStyle_WarningBox.normal.textColor = apEditorUtil.BoxTextColor;
+
+				GUI.backgroundColor = new Color(1.0f, 0.6f, 0.6f, 1.0f);
+
+				//Warning
+				GUILayout.Box(_editor.GetText(TEXT.DLG_PSD_Warning) + "\n[Save Path] is Empty", guiStyle_WarningBox, GUILayout.Width(width_3), GUILayout.Height(70));
+
+				GUI.backgroundColor = prevColor;
+			}
+			else if (_isBakeWarning)
 			{
 				GUIStyle guiStyle_WarningBox = new GUIStyle(GUI.skin.box);
 				guiStyle_WarningBox.alignment = TextAnchor.MiddleCenter;

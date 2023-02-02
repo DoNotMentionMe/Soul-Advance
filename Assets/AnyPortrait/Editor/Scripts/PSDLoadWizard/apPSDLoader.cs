@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -476,8 +476,10 @@ namespace AnyPortrait
 		// Step 2 - Calculate
 		//----------------------------------------------------------------------
 		public delegate void FUNC_CALCULTE_RESULT(bool isSuccess, object loadKey, bool isWarning, string warningMsg);
-		public void Step2_Calculate(	string bakeDstPath,
-										string bakeDstRelative,
+		public void Step2_Calculate(	
+										//string bakeDstPath,//경로 입력 삭제 [v1.4.2]
+										//string bakeDstRelative,
+
 										int bakeWidth,
 										int bakeHeight,
 										int bakeMaxNumAtlas,
@@ -498,19 +500,19 @@ namespace AnyPortrait
 				return;
 			}
 
-			//Bake 설정 저장
-			_bakeDstPath = bakeDstPath;
-			if(_bakeDstPath.EndsWith("/"))
-			{
-				_bakeDstPath = _bakeDstPath.Substring(0, _bakeDstPath.Length - 1);//끝에 / 로 끝나면 그건 제외한다.
-			}
+			////Bake 설정 저장
+			//_bakeDstPath = bakeDstPath;
+			//if(_bakeDstPath.EndsWith("/"))
+			//{
+			//	_bakeDstPath = _bakeDstPath.Substring(0, _bakeDstPath.Length - 1);//끝에 / 로 끝나면 그건 제외한다.
+			//}
 			
 			
-			_bakeDstPathRelative = bakeDstRelative;
-			if(_bakeDstPathRelative.EndsWith("/"))
-			{
-				_bakeDstPathRelative = _bakeDstPathRelative.Substring(0, _bakeDstPathRelative.Length - 1);
-			}
+			//_bakeDstPathRelative = bakeDstRelative;
+			//if(_bakeDstPathRelative.EndsWith("/"))
+			//{
+			//	_bakeDstPathRelative = _bakeDstPathRelative.Substring(0, _bakeDstPathRelative.Length - 1);
+			//}
 
 			_bakeReq_Width = bakeWidth;
 			_bakeReq_Height = bakeHeight;
@@ -534,12 +536,13 @@ namespace AnyPortrait
 				return;
 			}
 
-			//1. Path 미지정
-			if (string.IsNullOrEmpty(_bakeDstPath))
-			{
-				funcResult(false, null, true, "[Save Path] is Empty");
-				return;
-			}
+			//경로 체크는 마지막 Convert에서 하도록 한다.
+			////1. Path 미지정
+			//if (string.IsNullOrEmpty(_bakeDstPath))
+			//{
+			//	funcResult(false, null, true, "[Save Path] is Empty");
+			//	return;
+			//}
 
 			//2. 크기를 비교하자
 			//W,H 합계, 최대값, 최소값, 영역 전체의 합
@@ -908,8 +911,10 @@ namespace AnyPortrait
 		/// 이전의 Bake 정보를 이용하여 가능한 Atlas 규격을 유지하면서 만들기.
 		/// 차이점 : 이미지 리사이즈 비율이 고정적으로 입력되는 반면, 최대 Atlas 개수가 지정되지 않는다.
 		/// </summary>
-		public void Step2_Calculate_Secondary(	string bakeDstPath,
-												string bakeDstRelative,
+		public void Step2_Calculate_Secondary(	
+												//string bakeDstPath,//경로 입력 삭제 [v1.4.2]
+												//string bakeDstRelative,
+
 												int bakeWidth,
 												int bakeHeight,
 												//int bakeMaxNumAtlas,//이게 입력되지 않는다.
@@ -933,18 +938,20 @@ namespace AnyPortrait
 			}
 
 			//Bake 설정 저장
-			_bakeDstPath = bakeDstPath;
-			if(_bakeDstPath.EndsWith("/"))
-			{
-				_bakeDstPath = _bakeDstPath.Substring(0, _bakeDstPath.Length - 1);//끝에 / 로 끝나면 그건 제외한다.
-			}
+
+			//[v1.4.2] 삭제 : 경로는 마지막 Convert 시점에서 받도록 한다.
+			//_bakeDstPath = bakeDstPath;
+			//if(_bakeDstPath.EndsWith("/"))
+			//{
+			//	_bakeDstPath = _bakeDstPath.Substring(0, _bakeDstPath.Length - 1);//끝에 / 로 끝나면 그건 제외한다.
+			//}
 			
 			
-			_bakeDstPathRelative = bakeDstRelative;
-			if(_bakeDstPathRelative.EndsWith("/"))
-			{
-				_bakeDstPathRelative = _bakeDstPathRelative.Substring(0, _bakeDstPathRelative.Length - 1);
-			}
+			//_bakeDstPathRelative = bakeDstRelative;
+			//if(_bakeDstPathRelative.EndsWith("/"))
+			//{
+			//	_bakeDstPathRelative = _bakeDstPathRelative.Substring(0, _bakeDstPathRelative.Length - 1);
+			//}
 
 
 			_bakeReq_Width = bakeWidth;
@@ -967,12 +974,13 @@ namespace AnyPortrait
 				return;
 			}
 
-			//1. Path 미지정
-			if (string.IsNullOrEmpty(_bakeDstPath))
-			{
-				funcResult(false, null, true, "[Save Path] is Empty");
-				return;
-			}
+			//여기서는 Path를 비교하지 않는다. [v1.4.2]
+			////1. Path 미지정
+			//if (string.IsNullOrEmpty(_bakeDstPath))
+			//{
+			//	funcResult(false, null, true, "[Save Path] is Empty");
+			//	return;
+			//}
 
 			//2. 크기를 비교하자
 			//W,H 합계, 최대값, 최소값, 영역 전체의 합
@@ -1455,7 +1463,11 @@ namespace AnyPortrait
 		// Step 4 - ConvertToAnyPortrait
 		//----------------------------------------------------------------------
 		public delegate void FUNC_CONVERT_RESULT(bool isSuccess, List<Texture2D> resultTextures);
-		public bool Step4_ConvertToAnyPortrait(FUNC_CONVERT_RESULT funcConvertResult, apPortrait portrait, apPSDSet reimportPSDSet, Dictionary<apTransform_Mesh, apPSDLayerData> meshTransform2PSDLayer)
+		public bool Step4_ConvertToAnyPortrait(	string bakeDstPath,
+												FUNC_CONVERT_RESULT funcConvertResult,
+												apPortrait portrait,
+												apPSDSet reimportPSDSet,
+												Dictionary<apTransform_Mesh, apPSDLayerData> meshTransform2PSDLayer)
 		{
 			CloseProcess();
 
@@ -1463,6 +1475,15 @@ namespace AnyPortrait
 			_portrait = portrait;
 			_reimportPSDSet = reimportPSDSet;
 			_meshTransform2PSDLayer = meshTransform2PSDLayer;
+
+			//[v1.4.2] 경로 정보를 여기에서 넣자 (Calculate가 아니라 저장 시점에서)
+			bool isValidPath = apEditorUtil.MakeRelativeDirectoryPathFromAssets(bakeDstPath, ref _bakeDstPath, ref _bakeDstPathRelative);
+			if(!isValidPath)
+			{
+				//실패 > TODO : 실패 처리를 꼭 해야한다.
+				return false;
+			}
+
 
 			_bakedTextureAssetPathList.Clear();
 
@@ -1536,10 +1557,8 @@ namespace AnyPortrait
 
 			
 			List<apTextureData> preservedTexDataList = new List<apTextureData>();//<<Mesh 하나라도 Reimport되지 않다면 이 리스트에 추가된다.
-			//List<apTextureData> perfectPreservedTexDataList = new List<apTextureData>();//<<Mesh가 모두 Reimport되지 않다면 이 리스트에 추가된다. Reimport와 전혀 연관성이 없다.
 			List<apTextureData> unusedTexDataList = new List<apTextureData>();//<<Remapped Atlas에 의해서 덮어 씌워질 텍스쳐 데이터이다.
-			//List<apTextureData> partPreservedTexDataList = new List<apTextureData>();//Perfect가 아닌 "Mesh의 일부가 Reimport되지 않고, 일부는 Reimport되는" 텍스쳐 데이터. Preserved 폴더에 추가된다.
-
+			
 
 			apRenderUnit curRenderUnit = null;
 			apTransform_Mesh curMeshTransform = null;
@@ -1766,7 +1785,8 @@ namespace AnyPortrait
 
 		// Step 4-2 : Secondary 이미지 생성
 
-		public bool Step4_ConvertToAnyPortrait_Secondary(	FUNC_CONVERT_RESULT funcConvertResult, 
+		public bool Step4_ConvertToAnyPortrait_Secondary(	string bakeDstPath,
+															FUNC_CONVERT_RESULT funcConvertResult, 
 															apPSDSecondarySet targetSecondarySet)
 		{
 			CloseProcess();
@@ -1776,6 +1796,16 @@ namespace AnyPortrait
 			_secondarySet = targetSecondarySet;
 			_reimportPSDSet = null;
 			_meshTransform2PSDLayer = null;
+
+
+			//[v1.4.2] 경로 정보를 여기에서 넣자 (Calculate가 아니라 저장 시점에서)
+			bool isValidPath = apEditorUtil.MakeRelativeDirectoryPathFromAssets(bakeDstPath, ref _bakeDstPath, ref _bakeDstPathRelative);
+			if(!isValidPath)
+			{
+				//실패 > TODO : 실패 처리를 꼭 해야한다.
+				return false;
+			}
+
 
 			_bakedTextureAssetPathList.Clear();
 

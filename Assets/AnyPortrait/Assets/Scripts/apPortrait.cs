@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -16,7 +16,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Runtime.InteropServices;
 
 #if UNITY_2017_1_OR_NEWER
 using UnityEngine.Playables;
@@ -307,6 +306,7 @@ namespace AnyPortrait
 		private float _physicsDeltaTime = 0.0f;
 		public float PhysicsDeltaTime { get { return _physicsDeltaTime; } }
 		private const float PHYSICS_MAX_DELTA_TIME = 0.05f;//20FPS보다 낮은 FPS에서는 물리 시간이 고정이다.
+		private const float PHYSICS_SKIP_DELTA_TIME = 1.5f;//지나치게 FPS가 낮거나 앱이 중단되었다면 해당 프레임에서는 물리 시간을 0으로 만들어야 한다.
 
 
 		//물리에 주는 외력을 관리하는 객체
@@ -544,7 +544,7 @@ namespace AnyPortrait
 
 		//추가 22.5.15 : 애니메이션 전환시, 지정되지 않은 컨트롤 파라미터 애니메이션의 값을 "기본값"으로 할지 "마지막 값을 유지할지" 옵션
 		public enum UNSPECIFIED_ANIM_CONTROL_PARAM : int
-		{	
+		{
 			RevertToDefaultValue = 0,
 			KeepLastValue = 1,
 		}
@@ -639,7 +639,7 @@ namespace AnyPortrait
 		private DELTA_TIME_OPTION _deltaTimeOption = DELTA_TIME_OPTION.DeltaTime;//기본값. Init할 때 초기화
 		private float _deltaTimeMultiplier = 1.0f;//배속.
 		private float _tCurUpdate = 0.0f;//실제 업데이트 값
-		//커스텀 방식으로 조회할 때
+										 //커스텀 방식으로 조회할 때
 		public delegate float OnDeltaTimeRequested(object savedObject);
 		private OnDeltaTimeRequested _funcDeltaTimeRequested = null;
 		private object _deltaTimeRequestSavedObject = null;//업데이트 시간 콜백시 특수한 처리를 위한 값
@@ -669,6 +669,8 @@ namespace AnyPortrait
 		[NonSerialized] private Vector3 _teleportCheck_PosPrev = Vector3.zero;//이전 프레임에서의 텔레포트
 		[NonSerialized] public bool _isCurrentTeleporting = false;//현재 프레임에서 텔레포트가 발생했는가
 
+		[NonSerialized] public bool _isPhysicsEnabledInPrevFrame = false;//이전 프레임에서 물리가 유효하게 동작했는가
+		
 
 
 
@@ -920,7 +922,7 @@ namespace AnyPortrait
 				case DELTA_TIME_OPTION.CustomFunction:
 					{
 						//추가 22.1.8: 콜백 함수 이용
-						if(_funcDeltaTimeRequested != null)
+						if (_funcDeltaTimeRequested != null)
 						{
 							_tCurUpdate = _funcDeltaTimeRequested(_deltaTimeRequestSavedObject);
 						}
@@ -1242,29 +1244,38 @@ namespace AnyPortrait
 		{
 			_isCurrentTeleporting = false;//일단 false
 
-			if(!_isTeleportCorrectionOption || _transform == null)
+			//v1.4.2 : 텔레포트 보정 옵션에 관계없이 이전 프레임에 물리 연산 기록이 없다면 이건 텔레포트된 프레임과 동일하게 처리해야한다.
+			if(!_isPhysicsEnabledInPrevFrame)
 			{
-				//텔레포트 보정 옵션이 꺼져있다.
-				return;
+				//물리가 이전 프레임에서 발생하지 않았다면 이건 텔레포트 프레임이다. [물리가 활성화되어 있어도 이전 프레임 기준으로 체크]
+				_isCurrentTeleporting = true;
+				
 			}
 
-			if(_isTeleportChecked)
+			if (_isTeleportCorrectionOption && _transform != null)
 			{
-				//이전의 위치가 저장되었다면
-				//체크를 하자
-				Vector3 curPos = _transform.position;
-				if(Mathf.Abs(curPos.x - _teleportCheck_PosPrev.x) > _teleportMovementDist
-					|| Mathf.Abs(curPos.y - _teleportCheck_PosPrev.y) > _teleportMovementDist
-					|| Mathf.Abs(curPos.z - _teleportCheck_PosPrev.z) > _teleportMovementDist)
+				//텔레포트 보정 옵션이 켜져있고 텔레포트를 체크할 수 있는 상황이라면
+				if (_isTeleportChecked)
 				{
-					//텔레포트가 발생했다!
-					_isCurrentTeleporting = true;
+					//이전의 위치가 저장되었다면
+					//체크를 하자
+					Vector3 curPos = _transform.position;
+					if (Mathf.Abs(curPos.x - _teleportCheck_PosPrev.x) > _teleportMovementDist
+						|| Mathf.Abs(curPos.y - _teleportCheck_PosPrev.y) > _teleportMovementDist
+						|| Mathf.Abs(curPos.z - _teleportCheck_PosPrev.z) > _teleportMovementDist)
+					{
+						//텔레포트가 발생했다!
+						_isCurrentTeleporting = true;
+					}
 				}
+
+				//현재 위치를 저장하자
+				_isTeleportChecked = true;
+				_teleportCheck_PosPrev = _transform.position;
 			}
-			
-			//현재 위치를 저장하자
-			_isTeleportChecked = true;
-			_teleportCheck_PosPrev = _transform.position;
+
+			//물리 연산 활성화 여부를 저장한다. (다음 프레임에서 써먹기 위함)
+			_isPhysicsEnabledInPrevFrame = _isPhysicsPlay_Opt;
 		}
 
 
@@ -1414,7 +1425,7 @@ namespace AnyPortrait
 
 				//추가 22.1.9 : 첫번째 루트 유닛만 보여준다.
 				int nOptRootUnits = _optRootUnitList != null ? _optRootUnitList.Count : 0;
-				if(nOptRootUnits > 0)
+				if (nOptRootUnits > 0)
 				{
 					ShowRootUnitWhenBake(_optRootUnitList[0]);
 				}
@@ -1496,12 +1507,12 @@ namespace AnyPortrait
 				//이전
 				//PlayNoDebug(firstPlayAnimClip._name);
 
-				if(!_isUsingMecanim)
+				if (!_isUsingMecanim)
 				{
 					//변경
 					Play(firstPlayAnimClip._name);
 				}
-				
+
 			}
 
 			//만약 숨어있다가 나타날때 위치가 바뀌어있었다면 워프 가능성이 있다.
@@ -1569,7 +1580,7 @@ namespace AnyPortrait
 			{
 				//Play(firstPlayAnimClip._name);
 
-				if(!_isUsingMecanim)
+				if (!_isUsingMecanim)
 				{
 					//변경
 					Play(firstPlayAnimClip._name);
@@ -1811,7 +1822,7 @@ namespace AnyPortrait
 			List<apOptParamSetGroup> curParamSetGroups = null;
 			apOptParamSetGroup curParamSetGroup = null;
 			List<apOptParamSet> curParamSets = null;
-			
+
 
 			for (int iOptTransform = 0; iOptTransform < _optTransforms.Count; iOptTransform++)
 			{
@@ -1862,7 +1873,7 @@ namespace AnyPortrait
 
 
 			// < 단계 4 > : Root Unit, Anim Clip 초기화
-			
+
 			apOptRootUnit curRootUnit = null;
 			for (int i = 0; i < _optRootUnitList.Count; i++)
 			{
@@ -1887,7 +1898,7 @@ namespace AnyPortrait
 			// < 단계 5 > : 메타 데이터를 초기화
 
 			//추가 22.5.18 [v1.4.0] 지연된 애니메이션 실행 요청
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -1906,7 +1917,7 @@ namespace AnyPortrait
 
 			//추가 22.6.8 : 애니메이션, 텍스쳐등을 빠르게 접근하기 위한 매핑 변수 생성
 			MakeFastReferMapping();
-			
+
 
 
 
@@ -1932,6 +1943,7 @@ namespace AnyPortrait
 			_isTeleportChecked = false;//이전에 텔레포트가 체크되었는가.
 			_teleportCheck_PosPrev = Vector3.zero;//이전 프레임에서의 텔레포트
 			_isCurrentTeleporting = false;//현재 프레임에서 텔레포트가 발생했는가
+			_isPhysicsEnabledInPrevFrame = false;//이전에 물리 연산이 있었는가
 
 
 
@@ -1980,7 +1992,7 @@ namespace AnyPortrait
 
 
 			//지연된 플레이 요청 초기화 (여기선 HideRootUnits보단 미리 호출되어야 한다.)
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -2035,7 +2047,7 @@ namespace AnyPortrait
 
 
 			//지연된 플레이 요청 초기화 (여기선 HideRootUnits보단 미리 호출되어야 한다.)
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -2086,7 +2098,7 @@ namespace AnyPortrait
 
 
 			//지연된 플레이 요청 초기화 (여기선 HideRootUnits보단 미리 호출되어야 한다.)
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -2163,7 +2175,7 @@ namespace AnyPortrait
 			List<apOptParamSetGroup> curParamSetGroups = null;
 			apOptParamSetGroup curParamSetGroup = null;
 			List<apOptParamSet> curParamSets = null;
-			
+
 			for (int iOptTransform = 0; iOptTransform < _optTransforms.Count; iOptTransform++)
 			{
 				curOptTransform = _optTransforms[iOptTransform];
@@ -2236,7 +2248,7 @@ namespace AnyPortrait
 
 
 			// < 단계 4 > : Root Unit, Anim Clip 초기화
-			
+
 			apOptRootUnit curRootUnit = null;
 			for (int i = 0; i < _optRootUnitList.Count; i++)
 			{
@@ -2264,12 +2276,12 @@ namespace AnyPortrait
 			yield return new WaitForEndOfFrame();
 
 
-			
+
 			// < 단계 5 > : 메타 데이터를 초기화
 
 
 			//추가 22.5.18 [v1.4.0] 지연된 애니메이션 실행 요청
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -2309,6 +2321,7 @@ namespace AnyPortrait
 			_isTeleportChecked = false;//이전에 텔레포트가 체크되었는가.
 			_teleportCheck_PosPrev = Vector3.zero;//이전 프레임에서의 텔레포트
 			_isCurrentTeleporting = false;//현재 프레임에서 텔레포트가 발생했는가
+			_isPhysicsEnabledInPrevFrame = false;//이전에 물리 연산이 있었는가
 
 			//Wait
 			yield return new WaitForEndOfFrame();
@@ -2535,7 +2548,7 @@ namespace AnyPortrait
 
 			// < 단계 5 > : 메타 데이터를 초기화
 			//추가 22.5.18 [v1.4.0] 지연된 애니메이션 실행 요청
-			if(_animPlayDeferredRequest == null)
+			if (_animPlayDeferredRequest == null)
 			{
 				_animPlayDeferredRequest = new apAnimPlayDeferredRequest(_animPlayManager);
 			}
@@ -2576,6 +2589,7 @@ namespace AnyPortrait
 			_isTeleportChecked = false;//이전에 텔레포트가 체크되었는가.
 			_teleportCheck_PosPrev = Vector3.zero;//이전 프레임에서의 텔레포트
 			_isCurrentTeleporting = false;//현재 프레임에서 텔레포트가 발생했는가
+			_isPhysicsEnabledInPrevFrame = false;//이전에 물리 연산이 있었는가.
 
 			//Wait
 			yield return new WaitForEndOfFrame();
@@ -2638,7 +2652,7 @@ namespace AnyPortrait
 		private void MakeFastReferMapping()
 		{
 			//텍스쳐 참조용 매핑
-			if(_mapping_OptTextureData == null)
+			if (_mapping_OptTextureData == null)
 			{
 				_mapping_OptTextureData = new Dictionary<string, apOptTextureData>();
 			}
@@ -2706,7 +2720,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -2801,7 +2815,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -2875,7 +2889,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -2952,7 +2966,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -2971,7 +2985,7 @@ namespace AnyPortrait
 		/// <param name="blendMethod">How it is blended with the animation of the lower layers</param>
 		/// <param name="isAutoEndIfNotloop">If True, animation that does not play repeatedly is automatically terminated.</param>
 		/// <returns>Animation data to be played. If it fails, null is returned.</returns>
-		public apAnimPlayData CrossFadeQueued(	apAnimPlayData animPlayData,
+		public apAnimPlayData CrossFadeQueued(apAnimPlayData animPlayData,
 												float fadeTime = 0.3f,
 												int layer = 0,
 												apAnimPlayUnit.BLEND_METHOD blendMethod = apAnimPlayUnit.BLEND_METHOD.Interpolation,
@@ -3030,7 +3044,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -3105,7 +3119,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -3182,7 +3196,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -3261,7 +3275,7 @@ namespace AnyPortrait
 
 			//변경 22.5.18 : 지연된 플레이 요청
 			apAnimPlayData animPlayData = _animPlayManager.GetAnimPlayData_Opt(animClipName);
-			if(animPlayData == null)
+			if (animPlayData == null)
 			{
 				return null;
 			}
@@ -3539,7 +3553,51 @@ namespace AnyPortrait
 			return _animPlayManager.GetAnimationPlaybackStatus(animClipName);
 		}
 
+		//v1.4.2에서 추가
 
+		/// <summary>
+		/// Return the current frame at which the animation is played.
+		/// (The returned value is of type int, but internally, it is operated with data of type float.)
+		/// </summary>
+		/// <param name="animClipName">Animation Clip Name</param>
+		/// <returns></returns>
+		public int GetAnimationCurrentFrame(string animClipName)
+		{
+			return _animPlayManager.GetAnimationCurrentFrame(animClipName);
+		}
+
+		/// <summary>
+		/// Return "Start Frame" attribute of the animation.
+		/// Return -1 if there is no target animation.
+		/// </summary>
+		/// <param name="animClipName">Animation Clip Name</param>
+		/// <returns></returns>
+		public int GetAnimationStartFrame(string animClipName)
+		{
+			return _animPlayManager.GetAnimationStartFrame(animClipName);
+		}
+
+		/// <summary>
+		/// Return "End Frame" attribute of the animation.
+		/// Return -1 if there is no target animation.
+		/// </summary>
+		/// <param name="animClipName">Animation Clip Name</param>
+		/// <returns></returns>
+		public int GetAnimationEndFrame(string animClipName)
+		{
+			return _animPlayManager.GetAnimationEndFrame(animClipName);
+		}
+
+		/// <summary>
+		/// Return the playing time as a value between 0 and 1.
+		/// Return -1 if there is no target animation clip.
+		/// </summary>
+		/// <param name="animClipName">Animation Clip Name</param>
+		/// <returns></returns>
+		public float GetAnimationNormalizedTime(string animClipName)
+		{
+			return _animPlayManager.GetAnimationNormalizedTime(animClipName);
+		}
 
 
 
@@ -4806,11 +4864,11 @@ namespace AnyPortrait
 			}
 
 			//[v1.4.0] 추가 22.6.8 : 매핑 이용
-			if(_mapping_OptTextureData != null)
+			if (_mapping_OptTextureData != null)
 			{
 				apOptTextureData result = null;
 				_mapping_OptTextureData.TryGetValue(optTextureName, out result);
-				if(result != null)
+				if (result != null)
 				{
 					return result;
 				}
@@ -4881,7 +4939,7 @@ namespace AnyPortrait
 				Debug.Log("AnyPortrait : [SetMeshImageAll(string, Texture2D)] does not work when using the Merged Material.");
 				return;
 			}
-			
+
 			apOptTextureData targetTextureData = GetOptTextureData(optTextureName);
 			if (targetTextureData == null) { return; }
 
@@ -4908,7 +4966,7 @@ namespace AnyPortrait
 					"\nPlease use the [SetMeshCustomImageAll(Texture2D, string)] function instead.");
 				return;
 			}
-			
+
 
 
 			apOptTextureData targetTextureData = GetOptTextureData(optTextureName);
@@ -5009,7 +5067,7 @@ namespace AnyPortrait
 		public void SetMeshCustomAlphaAll(string optTextureName, float alpha, string propertyName)
 		{
 			if (_optTextureData == null || _optTextureData.Count == 0) { return; }
-			
+
 			//추가 21.12.31 : Merged Mat을 사용한다면 이 함수는 동작하지 않는다.
 			if (_isUseMergedMat)
 			{
@@ -5017,7 +5075,7 @@ namespace AnyPortrait
 					"\nPlease use the [SetMeshCustomAlphaAll(float, string)] function instead.");
 				return;
 			}
-			
+
 
 			apOptTextureData targetTextureData = GetOptTextureData(optTextureName);
 
@@ -5598,7 +5656,7 @@ namespace AnyPortrait
 				//		}
 				//	}
 				//}
-				
+
 				//변경 22.1.9 : Batched 되도록 변경
 				_optBatchedMaterial.SetMeshAlphaAll_WithoutTextureID(alpha);
 			}
@@ -5746,7 +5804,7 @@ namespace AnyPortrait
 				_optBatchedMaterial.SetMeshCustomImageAll_WithoutTextureID(texture, propertyName);
 			}
 
-			
+
 		}
 
 
@@ -5833,7 +5891,7 @@ namespace AnyPortrait
 				_optMergedMaterial.SetCustomFloat(floatValue, ref propertyName);
 			}
 			else
-			{	
+			{
 				//일반 버전
 				//apOptRootUnit optRootUnit;
 				//List<apOptTransform> optTransforms = null;
@@ -5924,7 +5982,7 @@ namespace AnyPortrait
 				_optBatchedMaterial.SetMeshCustomVector4All_WithoutTextureID(vector4Value, propertyName);
 			}
 		}
-		
+
 
 
 
@@ -5941,7 +5999,7 @@ namespace AnyPortrait
 		public void SetSortingLayer(string sortingLayerName)
 		{
 			//이름으로부터 SortingLayerID를 찾자
-			if(SortingLayer.layers == null || SortingLayer.layers.Length == 0)
+			if (SortingLayer.layers == null || SortingLayer.layers.Length == 0)
 			{
 				Debug.LogError("AnyPortrait : SetSortingLayer() Failed. There is no SortingLayer is this project.");
 				return;
@@ -5950,7 +6008,7 @@ namespace AnyPortrait
 			bool isTargetSortingLayerFound = false;
 			for (int i = 0; i < SortingLayer.layers.Length; i++)
 			{
-				if(string.Equals(SortingLayer.layers[i].name, sortingLayerName))
+				if (string.Equals(SortingLayer.layers[i].name, sortingLayerName))
 				{
 					isTargetSortingLayerFound = true;
 					targetSortingLayerID = SortingLayer.layers[i].id;
@@ -5958,7 +6016,7 @@ namespace AnyPortrait
 				}
 			}
 			//못찾았다.
-			if(!isTargetSortingLayerFound)
+			if (!isTargetSortingLayerFound)
 			{
 				Debug.LogError("AnyPortrait : SetSortingLayer() Failed. Could not find layer with requested name. <" + sortingLayerName + ">");
 				return;
@@ -5997,12 +6055,12 @@ namespace AnyPortrait
 		public void SetSortingLayer(apOptTransform optTransform, string sortingLayerName)
 		{
 			//이름으로부터 SortingLayerID를 찾자
-			if(SortingLayer.layers == null || SortingLayer.layers.Length == 0)
+			if (SortingLayer.layers == null || SortingLayer.layers.Length == 0)
 			{
 				Debug.LogError("AnyPortrait : SetSortingLayer() Failed. There is no SortingLayer is this project.");
 				return;
 			}
-			if(optTransform == null || optTransform._childMesh == null)
+			if (optTransform == null || optTransform._childMesh == null)
 			{
 				Debug.LogError("AnyPortrait : SetSortingLayer() Failed. OptTransform is null or it does not have a mesh.");
 				return;
@@ -6011,7 +6069,7 @@ namespace AnyPortrait
 			bool isTargetSortingLayerFound = false;
 			for (int i = 0; i < SortingLayer.layers.Length; i++)
 			{
-				if(string.Equals(SortingLayer.layers[i].name, sortingLayerName))
+				if (string.Equals(SortingLayer.layers[i].name, sortingLayerName))
 				{
 					isTargetSortingLayerFound = true;
 					targetSortingLayerID = SortingLayer.layers[i].id;
@@ -6019,7 +6077,7 @@ namespace AnyPortrait
 				}
 			}
 			//못찾았다.
-			if(!isTargetSortingLayerFound)
+			if (!isTargetSortingLayerFound)
 			{
 				Debug.LogError("AnyPortrait : SetSortingLayer() Failed. Could not find layer with requested name. <" + sortingLayerName + ">");
 				return;
@@ -6028,7 +6086,7 @@ namespace AnyPortrait
 			//Sorting Layer 적용
 			optTransform._childMesh.SetSortingLayer(sortingLayerName, targetSortingLayerID);
 		}
-		
+
 		/// <summary>
 		/// Changes the Sorting Layer of the specified OptTransform.
 		/// Use the name of the sorting layer set in the "Tags and Layers Manager" of the Unity project.
@@ -6059,7 +6117,7 @@ namespace AnyPortrait
 		/// <param name="sortingOrder">Sorting Order (Default is 0)</param>
 		public void SetSortingOrder(apOptTransform optTransform, int sortingOrder)
 		{
-			if(optTransform == null || optTransform._childMesh == null)
+			if (optTransform == null || optTransform._childMesh == null)
 			{
 				Debug.LogError("AnyPortrait : SetSortingOrder() Failed. OptTransform is null or it does not have a mesh.");
 				return;
@@ -6098,14 +6156,14 @@ namespace AnyPortrait
 		/// <returns></returns>
 		public string GetSortingLayerName()
 		{
-			if(SortingLayer.layers == null || SortingLayer.layers.Length == 0)
+			if (SortingLayer.layers == null || SortingLayer.layers.Length == 0)
 			{
 				return "Unknown Layer";
 			}
 
 			for (int i = 0; i < SortingLayer.layers.Length; i++)
 			{
-				if(SortingLayer.layers[i].id == _sortingLayerID)
+				if (SortingLayer.layers[i].id == _sortingLayerID)
 				{
 					return SortingLayer.layers[i].name;
 				}
@@ -6132,19 +6190,19 @@ namespace AnyPortrait
 		/// <returns>Sorting Order value. -1 is returned if the requested OptTransform does not exist or does not have a mesh.</returns>
 		public int GetSortingOrder(apOptTransform optTransform)
 		{
-			if(optTransform == null)
+			if (optTransform == null)
 			{
 				Debug.LogError("AnyPortrait : GetSortingOrder() Failed. The OptTransform entered as an argument is null.");
 				return -1;
 			}
-			if(optTransform._childMesh == null)
+			if (optTransform._childMesh == null)
 			{
 				Debug.LogError("AnyPortrait : GetSortingOrder() Failed. The requested OptTransform does not have a mesh.");
 				return -1;
 			}
 			return optTransform._childMesh.GetSortingOrder();
 		}
-		
+
 		/// <summary>
 		/// Get the Sorting Order of the specified OptTransform.
 		/// </summary>
@@ -6168,7 +6226,7 @@ namespace AnyPortrait
 
 
 
-		
+
 
 		//추가 19.8.19
 		//Sorting Order Option에 관련된 함수들 추가
@@ -6179,7 +6237,7 @@ namespace AnyPortrait
 		/// <param name="isEnabled">Whether the sorting order is automatically updated (Default is true)</param>
 		public void SetSortingOrderChangedAutomatically(bool isEnabled)
 		{
-			if(_optRootUnitList == null)
+			if (_optRootUnitList == null)
 			{
 				return;
 			}
@@ -6196,7 +6254,7 @@ namespace AnyPortrait
 		/// </summary>
 		public void RefreshSortingOrderByDepth()
 		{
-			if(_optRootUnitList == null)
+			if (_optRootUnitList == null)
 			{
 				return;
 			}
@@ -6211,7 +6269,7 @@ namespace AnyPortrait
 		/// </summary>
 		public void ApplySortingOptionToOptRootUnits()
 		{
-			if(_optRootUnitList == null)
+			if (_optRootUnitList == null)
 			{
 				return;
 			}
@@ -6760,7 +6818,7 @@ namespace AnyPortrait
 				_textureData[iTexture].ReadyToEdit(this);
 			}
 
-			_meshes.RemoveAll(delegate(apMesh a)
+			_meshes.RemoveAll(delegate (apMesh a)
 			{
 				return a == null;
 			});
@@ -7078,7 +7136,7 @@ namespace AnyPortrait
 					}
 				}
 
-				
+
 				int curBoneIndex = 0;
 				for (int iRoot = 0; iRoot < meshGroup._boneList_Root.Count; iRoot++)
 				{
@@ -7101,15 +7159,100 @@ namespace AnyPortrait
 		public void ReadyToEdit_Step6()
 		{
 			//Render Unit도 체크해주자
+			//아무 순서대로 하지 말고, Root이 MeshGroup을 찾아서 재귀적으로 한 뒤, 처리되지 못한 MeshGroup을 체크해야한다.
+			//Step5에서 MeshGroup간의 Parent-Child 연결이 완료되었으니 가능하다.
+			List<apMeshGroup> processedMeshGroups = new List<apMeshGroup>();
+
+			//이전
+			//for (int iMeshGroup = 0; iMeshGroup < _meshGroups.Count; iMeshGroup++)
+			//{
+			//	apMeshGroup meshGroup = _meshGroups[iMeshGroup];
+			//	//meshGroup.SetAllRenderUnitForceUpdate();
+			//	meshGroup.RefreshForce();
+			//	meshGroup.SortRenderUnits(true);
+			//	meshGroup.SortBoneListByLevelAndDepth();
+			//}
+
+			//변경 v1.4.2 : 루트 메시 그룹을 중심으로 재귀적으로 호출하자 (Sort RenderUnit 특성상)
 			for (int iMeshGroup = 0; iMeshGroup < _meshGroups.Count; iMeshGroup++)
 			{
 				apMeshGroup meshGroup = _meshGroups[iMeshGroup];
-				//meshGroup.SetAllRenderUnitForceUpdate();
-				meshGroup.RefreshForce();
-				meshGroup.SortRenderUnits(true);
-				meshGroup.SortBoneListByLevelAndDepth();
+				if(meshGroup._parentMeshGroup == null)
+				{
+					//루트 메시 그룹에 대해서만 재귀 함수 호출
+					ReadyToEdit_RefrestMeshGroupRecursive(meshGroup, meshGroup, processedMeshGroups);
+				}
+			}
+
+			//다시 돌면서, 처리되지 않은 나머지 메시 그룹을 찾아서 처리하자
+			for (int iMeshGroup = 0; iMeshGroup < _meshGroups.Count; iMeshGroup++)
+			{
+				apMeshGroup meshGroup = _meshGroups[iMeshGroup];
+				if(processedMeshGroups.Contains(meshGroup))
+				{
+					//이미 처리가 되었다.
+					continue;
+				}
+
+				//누락된 메시 그룹에 대해서도 호출
+				ReadyToEdit_RefrestMeshGroupRecursive(meshGroup, meshGroup._parentMeshGroup != null ? meshGroup._parentMeshGroup : meshGroup, processedMeshGroups);
 			}
 		}
+
+		//추가 v1.4.2 : 초기화시 메시 그룹의 Refresh/SortRenderUnit을 호출할 때, 그냥하는게 아니라 재귀적으로 하도록
+		private void ReadyToEdit_RefrestMeshGroupRecursive(apMeshGroup curMeshGroup, apMeshGroup rootMeshGroup, List<apMeshGroup> processedList)
+		{
+			if (curMeshGroup == null)
+			{
+				return;
+			}
+
+			curMeshGroup.SetDirtyToReset();//추가 1.4.2 : 초기화시 Reset 플래그를 올리자
+			curMeshGroup.RefreshForce();
+			if(curMeshGroup._parentMeshGroup == null || curMeshGroup == rootMeshGroup)
+			{
+				//이게 루트 메시 그룹이라면
+				//Sort 후 TF에 Depth Assign까지 수행한다.
+				curMeshGroup.SortRenderUnits(true, apMeshGroup.DEPTH_ASSIGN.AssignDepth);
+			}
+			else
+			{
+				//이게 루트 메시 그룹이 아니라면, 위에서 이미 Depth Assign이 되었으므로 정렬만 한다.
+				curMeshGroup.SortRenderUnits(true, apMeshGroup.DEPTH_ASSIGN.OnlySort);
+			}
+			curMeshGroup.SortBoneListByLevelAndDepth();
+
+			//결과 리스트에 추가
+			processedList.Add(curMeshGroup);
+
+			//자식 메시 그룹이 있다면 (이건 Step3에서 연결이 된다)
+			int nChildMeshGroups = curMeshGroup._childMeshGroupTransforms != null ? curMeshGroup._childMeshGroupTransforms.Count : 0;
+			if(nChildMeshGroups == 0)
+			{
+				return;
+			}
+
+			apTransform_MeshGroup childMeshGroupTF = null;
+			for (int i = 0; i < nChildMeshGroups; i++)
+			{
+				childMeshGroupTF = curMeshGroup._childMeshGroupTransforms[i];
+				if(childMeshGroupTF == null)
+				{
+					continue;
+				}
+				if(childMeshGroupTF._meshGroup == null
+					|| childMeshGroupTF._meshGroup == curMeshGroup
+					|| childMeshGroupTF._meshGroup == rootMeshGroup)
+				{
+					continue;
+				}
+
+				ReadyToEdit_RefrestMeshGroupRecursive(childMeshGroupTF._meshGroup, rootMeshGroup, processedList);
+
+			}
+		}
+
+
 
 		/// <summary>[Please do not use it]</summary>
 		public void ReadyToEdit_Step7()
@@ -7252,15 +7395,23 @@ namespace AnyPortrait
 			int nModRemoved = 0;
 
 			//<REV_MG>
+			apMeshGroup curMeshGroup = null;
 			//for (int i = 0; i < _meshGroups.Count; i++)
 			for (int i = 0; i < revMeshGroups.Count; i++)
 			{
-				//int curNumModRemoved = _meshGroups[i]._modifierStack._modifiers.RemoveAll(delegate(apModifierBase a)
-				int curNumModRemoved = revMeshGroups[i]._modifierStack._modifiers.RemoveAll(delegate(apModifierBase a)
+				curMeshGroup = revMeshGroups[i];
+
+				//유효하지 않은 모디파이어들을 여기서 삭제한다.
+				//int curNumModRemoved = curMeshGroup._modifierStack.RemoveInvalidModifiers();
+				if(curMeshGroup._modifierStack._modifiers != null)
 				{
-					return a == null;
-				});
-				nModRemoved += curNumModRemoved;
+					int curNumModRemoved = curMeshGroup._modifierStack._modifiers.RemoveAll(delegate(apModifierBase a)
+					{
+						return a == null;
+					});
+
+					nModRemoved += (curNumModRemoved > 0) ? curNumModRemoved : 0;
+				}
 			}
 
 			if(!isResetLink)
@@ -7507,8 +7658,18 @@ namespace AnyPortrait
 					
 				}
 
-				
-				
+
+
+				//Link에서 SortRenderUnit 변경사항 (v1.4.2)
+				//이전 : SortRenderUnit을 호출하여 RenderUnit / TF의 Depth를 갱신한 후 Clipping, RenderUnit 리셋과 같은 후속 처리를 한다.
+				// >> 렌더유닛이 완성되지 않았거나 서브 메시 그룹이 먼저 호출되는 경우 Depth가 잘못 적용되는 문제가 발생한다.
+
+				//변경
+				//- 순서를 변경하여 RenderUnit을 먼저 체크 및 생성한다.
+				//- Sort는 값 할당 없이 먼저 수행한다.
+				//- Link 이후, Root Mesh Group에 한해서 Depth 할당을 다시 한다.
+
+				//참고 REV_MG는 Child > Root 순서로 호출되는 리스트다.
 
 				//<REV_MG>
 				//for (int iMeshGroup = 0; iMeshGroup < _meshGroups.Count; iMeshGroup++)
@@ -7517,7 +7678,11 @@ namespace AnyPortrait
 					//apMeshGroup meshGroup = _meshGroups[iMeshGroup];
 					apMeshGroup meshGroup = revMeshGroups[iMeshGroup];
 
-					meshGroup.SortRenderUnits(true);
+					//기존 렌더유닛 검토 및 다시 생성) (위치 변경 v1.4.2)
+					meshGroup.ResetRenderUnitsWithoutRefreshEditor();
+
+					//단순 정렬
+					meshGroup.SortRenderUnits(true, apMeshGroup.DEPTH_ASSIGN.OnlySort);
 
 
 					//추가 : Clipping 후속 처리를 한다.
@@ -7528,7 +7693,7 @@ namespace AnyPortrait
 
 						if (meshTransform._isClipping_Parent)
 						{
-							//최대 3개의 하위 Mesh를 검색해서 연결한다.
+							//Clipped Mesh를 검색해서 연결한다.
 							//찾은 이후엔 Sort를 해준다.
 
 							for (int iClip = 0; iClip < meshTransform._clipChildMeshes.Count; iClip++)
@@ -7564,7 +7729,11 @@ namespace AnyPortrait
 					}
 
 
-					meshGroup.ResetRenderUnitsWithoutRefreshEditor();
+					//이전 >> 위치가 변경되었다 [v1.4.2]
+					////여기서 RenderUnit을 모두 리셋한다. (기존 렌더유닛 검토 및 다시 생성)
+					//meshGroup.ResetRenderUnitsWithoutRefreshEditor();
+
+
 					meshGroup.RefreshAutoClipping();
 					if (meshGroup._rootRenderUnit != null)
 					{
@@ -7576,6 +7745,20 @@ namespace AnyPortrait
 					}
 
 					
+				}
+
+
+				//추가 [v1.4.2] Root Mesh Group에 대해 Depth를 갱신하는 Sorting을 여기서 하자
+				//Root Mesh Group만 체크하므로 [REV_MG]를 따르지 않는다.
+				for (int iMeshGroup = 0; iMeshGroup < _meshGroups.Count; iMeshGroup++)
+				{
+					apMeshGroup meshGroup = _meshGroups[iMeshGroup];
+					if(meshGroup._parentMeshGroup == null && meshGroup._parentMeshGroupID < 0)
+					{
+						//Root MeshGroup인 경우
+						//Sort 후 Depth 할당까지 하자
+						meshGroup.SortRenderUnits(true, apMeshGroup.DEPTH_ASSIGN.AssignDepth);
+					}
 				}
 
 				//Debug.LogWarning("<Link And Refresh In Editor> : Modifier Test");
@@ -7872,7 +8055,10 @@ namespace AnyPortrait
 				//apMeshGroup meshGroup = _meshGroups[iMeshGroup];
 				apMeshGroup meshGroup = revMeshGroups[iMeshGroup];
 
-				meshGroup._modifierStack.RefreshAndSort(false);
+				//meshGroup._modifierStack.RefreshAndSort(false);//이전
+				//첫 Link시, 잘못된 데이터가 있으면 삭제를 한다.
+				meshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.Keep,
+															apModifierStack.REFRESH_OPTION_REMOVE.RemoveNullModifiers);//변경 22.12.13
 
 
 				//Bone 연결 
@@ -8778,10 +8964,22 @@ namespace AnyPortrait
 			if(nextDeltaTime > 0.0f)
 			{
 				_physicsDeltaTime = nextDeltaTime;
-				if(_physicsDeltaTime > PHYSICS_MAX_DELTA_TIME)
+
+				//변경
+				//v1.4.2 : 경과 시간이 지나치게 크다면 앱이 중단되었거나 FPS가 떨어졌던 것이다.
+				//이 경우엔 아예 Delta Time을 0으로 만들어서 현재 프레임을 무효로 만들어야 한다.
+				if (_physicsDeltaTime > PHYSICS_SKIP_DELTA_TIME)
 				{
+					//지나치게 긴 물리 시간 > 0초로 만든다.
+					_physicsDeltaTime = 0.0f;
+				}
+				else if (_physicsDeltaTime > PHYSICS_MAX_DELTA_TIME)
+				{
+					//적당히 시간이 조금 오버했다. Max로 한정하자
 					_physicsDeltaTime = PHYSICS_MAX_DELTA_TIME;
 				}
+
+
 				_physicsTimer.Stop();
 				_physicsTimer.Reset();
 				_physicsTimer.Start();

@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -32,6 +32,10 @@ namespace AnyPortrait
 		/// </summary>
 		public void SelectPortrait(apPortrait portrait)
 		{
+			//v1.4.2 : 편집 가능 여부는 Portrait 선택 전에 실시해야한다.
+
+
+
 			if (portrait != _portrait)
 			{
 				Clear();
@@ -420,7 +424,12 @@ namespace AnyPortrait
 					Editor.Controller.ResetMeshGroupRuleVisibility(_rootUnit._childMeshGroup);
 
 
-					_rootUnit._childMeshGroup._modifierStack.RefreshAndSort(true);
+					
+					//_rootUnit._childMeshGroup._modifierStack.RefreshAndSort(true);//이전
+					//변경 22.12.13
+					_rootUnit._childMeshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible,
+																				apModifierStack.REFRESH_OPTION_REMOVE.Ignore);
+
 					_rootUnit._childMeshGroup.ResetBoneGUIVisible();
 
 
@@ -620,8 +629,8 @@ namespace AnyPortrait
 
 				areaCenter.y *= -1;
 				areaCenter *= apGL.Zoom;
-				Editor._scroll_MainCenter.x = (areaCenter.x) / (apGL.WindowSize.x * 0.1f);
-				Editor._scroll_MainCenter.y = (areaCenter.y) / (apGL.WindowSize.y * 0.1f);
+				Editor._scroll_CenterWorkSpace.x = (areaCenter.x) / (apGL.WindowSize.x * 0.1f);
+				Editor._scroll_CenterWorkSpace.y = (areaCenter.y) / (apGL.WindowSize.y * 0.1f);
 			}
 			else
 			{
@@ -677,7 +686,10 @@ namespace AnyPortrait
 
 				_meshGroup._modifierStack.InitModifierCalculatedValues();//<<값 초기화
 
-				_meshGroup._modifierStack.RefreshAndSort(true);
+				//_meshGroup._modifierStack.RefreshAndSort(true);//이전
+				//변경 22.12.13
+				_meshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible,
+															apModifierStack.REFRESH_OPTION_REMOVE.Ignore);
 
 				////ModParamSetGroup의 RefreshSync 함수가 호출되는 이후애 ModLinkInfo의 연결을 갱신하자
 				//_modLinkInfo.LinkRefresh();//추가 21.2.14
@@ -687,11 +699,7 @@ namespace AnyPortrait
 
 
 			//렌더 유닛/본의 작업용 임시 Visibility를 설정하자.
-			//이전
-			//Editor.Controller.SetMeshGroupTmpWorkVisibleReset(_meshGroup, true, true, true);
-			//_meshGroup.ResetBoneGUIVisible();
-
-			//변경 20.4.13 : Visibility Controller를 이용하자
+			//[20.4.13] Visibility Controller를 이용하자
 			//동기화 후에 옵션에 따라 초기화를 하자
 			Editor.VisiblityController.SyncMeshGroup(_meshGroup);
 			Editor.Controller.SetMeshGroupTmpWorkVisibleReset(	_meshGroup, 
@@ -711,6 +719,9 @@ namespace AnyPortrait
 			SetModifierExclusiveEditing(EX_EDIT.None);
 			SetModifierSelectionLock(false);
 			//SetModifierEditMode(EX_EDIT_KEY_VALUE.None);
+
+			//[v1.4.2] 편집 모드가 리셋되면서 ExEdit 플래그 등을 갱신해야한다.
+			AutoRefreshModifierExclusiveEditing();
 
 			//통계 재계산 요청
 			SetStatisticsRefresh();
@@ -766,12 +777,15 @@ namespace AnyPortrait
 				Editor._portrait._animClips[i]._isSelectedInEditor = false;
 			}
 
+			//[v1.4.2] 애니메이션 기즈모를 리셋하기 위해 상태를 변경한다.
+			_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.None;
+			
+
+
 			bool isChanged = false;
 			if (_animClip != animClip)
 			{
 				_animClip = animClip;
-
-
 
 				_subAnimTimeline = null;
 				_subAnimKeyframe = null;
@@ -830,6 +844,15 @@ namespace AnyPortrait
 				isChanged = true;
 
 
+				//v1.4.2 추가 : 유효성 테스트를 수행해서 AnimClip의 Link를 한번 더 확인하자
+				bool isValidAnimClip = _animClip.ValidateForLinkEditor();
+				if(!isValidAnimClip)
+				{
+					//Debug.LogError("AnimClip 유효성 테스트를 통과하지 못했다. 다시 링크 [" + _animClip._name + "]");
+					_animClip.LinkEditor(_portrait);
+				}
+
+
 				if (_animClip._targetMeshGroup != null)
 				{
 					//Mesh Group을 선택하면 이 초기화를 전부 실행해야한다.
@@ -858,7 +881,10 @@ namespace AnyPortrait
 
 					_animClip._targetMeshGroup._modifierStack.InitModifierCalculatedValues();//<<값 초기화
 
-					_animClip._targetMeshGroup._modifierStack.RefreshAndSort(true);
+					//_animClip._targetMeshGroup._modifierStack.RefreshAndSort(true);
+					//변경 22.12.13
+					_animClip._targetMeshGroup._modifierStack.RefreshAndSort(	apModifierStack.REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible,
+																				apModifierStack.REFRESH_OPTION_REMOVE.Ignore);
 
 
 
@@ -906,7 +932,8 @@ namespace AnyPortrait
 				}
 			}
 
-			AutoSelectAnimWorkKeyframe();
+			bool isWorkKeyframeChanged = false;
+			AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//Work Keyframe 변화를 별도로 체크하지는 않는다.
 
 			if (isResetInfo)
 			{
@@ -938,7 +965,7 @@ namespace AnyPortrait
 
 			//Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet_Modifier_Morph());
 
-			SetAnimClipGizmoEvent(isResetInfo);//Gizmo 이벤트 연결
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 			
 			//이전
 			//RefreshAnimEditing(true);
@@ -1862,7 +1889,7 @@ namespace AnyPortrait
 
 			if (isChanged)
 			{
-				Editor.Gizmos.RevertTransformObjects(null);//<<변경 : Refresh -> Revert (강제)
+				Editor.Gizmos.RevertFFD(false);//<<변경 : Refresh -> Revert (강제)
 			}
 		}
 
@@ -3243,25 +3270,44 @@ namespace AnyPortrait
 		
 		/// <summary>
 		/// AnimClip 상태에서 현재 상태에 맞는 GizmoEvent를 등록한다.
+		/// 만약 이전의 연결 상태와 같다면 억지로 리셋하지 않도록 한다.
 		/// </summary>
-		private void SetAnimClipGizmoEvent(bool isForceReset)
+		private void SetAnimClipGizmoEvent(
+											//bool isForceReset//일단 이건 사용하지 않는다.
+											)
 		{
 			if (_animClip == null)
 			{
+				//AnimClip이 없다면 항상 Unlink
 				Editor.Gizmos.Unlink();
+				_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.None;
 				return;
 			}
 
-			if (isForceReset)
-			{
-				Editor.Gizmos.Unlink();
+			
+			//이전
+			//if (isForceReset)
+			//{
+			//	Editor.Gizmos.Unlink();
+			//}
 
-			}
+
+			//[v1.4.2] 이전에는 옵션에 따라 무조건 Unlink를 했지만,
+			//많은 경우에 Unlink를 하면 안되는 상황 (Timeline 등이 바뀌지 않은 상태)임에도 계속 Unlink를 하여
+			//마우스 동작이 계속 초기화되는 문제가 있었다.
+			//그래서 Timeline과 Gizmo 연결 상태를 별도의 변수로 저장하여, 그것이 바뀔 때에만 Unlink를 수행하도록 한다.
+			//즉, "인자에 의한 수동 리셋" 에서 "상태 확인 후 자동 리셋"으로 개선됨
 
 			if (AnimTimeline == null)
 			{
 				//타임라인이 없으면 선택만 가능하다
-				Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_OnlySelectTransform());
+				if(_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.NoTimeline)
+				{
+					_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.NoTimeline;
+
+					Editor.Gizmos.Unlink();
+					Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_OnlySelectTransform());
+				}
 			}
 			else
 			{
@@ -3273,23 +3319,46 @@ namespace AnyPortrait
 							if ((int)(AnimTimeline._linkedModifier.CalculatedValueType & apCalculatedResultParam.CALCULATED_VALUE_TYPE.VertexPos) != 0)
 							{
 								//Vertex와 관련된 Modifier다.
-								Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditVertex());
+								if(_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.AnimMod_EditVertex)
+								{
+									_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.AnimMod_EditVertex;
+
+									Editor.Gizmos.Unlink();
+									Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditVertex());
+								}
 							}
 							else if(AnimTimeline._linkedModifier.ModifierType == apModifierBase.MODIFIER_TYPE.AnimatedColorOnly)
 							{
 								//추가 21.7.20 : 애니메이션 색상 모디파이어
-								Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditColorOnly());
+								if(_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.AnimMod_EditColor)
+								{
+									_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.AnimMod_EditColor;
+
+									Editor.Gizmos.Unlink();
+									Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditColorOnly());
+								}
 							}
 							else
 							{
-								//Transform과 관련된 Modifier다.								
-								Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditTransform());
+								//Transform과 관련된 Modifier다.		
+								if(_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.AnimMod_EditTF)
+								{
+									_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.AnimMod_EditTF;
+
+									Editor.Gizmos.Unlink();
+									Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditTransform());
+								}
 							}
 						}
 						else
 						{
-							Debug.LogError("Error : 선택된 Timeline의 Modifier가 연결되지 않음");
-							Editor.Gizmos.Unlink();
+							if (_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.UnknownTimeline)
+							{
+								_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.UnknownTimeline;
+
+								Debug.LogError("Error : 선택된 Timeline의 Modifier가 연결되지 않음");
+								Editor.Gizmos.Unlink();
+							}
 						}
 						break;
 
@@ -3299,14 +3368,29 @@ namespace AnyPortrait
 					//	Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_EditBone());
 					//	break;
 
-					case apAnimClip.LINK_TYPE.ControlParam:
-						//Control Param일땐 선택만 가능
-						Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_OnlySelectTransform());
+					case apAnimClip.LINK_TYPE.ControlParam:						
+						{
+							//Control Param일땐 선택만 가능
+							if (_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.ControlParam)
+							{
+								_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.ControlParam;
+
+								Editor.Gizmos.Unlink();
+								Editor.Gizmos.LinkObject(Editor.GizmoController.GetEventSet__Animation_OnlySelectTransform());
+							}
+						}
 						break;
 
 					default:
-						Debug.LogError("TODO : 알 수 없는 Timeline LinkType [" + AnimTimeline._linkType + "]");
-						Editor.Gizmos.Unlink();
+						{
+							if (_animGizmoLinkedStatus != ANIM_GIZMO_LINKED_STATUS.None)
+							{
+								_animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.None;
+
+								Debug.LogError("TODO : 알 수 없는 Timeline LinkType [" + AnimTimeline._linkType + "]");
+								Editor.Gizmos.Unlink();
+							}
+						}
 						break;
 				}
 			}
@@ -3374,15 +3458,20 @@ namespace AnyPortrait
 				_modRenderPins_All.Clear();
 				_modRenderPins_Weighted.Clear();
 
-
-				AutoSelectAnimWorkKeyframe();
+				bool isWorkKeyframeChanged = false;
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
 				
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//이 부분까지도 FFD가 해제되지 않았다면 강제로 Revert (Adapt 여부는 앞에서 물어봤어야 한다.)
+					Editor.Gizmos.RevertFFDTransformForce();
+				}
 				
 				//RefreshAnimEditing(true);//이전
 				AutoRefreshModifierExclusiveEditing();//변경 22.5.15
 
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.Timelines | apEditor.REFRESH_TIMELINE_REQUEST.LinkKeyframeAndModifier, null, null);
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결 : 선택된게 없으므로 그냥 초기화
 
 				//우측 Hierarchy GUI 변동이 있을 수 있으니 리셋
 				Editor.SetGUIVisible(apEditor.DELAYED_UI_TYPE.GUI_Anim_Hierarchy_Delayed__Meshes, false);//"GUI Anim Hierarchy Delayed - Meshes"
@@ -3419,7 +3508,14 @@ namespace AnyPortrait
 				_modRenderPins_All.Clear();
 				_modRenderPins_Weighted.Clear();
 
-				AutoSelectAnimWorkKeyframe();
+				bool isWorkKeyframeChanged = false;
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//이 부분까지도 FFD가 해제되지 않았다면 강제로 Revert (Adapt 여부는 앞에서 물어봤어야 한다.)
+					Editor.Gizmos.RevertFFDTransformForce();
+				}
 
 				//Editing에서 바꿀 수 있으므로 AnimEditing를 갱신한다.
 				//RefreshAnimEditing(true);
@@ -3436,7 +3532,7 @@ namespace AnyPortrait
 
 			Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.None, null, null);//<<Timeline을 선택하는 것 만으로는 크게 바뀌는게 없다.
 
-			SetAnimClipGizmoEvent(false);//Gizmo 이벤트 연결
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 			//추가 : MeshGroup Hierarchy를 갱신합시다.
 			Editor.Hierarchy_MeshGroup.RefreshUnits();
@@ -3524,39 +3620,28 @@ namespace AnyPortrait
 				_modRenderPins_All.Clear();
 				_modRenderPins_Weighted.Clear();
 
-				AutoSelectAnimWorkKeyframe();
+				bool isWorkKeyframeChanged = false;
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+				
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//이 부분까지도 FFD가 해제되지 않았다면 강제로 Revert (Adapt 여부는 앞에서 물어봤어야 한다.)
+					Editor.Gizmos.RevertFFDTransformForce();
+				}
+
+
 
 				//Editing에서 바꿀 수 있으므로 AnimEditing를 갱신한다.
 				//RefreshAnimEditing(true);
 				AutoRefreshModifierExclusiveEditing();//변경 22.5.15
 
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.All, null, null);
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 				return;
 			}
 
-			
-			//이전 코드
-			//if (_subAnimTimelineLayer != timelineLayer && isKeyframeSelectReset)
-			//{
-			//	_subAnimKeyframe = null;
-			//	_subAnimKeyframeList.Clear();
-
-			//	_animTimelineCommonCurve.Clear();//추가 3.30
-
-			//	_subAnimTimelineLayer = timelineLayer;
-
-			//	AutoSelectAnimWorkKeyframe();
-
-			//	RefreshAnimEditing(true);
-			//}
-
-			//_subAnimTimelineLayer = timelineLayer;
-
-
 			//변경 20.6.11 : 래핑
-			//Debug.LogWarning(">> Start Select");
 			bool isChanged = _subObjects.SelectAnimTimelineLayer(timelineLayer, multiSelect);
 			
 			//변경 20.6.20
@@ -3575,7 +3660,16 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();
 
-				AutoSelectAnimWorkKeyframe();
+				bool isWorkKeyframeChanged = false;
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+				
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//Timeline Layer 선택시 Work Keyframe의 변경이 생겼다면
+					//FFD 여부를 물어봐야한다. 단, 여기서는 Cancel이 불가능하다.
+					Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+
+				}
 
 				//RefreshAnimEditing(true);
 				AutoRefreshModifierExclusiveEditing();//변경 22.5.15
@@ -3595,7 +3689,7 @@ namespace AnyPortrait
 			//선택하는 것 만으로는 변경되는게 없다.
 			Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.None, null, null);
 
-			SetAnimClipGizmoEvent(false);//Gizmo 이벤트 연결
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 			//만약 처리 이전-이후의 타임라인이 그대로라면 GUI가 깜빡이는걸 막자
 			if (prevTimeline == _subAnimTimeline)
@@ -3621,8 +3715,8 @@ namespace AnyPortrait
 		/// <param name="isAutoSelectTargetObject"></param>
 		/// <param name="isIgnoreLock"></param>
 		public void SelectAnimTimelineLayersAddable(	List<apAnimTimelineLayer> timelineLayers, 
-											bool isDeselected2Selected,
-											bool isKeyframeSelectReset
+														bool isDeselected2Selected,
+														bool isKeyframeSelectReset
 										)
 		{
 			//Debug.Log("SetAnimTimelineLayer : " + (timelineLayer != null ? timelineLayer.DisplayName : "<Null>"));
@@ -3645,6 +3739,13 @@ namespace AnyPortrait
 				return;
 			}
 
+
+			//FFD 모드가 켜져있다면 강제로 종료한다. [v1.4.2]
+			if(Editor.Gizmos.IsFFDMode)
+			{
+				Editor.Gizmos.RevertFFDTransformForce();
+			}
+
 			//여러개의 타임라인 레이어를 "추가" 또는 "해제"한다.
 			_subObjects.SelectAnimTimelineLayersAddable(timelineLayers, isDeselected2Selected);
 			
@@ -3656,7 +3757,8 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();
 
-				AutoSelectAnimWorkKeyframe();
+				bool isWorkKeyframeChanged = false;
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
 
 				//RefreshAnimEditing(true);
 				AutoRefreshModifierExclusiveEditing();//변경 22.5.15
@@ -3665,7 +3767,7 @@ namespace AnyPortrait
 			//선택하는 것 만으로는 변경되는게 없다.
 			Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.None, null, null);
 
-			SetAnimClipGizmoEvent(false);//Gizmo 이벤트 연결
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 			//만약 처리 이전-이후의 타임라인이 그대로라면 GUI가 깜빡이는걸 막자
 			if (prevTimeline == _subAnimTimeline)
@@ -3685,8 +3787,14 @@ namespace AnyPortrait
 		/// </summary>
 		/// <param name="keyframe"></param>
 		/// <param name="isTimelineAutoSelect"></param>
-		public void SelectAnimKeyframe(apAnimKeyframe keyframe, bool isTimelineAutoSelect, apGizmos.SELECT_TYPE selectType, bool isSelectLoopDummy = false)
+		public void SelectAnimKeyframe(	apAnimKeyframe keyframe,
+										bool isTimelineAutoSelect,
+										apGizmos.SELECT_TYPE selectType,
+										bool isSelectLoopDummy = false)
 		{
+
+			bool isWorkKeyframeChanged = false;
+
 			if (_selectionType != SELECTION_TYPE.Animation ||
 				_animClip == null)
 			{
@@ -3699,9 +3807,10 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();//추가 3.30
 
-				AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
+				
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
 
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결 + Unlink
 
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.All, null, null);
 				return;
@@ -3730,7 +3839,8 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();//추가 3.30
 
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				//선택된 키프레임이 없다면 Gizmo는 무조건 리셋이다.
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 				return;
 			}
 
@@ -3752,7 +3862,15 @@ namespace AnyPortrait
 
 					_animTimelineCommonCurve.Clear();//추가 3.30
 
-					AutoSelectAnimWorkKeyframe();
+					AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//FFD 적용 여부를 물어보자 다만, 취소는 없다.
+						//(취소가 있는 질문을 하고자 했다면 기능의 초반에 직접 체크하여 호출하자)
+						Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+					}
+
 					return;
 				}
 				apAnimTimeline parentTimeline = parentLayer._parentTimeline;
@@ -3764,9 +3882,16 @@ namespace AnyPortrait
 
 					_animTimelineCommonCurve.Clear();//추가 3.30
 
-					SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+					AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
 
-					AutoSelectAnimWorkKeyframe();
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//FFD 적용 여부를 물어보자 다만, 취소는 없다.
+						//(취소가 있는 질문을 하고자 했다면 기능의 초반에 직접 체크하여 호출하자)
+						Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+					}
+
+					SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 					return;
 				}
 
@@ -3785,9 +3910,16 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();//추가 3.30
 
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
 
-				AutoSelectAnimWorkKeyframe();
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//FFD 적용 여부를 물어보자 다만, 취소는 없다.
+					//(취소가 있는 질문을 하고자 했다면 기능의 초반에 직접 체크하여 호출하자)
+					Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+				}
+				
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.None, parentLayer, null);//<<변경 19.5.21 : 선택하는 것 만으로는 변경되지 않도록
 			}
@@ -3806,7 +3938,7 @@ namespace AnyPortrait
 
 					_animTimelineCommonCurve.Clear();//추가 3.30
 
-					SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+					SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 					return;//처리 못함
 				}
 
@@ -3827,7 +3959,7 @@ namespace AnyPortrait
 					_subAnimKeyframe = null;
 					_subAnimKeyframeList.Clear();
 				}
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 
 				_animTimelineCommonCurve.Clear();//추가 3.30
@@ -3863,8 +3995,17 @@ namespace AnyPortrait
 				AutoSelectAnimTargetObject();
 			}
 
-			AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
-			SetAnimClipGizmoEvent(isKeyframeChanged);//Gizmo 이벤트 연결
+			AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
+
+			if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+			{
+				//FFD 적용 여부를 물어보자 다만, 취소는 없다.
+				//(취소가 있는 질문을 하고자 했다면 기능의 초반에 직접 체크하여 호출하자)
+				Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+			}
+
+
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 			//Common Keyframe을 갱신하자
 			RefreshCommonAnimKeyframes();
@@ -3887,6 +4028,9 @@ namespace AnyPortrait
 		/// <param name="selectType"></param>
 		public void SelectAnimMultipleKeyframes(List<apAnimKeyframe> keyframes, apGizmos.SELECT_TYPE selectType, bool isTimelineAutoSelect)
 		{
+			bool isWorkKeyframeChanged = false;
+
+
 			if (_selectionType != SELECTION_TYPE.Animation ||
 				_animClip == null)
 			{
@@ -3897,14 +4041,26 @@ namespace AnyPortrait
 				_subAnimKeyframe = null;
 				_subAnimKeyframeList.Clear();
 
-				AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
 
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 				_animTimelineCommonCurve.Clear();//추가 3.30
 
 				return;
 			}
+
+			int nInputKeyframes = keyframes != null ? keyframes.Count : 0;
+
+			//[v1.4.2]
+			//선택된 키프레임이 없다면 타임라인 레이어 선택이 해제되는데
+			//이러면 대충 "헛 영역"을 잡은 후에 선택된 객체(+Layer)가 풀리게 된다.
+			//FFD 등 도구들이 해제되는 문제가 발생하므로, InputKeyframe이 없을땐 처리하지 말자
+			if(nInputKeyframes == 0)
+			{
+				return;
+			}
+			
 
 			apAnimKeyframe curKeyframe = null;
 			if (selectType == apGizmos.SELECT_TYPE.New)
@@ -3918,32 +4074,43 @@ namespace AnyPortrait
 			_animTimelineCommonCurve.Clear();//추가 3.30
 
 
+			//키프레임들을 선택했을때, 기즈모 이벤트 초기화를 검사하기 위해
+			//FrameIndex, Timeline, Timeline Layer, WorkKeyframe이 변경되었는지를 체크한다.
+			//사실 WorkKeyframe이 변경되었다면 Timeline + Layer가 변경된 것이므로,
+			//FrameIndex만 같이 체크하자
+
+			int prevFrameIndex = _animClip.CurFrame;
 
 
-			for (int i = 0; i < keyframes.Count; i++)
+
+			if (nInputKeyframes > 0)
 			{
-				curKeyframe = keyframes[i];
-				if (curKeyframe == null ||
-					curKeyframe._parentTimelineLayer == null ||
-					curKeyframe._parentTimelineLayer._parentAnimClip != _animClip)
+				for (int i = 0; i < nInputKeyframes; i++)
 				{
-					continue;
-				}
-
-				if (selectType == apGizmos.SELECT_TYPE.Add ||
-					selectType == apGizmos.SELECT_TYPE.New)
-				{
-					//Debug.Log("Add");
-					if (!_subAnimKeyframeList.Contains(curKeyframe))
+					curKeyframe = keyframes[i];
+					if (curKeyframe == null ||
+						curKeyframe._parentTimelineLayer == null ||
+						curKeyframe._parentTimelineLayer._parentAnimClip != _animClip)
 					{
-						_subAnimKeyframeList.Add(curKeyframe);
+						continue;
+					}
+
+					if (selectType == apGizmos.SELECT_TYPE.Add ||
+						selectType == apGizmos.SELECT_TYPE.New)
+					{
+						//Debug.Log("Add");
+						if (!_subAnimKeyframeList.Contains(curKeyframe))
+						{
+							_subAnimKeyframeList.Add(curKeyframe);
+						}
+					}
+					else
+					{
+						_subAnimKeyframeList.Remove(curKeyframe);
 					}
 				}
-				else
-				{
-					_subAnimKeyframeList.Remove(curKeyframe);
-				}
 			}
+			
 
 			if (_subAnimKeyframeList.Count > 0)
 			{
@@ -3956,6 +4123,9 @@ namespace AnyPortrait
 			{
 				_subAnimKeyframe = null;
 			}
+
+
+
 
 			if (isTimelineAutoSelect)
 			{
@@ -4127,9 +4297,15 @@ namespace AnyPortrait
 			
 			AutoSelectAnimTargetObject();
 			
-			AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
+			AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
+
+			//FFD 완료 (취소 없음)
+			if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+			{
+				Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+			}
 			
-			SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결 (기존 true > v1.4.2 변경 isWorkKeyframeChanged)
 
 			//Common Keyframe을 갱신하자
 			RefreshCommonAnimKeyframes();
@@ -4293,6 +4469,8 @@ namespace AnyPortrait
 		/// </summary>
 		public void SelectAnimCommonKeyframes(List<apAnimCommonKeyframe> commonKeyframes, apGizmos.SELECT_TYPE selectType)
 		{
+			bool isWorkKeyframeChanged = false;
+
 			if (_selectionType != SELECTION_TYPE.Animation ||
 				_animClip == null)
 			{
@@ -4310,9 +4488,9 @@ namespace AnyPortrait
 				_subAnimCommonKeyframeList.Clear();
 				_subAnimCommonKeyframeList_Selected.Clear();
 
-				AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
 
-				SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+				SetAnimClipGizmoEvent();//Gizmo 이벤트 연결
 
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.All, null, null);
 				return;
@@ -4426,8 +4604,15 @@ namespace AnyPortrait
 				refreshLayer[i].SortAndRefreshKeyframes();
 			}
 
-			AutoSelectAnimWorkKeyframe();//<Work+Mod 자동 연결
-			SetAnimClipGizmoEvent(true);//Gizmo 이벤트 연결
+			AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//<Work+Mod 자동 연결
+
+			if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+			{
+				//FFD를 완료한다.
+				Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+			}
+
+			SetAnimClipGizmoEvent();//Gizmo 이벤트 연결 (기존 true > isWorkKeyframeChanged로 변경 v1.4.2)
 
 			//추가 3.30 : 키프레임들이 여러개 선택된 경우, CommonCurve를 갱신한다.
 			_animTimelineCommonCurve.Clear();
@@ -4559,6 +4744,8 @@ namespace AnyPortrait
 		/// <param name="isAutoChangeLeftTabToControlParam">이 값이 True이면 Timeline이 ControlParam 타입일때 자동으로 왼쪽 탭이 Controller로 바뀐다.</param>
 		public void AutoSelectAnimTimelineLayer(bool isAutoTimelineScroll, bool isAutoChangeLeftTabToControlParam = true)
 		{	
+			bool isWorkKeyframeChanged = false;
+
 			//수정 :
 			//Timeline을 선택하지 않았다 하더라도 자동으로 선택을 할 수 있다.
 			//수정작업중이 아니며 + 해당 오브젝트를 포함하는 Layer를 가진 Timeline의 개수가 1개일 땐 그것을 선택한다.
@@ -4576,13 +4763,22 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();//<<추가
 
-				AutoSelectAnimWorkKeyframe();
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+				//FFD는 해제한다.
+				if(Editor.Gizmos.IsFFDMode)
+				{
+					Editor.Gizmos.RevertFFDTransformForce();
+				}
 
 				//우측 Hierarchy GUI 변동이 있을 수 있으니 리셋
 				Editor.SetGUIVisible(apEditor.DELAYED_UI_TYPE.GUI_Anim_Hierarchy_Delayed__Meshes, false);//"GUI Anim Hierarchy Delayed - Meshes"
 				Editor.SetGUIVisible(apEditor.DELAYED_UI_TYPE.GUI_Anim_Hierarchy_Delayed__Bone, false);//"GUI Anim Hierarchy Delayed - Bone"
 				Editor.SetGUIVisible(apEditor.DELAYED_UI_TYPE.GUI_Anim_Hierarchy_Delayed__ControlParam, false);//"GUI Anim Hierarchy Delayed - ControlParam"
-																											   //Editor.SetGUIVisible("AnimationRight2GUI_Timeline_Layers", false);
+				
+				//[v1.4.2] UI 상에서 "마지막으로 클릭한 타임라인 레이어"를 초기화한다.
+				_lastClickTimelineLayer = null;
+
 				return;
 			}
 
@@ -4601,8 +4797,16 @@ namespace AnyPortrait
 
 				_animTimelineCommonCurve.Clear();//<<추가
 
-				AutoSelectAnimWorkKeyframe();
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
 
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//취소 없이 FFD를 완료한다.
+					Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+				}
+
+				//[v1.4.2] UI 상에서의 "마지막 클릭 타임라인 레이어" 초기화
+				_lastClickTimelineLayer = null;
 			}
 			else
 			{
@@ -4610,11 +4814,16 @@ namespace AnyPortrait
 				bool isChanged = _subAnimTimeline != resultTimeline;
 				_subAnimTimeline = resultTimeline;
 				
-				AutoSelectAnimWorkKeyframe();
+				AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+				if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+				{
+					//취소 없이 FFD를 완료한다.
+					Editor.Gizmos.CheckAdaptOrRevertFFD_WithoutCancel();
+				}
 
 				//여기서는 아예 Work Keyframe 뿐만아니라 Keyframe으로도 선택을 한다.
 				SelectAnimKeyframe(_subObjects.WorkKeyframe, false, apGizmos.SELECT_TYPE.New);//<<이것도 다중 처리?
-
 
 				_modRegistableBones.Clear();//<<이것도 갱신해주자 [타임라인에 등록된 Bone]
 				if (_subAnimTimeline != null)
@@ -4627,7 +4836,6 @@ namespace AnyPortrait
 							_modRegistableBones.Add(timelineLayer._linkedBone);
 						}
 					}
-
 				}
 
 				if (isChanged)
@@ -4663,12 +4871,155 @@ namespace AnyPortrait
 
 		}
 
+
+		/// <summary>
+		/// v1.4.2 : 객체를 클릭하여 선택하면,
+		/// 해당 객체에 해당하는 Timeline Layer에 대한 UI 하단의 Layer Info를 직접 클릭한 것과 같은 판정이 나도록 만든다.
+		/// 그게 "클릭한 판정"이 나야 이후에 Shift를 이용한 다중 레이어 선택이 가능해진다.
+		/// 일단 타임라인 레이어가 선택된 이후에 이 함수를 호출하자
+		/// </summary>
+		/// <param name="clickedObject"></param>
+		public void SyncLastClickedTimelineLayerInfo(object clickedObject)
+		{
+			if (_selectionType != SELECTION_TYPE.Animation
+				|| _animClip == null
+				|| _subAnimTimeline == null
+				|| clickedObject == null)
+			{
+				_lastClickTimelineLayer = null;
+				return;
+			}
+
+			
+			List<apAnimTimelineLayer> selectedLayers = _subObjects.AllTimelineLayers;
+			int nTimelineLayers = selectedLayers != null ? selectedLayers.Count : 0;
+			if(nTimelineLayers == 0)
+			{
+				_lastClickTimelineLayer = null;
+				return;
+			}
+
+			apTransform_Mesh targetMeshTF = null;
+			apTransform_MeshGroup targetMeshGroupTF = null;
+			apBone targetBone = null;
+			apControlParam targetCP = null;
+
+			_lastClickTimelineLayer = null;
+
+			int selectedObjType = -1;
+			if(clickedObject is apTransform_Mesh)
+			{
+				targetMeshTF = clickedObject as apTransform_Mesh;
+				selectedObjType = 0;
+
+				if(_subAnimTimeline._linkType != apAnimClip.LINK_TYPE.AnimatedModifier)
+				{
+					return;//타입이 맞지 않으면 패스
+				}
+			}
+			else if(clickedObject is apTransform_MeshGroup)
+			{
+				targetMeshGroupTF = clickedObject as apTransform_MeshGroup;
+				selectedObjType = 1;
+
+				if(_subAnimTimeline._linkType != apAnimClip.LINK_TYPE.AnimatedModifier)
+				{
+					return;//타입이 맞지 않으면 패스
+				}
+			}
+			else if(clickedObject is apBone)
+			{
+				targetBone = clickedObject as apBone;
+				selectedObjType = 2;
+
+				if(_subAnimTimeline._linkType != apAnimClip.LINK_TYPE.AnimatedModifier)
+				{
+					return;//타입이 맞지 않으면 패스
+				}
+			}
+			else if(clickedObject is apControlParam)
+			{
+				targetCP = clickedObject as apControlParam;
+				selectedObjType = 3;
+
+				if(_subAnimTimeline._linkType != apAnimClip.LINK_TYPE.ControlParam)
+				{	
+					return;//타입이 맞지 않으면 패스
+				}
+			}
+			else
+			{
+				//뭘 클릭한거징
+				return;
+			}
+
+
+			//클릭한 대상의 레이어를 찾아서 "마지막 클릭한 레이어"로 동기화하고 리턴
+			apAnimTimelineLayer curLayer = null;
+			for (int i = 0; i < nTimelineLayers; i++)
+			{
+				curLayer = selectedLayers[i];
+				switch (selectedObjType)
+				{
+					case 0://Mesh TF
+						{
+							if(curLayer._linkedMeshTransform != null
+								&& curLayer._linkedMeshTransform == targetMeshTF)
+							{								_lastClickTimelineLayer = curLayer;
+								_lastClickTimelineLayer = curLayer;
+								return;
+							}
+						}
+						break;
+
+					case 1://MeshGroup TF
+						{
+							if(curLayer._linkedMeshGroupTransform != null
+								&& curLayer._linkedMeshGroupTransform == targetMeshGroupTF)
+							{
+								_lastClickTimelineLayer = curLayer;
+								return;
+							}
+						}
+						break;
+
+					case 2://Bone
+						{
+							if(curLayer._linkedBone != null
+								&& curLayer._linkedBone == targetBone)
+							{
+								_lastClickTimelineLayer = curLayer;
+								return;
+							}
+						}
+						break;
+
+					case 3://Control Param
+						{
+							if(curLayer._linkedControlParam != null
+								&& curLayer._linkedControlParam == targetCP)
+							{
+								_lastClickTimelineLayer = curLayer;
+								return;
+							}
+						}
+						break;
+				}
+				
+			}
+			_lastClickTimelineLayer = null;
+
+		}
+
+
+
 		/// <summary>
 		/// 현재 재생중인 프레임에 맞게 WorkKeyframe을 자동으로 선택한다.
 		/// 키프레임을 바꾸거나 레이어를 바꿀때 자동으로 호출한다.
 		/// 수동으로 선택하는 키프레임과 다르다.
+		/// Work Keyframe이 변경되었거나 없다면 true를 리턴한다.
 		/// </summary>
-		public void AutoSelectAnimWorkKeyframe()
+		public void AutoSelectAnimWorkKeyframe(out bool isWorkKeyframeChangedOrNone)
 		{
 			Editor.Gizmos.SetUpdate();
 
@@ -4677,7 +5028,6 @@ namespace AnyPortrait
 			//if (_subAnimTimelineLayer == null || IsAnimPlaying)//이전
 			if (_subObjects.NumTimelineLayers == 0 || IsAnimPlaying)
 			{
-
 				//if (_subAnimWorkKeyframe != null)
 				if(_subObjects.NumWorkKeyframes > 0)//변경 20.6.12
 				{
@@ -4696,16 +5046,19 @@ namespace AnyPortrait
 					_modRenderPins_Weighted.Clear();
 
 					//추가 : 기즈모 갱신이 필요한 경우 (주로 FFD)
-					Editor.Gizmos.RevertFFDTransformForce();
+					//Editor.Gizmos.RevertFFDTransformForce(); //>> 삭제. 외부에서 처리하자
 				}
 
 				Editor.Hierarchy_AnimClip.RefreshUnits();
+
+				isWorkKeyframeChangedOrNone = true;
 				return;
 			}
 
 			
 			//변경된 코드 20.6.12 : 래핑
-			_subObjects.AutoSelectWorkKeyframes(_animClip, IsAnimPlaying);
+			bool isSelectedWorkKeyframeChanged = false;
+			_subObjects.AutoSelectWorkKeyframes(_animClip, IsAnimPlaying, out isSelectedWorkKeyframeChanged);
 
 			
 
@@ -4725,32 +5078,68 @@ namespace AnyPortrait
 				_modRenderPins_Weighted.Clear();
 
 
-				Editor.Gizmos.RevertFFDTransformForce();//<기즈모 갱신
+				//외부에서 처리하자 [v1.4.2]
+				//Editor.Gizmos.RevertFFDTransformForce();//<기즈모 갱신
 
 				Editor.Hierarchy_AnimClip.RefreshUnits();
+
+				isWorkKeyframeChangedOrNone = true;
 				return;
 			}
 
 			//ModData를 동기화하자
 			_modData.SyncModData_AnimEdit();
 
-			//MRV는 모두 초기화
-			//변경 20.6.29 : Mod와 통합되었다.
-			_modRenderVert_Main = null;
-			_modRenderVerts_All.Clear();
-			_modRenderVerts_Weighted.Clear();
+			
 
-			//추가 22.4.6 [v1.4.0] MRP
-			_modRenderPin_Main = null;
-			_modRenderPins_All.Clear();
-			_modRenderPins_Weighted.Clear();
+			if (!isSelectedWorkKeyframeChanged)
+			{
+				//이전의 WorkKeyframe들이 그대로 유지되었을때
+				//Debug.Log("Work Keyframe들이 계속 유지됨");
+				isWorkKeyframeChangedOrNone = false;
+			}
+			else
+			{
+				//이전의 WorkKeyframe들은 선택되지 않았다. > 초기화
+
+				//Debug.LogWarning("Work Keyframe들이 변경됨 > 다 초기화됨");
+
+				//MRV는 모두 초기화
+				//변경 20.6.29 : Mod와 통합되었다.
+				_modRenderVert_Main = null;
+				_modRenderVerts_All.Clear();
+				_modRenderVerts_Weighted.Clear();
+
+				//추가 22.4.6 [v1.4.0] MRP
+				_modRenderPin_Main = null;
+				_modRenderPins_All.Clear();
+				_modRenderPins_Weighted.Clear();
 
 
-			//완료
-			Editor.Gizmos.RevertFFDTransformForce();//<기즈모 갱신
+				//완료
+				//Editor.Gizmos.RevertFFDTransformForce();//이전
+
+				//변경 v1.4.2
+				//if (Editor.Gizmos.IsFFDMode)
+				//{
+				//	//FFD 모드였다면
+				//	Editor.Gizmos.CheckAdaptOrRevertFFD(Editor);
+				//}
+				//else
+				//{
+				//	Editor.Gizmos.RevertFFDTransformForce();
+				//}
+				//FFD 체크는 이 함수를 호출하는 외부에서 일괄적으로 하자
+				//대신 변경 내역을 out 변수에 입력하자
+				isWorkKeyframeChangedOrNone = true;
+				
+			}
+			
 
 			//Hierarchy 갱신
 			Editor.Hierarchy_AnimClip.RefreshUnits();
+
+			return;
 		}
 
 

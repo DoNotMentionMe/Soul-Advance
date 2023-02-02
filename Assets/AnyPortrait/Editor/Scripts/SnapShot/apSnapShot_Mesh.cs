@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -64,6 +64,9 @@ namespace AnyPortrait
 		private int _nEdges = 0;
 		private List<EdgeData> _edges = null;
 
+		//원본 메시의 OffsetPos를 저장해야한다.
+		private Vector2 _srcMeshOffsetPos = Vector2.zero;
+
 
 		// Init
 		//--------------------------------------------
@@ -88,6 +91,8 @@ namespace AnyPortrait
 
 			_nVerts = 0;
 			_nEdges = 0;
+
+			_srcMeshOffsetPos = Vector2.zero;
 		}
 
 		// Functions
@@ -161,6 +166,9 @@ namespace AnyPortrait
 			}
 
 			_nEdges = _edges.Count;
+
+
+			_srcMeshOffsetPos = srcMesh._offsetPos;
 			
 
 			return true;
@@ -168,7 +176,7 @@ namespace AnyPortrait
 
 
 
-		public List<apVertex> Paste(apMesh targetMesh)
+		public List<apVertex> Paste(apMesh targetMesh, apDialog_CopyMeshVertPin.POSITION_SPACE posSpace)
 		{
 			if(_nVerts == 0 
 				|| _nEdges == 0 
@@ -184,12 +192,23 @@ namespace AnyPortrait
 			List<apVertex> newVerts = new List<apVertex>();
 			Dictionary<VertData, apVertex> data2CopiedVert = new Dictionary<VertData, apVertex>();
 
+			//피벗에 대한 오프셋
+			Vector2 deltaPivot = targetMesh._offsetPos - _srcMeshOffsetPos;
+
+
 			for (int i = 0; i < _nVerts; i++)
 			{
 				curVertData = _verts[i];
 
 				//버텍스를 추가한다.
-				apVertex copiedVert = targetMesh.AddVertexAutoUV(curVertData._pos);
+				//옵션에 따라 위치를 변환해야할 수도 있다.
+				Vector2 pastePos = curVertData._pos;
+				if(posSpace == apDialog_CopyMeshVertPin.POSITION_SPACE.RelativeToPivot)
+				{
+					//Pivot에 대한 상대 위치
+					pastePos += deltaPivot;
+				}
+				apVertex copiedVert = targetMesh.AddVertexAutoUV(pastePos);
 				copiedVert._zDepth = curVertData._zDepth;
 
 				//Edge를 위해 변환 정보 저장

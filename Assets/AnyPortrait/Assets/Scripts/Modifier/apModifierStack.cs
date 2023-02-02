@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -86,65 +86,302 @@ namespace AnyPortrait
 		}
 
 
+		// Validate
+		//-------------------------------------------------------
+		/// <summary>
+		/// 유효하지 않은 모디파이어들을 소스 리스트에서 삭제하고, 삭제된 개수를 리턴합니다.
+		/// </summary>
+		/// <returns></returns>
+		public int RemoveInvalidModifiers()
+		{
+			int nRemoved = 0;
+			if (_modifiers_Volume != null)
+			{
+				int curRmv = _modifiers_Volume.RemoveAll(delegate (apModifier_Volume a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
 
-		public void RefreshAndSort(bool isSetActiveAllModifier)
+			if (_modifiers_Morph != null)
+			{
+				int curRmv = _modifiers_Morph.RemoveAll(delegate (apModifier_Morph a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_AnimatedMorph != null)
+			{
+				int curRmv = _modifiers_AnimatedMorph.RemoveAll(delegate (apModifier_AnimatedMorph a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_Rigging != null)
+			{
+				int curRmv = _modifiers_Rigging.RemoveAll(delegate (apModifier_Rigging a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_Physic != null)
+			{
+				int curRmv = _modifiers_Physic.RemoveAll(delegate (apModifier_Physic a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_TF != null)
+			{
+				int curRmv = _modifiers_TF.RemoveAll(delegate (apModifier_TF a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_AnimatedTF != null)
+			{
+				int curRmv = _modifiers_AnimatedTF.RemoveAll(delegate (apModifier_AnimatedTF a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_FFD != null)
+			{
+				int curRmv = _modifiers_FFD.RemoveAll(delegate (apModifier_FFD a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_AnimatedFFD != null)
+			{
+				int curRmv = _modifiers_AnimatedFFD.RemoveAll(delegate (apModifier_AnimatedFFD a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_ColorOnly != null)
+			{
+				int curRmv = _modifiers_ColorOnly.RemoveAll(delegate (apModifier_ColorOnly a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			if (_modifiers_AnimatedColorOnly != null)
+			{
+				int curRmv = _modifiers_AnimatedColorOnly.RemoveAll(delegate (apModifier_AnimatedColorOnly a) { return a == null; });
+				nRemoved += curRmv > 0 ? curRmv : 0;
+			}
+
+			//만약, Runtime용 변수인 _modifiers에도 Null이 있다면 일단 여기서 없애자 (RefreshAndSort 함수가 더 적절하다)
+			if (_modifiers != null)
+			{
+				_modifiers.RemoveAll(delegate(apModifierBase a)
+				{
+					return a == null;
+				});
+			}
+
+			//if(nRemoved > 0)
+			//{
+			//	Debug.Log("Null 모디파이어 발견 (Invalid 체크에서)");
+			//}
+
+			return nRemoved;
+		}
+
+
+
+
+		public enum REFRESH_OPTION_ACTIVE
+		{
+			/// <summary>이 함수를 호출함과 함께 가능한 모디파이어를 Active한다. (기존의 true에 해당)</summary>
+			ActiveAllModifierIfPossible,
+			/// <summary>Active 여부를 그대로 둔다. (기존의 false에 해당)</summary>
+			Keep,
+		}
+
+		public enum REFRESH_OPTION_REMOVE
+		{
+			/// <summary>Null인 모디파이어를 삭제한다. (Undo 체크 필요)</summary>
+			RemoveNullModifiers,
+			/// <summary>Null인 데이터를 그대로 둔다. (기본값)</summary>
+			Ignore,
+		}
+
+
+		//public void RefreshAndSort(bool isSetActiveAllModifier)
+		//변경 22.12.13 : 옵션이 하나 더 추가됨
+		//(1) 함수 호출후 가능한 모든 모디파이어를 Active로 만들지 여부 (기존 bool 인자)
+		//(2) Null 상태의 모디파이어를 소스 리스트에서 완전히 삭제할지 여부
+		public void RefreshAndSort(REFRESH_OPTION_ACTIVE activeModOption, REFRESH_OPTION_REMOVE removeNullOption)
 		{
 			_modifiers.Clear();
 
-			for (int i = 0; i < _modifiers_Volume.Count; i++)
+			apModifierBase curMod = null;
+
+			bool isAnyNullMod = false;//Null 데이터가 있는지 감지하자
+
+			if (_modifiers_Volume != null)
 			{
-				_modifiers.Add(_modifiers_Volume[i]);
+				for (int i = 0; i < _modifiers_Volume.Count; i++)
+				{
+					curMod = _modifiers_Volume[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_Morph.Count; i++)
+			if (_modifiers_Morph != null)
 			{
-				_modifiers.Add(_modifiers_Morph[i]);
+				for (int i = 0; i < _modifiers_Morph.Count; i++)
+				{
+					curMod = _modifiers_Morph[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_AnimatedMorph.Count; i++)
+			if (_modifiers_AnimatedMorph != null)
 			{
-				_modifiers.Add(_modifiers_AnimatedMorph[i]);
+				for (int i = 0; i < _modifiers_AnimatedMorph.Count; i++)
+				{
+					curMod = _modifiers_AnimatedMorph[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_Rigging.Count; i++)
+			if (_modifiers_Rigging != null)
 			{
-				_modifiers.Add(_modifiers_Rigging[i]);
+				for (int i = 0; i < _modifiers_Rigging.Count; i++)
+				{
+					curMod = _modifiers_Rigging[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_Physic.Count; i++)
+			if (_modifiers_Physic != null)
 			{
-				_modifiers.Add(_modifiers_Physic[i]);
+				for (int i = 0; i < _modifiers_Physic.Count; i++)
+				{
+					curMod = _modifiers_Physic[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_TF.Count; i++)
+			if (_modifiers_TF != null)
 			{
-				_modifiers.Add(_modifiers_TF[i]);
+				for (int i = 0; i < _modifiers_TF.Count; i++)
+				{
+					curMod = _modifiers_TF[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_AnimatedTF.Count; i++)
+			if (_modifiers_AnimatedTF != null)
 			{
-				_modifiers.Add(_modifiers_AnimatedTF[i]);
+				for (int i = 0; i < _modifiers_AnimatedTF.Count; i++)
+				{
+					curMod = _modifiers_AnimatedTF[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_FFD.Count; i++)
+			if (_modifiers_FFD != null)
 			{
-				_modifiers.Add(_modifiers_FFD[i]);
+				for (int i = 0; i < _modifiers_FFD.Count; i++)
+				{
+					curMod = _modifiers_FFD[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_AnimatedFFD.Count; i++)
+			if (_modifiers_AnimatedFFD != null)
 			{
-				_modifiers.Add(_modifiers_AnimatedFFD[i]);
+				for (int i = 0; i < _modifiers_AnimatedFFD.Count; i++)
+				{
+					curMod = _modifiers_AnimatedFFD[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
+
 
 			//추가 21.7.20 : 색상 전용 모디파이어
-			for (int i = 0; i < _modifiers_ColorOnly.Count; i++)
+			if (_modifiers_ColorOnly != null)
 			{
-				_modifiers.Add(_modifiers_ColorOnly[i]);
+				for (int i = 0; i < _modifiers_ColorOnly.Count; i++)
+				{
+					curMod = _modifiers_ColorOnly[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
 			}
 
-			for (int i = 0; i < _modifiers_AnimatedColorOnly.Count; i++)
+			if (_modifiers_AnimatedColorOnly != null)
 			{
-				_modifiers.Add(_modifiers_AnimatedColorOnly[i]);
+				for (int i = 0; i < _modifiers_AnimatedColorOnly.Count; i++)
+				{
+					curMod = _modifiers_AnimatedColorOnly[i];
+					if(curMod == null)
+					{
+						isAnyNullMod = true;
+						continue;
+					}
+					_modifiers.Add(curMod);
+				}
+			}
+			
+
+			//Null 데이터가 발견되었다면 옵션에 따라 삭제하자
+			if(isAnyNullMod 
+				&& removeNullOption == REFRESH_OPTION_REMOVE.RemoveNullModifiers)
+			{	
+				if(_modifiers_Volume != null)				{ _modifiers_Volume.RemoveAll(delegate(apModifier_Volume a) { return a == null; }); }
+				if(_modifiers_Morph != null)				{ _modifiers_Morph.RemoveAll(delegate(apModifier_Morph a) { return a == null; }); }
+				if(_modifiers_AnimatedMorph != null)		{ _modifiers_AnimatedMorph.RemoveAll(delegate(apModifier_AnimatedMorph a) { return a == null; }); }
+				if(_modifiers_Rigging != null)				{ _modifiers_Rigging.RemoveAll(delegate(apModifier_Rigging a) { return a == null; }); }
+				if(_modifiers_Physic != null)				{ _modifiers_Physic.RemoveAll(delegate(apModifier_Physic a) { return a == null; }); }
+				if(_modifiers_TF != null)					{ _modifiers_TF.RemoveAll(delegate(apModifier_TF a) { return a == null; }); }
+				if(_modifiers_AnimatedTF != null)			{ _modifiers_AnimatedTF.RemoveAll(delegate(apModifier_AnimatedTF a) { return a == null; }); }
+				if(_modifiers_FFD != null)					{ _modifiers_FFD.RemoveAll(delegate(apModifier_FFD a) { return a == null; }); }
+				if(_modifiers_AnimatedFFD != null)			{ _modifiers_AnimatedFFD.RemoveAll(delegate(apModifier_AnimatedFFD a) { return a == null; }); }
+				if(_modifiers_ColorOnly != null)			{ _modifiers_ColorOnly.RemoveAll(delegate(apModifier_ColorOnly a) { return a == null; }); }
+				if(_modifiers_AnimatedColorOnly != null)	{ _modifiers_AnimatedColorOnly.RemoveAll(delegate(apModifier_AnimatedColorOnly a) { return a == null; }); }
 			}
 
 
@@ -160,7 +397,8 @@ namespace AnyPortrait
 
 			_isSorted = true;
 
-			if (isSetActiveAllModifier)
+			//if (isSetActiveAllModifier)
+			if(activeModOption == REFRESH_OPTION_ACTIVE.ActiveAllModifierIfPossible)
 			{
 				ActiveAllModifierFromExclusiveEditing();
 			}
@@ -168,13 +406,54 @@ namespace AnyPortrait
 
 
 
-		// Functions
+		// Functions - Validate
+		//----------------------------------------------------
+		/// <summary>
+		/// 모디파이어가 이 모디파이어스택에 포함되어 있는지 확인하는 유효성 검사용 함수.
+		/// 모디파이어 삭제/복구 과정에서 제대로 연결되었는지 체크한다.
+		/// </summary>
+		public bool IsContain(apModifierBase modifier)
+		{
+			if(modifier == null)
+			{
+				return false;
+			}
+			switch (modifier.ModifierType)
+			{
+				case apModifierBase.MODIFIER_TYPE.Volume:
+					if(_modifiers_Volume != null && modifier is apModifier_Volume)
+					{
+						return _modifiers_Volume.Contains(modifier as apModifier_Volume);
+					}
+					break;
+
+				case apModifierBase.MODIFIER_TYPE.Morph:
+
+				case apModifierBase.MODIFIER_TYPE.AnimatedMorph:
+				case apModifierBase.MODIFIER_TYPE.Rigging:
+				case apModifierBase.MODIFIER_TYPE.Physic:
+				case apModifierBase.MODIFIER_TYPE.TF:
+				case apModifierBase.MODIFIER_TYPE.AnimatedTF:
+				case apModifierBase.MODIFIER_TYPE.FFD:
+				case apModifierBase.MODIFIER_TYPE.AnimatedFFD:
+				case apModifierBase.MODIFIER_TYPE.ColorOnly:
+				case apModifierBase.MODIFIER_TYPE.AnimatedColorOnly:
+					break;
+			}
+			return false;
+		}
+
+
+
+
+		// Functions - Update
 		//----------------------------------------------------
 		public void Update_Pre(float tDelta)
 		{
 			if (_modifiers.Count == 0 && !_isSorted)
 			{
-				RefreshAndSort(false);
+				//RefreshAndSort(false);
+				RefreshAndSort(REFRESH_OPTION_ACTIVE.Keep, REFRESH_OPTION_REMOVE.Ignore);//변경 22.12.13
 			}
 
 			//Profiler.BeginSample("Modifier Calculate");
@@ -215,7 +494,8 @@ namespace AnyPortrait
 		{
 			if (_modifiers.Count == 0 && !_isSorted)
 			{
-				RefreshAndSort(false);
+				//RefreshAndSort(false);
+				RefreshAndSort(REFRESH_OPTION_ACTIVE.Keep, REFRESH_OPTION_REMOVE.Ignore);//변경 22.12.13
 			}
 
 			//Profiler.BeginSample("Modifier Calculate");

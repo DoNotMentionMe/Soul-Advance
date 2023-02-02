@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -396,12 +396,14 @@ namespace AnyPortrait
 			}
 			if (_isNeedRenderUnitReset || _renderUnits_All.Count == 0 || _rootRenderUnit == null)
 			{
+				//렌더 유닛들이 생성되었는지 확인하고, 매칭이 안된 렌더 유닛들을 생성한다.
 				ResetRenderUnits(linkRefreshRequest);
 			}
 
 			if (_isNeedRenderUnitSort)
 			{
-				SortRenderUnits(isDepthChanged);
+				//여기서는 TF의 Depth를 바꾸지는 않고 오직 RenderUnit의 정렬만 한다.
+				SortRenderUnits(isDepthChanged, DEPTH_ASSIGN.OnlySort);
 			}
 			
 			_tUpdateBias += tDelta;
@@ -516,7 +518,8 @@ namespace AnyPortrait
 
 			if (_isNeedRenderUnitSort)
 			{
-				SortRenderUnits(isDepthChanged);
+				//여기서는 TF의 Depth는 수정하지 않고, Render Unit만 정렬한다.
+				SortRenderUnits(isDepthChanged, DEPTH_ASSIGN.OnlySort);
 			}
 			
 			_tUpdateBias += tDelta;
@@ -690,185 +693,389 @@ namespace AnyPortrait
 			}
 		}
 
-		public void SortRenderUnits(bool isDepthChanged)
+
+
+		public enum DEPTH_ASSIGN
+		{
+			/// <summary>RenderUnit을 Sorting만 한다. MeshTF/MeshGroupTF의 실제적인 Depth를 수정하지는 않는다.</summary>
+			OnlySort,
+			/// <summary>
+			/// Sort 이후에 RenderUnit의 순서를 바탕으로 MeshTF/MeshGroupTF의 Depth값도 갱신한다.
+			/// 단, 이 옵션으로 갱신하는 경우, Depth 할당은 자동으로 최상위 MeshGroup에서 수행한다. (Parent Mesh Group이 연결되어 있어야 한다.)
+			/// 미리 Render Unit을 
+			/// </summary>
+			AssignDepth
+		}
+
+
+		public void SortRenderUnits(bool isDepthChanged , DEPTH_ASSIGN depthAssignOption)
 		{
 			_isNeedRenderUnitSort = false;
 
 			List<apRenderUnit> sortedList = new List<apRenderUnit>();
 
+			apRenderUnit curRenderUnit = null;
+
+			
+			//Depth 처리
+			//1. RenderUnit의 Depth를 기준으로 먼저 Sort
+			//2. RenderUnit 순서대로 Depth를 다시 설정한다. (1 ~ n)
+			//>> 단, MeshGroup이 중간에 포함되면 -> 해당 MeshGroup이 포함된 RenderUnit의 마지막 Depth를 가져와야 한다.
+			//3. 갱신된 RenderUnit의 Depth를 각각의 Transform에 넣어준다. >> 옵션에 의함 (v1.4.2)
+
+			//1. 같은 레벨의 Render Unit들 간의 Sorting
+			// Detph Sort는 기본적으로 "같은 레벨인 경우"에만 적용한다.
+			// 다른 레벨인 경우는 상위 Sort 뒤에 붙으면서, 상위 레벨의 다음 유닛의 앞쪽에 붙는다.
+
+			
+			//Depth Changed의 경우와 관계없이 동작하는 코드
+
+			//1. 재귀적으로 Render Unit들을 정렬하여 RenderUnit_All 리스트를 완성하고, Max Level을 계산한다.
+			_maxRenderUnitLevel = -1;//서브 렌더 유닛의 최대 레벨
+
+			//중요
+			//재귀적으로 같은 레벨의 RenderUnit들을 정렬하면서 SortedList에 넣는다.
+			//실질적인 정렬은 Root Render Unit을 기준으로 Child Render Unit 리스트를 정렬하는 것이다.
+			if (_rootRenderUnit != null)
+			{
+				RefreshRenderUnitLevel(_rootRenderUnit, 0);//<< 여기서 _maxRenderUnitLevel를 계산한다.
+
+				//UI와 달리 여기서는 오름차순 (먼저 출력될 것 부터 가져온다.)
+				SortRenderUnitByLevelAndDepth(_rootRenderUnit, sortedList);
+			}
+
+
+			// < 중요 > sortedList를 바탕으로 여기서 _renderUnits_All을 다시 설정한다.
+			//여기서 렌더 유닛의 정렬이 완료된다.
+			_renderUnits_All.Clear();
+			for (int i = 0; i < sortedList.Count; i++)
+			{
+				curRenderUnit = sortedList[i];
+
+				_renderUnits_All.Add(curRenderUnit);//순서대로 입력한다.
+
+				//추가 : Extra 옵션에 의해서 Depth가 바뀌는 이벤트를 할당한다.
+				curRenderUnit.SetExtraDepthChangedEvent(OnRenderUnitExtraDepthChanged);
+
+				//Debug.Log("[" + curRenderUnit.GetDepth() + "] : " + curRenderUnit.Name);
+			}
+
+
+
 			if (isDepthChanged)
 			{
-				//Depth 처리
-				//Mesh Group 내부에서는 모두 되었다고 판단
-				//Depth = Layer
-				//1. RenderUnit의 Depth를 기준으로 먼저 Sort
-				//2. RenderUnit 순서대로 Depth를 다시 설정한다. (1 ~ n)
-				//>> 단, MeshGroup이 중간에 포함되면 -> 해당 MeshGroup이 포함된 RenderUnit의 마지막 Depth를 가져와야 한다.
-				//3. 갱신된 RenderUnit의 Depth를 각각의 Transform에 넣어준다.
 
-
-				//TODO
-				//규칙 추가
-				// Detph Sort는 기본적으로
-				// "같은 레벨인 경우"에만 적용한다.
-				// 다른 레벨인 경우는 상위 Sort 뒤에 붙으면서, 상위 레벨의 다음 유닛의 앞쪽에 붙는다.
-				_maxRenderUnitLevel = -1;
-				if (_rootRenderUnit != null)
-				{
-					RefreshRenderUnitLevel(_rootRenderUnit, 0);
-
-					//UI와 달리 여기서는 오름차순 (먼저 출력될 것 부터 가져온다.)
-
-					SortRenderUnitByLevelAndDepth(_rootRenderUnit, sortedList);
-				}
-				
-
-				
-
-				_renderUnits_All.Clear();
-				for (int i = 0; i < sortedList.Count; i++)
-				{
-					_renderUnits_All.Add(sortedList[i]);
-				}
-				
 				//1차로 Depth 값을 계산한다.
 				int curDepth = 0;//<0부터 시작 (Root가 0이다)
-				for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
-				{
-					apRenderUnit renderUnit = _renderUnits_All[iUnit];
-					curDepth = renderUnit.SetDepth(curDepth);
-					renderUnit.SetDepthForSort(curDepth);//<<추가
-					curDepth++;
-				}
 
+				#region [미사용 코드] Depth 할당이 Root Mesh Group에서 일괄적으로 수행하도록 바뀌었으므로, 이 메시 그룹의 StartDepth를 구할 필요가 없다.
+				//int startDepth = 0;
+
+
+				////추가 22.8.17 [v1.4.2]
+				////만약 자신이 다른 메시 그룹의 자식이라면, 그때의 MeshGroup TF의 Depth를 받아야 한다.
+				//if (_parentMeshGroup != null)
+				//{
+				//	//Debug.LogWarning("Child MeshGroup에 속한 메시 그룹에서 Sort Render Unit을 호출했다. (" + _parentMeshGroup._name + ")");
+
+				//	apTransform_MeshGroup childMeshGroupTFInParent = _parentMeshGroup.GetMeshGroupTransformByMeshGroupID(_uniqueID);
+				//	if (childMeshGroupTFInParent != null)
+				//	{
+				//		startDepth = childMeshGroupTFInParent._depth;
+				//	}
+				//}
+
+				//curDepth = startDepth; 
+				#endregion
+
+				#region [미사용 코드] Depth 할당은 아래의 코드에서 옵션에 따라 수행한다.
+				//for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+				//{
+				//	curRenderUnit = _renderUnits_All[iUnit];
+
+				//	// < TF에 Depth 할당하기 >
+				//	curDepth = curRenderUnit.SetDepth(curDepth);//여기서 잘못 들어가는게 문제. Depth를 고정값으로 넣으니 문제가 된다.
+
+				//	//curRenderUnit.SetDepthForSort(curDepth);//<<추가 >> 삭제 22.8.19 [v1.4.2]
+
+				//	if (curRenderUnit._meshGroupTransform != null
+				//		&& curRenderUnit._meshGroupTransform._meshGroup != null)
+				//	{
+				//		//렌더 유닛이 자식 메시 그룹일 때
+				//		//> Root Transform의 Depth를 변경
+				//		apMeshGroup childMeshGroup = curRenderUnit._meshGroupTransform._meshGroup;
+				//		if (childMeshGroup._rootMeshGroupTransform != null)
+				//		{
+				//			childMeshGroup._rootMeshGroupTransform._depth = curDepth;
+				//			//Debug.LogWarning("자식 메시 그룹 [" + childMeshGroup._name + "]의 루트 MGTF의 Depth를 변경 : " + curDepth);
+				//		}
+				//	}
+
+				//	curDepth++;
+				//} 
+				#endregion
+
+				//렌더 유닛의 GUI상에 보여지는 GUIIndex를 수정한다.
 				if (_rootRenderUnit != null)
 				{
 					RefreshDepth(_rootRenderUnit, 0);
 				}
 
-				//Clip 여부에 따라서 다시 설정
-				bool isAnyClipping = RefreshAutoClipping();
 
-				if (isAnyClipping)
-				{
-					//2차로 Depth 값을 계산한다.
-					//여기서는 Clipping의 Parent / Child가 같이 묶이도록 한다.
-					List<apRenderUnit> nextRenderUnits = new List<apRenderUnit>();
-					for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
-					{
-						apRenderUnit renderUnit = _renderUnits_All[iUnit];
-						if (nextRenderUnits.Contains(renderUnit))
-						{
-							continue;
-						}
 
-						nextRenderUnits.Add(renderUnit);
+				// < Clip 여부에 따라서 다시 설정 >
 
-						if (renderUnit._unitType == apRenderUnit.UNIT_TYPE.Mesh
-							&& renderUnit._meshTransform != null)
-						{
-							apTransform_Mesh meshTransform = renderUnit._meshTransform;
+				//계산된 _renderUnits_All 리스트 순서를 기반으로 Clipping Parent-Child를 정한다.
+				//bool isAnyClipping = RefreshAutoClipping();//이전
+				RefreshAutoClipping();//변경 v1.4.2
 
-							//>>Child 위주로 수정을 하자
-							if (meshTransform._isClipping_Parent)
-							{
-								//Clip Mask Parent Mesh라면
-								//미리 Child를 넣어주자
-								if (meshTransform._clipChildMeshes.Count > 0)
-								{
-									for (int iClip = 0; iClip < meshTransform._clipChildMeshes.Count; iClip++)
-									{
-										apTransform_Mesh childMesh = meshTransform._clipChildMeshes[iClip]._meshTransform;
-										if (childMesh != null)
-										{
-											apRenderUnit childRenderUnit = GetRenderUnit(childMesh);
+				#region [미사용 코드] 해당 코드는 Refresh Auto Clipping 함수 내에서 동일하게 처리된다.
+				//if (isAnyClipping)
+				//{
+				//	//2차로 Depth 값을 계산한다.
+				//	//여기서는 Clipping의 Parent / Child가 같이 묶이도록 한다.
 
-											meshTransform._clipChildMeshes[iClip]._renderUnit = childRenderUnit;
+				//	//[v1.4.2] 변경점
+				//	//- nextRenderUnits 삭제. 순서가 바뀌는게 아니므로 불필요
+				//	//List<apRenderUnit> nextRenderUnits = new List<apRenderUnit>();
 
-											if (childRenderUnit != null)
-											{
-												if (!nextRenderUnits.Contains(childRenderUnit))
-												{
-													nextRenderUnits.Add(childRenderUnit);
-												}
-											}
-										}
-									}
-								}
-								#region [미사용 코드]
-								//for (int iClip = 0; iClip < 3; iClip++)
-								//{
-								//	apTransform_Mesh childMesh = meshTransform._clipChildMeshTransforms[iClip];
-								//	if (childMesh != null)
-								//	{
-								//		apRenderUnit childRenderUnit = GetRenderUnit(childMesh);
 
-								//		meshTransform._clipChildRenderUnits[iClip] = childRenderUnit;
+					
+				//	for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+				//	{
+				//		apRenderUnit renderUnit = _renderUnits_All[iUnit];
 
-								//		if (childRenderUnit != null)
-								//		{
-								//			if (!nextRenderUnits.Contains(childRenderUnit))
-								//			{
-								//				nextRenderUnits.Add(childRenderUnit);
-								//			}
-								//		}
-								//	}
-								//} 
-								#endregion
+				//		//삭제
+				//		//if (nextRenderUnits.Contains(renderUnit))
+				//		//{
+				//		//	continue;
+				//		//}
 
-							}
-						}
-					}
-					_renderUnits_All.Clear();
-					for (int i = 0; i < nextRenderUnits.Count; i++)
-					{
-						_renderUnits_All.Add(nextRenderUnits[i]);
-					}
+				//		//nextRenderUnits.Add(renderUnit);
 
-					//다시 Depth를 계산한다.
-					curDepth = 0;//<0부터 시작 (Root가 0이므로)
-					for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
-					{
-						//Debug.Log("Depth [" + curDepth + "]");
-						apRenderUnit renderUnit = _renderUnits_All[iUnit];
-						curDepth = renderUnit.SetDepth(curDepth);
-						renderUnit.SetDepthForSort(curDepth);//<<추가
-						curDepth++;
-					}
-				}
+				//		if (renderUnit._unitType == apRenderUnit.UNIT_TYPE.Mesh
+				//			&& renderUnit._meshTransform != null)
+				//		{
+				//			apTransform_Mesh meshTransform = renderUnit._meshTransform;
+
+				//			//>>Child 위주로 수정을 하자
+				//			if (meshTransform._isClipping_Parent)
+				//			{
+				//				//Clip Mask Parent Mesh라면
+				//				//미리 Child를 넣어주자
+				//				if (meshTransform._clipChildMeshes.Count > 0)
+				//				{
+				//					for (int iClip = 0; iClip < meshTransform._clipChildMeshes.Count; iClip++)
+				//					{
+				//						apTransform_Mesh childMesh = meshTransform._clipChildMeshes[iClip]._meshTransform;
+				//						if (childMesh != null)
+				//						{
+				//							apRenderUnit childRenderUnit = GetRenderUnit(childMesh);
+
+				//							meshTransform._clipChildMeshes[iClip]._renderUnit = childRenderUnit;
+
+				//							//if (childRenderUnit != null)
+				//							//{
+				//							//	if (!nextRenderUnits.Contains(childRenderUnit))
+				//							//	{
+				//							//		nextRenderUnits.Add(childRenderUnit);
+				//							//	}
+				//							//}
+				//						}
+				//					}
+				//				}
+				//			}
+				//		}
+				//	}
+
+				//	//삭제 v1.4.2
+				//	//_renderUnits_All.Clear();
+				//	//for (int i = 0; i < nextRenderUnits.Count; i++)
+				//	//{
+				//	//	_renderUnits_All.Add(nextRenderUnits[i]);
+				//	//}
+
+
+				//	#region [미사용 코드]
+				//	////[v1.4.2] Depth를 할당하는 것은 옵션에 의해서만 동작하도록 만든다.
+				//	//if (depthAssignOption == DEPTH_ASSIGN.AssignDepth)
+				//	//{
+				//	//	//다시 Depth를 계산한다.
+
+				//	//	//curDepth = 0;//<0부터 시작 (Root가 0이므로) >> 버그 유발
+				//	//	curDepth = startDepth;//[v1.4.2] 2레벨 이상의 자식 메시 그룹에서의 Depth 미설정 버그
+
+				//	//	for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+				//	//	{
+				//	//		curRenderUnit = _renderUnits_All[iUnit];
+				//	//		curDepth = curRenderUnit.SetDepth(curDepth);
+
+				//	//		if (curRenderUnit._meshGroupTransform != null
+				//	//		&& curRenderUnit._meshGroupTransform._meshGroup != null)
+				//	//		{
+				//	//			//렌더 유닛이 자식 메시 그룹일 때
+				//	//			//> Root Transform의 Depth를 변경
+				//	//			apMeshGroup childMeshGroup = curRenderUnit._meshGroupTransform._meshGroup;
+				//	//			if (childMeshGroup._rootMeshGroupTransform != null)
+				//	//			{
+				//	//				childMeshGroup._rootMeshGroupTransform._depth = curDepth;
+				//	//				//Debug.LogWarning("자식 메시 그룹 [" + childMeshGroup._name + "]의 루트 MGTF의 Depth를 변경 : " + curDepth);
+				//	//			}
+				//	//		}
+
+				//	//		curDepth++;
+				//	//	}
+				//	//} 
+				//	#endregion
+				//}
+				#endregion
+
+				//삭제 v1.4.2 : 위에서 이미 처리했다.
 				//Depth를 다시 넣어주자
-				if (_rootRenderUnit != null)
+				//if (_rootRenderUnit != null)
+				//{
+				//	RefreshDepth(_rootRenderUnit, 0);
+				//}
+
+				//[v1.4.2] Depth를 할당하는 것은 옵션에 의해서만 동작하도록 만든다.
+				//위치도 변경
+
+				
+				if (depthAssignOption == DEPTH_ASSIGN.AssignDepth)
 				{
-					RefreshDepth(_rootRenderUnit, 0);
+					//Depth는 Root Mesh Group에서 일괄적으로 정렬 후 설정해야한다.
+					//Root Mesh Group 여부를 판별하여 다르게 고려한다.
+					apMeshGroup rootMeshGroup = FindRootMeshGroup();
+
+					if(_parentMeshGroup == null
+						|| rootMeshGroup == null
+						|| rootMeshGroup == this)
+					{
+						//이게 Root Mesh Group이라면, 여기서 직접 Depth를 할당한다.
+						//curDepth = 0;//<0부터 시작 (Root가 0이므로) >> 버그 유발
+						//curDepth = startDepth;//[v1.4.2] 2레벨 이상의 자식 메시 그룹에서의 Depth 미설정 버그
+						curDepth = 0;//다시 변경 v1.4.2 : 루트인 경우에 시작 Depth는 0이다.
+
+						for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+						{
+							curRenderUnit = _renderUnits_All[iUnit];
+							curDepth = curRenderUnit.SetDepth(curDepth);//TF에 Depth 할당
+
+							if (curRenderUnit._meshGroupTransform != null
+							&& curRenderUnit._meshGroupTransform._meshGroup != null)
+							{
+								//렌더 유닛이 자식 메시 그룹일 때
+								//> Root Transform의 Depth를 변경
+								apMeshGroup childMeshGroup = curRenderUnit._meshGroupTransform._meshGroup;
+								if (childMeshGroup._rootMeshGroupTransform != null)
+								{
+									childMeshGroup._rootMeshGroupTransform._depth = curDepth;
+									//Debug.LogWarning("자식 메시 그룹 [" + childMeshGroup._name + "]의 루트 MGTF의 Depth를 변경 : " + curDepth);
+								}
+							}
+
+							curDepth++;
+						}
+					}
+					else
+					{
+						//이게 Root Mesh Group이 아니라면.
+						//Root Mesh Group부터 일괄적으로 Depth를 할당하게 만들자
+
+						//링크는 필요 없이 빠른 Sort 후 할당 함수를 호출하자
+						rootMeshGroup.SortRenderUnitsAndAssignDepthInRootMeshGroup();
+					}
 				}
 			}
 
 
+			#region [미사용 코드] 불필요한 중복 할당
 			//_renderUnits_All 에 대해서 전체 Depth에 대해서 오름차순(-5, -4, -3, ...0, 1, 2, 3...)으로 정렬한다.
 			//Depth 값이 작을수록 뒤에 있기 때문에, 먼저 렌더링이 되어야 한다.
-			//_renderUnits_All.Sort(delegate (apRenderUnit a, apRenderUnit b)
-			//{
-			//	return a._depth - b._depth;
-			//});
 
-			sortedList.Clear();
+			//삭제 v1.4.2 : 위에서 이미 다 정렬했다.
+			//sortedList.Clear();
+			//if (_rootRenderUnit != null)
+			//{
+			//	SortRenderUnitByLevelAndDepth(_rootRenderUnit, sortedList);
+			//}
+
+
+			////정렬된 순서에 맞게 Render Unit 리스트를 다시 설정한다.
+			//_renderUnits_All.Clear();
+
+			//for (int i = 0; i < sortedList.Count; i++)
+			//{
+			//	curRenderUnit = sortedList[i];
+			//	//curRenderUnit.SetDepthForSort(curRenderUnit.GetDepth());//삭제 22.8.19
+
+			//	curRenderUnit.SetExtraDepthChangedEvent(OnRenderUnitExtraDepthChanged);//추가 : Extra 옵션에 의해서 Depth가 바뀌는 이벤트를 할당한다.
+			//	_renderUnits_All.Add(curRenderUnit);
+			//} 
+			#endregion
+
+
+			//추가 12.2 : Sorted Buffer에 집어넣자
+			_sortedRenderBuffer.SetSortedRenderUnits(_renderUnits_All);
+		}
+
+
+		/// <summary>
+		/// SortRenderUnits 함수 내에서 호출되는 함수.
+		/// 부모가 없는 루트 메시 그룹을 대상으로, 빠르게 렌더 유닛을 정렬하고, 모든 TF에 Depth를 할당한다.
+		/// SortRenderUnits 함수 외에는 호출하지 않도록 주의한다.
+		/// 정렬 방식 자체는 SortRenderUnits와 유사하다.
+		/// </summary>
+		private void SortRenderUnitsAndAssignDepthInRootMeshGroup()
+		{
+			List<apRenderUnit> sortedList = new List<apRenderUnit>();
+
+			// < Render Unit들을 정렬 >
+			//재귀적으로 같은 레벨의 RenderUnit들을 정렬하면서 SortedList에 넣는다.
+			//실질적인 정렬은 Root Render Unit을 기준으로 Child Render Unit 리스트를 정렬하는 것이다.
 			if (_rootRenderUnit != null)
 			{
 				SortRenderUnitByLevelAndDepth(_rootRenderUnit, sortedList);
 			}
 
+			apRenderUnit curRenderUnit = null;
+
+			// < 중요 > sortedList를 바탕으로 여기서 _renderUnits_All을 다시 설정한다.
+			//여기서 렌더 유닛의 정렬이 완료된다.
 			_renderUnits_All.Clear();
 			for (int i = 0; i < sortedList.Count; i++)
 			{
-				apRenderUnit renderUnit = sortedList[i];
-				renderUnit.SetDepthForSort(renderUnit.GetDepth());
-				renderUnit.SetExtraDepthChangedEvent(OnRenderUnitExtraDepthChanged);//추가 : Extra 옵션에 의해서 Depth가 바뀌는 이벤트를 할당한다.
-				_renderUnits_All.Add(renderUnit);
+				curRenderUnit = sortedList[i];
+				_renderUnits_All.Add(curRenderUnit);//순서대로 입력한다.
 			}
 
-			//추가 12.2 : Sorted Buffer에 집어넣자
-			_sortedRenderBuffer.SetSortedRenderUnits(_renderUnits_All);
+			//Root Mesh Group이므로 
+			int curDepth = 0;//<0부터 시작 (Root이므로 시작 Depth는 0이다)
+
+			for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+			{
+				curRenderUnit = _renderUnits_All[iUnit];
+				curDepth = curRenderUnit.SetDepth(curDepth);//TF에 Depth 할당
+
+				if (curRenderUnit._meshGroupTransform != null
+				&& curRenderUnit._meshGroupTransform._meshGroup != null)
+				{
+					//렌더 유닛이 자식 메시 그룹일 때
+					//> Root Transform의 Depth를 변경
+					apMeshGroup childMeshGroup = curRenderUnit._meshGroupTransform._meshGroup;
+					if (childMeshGroup._rootMeshGroupTransform != null)
+					{
+						childMeshGroup._rootMeshGroupTransform._depth = curDepth;
+						//Debug.LogWarning("자식 메시 그룹 [" + childMeshGroup._name + "]의 루트 MGTF의 Depth를 변경 : " + curDepth);
+					}
+				}
+
+				curDepth++;
+			}
 		}
+
+
+
 
 
 		private void RefreshRenderUnitLevel(apRenderUnit renderUnit, int curLevel)
@@ -878,14 +1085,17 @@ namespace AnyPortrait
 				_maxRenderUnitLevel = curLevel;
 			}
 			renderUnit._level = curLevel;
-			if (renderUnit._meshGroupTransform != null)
-			{
-				renderUnit._meshGroupTransform._level = curLevel;
-			}
-			else if (renderUnit._meshTransform != null)
-			{
-				renderUnit._meshTransform._level = curLevel;
-			}
+
+			//삭제 v1.4.2 : TF의 레벨은 사용되지 않는 값이다.
+			//if (renderUnit._meshGroupTransform != null)
+			//{
+			//	renderUnit._meshGroupTransform._level = curLevel;
+			//}
+			//else if (renderUnit._meshTransform != null)
+			//{
+			//	renderUnit._meshTransform._level = curLevel;
+			//}
+
 			if (renderUnit._childRenderUnits.Count > 0)
 			{
 				for (int i = 0; i < renderUnit._childRenderUnits.Count; i++)
@@ -897,6 +1107,7 @@ namespace AnyPortrait
 
 		private void SortRenderUnitByLevelAndDepth(apRenderUnit nextRenderUnit, List<apRenderUnit> resultList)
 		{
+			
 			resultList.Add(nextRenderUnit);
 
 			if (nextRenderUnit._childRenderUnits.Count > 0)
@@ -904,7 +1115,8 @@ namespace AnyPortrait
 				//1. 먼저 Sort를 한다.
 				nextRenderUnit._childRenderUnits.Sort(delegate (apRenderUnit a, apRenderUnit b)
 				{
-					return a.DepthForOnlySort - b.DepthForOnlySort;
+					//return a.DepthForOnlySort - b.DepthForOnlySort;//이전
+					return a.GetDepth() - b.GetDepth();//변경 22.8.19
 				});
 
 				//2. 앞에서부터 리스트에 넣는데, 이걸 재귀적으로 넣는다. (Child가 Parent에 자연스럽게 묶이게 된다.)
@@ -919,7 +1131,7 @@ namespace AnyPortrait
 		private int RefreshDepth(apRenderUnit renderUnit, int curGUIIndex)
 		{
 
-			renderUnit.RefreshDepth();
+			//renderUnit.RefreshDepthForSort();//삭제 22.8.19
 			renderUnit._guiIndex = curGUIIndex;
 
 			if (renderUnit._childRenderUnits.Count == 0)
@@ -946,9 +1158,10 @@ namespace AnyPortrait
 		/// <summary>
 		/// Clipping은 Refresh에서 Depth Sort 다음에 자동으로 다시 세팅되어야 한다.
 		/// </summary>
-		public bool RefreshAutoClipping()
+		//public bool RefreshAutoClipping()
+		public void RefreshAutoClipping()//변경 v1.4.2 : 리턴이 필요없어졌다.
 		{
-			bool isAnyClipping = false;
+			//bool isAnyClipping = false;
 
 			//클리핑을 RenderUnit 기준으로 다시 돌리자
 			//RenderUnit의 Level은 정리된 상태여야 한다.
@@ -965,20 +1178,21 @@ namespace AnyPortrait
 				}
 
 
-				//1. 일단 Parent는 다시 초기화 한다.
+				//1. 일단 Parent는 다시 초기화 한다. (여기서 클리핑 정보인 ClipMeshSet이 모두 초기화된다.)
 				for (int i = 0; i < subLevelRenderUnits.Count; i++)
 				{
 					apTransform_Mesh meshTransform = subLevelRenderUnits[i]._meshTransform;
 					meshTransform.InitClipMeshAsParent();
 				}
 
+				
 				//2. Clip-Child를 기준으로 다시 연결을 해주자
 				for (int i = 0; i < subLevelRenderUnits.Count; i++)
 				{
 					apTransform_Mesh meshTransform = subLevelRenderUnits[i]._meshTransform;
 					if (meshTransform._isClipping_Child)
 					{
-						isAnyClipping = true;
+						//isAnyClipping = true;
 
 						//자신보다 Depth가 낮은 MeshTransform 중에서 "최대값"을 가진 MeshTransform을 찾는다.
 						apTransform_Mesh maskMesh = null;
@@ -1005,39 +1219,17 @@ namespace AnyPortrait
 							}
 						}
 
-						bool isClipAddable = false;
 						if (maskMesh != null)
 						{
-							if (maskMesh._isClipping_Parent)
-							{
-								//이전 코드 : Child Clip은 최대 3
-								////이미 Parent이면 -> 추가된 Child가 3 미만이어야 한다.
-								//int nChildMeshes = maskMesh.GetChildClippedMeshes();
-								//if (nChildMeshes < 3)
-								//{
-								//	isClipAddable = true;
-								//}
-
-								//변경 : 개수 제한은 없다. (성능이 딸릴뿐)
-								isClipAddable = true;
-							}
-							else
-							{
-								isClipAddable = true;
-							}
-						}
-
-						if (isClipAddable)
-						{
+							//Clipping Parent 메시 TF를 찾았다.
 							maskMesh.AddClippedChildMesh(meshTransform, GetRenderUnit(meshTransform));
 						}
 						else
 						{
-							//마땅한 Mask Mesh를 찾지 못했다.
+							//마땅한 Mask Mesh를 찾지 못했다면 Clipped를 해제한다.
 							meshTransform._isClipping_Child = false;
 							meshTransform._clipParentMeshTransform = null;
 							meshTransform._clipIndexFromParent = -1;
-
 						}
 					}
 				}
@@ -1120,12 +1312,64 @@ namespace AnyPortrait
 			#endregion
 
 
-			return isAnyClipping;
+			//return isAnyClipping;//더이상 리턴하지 않는다.
+		}
+
+
+		/// <summary>
+		/// 현재 메시 그룹을 포함하여 자식 > 부모 (루트)까지 필요한만큼 렌더 유닛을 생성한다.
+		/// 방향은 자식부터 부모이다.
+		/// 특히, 렌더 유닛 순서로부터 TF의 Depth를 다시 설정하려는 경우 이 함수가 요긴한다.
+		/// </summary>
+		public void ResetRenderUnitsChildAndRoot()
+		{
+			//1. 자식 > 부모 메시 그룹 리스트를 만들자
+			//루트를 찾아서
+			apMeshGroup rootMeshGroup = FindRootMeshGroup();
+
+			List<apMeshGroup> revMeshGroups = new List<apMeshGroup>();
+			FindReverseMeshGroupListRecursive(rootMeshGroup, revMeshGroups);
+
+			int nRevMeshGroups = revMeshGroups.Count;
+			if(nRevMeshGroups == 0)
+			{
+				return;
+			}
+
+			//자식부터 역순으로 RenderUnit Refresh를 수행한다.
+			for (int i = 0; i < nRevMeshGroups; i++)
+			{
+				revMeshGroups[i].ResetRenderUnitsWithoutRefreshEditor();
+			}
+		}
+
+
+
+		private void FindReverseMeshGroupListRecursive(apMeshGroup curMeshGroup, List<apMeshGroup> resultList)
+		{
+			//자식부터 리스트에 넣는다. (거꾸로)
+			int nChildTFs = curMeshGroup._childMeshGroupTransforms != null ? curMeshGroup._childMeshGroupTransforms.Count : 0;
+			if(nChildTFs > 0)
+			{
+				for (int i = 0; i < nChildTFs; i++)
+				{
+					apTransform_MeshGroup childMeshGroupTF = curMeshGroup._childMeshGroupTransforms[i];
+					apMeshGroup childMeshGroup = childMeshGroupTF._meshGroup;
+					if(childMeshGroup != null && childMeshGroup != curMeshGroup)
+					{
+						FindReverseMeshGroupListRecursive(childMeshGroup, resultList);
+					}
+				}
+			}
+
+			if (!resultList.Contains(curMeshGroup))
+			{
+				resultList.Add(curMeshGroup);
+			}
 		}
 
 
 		//추가 20.4.3 : selectedAnimClipToLink를 추가했다.
-		//
 		public void ResetRenderUnits(apUtil.LinkRefreshRequest linkRefreshRequest)
 		{
 			//Debug.Log("[" + _name + "] ResetRenderUnits (Request : " + (linkRefreshRequest != null ? linkRefreshRequest.ToString() : "Null") + ")");
@@ -1232,12 +1476,14 @@ namespace AnyPortrait
 			//_modifierStack.LinkModifierStackToRenderUnitCalculateStack();
 		}
 
+
+
 		/// <summary>
 		/// ResetRenderUnits() 함수의 변형. Portrait.LinkAndRefreshInEditor() 함수를 호출하지는 않는다.
 		/// </summary>
 		public void ResetRenderUnitsWithoutRefreshEditor()
 		{
-			_isNeedRenderUnitReset = false;
+			_isNeedRenderUnitReset = false;//여기서 RenderUnit Reset을 이미 했기 때문에 플래그는 내린다.
 
 			//이것도 문제..
 
@@ -1423,31 +1669,6 @@ namespace AnyPortrait
 
 			apRenderUnit curRenderUnit_Group = null;
 
-			//Debug.LogWarning("< AddRenderUnitPerMeshGroup : MeshGroup : " + targetMeshGroup._name + " >");
-
-			#region [미사용 코드] 대신 prevSubObj2RenderUnits를 이용하자
-			//생성하기 전에
-			//동일한 targetMeshGroup을 가진 다른 RenderUnit이 있는지 검색하자
-			//if(_parentPortrait != null)
-			//{
-			//	for (int i = 0; i < _parentPortrait._meshGroups.Count; i++)
-			//	{
-			//		apMeshGroup curMG = _parentPortrait._meshGroups[i];
-			//		if(curMG == this)
-			//		{
-			//			continue;
-			//		}
-			//		apRenderUnit findRenderUnit = curMG.GetRenderUnit(targetMeshGroupTransform);
-			//		if(findRenderUnit != null)
-			//		{
-			//			curRenderUnit_Group = findRenderUnit;
-			//			Debug.LogWarning("Re-Link Render Unit : " + curRenderUnit_Group.Name);
-			//			break;
-			//		}
-			//	}
-			//} 
-			#endregion
-
 			if (prevSubObj2RenderUnits != null)			
 			{
 				//재활용이 가능한 경우
@@ -1482,29 +1703,6 @@ namespace AnyPortrait
 				}
 
 				apRenderUnit renderUnit = null;
-
-				#region [미사용 코드] 대신 prevSubObj2RenderUnits를 이용하자
-				//생성하기 전에
-				//동일한 targetMeshGroup을 가진 다른 RenderUnit이 있는지 검색하자
-				//if (_parentPortrait != null)
-				//{
-				//	for (int iMG = 0; iMG < _parentPortrait._meshGroups.Count; iMG++)
-				//	{
-				//		apMeshGroup curMG = _parentPortrait._meshGroups[iMG];
-				//		if (curMG == this)
-				//		{
-				//			continue;
-				//		}
-				//		apRenderUnit findRenderUnit = curMG.GetRenderUnit(meshTransform);
-				//		if (findRenderUnit != null)
-				//		{
-				//			renderUnit = findRenderUnit;
-				//			Debug.LogWarning("Re-Link Render Unit : " + renderUnit.Name);
-				//			break;
-				//		}
-				//	}
-				//} 
-				#endregion
 
 				if (prevSubObj2RenderUnits != null)				
 				{
@@ -1628,6 +1826,34 @@ namespace AnyPortrait
 			return null;
 		}
 
+		/// <summary>
+		/// 루트 메시 그룹을 리턴한다.
+		/// </summary>
+		/// <returns></returns>
+		public apMeshGroup FindRootMeshGroup()
+		{
+			if(_parentMeshGroup == null)
+			{
+				return this;
+			}
+			apMeshGroup curMeshGroup = this;
+
+			while(true)
+			{
+				if(curMeshGroup._parentMeshGroup == null 
+					|| curMeshGroup._parentMeshGroup == this)
+				{
+					//부모가 없는 루트 메시 그룹을 찾았다면 리턴
+					return curMeshGroup;
+				}
+
+				//한레벨 위로 올라간다.
+				curMeshGroup = curMeshGroup._parentMeshGroup;
+
+			}
+		}
+
+
 		// Dpeth / Layer 관련 처리
 		//-----------------------------------------------------------------------
 		public void ChangeRenderUnitDepth(apRenderUnit renderUnit, int nextDepth)
@@ -1636,7 +1862,8 @@ namespace AnyPortrait
 			{
 				return;
 			}
-			//Debug.Log("[" + renderUnit.Name + "] Depth Change : " + renderUnit.GetDepth() + " >> " + nextDepth);
+			
+			//Debug.Log("[" + renderUnit.Name + "] Depth 변경 : " + renderUnit.GetDepth() + " >> " + nextDepth);
 
 			//추가
 			//변경된 NextDepth에 대해서
@@ -1651,6 +1878,8 @@ namespace AnyPortrait
 				return (a != renderUnit) && (a._parentRenderUnit == renderUnit._parentRenderUnit);
 			});
 
+
+			//Debug.Log("같은 레벨의 렌더 유닛들 : " + sameLevelRenderUnits.Count);
 			
 
 			bool isIncrease = false;
@@ -1661,7 +1890,7 @@ namespace AnyPortrait
 				//이동 불가
 				//Debug.LogError("이동 불가");
 				SetDirtyToSort();
-				SortRenderUnits(true);
+				SortRenderUnits(true, DEPTH_ASSIGN.AssignDepth);//이동한 건 없지만 값 할당도 일단 하자.
 				return;
 			}
 
@@ -1679,13 +1908,13 @@ namespace AnyPortrait
 			});
 
 			//디버그
+
 			//Debug.Log("-----------------------------------");
 			//for (int i = 0; i < sameLevelRenderUnits.Count; i++)
 			//{
 			//	Debug.Log("[" + i + "] " + sameLevelRenderUnits[i].Name + " (Depth : " + sameLevelRenderUnits[i].GetDepth() + ")");
 			//}
 			//Debug.Log("-----------------------------------");
-			
 
 			//시작지점을 찾는다.
 			//증가시 : CurDepth보다 큰 최소값 Cur - Start ->>>
@@ -1912,7 +2141,7 @@ namespace AnyPortrait
 						//변경
 						int changedDepth = unit.GetDepth() - movedDepthOffset;//100대신 더 여유있는 movedDepthOffset를 이용하자
 						unit.SetDepth(changedDepth);
-						unit.SetDepthForSort(changedDepth);
+						//unit.SetDepthForSort(changedDepth);//삭제 22.8.19
 					}
 				}
 			}
@@ -1943,48 +2172,273 @@ namespace AnyPortrait
 						//변경
 						int changedDepth = unit.GetDepth() + movedDepthOffset;//100대신 더 여유있는 movedDepthOffset를 이용하자
 						unit.SetDepth(changedDepth);
-						unit.SetDepthForSort(changedDepth);
+						//unit.SetDepthForSort(changedDepth);//삭제 22.8.19
 					}
 				}
 			}
-			//renderUnit._depth = nextDepth;
 			
 			renderUnit.SetDepth(nextDepth);
-			renderUnit.SetDepthForSort(nextDepth);//<<추가
+			
+			
 			//나머지는 Sort가 알아서 할 것이다.
-
-
 			SetDirtyToSort();
-			SortRenderUnits(true);
+			SortRenderUnits(true, DEPTH_ASSIGN.AssignDepth);//Render Unit 정렬후 Depth도 수정하자
+
+			
+			//Debug.LogWarning("이동 결과 : -----------------------------------");
+			//for (int iUnit = 0; iUnit < _renderUnits_All.Count; iUnit++)
+			//{
+			//	//Debug.Log("Depth [" + curDepth + "]");
+			//	apRenderUnit unit = _renderUnits_All[iUnit];
+			//	if(unit == renderUnit)
+			//	{
+			//		//Debug.LogError(unit.Name + " : " + unit.GetDepth() + " (" + unit.DepthForOnlySort + ")");
+			//		Debug.LogError(unit.Name + " : " + unit.GetDepth());
+			//	}
+			//	else
+			//	{
+			//		//Debug.Log(unit.Name + " : " + unit.GetDepth() + " (" + unit.DepthForOnlySort + ")");
+			//		Debug.Log(unit.Name + " : " + unit.GetDepth());
+			//	}
+				
+			//}
+			//Debug.LogWarning("-------------------------------------------");
 		}
+
+
+
+
+
+
+
+		/// <summary>
+		/// v1.4.2 : 여러개의 렌더 유닛들의 Depth를 일괄적으로 변경한다.
+		/// ChangeRenderUnitDepth 함수와 비슷해보이지만, Depth값이 절대값이 아닌 변화값이므로 주의하자
+		/// </summary>
+		/// <param name="renderUnit"></param>
+		/// <param name="deltaDepth"></param>
+		public void ChangeMultipleRenderUnitsDepth(List<apRenderUnit> renderUnits, int deltaDepth)
+		{
+			int nRenderUnits = renderUnits != null ? renderUnits.Count : 0;
+			if(deltaDepth == 0 || nRenderUnits == 0)
+			{
+				return;
+			}
+
+
+			//일괄 변경 방법
+			//- 1. Render Unit을 Depth에 맞게 정렬한다. (Depth의 오름차순)
+			//- 2. Depth 감소시 앞에서부터, Depth 증가시 뒤에서부터 하나씩 Depth를 변경한다.
+
+			//이동이 불가능한 경우
+			//한번이라도 이동이 실패한다면 > 해당 RenderUnit과 같은 Parent를 공유하고 있는 다른 RenderUnit들은 이동을 중단한다. (Depth 한계점에 도달했기 때문)
+			List<apRenderUnit> sortedRenderUnits = new List<apRenderUnit>();
+			
+			apRenderUnit curRenderUnit = null;
+			for (int i = 0; i < nRenderUnits; i++)
+			{
+				curRenderUnit = renderUnits[i];
+
+				if(sortedRenderUnits.Contains(curRenderUnit))
+				{
+					continue;
+				}
+
+				//만약 부모가 선택되어서 같이 이동하고자 한다면 이동을 막자
+				if(curRenderUnit._parentRenderUnit != null)
+				{
+					//Parent 중에서 하나라도 포함되어 있다면 이건 이동하지 않는다.
+					bool isParentSelected = false;
+					apRenderUnit curParentRenderUnit = curRenderUnit._parentRenderUnit;
+					while(true)
+					{
+						if(curParentRenderUnit == null || curParentRenderUnit == curRenderUnit)
+						{
+							break;
+						}
+
+						if(renderUnits.Contains(curParentRenderUnit))
+						{
+							//부모가 선택되어 있다면 자식 MeshGroupTF는 움직이지 않는다.
+							isParentSelected = true;
+							break;
+						}
+
+						//다른 부모를 찾자
+						curParentRenderUnit = curParentRenderUnit._parentRenderUnit;
+					}
+
+					if(isParentSelected)
+					{
+						//부모가 선택되어 있다면 이건 움직이지 않는다.
+						continue;
+					}
+				}
+
+
+
+				sortedRenderUnits.Add(curRenderUnit);
+			}
+			nRenderUnits = sortedRenderUnits.Count;
+
+			if(nRenderUnits == 0)
+			{
+				return;
+			}
+
+			sortedRenderUnits.Sort(delegate(apRenderUnit a, apRenderUnit b)
+			{
+				return a.GetDepth() - b.GetDepth();//오름차순
+			});
+
+
+			//이동이 불가능해진 Parent RenderUnit들을 리스트로 모으자
+			List<apRenderUnit> moveCompletedParentRenderUnits = new List<apRenderUnit>();
+			bool isMoveCompletedOnRootParentRenderUnit = false;//만약 Parent가 null인 Render Unit의 이동이 완료되었다면 이게 true
+
+			//이제 하나씩 옮기자
+			//매번 Sort를 하므로 성능은 떨어지겠지만 정확히 하려면 이게 맞긴 할거다.
+			int iLoopStart = -1;
+			int loopDelta = 0;
+
+			if(deltaDepth < 0)
+			{
+				//Depth를 줄이는 경우 : 아래로 이동하므로 아래(리스트 앞쪽)부터 옮긴다.
+				iLoopStart = 0;
+				loopDelta = +1;
+			}
+			else
+			{
+				//Depth를 증가시키는 경우 : 위로 이동하므로 위(리스트 뒤쪽)부터 옮긴다.
+				iLoopStart = nRenderUnits - 1;
+				loopDelta = -1;
+			}
+
+			int iCur = iLoopStart;
+			while(true)
+			{
+				if(iCur < 0 || iCur >= nRenderUnits)
+				{
+					//완료가 되었다.
+					break;
+				}
+
+				curRenderUnit = sortedRenderUnits[iCur];
+
+				bool isMovable = true;
+
+				//이동이 완료된 Parent를 공유한다면 이동 불가
+				if(curRenderUnit._parentRenderUnit != null)
+				{
+					if(moveCompletedParentRenderUnits.Contains(curRenderUnit._parentRenderUnit))
+					{
+						//이 부모 렌더 유닛의 자식 렌더 유닛들은 더이상 이동하지 못한다.
+						isMovable = false;
+					}
+				}
+				else
+				{
+					if(isMoveCompletedOnRootParentRenderUnit)
+					{
+						//Parent가 null인 렌더 유닛들은 더이상 이동하지 못한다.
+						isMovable = false;
+					}
+				}
+
+
+				if (isMovable)
+				{
+					//하나씩 이동
+					int prevDepth = curRenderUnit.GetDepth();
+
+					ChangeRenderUnitDepth(curRenderUnit, curRenderUnit.GetDepth() + deltaDepth);
+
+					int changedDepth = curRenderUnit.GetDepth();
+
+					if (prevDepth == changedDepth)
+					{
+						//이동하지 못했다. = 이동 범위 끝에 도달했다. (맨 위 또는 맨 아래)
+						//이 Render Unit과 동일한 부모를 공유하는 다른 자식들은 더이상 이동할 수 없다.
+						if (curRenderUnit._parentRenderUnit != null)
+						{
+							moveCompletedParentRenderUnits.Add(curRenderUnit._parentRenderUnit);
+						}
+						else
+						{
+							//Parent가 없다면
+							isMoveCompletedOnRootParentRenderUnit = true;
+						}
+					}
+				}				
+
+				//다음 렌더 유닛을 찾자
+				iCur += loopDelta;
+			}
+
+			//마지막으로 다시 정렬
+			SetDirtyToSort();
+			SortRenderUnits(true, DEPTH_ASSIGN.AssignDepth);//Render Unit 정렬후 Depth도 수정하자
+			RefreshForce();
+		}
+
+
+
 
 		public int GetLastDepth()
 		{
 			int maxDepth = 0;
-			for (int i = 0; i < _renderUnits_All.Count; i++)
+			int nRenderUnits = _renderUnits_All != null ? _renderUnits_All.Count : 0;
+			if (nRenderUnits > 0)
 			{
-				apRenderUnit unit = _renderUnits_All[i];
-				int curLastDepth = unit.GetLastDepth();
-				if (maxDepth < curLastDepth)
+				apRenderUnit unit = null;
+				for (int i = 0; i < nRenderUnits; i++)
 				{
-					maxDepth = curLastDepth;
+					unit = _renderUnits_All[i];
+
+					int curLastDepth = unit.GetLastDepth();//자식을 가진 RenderUnit일 수 있으므로, 재귀적으로 계산되는 함수를 이용해서 Depth를 구해야한다.
+
+					if (maxDepth < curLastDepth)
+					{
+						maxDepth = curLastDepth;
+					}
 				}
 			}
 			return maxDepth;
 		}
 
+		
+		public int GetFirstDepth()
+		{
+			bool isFindMinDepth = false;
+			int minDepth = 0;
+
+			int nRenderUnits = _renderUnits_All != null ? _renderUnits_All.Count : 0;
+			if (nRenderUnits > 0)
+			{
+				apRenderUnit unit = null;
+				for (int i = 0; i < nRenderUnits; i++)
+				{
+					unit = _renderUnits_All[i];
+					
+					int curDepth = unit.GetDepth();//First 방향은 자식 RenderUnit을 고려하지 않는다.
+
+					if(!isFindMinDepth || curDepth < minDepth)
+					{
+						minDepth = curDepth;
+						isFindMinDepth = true;
+					}
+				}
+			}
+			return minDepth;
+		}
 
 
 		// 추가 11.30 : Extra Option 관련 처리
 		//------------------------------------------------------------------------------------
 		private void OnRenderUnitExtraDepthChanged(apRenderUnit renderUnit, int deltaDepth)
 		{
-			if(deltaDepth == 0)
-			{
-				return;
-			}
+			if(deltaDepth == 0) { return; }
 
-			//Debug.Log("OnRenderUnitExtraDepthChanged : " + renderUnit.Name + " / " + deltaDepth);
 			_sortedRenderBuffer.OnExtraDepthChanged(renderUnit, deltaDepth);
 		}
 
@@ -2142,6 +2596,14 @@ namespace AnyPortrait
 			return _childMeshGroupTransforms.Find(delegate (apTransform_MeshGroup a)
 			{
 				return a._transformUniqueID == uniqueID;
+			});
+		}
+
+		public apTransform_MeshGroup GetMeshGroupTransformByMeshGroupID(int meshGroupID)
+		{
+			return _childMeshGroupTransforms.Find(delegate (apTransform_MeshGroup a)
+			{
+				return a._meshGroupUniqueID == meshGroupID;
 			});
 		}
 
@@ -2575,6 +3037,175 @@ namespace AnyPortrait
 			SortBoneListByLevelAndDepth();
 
 		}
+
+
+
+		/// <summary>
+		/// v1.4.2 : 여러개의 본들의 Depth를 일괄적으로 변경한다.
+		/// ChangeBoneDepth 함수와 비슷해보이지만, 절대값이 아닌 변화값이다.
+		/// </summary>
+		public void ChangeMultipleBonesDepth(List<apBone> bones, int deltaDepth)
+		{
+			int nBones = bones != null ? bones.Count : 0;
+			if(deltaDepth == 0 || nBones == 0)
+			{
+				return;
+			}
+
+			//일괄 변경 방법
+			//- 1. 입력된 본을 Depth에 맞게 정렬한다. (Depth의 오름차순)
+			//- 2. Depth 감소시 앞에서부터, Depth 증가시 뒤에서부터 하나씩 Depth를 변경한다.
+
+			//이동 대상이 아닌 경우
+			//- 부모중에 하나라도 이동 대상이라면, 해당 본은 이동되지 않는다.
+
+			//처리 중에 이동이 안되는 경우
+			//- 한번이라도 Depth 변화가 없을때 (이동처리 결과가 변함이 없을 때), 그 본의 부모를 공유하는 모든 본들은 더이상 이동하지 않는다.
+
+			//처리 전에 Depth 계산을 한번 하자
+			SortBoneListByLevelAndDepth();
+
+
+			//유효한 본만 이동 대상으로 넣자
+			List<apBone> sortedBones = new List<apBone>();
+
+			apBone curBone = null;
+			for (int i = 0; i < nBones; i++)
+			{
+				curBone = bones[i];
+
+				if(sortedBones.Contains(curBone))
+				{
+					//이미 이동 대상이된 본이다.
+					continue;
+				}
+
+				//이 본의 부모가 이동 대상이라면 이동되어선 안된다.
+				if(curBone._parentBone != null)
+				{
+					bool isParentSelected = false;
+					apBone curParentBone = curBone._parentBone;
+					while(true)
+					{
+						if(curParentBone == null || curParentBone == curBone)
+						{
+							break;
+						}
+
+						if(bones.Contains(curParentBone))
+						{
+							//이 부모 본이 이동 대상이라면 자식들은 움직이지 않는다.
+							isParentSelected = true;
+							break;
+						}
+
+						//더 위로 올라간다.
+						curParentBone = curParentBone._parentBone;
+					}
+
+					if(isParentSelected)
+					{
+						//부모가 선택되어있다면 이건 움직이지 않는다.
+						continue;
+					}
+				}
+
+				sortedBones.Add(curBone);
+			}
+
+			nBones = sortedBones.Count;
+
+			if (nBones == 0)
+			{
+				return;
+			}
+
+			//오름차순으로 정렬하자
+			sortedBones.Sort(delegate(apBone a, apBone b)
+			{
+				if(a._depth == b._depth)
+				{
+					return string.Compare(a._name, b._name);
+				}
+				return a._depth - b._depth;
+			});
+
+			//이동이 중간에 멈추는 것을 감지할 리스트 (부모 기준)
+			List<apBone> completedParentBones = new List<apBone>();
+			bool isRootBoneMoveCompleted = false;
+
+			//하나씩 옮기자.
+			int iLoopStart = deltaDepth < 0 ? 0 : nBones - 1;//아래로 움직이는 경우 아래(0) 본부터 이동, 또는 그 반대
+			int loopDelta = deltaDepth < 0 ? 1 : -1;
+
+			int iCur = iLoopStart;
+
+			while(true)
+			{
+				if(iCur < 0 || iCur >= nBones)
+				{
+					//완료가 되었다.
+					break;
+				}
+
+				curBone = sortedBones[iCur];
+
+				bool isMovable = true;
+
+				//이동이 완료된 동일한 Parent를 가진 본이 있다면 이동할 수 없다.
+				if(curBone._parentBone != null)
+				{
+					//부모 본이 있는 경우
+					if(completedParentBones.Contains(curBone._parentBone))
+					{
+						//이 부모 본의 자식들은 더이상 이동할 수 없다.
+						isMovable = false;
+					}
+				}
+				else
+				{
+					//루트 본인 경우
+					if(isRootBoneMoveCompleted)
+					{
+						//루트 본을 더이상 움직일 수 없다.
+						isMovable = false;
+					}
+				}
+
+				if(isMovable)
+				{
+					//이동을 시켜보자
+					int prevDepth = curBone._depth;
+
+					ChangeBoneDepth(curBone, curBone._depth + deltaDepth);
+
+					int changedDepth = curBone._depth;
+
+					//변화가 없었다면
+					if(prevDepth == changedDepth)
+					{
+						//이 본의 부모 본을 공유하는 다른 본들은 더이상 이동하지 않는다.
+						if(curBone._parentBone != null)
+						{
+							completedParentBones.Add(curBone._parentBone);
+						}
+						else
+						{
+							isRootBoneMoveCompleted = true;
+						}
+					}
+				}
+
+				//커서를 이동시키자
+				iCur += loopDelta;
+			}
+
+			//전체 Sort를 다시 한다.
+			SortBoneListByLevelAndDepth();
+		}
+
+
+
 
 
 
@@ -3135,6 +3766,32 @@ namespace AnyPortrait
 
 		// GUI
 		//------------------------------------
+
+
+
+
+		// 디버그
+		//------------------------------------
+		// 테스트할 때 열어서 사용하자
+		//public void PrintAllTransformsDepth()
+		//{
+		//	string strDebug = "";
+		//	Debug.Log("------------- 전체 Depth 조회 (" + _name + ") -------------");
+		//	int nRenderUnits = _renderUnits_All != null ? _renderUnits_All.Count : 0;
+		//	if(nRenderUnits == 0)
+		//	{
+		//		Debug.LogError("렌더 유닛이 없다");
+		//		return;
+		//	}
+
+		//	apRenderUnit curRenderUnit = null;
+		//	for (int i = 0; i < nRenderUnits; i++)
+		//	{
+		//		curRenderUnit = _renderUnits_All[i];
+		//		strDebug += "[" + curRenderUnit.GetDepth() + "] " + curRenderUnit.Name + "\n";
+		//	}
+		//	Debug.Log(strDebug);
+		//}
 		
 
 	}

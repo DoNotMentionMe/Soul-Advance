@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -118,7 +118,23 @@ namespace AnyPortrait
 			}
 
 			width -= 10;
-			//Bake 설정
+
+			bool isPressedEnter = false;
+			if(Event.current != null && _isInitFocused)
+			{
+				if(Event.current.type == EventType.KeyUp)
+				{
+					if(Event.current.keyCode == KeyCode.Return)
+					{
+						isPressedEnter = true;
+						Event.current.Use();
+						apEditorUtil.ReleaseGUIFocus();
+					}
+				}
+			}
+
+
+			//이름
 			EditorGUILayout.LabelField(_editor.GetText(TEXT.DLG_NewPortraitName), GUILayout.Width(width));//"New Portrait Name"
 			//X, Y 개수를 표시
 
@@ -148,6 +164,13 @@ namespace AnyPortrait
 			{
 				_isInitFocused = true;
 				apEditorUtil.SetGUIFocus_TextField(apStringFactory.I.GUI_ID__NewPortraitName);
+			}
+
+			//v1.4.2 : 엔터키를 누르면 바로 생성
+			if(isPressedEnter)
+			{
+				_funcResult(true, _loadKey, _newPortraitName);
+				CloseDialog();
 			}
 		}
 	}

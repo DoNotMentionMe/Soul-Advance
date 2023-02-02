@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -308,6 +308,18 @@ namespace AnyPortrait
 			{
 				Editor.Select.SelectBone(resultBone, multiSelect);
 				isAnyClick = true;
+
+
+				//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+				if(Editor._option_AutoScrollWhenObjectSelected)
+				{
+					//스크롤 가능한 상황인지 체크하고
+					if(Editor.IsAutoScrollableWhenClickObject_MeshGroup(resultBone, true))
+					{
+						//자동 스크롤을 요청한다.
+						Editor.AutoScroll_HierarchyMeshGroup(resultBone);
+					}
+				}
 			}
 
 			if (!isAnyClick)
@@ -612,50 +624,30 @@ namespace AnyPortrait
 							return false;
 						}
 
+						//본 외곽선을 클릭했는지 체크하자
 
-						//Vector2 posGL_Org = Vector2.zero;
-						//Vector2 posGL_Mid1 = Vector2.zero;
-						//Vector2 posGL_Mid2 = Vector2.zero;
-						//Vector2 posGL_End1 = Vector2.zero;
-						//Vector2 posGL_End2 = Vector2.zero;
+						//v1.4.2 : 클릭 인식 범위가 기존 4 (고정값)에서 옵션에 의한 가변값으로 바뀐다. (최소 4 이상)
+						float boneOutlineClickRange = Editor.GUIRenderSettings.BoneV1OutlineSelectBaseRange;
 
-						//if (!isBoneIKRenderable)
-						//{
-						//	posGL_Org = apGL.World2GL(bone._worldMatrix._pos);
-						//	posGL_Mid1 = apGL.World2GL(bone._shapePoints_V1_Normal.Mid1);
-						//	posGL_Mid2 = apGL.World2GL(bone._shapePoints_V1_Normal.Mid2);
-						//	posGL_End1 = apGL.World2GL(bone._shapePoints_V1_Normal.End1);
-						//	posGL_End2 = apGL.World2GL(bone._shapePoints_V1_Normal.End2);
-						//}
-						//else
-						//{
-						//	//추가 : IK 렌더링 상태인 경우
-						//	posGL_Org = apGL.World2GL(bone._worldMatrix_IK._pos);
-						//	posGL_Mid1 = apGL.World2GL(bone._shapePoints_V1_IK.Mid1);
-						//	posGL_Mid2 = apGL.World2GL(bone._shapePoints_V1_IK.Mid2);
-						//	posGL_End1 = apGL.World2GL(bone._shapePoints_V1_IK.End1);
-						//	posGL_End2 = apGL.World2GL(bone._shapePoints_V1_IK.End2);
-						//}
-
-						if (IsPointInEdge(posGL_Start, posGL_Mid1, mousePosGL, 4.0f))
+						if (IsPointInEdge(posGL_Start, posGL_Mid1, mousePosGL, boneOutlineClickRange))
 						{
 							return true;
 						}
-						if (IsPointInEdge(posGL_Start, posGL_Mid2, mousePosGL, 4.0f))
+						if (IsPointInEdge(posGL_Start, posGL_Mid2, mousePosGL, boneOutlineClickRange))
 						{
 							return true;
 						}
-						if (IsPointInEdge(posGL_Mid1, posGL_End1, mousePosGL, 4.0f))
+						if (IsPointInEdge(posGL_Mid1, posGL_End1, mousePosGL, boneOutlineClickRange))
 						{
 							return true;
 						}
-						if (IsPointInEdge(posGL_Mid2, posGL_End2, mousePosGL, 4.0f))
+						if (IsPointInEdge(posGL_Mid2, posGL_End2, mousePosGL, boneOutlineClickRange))
 						{
 							return true;
 						}
 						if (bone._shapeTaper < 100)
 						{
-							if (IsPointInEdge(posGL_End1, posGL_End2, mousePosGL, 4.0f))
+							if (IsPointInEdge(posGL_End1, posGL_End2, mousePosGL, boneOutlineClickRange))
 							{
 								return true;
 							}
@@ -667,21 +659,11 @@ namespace AnyPortrait
 						//가운데 원점 체크
 						//여기서는 적당히 체크하자
 						//Size는 10
-						//Vector2 orgPos = Vector2.zero;
-						//if (!isBoneIKRenderable)
-						//{
-						//	orgPos = apGL.World2GL(bone._worldMatrix._pos);
-						//}
-						//else
-						//{
-						//	//추가 : IK 렌더링을 하는 경우
-						//	orgPos = apGL.World2GL(bone._worldMatrix_IK._pos);
-						//}
-						//float orgSize = apGL.Zoom * 10.0f;
-
+						
 						float orgSize = apGL.Zoom * apBone.RenderSetting_V1_Radius_Org;//<<개선된 버전 20.3.23
 						float minDist = orgSize * 0.5f;
 						float maxDist = orgSize * 1.1f;
+						
 						float dist = (posGL_Start - mousePosGL).sqrMagnitude;
 						if (dist < maxDist * maxDist && dist > minDist * minDist)
 						{
@@ -797,13 +779,15 @@ namespace AnyPortrait
 							return false;
 						}
 
+						//v1.4.2 : 클릭 범위는 [선분의 렌더링 굵기] x [해상도에 따른 클릭 범위 보정]이다.
+						float outlineClickRange = bone._shapePoints_V2_Normal.LineThickness * Editor.GUIRenderSettings.ClickRangeCorrectionByResolution;
 
 						//1) 선분에서 체크하자
-						if (IsPointInEdge(posGL_Mid1, posGL_End, mousePosGL, bone._shapePoints_V2_Normal.LineThickness))
+						if (IsPointInEdge(posGL_Mid1, posGL_End, mousePosGL, outlineClickRange))
 						{
 							return true;
 						}
-						if (IsPointInEdge(posGL_Mid2, posGL_End, mousePosGL, bone._shapePoints_V2_Normal.LineThickness))
+						if (IsPointInEdge(posGL_Mid2, posGL_End, mousePosGL, outlineClickRange))
 						{
 							return true;
 						}

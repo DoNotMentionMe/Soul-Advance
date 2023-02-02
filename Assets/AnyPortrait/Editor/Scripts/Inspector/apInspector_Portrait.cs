@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 //using UnityEngine.Profiling;
 
 #if UNITY_2017_1_OR_NEWER
@@ -143,6 +144,11 @@ namespace AnyPortrait
 		private apEditorUtil.PREFAB_STATUS _prefabStatus = apEditorUtil.PREFAB_STATUS.NoPrefab;
 		private UnityEngine.Object _srcPrefabObject = null;
 		private GameObject _rootGameObjAsPrefabInstance = null;
+
+#if UNITY_2021_1_OR_NEWER
+		//추가 v1.4.2 : 유니티 2021.1부터 지원되는 값들
+		private bool _isPrefabEditingScreen = false;//프리팹 편집 화면(Isolation Mode 등)인가.
+#endif
 
 		//추가 21.8.21 : 소켓 정보들
 		private enum SOCKET_TYPE
@@ -471,6 +477,25 @@ namespace AnyPortrait
 
 					GUI.backgroundColor = prevColor;
 				}
+#if UNITY_2021_1_OR_NEWER
+				else if(_isPrefabEditingScreen)
+				{
+					//(Unity 2021에서)
+					//현재 화면이 프리팹 편집 화면이라면 에디터를 열 수 없다.
+					GUILayout.Space(10);
+
+					EditorGUILayout.LabelField(_guiContent_PrefabAsset, GUILayout.Height(40));
+
+					GUI.backgroundColor = new Color(1.0f, 0.7f, 0.7f, 1.0f);
+
+					GUILayout.Box("Editing is not possible in the prefab editing screen.\nPlace the instance in the normal scene.",
+									_guiStyle_subTitle_Msg,
+									GUILayout.Width(width_Inspector),
+									GUILayout.Height(height_MainMsg));
+
+					GUI.backgroundColor = prevColor;
+				}
+#endif
 				else if (!EditorApplication.isPlaying)
 				{
 					//일반 메뉴 버튼 3개가 나온다.
@@ -979,6 +1004,11 @@ namespace AnyPortrait
 					case apEditorUtil.PREFAB_STATUS.Disconnected:
 						GUI.backgroundColor = new Color(1.0f, 0.7f, 0.7f, 1.0f);
 						strStatus = "(Disconnected)";
+						break;
+
+					case apEditorUtil.PREFAB_STATUS.Asset://v1.4.2
+						GUI.backgroundColor = new Color(1.0f, 0.7f, 0.7f, 1.0f);
+						strStatus = "(Not Instance)";
 						break;
 
 					case apEditorUtil.PREFAB_STATUS.Missing:
@@ -2121,6 +2151,14 @@ namespace AnyPortrait
 			_srcPrefabObject = null;
 			_rootGameObjAsPrefabInstance = null;
 
+#if UNITY_2021_1_OR_NEWER
+			//추가 v1.4.2 : 유니티 2021.1부터 지원되는 값들
+
+			//프리팹 편집 화면(Isolation Mode 등)인가.
+			_isPrefabEditingScreen = PrefabStageUtility.GetCurrentPrefabStage() != null;
+#endif
+
+
 			//프리팹 에셋이면 아무것도 편집 불가
 			_isPrefabAsset = apEditorUtil.IsPrefabAsset(_targetPortrait.gameObject);
 			if(_isPrefabAsset)
@@ -2128,6 +2166,13 @@ namespace AnyPortrait
 				return;
 			}
 
+#if UNITY_2021_1_OR_NEWER
+			//프리팹 편집 화면에서는 편집이 불가능하다.
+			if(_isPrefabEditingScreen)
+			{
+				return;
+			}
+#endif
 
 			_prefabStatus = apEditorUtil.GetPrefabStatus(_targetPortrait.gameObject);
 
@@ -2178,6 +2223,11 @@ namespace AnyPortrait
 
 				case apEditorUtil.PREFAB_STATUS.Missing:
 					_isPrefabInstance = true;
+					break;
+
+				case apEditorUtil.PREFAB_STATUS.Asset://v1.4.2 추가
+					_isPrefabAsset = true;
+					_isPrefabInstance = false;
 					break;
 			}
 		}

@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -356,6 +356,15 @@ namespace AnyPortrait
 			{
 				return null;
 			}
+
+			//v1.4.2 : FFD 모드시에는 FFD 포인트를 선택해야한다.
+			if(Editor.Gizmos.IsFFDMode)
+			{
+				Editor.Gizmos.SelectAllFFDPoints();
+				Editor.SetRepaint();
+				return apHotKey.HotKeyResult.MakeResult();
+			}
+
 
 			apMeshPinGroup pinGroup = Editor.Select.Mesh._pinGroup;
 

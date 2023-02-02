@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -160,6 +160,60 @@ namespace AnyPortrait
 			get
 			{
 				return _animClipName;
+			}
+		}
+
+		/// <summary>
+		/// Return the current frame at which the animation is played.
+		/// (The returned value is of type int, but internally, it is operated with data of type float.)
+		/// </summary>
+		public int CurrentFrame
+		{
+			get
+			{
+				if (_linkedAnimClip == null) { return -1; }
+				return _linkedAnimClip.CurFrame;
+			}
+			
+		}
+		public int StartFrame
+		{
+			get
+			{
+				if (_linkedAnimClip == null) { return -1; }
+				return _linkedAnimClip.StartFrame;
+			}
+		}
+
+
+		public int EndFrame
+		{
+			get
+			{
+				if (_linkedAnimClip == null) { return -1; }
+				return _linkedAnimClip.EndFrame;
+			}
+		}
+
+		/// <summary>
+		/// Return the playing time as a value between 0 and 1.
+		/// Return -1 if there is no target animation clip.
+		/// </summary>
+		public float NormalizedTime
+		{
+			get
+			{
+				if (_linkedAnimClip == null) { return -1.0f; }
+				float fFrame = _linkedAnimClip.CurFrameFloat;
+				int length = _linkedAnimClip.EndFrame - _linkedAnimClip.StartFrame;
+
+				if(length <= 0)
+				{
+					return 0.0f;
+				}
+
+				return Mathf.Clamp01(fFrame / (float)length);
+
 			}
 		}
 	}

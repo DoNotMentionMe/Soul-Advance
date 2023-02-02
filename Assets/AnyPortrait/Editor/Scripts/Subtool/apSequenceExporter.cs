@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -545,7 +545,7 @@ namespace AnyPortrait
 			_bgColor = _editor._captureFrame_Color;
 			_saveFilePath = saveFilePath;
 
-			_frameScrollPosition = _editor._scroll_MainCenter;
+			_frameScrollPosition = _editor._scroll_CenterWorkSpace;
 			_frameZoomIndex = _editor._iZoomX100;
 
 			_targetRootUnit = rootUnit;
@@ -782,7 +782,7 @@ namespace AnyPortrait
 			_bgColor.a = 1.0f;//<<MP4는 투명을 지원하지 않는다.
 			_saveFilePath = saveFilePath;
 
-			_frameScrollPosition = _editor._scroll_MainCenter;
+			_frameScrollPosition = _editor._scroll_CenterWorkSpace;
 			_frameZoomIndex = _editor._iZoomX100;
 
 			_targetRootUnit = rootUnit;
@@ -1102,7 +1102,7 @@ namespace AnyPortrait
 			_saveFilePath = saveFilePath;
 
 
-			_frameScrollPosition = _editor._scroll_MainCenter;
+			_frameScrollPosition = _editor._scroll_CenterWorkSpace;
 			_frameZoomIndex = _editor._iZoomX100;
 
 			_targetRootUnit = rootUnit;

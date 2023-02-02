@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1133,7 +1133,14 @@ namespace AnyPortrait
 			//GL.Flush();
 		}
 
-		public void DrawMesh(apMesh mesh, apMatrix3x3 matrix, Color color2X, bool isShowAllTexture, bool isDrawOutline, bool isDrawEdge, bool isDrawToneOutline = false)
+		public void DrawMesh(	apMesh mesh,
+								apMatrix3x3 matrix,
+								Color color2X,
+								bool isShowAllTexture,
+								bool isDrawOutline,
+								bool isDrawEdge,
+								bool isDrawToneOutline,
+								Texture2D alternativeTexture = null)
 		{
 			try
 			{
@@ -1153,10 +1160,16 @@ namespace AnyPortrait
 
 				matrix *= mesh.Matrix_VertToLocal;
 
+
+				Texture2D targetTexture = mesh.LinkedTextureData._image;
+				if(alternativeTexture != null)
+				{
+					targetTexture = alternativeTexture;
+				}
+
 				if (isShowAllTexture)
 				{
-					//DrawTexture(mesh._textureData._image, matrix, mesh._textureData._width, mesh._textureData._height, textureColor, -10);
-					DrawTexture(mesh.LinkedTextureData._image, matrix, mesh.LinkedTextureData._width, mesh.LinkedTextureData._height, textureColor, -10);
+					DrawTexture(targetTexture, matrix, mesh.LinkedTextureData._width, mesh.LinkedTextureData._height, textureColor, -10);
 				}
 				
 				Vector2 pos2_0 = Vector2.zero;
@@ -1171,17 +1184,20 @@ namespace AnyPortrait
 				Vector2 uv_1 = Vector2.zero;
 				Vector2 uv_2 = Vector2.zero;
 
+				
+
 				//2. 메시를 렌더링하자
 				if (mesh._indexBuffer.Count >= 3)
 				{
 					//변경 21.5.19
 					if (!isDrawToneOutline)
 					{
-						_matBatch.BeginPass_Texture_Normal(GL.TRIANGLES, color2X, mesh.LinkedTextureData._image, apPortrait.SHADER_TYPE.AlphaBlend);
+						
+						_matBatch.BeginPass_Texture_Normal(GL.TRIANGLES, color2X, targetTexture, apPortrait.SHADER_TYPE.AlphaBlend);
 					}
 					else
 					{
-						_matBatch.BeginPass_ToneColor_Custom(GL.TRIANGLES, color2X, mesh.LinkedTextureData._image, 0.0f, 0.0f);
+						_matBatch.BeginPass_ToneColor_Custom(GL.TRIANGLES, color2X, targetTexture, 0.0f, 0.0f);
 					}
 					
 					//_matBatch.SetClippingSize(_glScreenClippingSize);
@@ -1193,7 +1209,7 @@ namespace AnyPortrait
 					//Color color0 = Color.white, color1 = Color.white, color2 = Color.white;
 					
 					//색상은 한번만
-					GL.Color(Color.black);
+					GL.Color(Color.white);
 
 					for (int i = 0; i < mesh._indexBuffer.Count; i += 3)
 					{

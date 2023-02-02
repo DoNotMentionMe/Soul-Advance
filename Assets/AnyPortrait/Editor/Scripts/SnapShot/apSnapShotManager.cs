@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -95,6 +95,9 @@ namespace AnyPortrait
 		//추가 21.10.6 : 메시의 버텍스 복사하기
 		private apSnapShot_Mesh _clipboard_MeshVertEdges = null;
 
+		//추가 1.4.2 : 메시 핀을 복사하기
+		private apSnapShot_MeshPin _clipboard_MeshPin = null;
+
 
 		// Init
 		//-------------------------------------------
@@ -167,6 +170,9 @@ namespace AnyPortrait
 
 			if(_clipboard_MeshVertEdges == null) { _clipboard_MeshVertEdges = new apSnapShot_Mesh(); }
 			_clipboard_MeshVertEdges.Clear();
+
+			if(_clipboard_MeshPin == null) { _clipboard_MeshPin = new apSnapShot_MeshPin(); }
+			_clipboard_MeshPin.Clear();
 		}
 
 
@@ -1587,7 +1593,7 @@ namespace AnyPortrait
 			_clipboard_MeshVertEdges.Copy(selectedVertices, mesh);
 		}
 
-		public List<apVertex> Paste_MeshVertices(apMesh targetMesh)
+		public List<apVertex> Paste_MeshVertices(apMesh targetMesh, apDialog_CopyMeshVertPin.POSITION_SPACE posSpace)
 		{
 			if(_clipboard_MeshVertEdges == null)
 			{
@@ -1606,8 +1612,72 @@ namespace AnyPortrait
 				return null;
 			}
 
-			return _clipboard_MeshVertEdges.Paste(targetMesh);
+			return _clipboard_MeshVertEdges.Paste(targetMesh, posSpace);
 
+		}
+
+		public bool IsPastable_MeshVertices()
+		{
+			if(_clipboard_MeshVertEdges == null)
+			{
+				return false;
+			}
+			if(!_clipboard_MeshVertEdges.IsPastable())
+			{
+				return false;
+			}
+			return true;
+		}
+
+
+
+		//-------------------------------------------------------------------
+		// Mesh의 Pin복사 (v1.4.2)
+		//-------------------------------------------------------------------
+		public void Copy_MeshPins(apMesh mesh, List<apMeshPin> selectedPins)
+		{
+			if(_clipboard_MeshPin == null)
+			{
+				_clipboard_MeshPin = new apSnapShot_MeshPin();
+			}
+
+			_clipboard_MeshPin.Copy(selectedPins, mesh);
+		}
+
+		public List<apMeshPin> Paste_MeshPins(apMesh targetMesh, apDialog_CopyMeshVertPin.POSITION_SPACE posSpace)
+		{
+			if(_clipboard_MeshPin == null)
+			{
+				return null;
+			}
+
+			if(targetMesh == null
+				|| targetMesh._textureData_Linked == null
+				|| targetMesh._textureData_Linked._image == null)
+			{
+				return null;
+			}
+
+			if(!_clipboard_MeshPin.IsPastable())
+			{
+				return null;
+			}
+
+			return _clipboard_MeshPin.Paste(targetMesh, posSpace);
+
+		}
+
+		public bool IsPastable_MeshPins()
+		{
+			if(_clipboard_MeshPin == null)
+			{
+				return false;
+			}
+			if(!_clipboard_MeshPin.IsPastable())
+			{
+				return false;
+			}
+			return true;
 		}
 
 		// Save / Load

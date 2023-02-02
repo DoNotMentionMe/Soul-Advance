@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -120,22 +120,6 @@ namespace AnyPortrait
 				return null;
 			}
 
-			//이전
-			//if (Editor.Select.MeshGroupTF_Main != null)
-			//{
-			//	Editor.Select.SetBone(null, apSelection.MULTI_SELECT.Main);
-			//	return apGizmos.SelectResult.Main.SetSingle(Editor.Select.MeshGroupTF_Main);
-			//}
-			//if (Editor.Select.MeshTF_Main != null)
-			//{
-			//	Editor.Select.SetBone(null, apSelection.MULTI_SELECT.Main);
-			//	return apGizmos.SelectResult.Main.SetSingle(Editor.Select.MeshTF_Main);
-			//}
-			//if (Editor.Select.Modifier.IsTarget_Bone && Editor.Select.Bone != null)
-			//{
-			//	return apGizmos.SelectResult.Main.SetSingle(Editor.Select.Bone);
-			//}
-
 			//>> [GizmoMain] >>
 			if(Editor.Select.MeshGroupTF_Mod_Gizmo != null)
 			{
@@ -192,19 +176,10 @@ namespace AnyPortrait
 
 			bool isChildMeshTransformSelectable = Editor.Select.Modifier.IsTarget_ChildMeshTransform;
 
-
-			//이전
-			//apTransform_MeshGroup prevSelectedMeshGroupTransform = Editor.Select.MeshGroupTF_Main;
-			//apTransform_Mesh prevSelectedMeshTransform = Editor.Select.MeshTF_Main;
-			//apBone prevSelectedBone = Editor.Select.Bone;
-
 			//>> [GizmoMain] >>
 			apTransform_MeshGroup prevSelectedMeshGroupTransform = Editor.Select.MeshGroupTF_Mod_Gizmo;
 			apTransform_Mesh prevSelectedMeshTransform = Editor.Select.MeshTF_Mod_Gizmo;
 			apBone prevSelectedBone = Editor.Select.Bone_Mod_Gizmo;
-
-			
-
 
 			//int prevSelected = 0;
 			object prevSelectedObj = null;
@@ -263,19 +238,6 @@ namespace AnyPortrait
 					apBone bone = null;
 					apBone resultBone = null;
 
-					//<BONE_EDIT>
-					//List<apBone> boneList = meshGroup._boneList_Root;
-					//for (int i = 0; i < boneList.Count; i++)
-					//{
-					//	//Recursive하게 Bone을 선택한다.
-					//	bone = CheckBoneClick(boneList[i], mousePosW, mousePosGL, Editor._boneGUIRenderMode, -1, Editor.Select.IsBoneIKRenderable);
-					//	if (bone != null)
-					//	{
-					//		resultBone = bone;
-					//	}
-					//}
-
-
 					//>>Bone Set으로 변경
 					apMeshGroup.BoneListSet boneSet = null;
 					if (meshGroup._boneListSets != null && meshGroup._boneListSets.Count > 0)
@@ -314,11 +276,6 @@ namespace AnyPortrait
 
 					if (resultBone != null)
 					{
-						//이전
-						//Editor.Select.SetBone(resultBone);
-						//Editor.Select.SetSubMeshGroupInGroup(null);
-						//Editor.Select.SetSubMeshInGroup(null);
-
 						//변경 20.4.11 : 위 함수를 매번 호출하면 느리므로, 한번에 처리하는 함수를 이용하자.
 						//추가 20.5.27 : 
 						Editor.Select.SelectSubObject(null, null, resultBone, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);
@@ -333,6 +290,17 @@ namespace AnyPortrait
 						prevSelectedObj = selectedBone;
 
 						isSelectionCompleted = true;//추가 20.5.27 : 선택된 본과 상관없이 처리가 끝났다.
+
+						//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+						if(Editor._option_AutoScrollWhenObjectSelected)
+						{
+							//스크롤 가능한 상황인지 체크하고
+							if(Editor.IsAutoScrollableWhenClickObject_MeshGroup(resultBone, true))
+							{
+								//자동 스크롤을 요청한다.
+								Editor.AutoScroll_HierarchyMeshGroup(resultBone);
+							}
+						}
 					}
 				}
 
@@ -401,11 +369,14 @@ namespace AnyPortrait
 						//Mesh Group 자체를 선택해야 한다.
 						apMeshGroup parentMeshGroup = Editor.Select.MeshGroup.FindParentMeshGroupOfMeshTransform(selectedMeshTransform);
 
+						object selectedObj = null;
+
 						if (parentMeshGroup == null || parentMeshGroup == Editor.Select.MeshGroup || isChildMeshTransformSelectable)
 						{
 							//Editor.Select.SetSubMeshInGroup(selectedMeshTransform);//이전
 							//Editor.Select.SetSubObjectInGroup(selectedMeshTransform, null, null);//변경 20.4.11
 							Editor.Select.SelectSubObject(selectedMeshTransform, null, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택 옵션
+							selectedObj = selectedMeshTransform;
 						}
 						else
 						{
@@ -415,12 +386,14 @@ namespace AnyPortrait
 								//Editor.Select.SetSubMeshGroupInGroup(childMeshGroupTransform);//이전
 								//Editor.Select.SetSubObjectInGroup(null, childMeshGroupTransform, null);//변경 20.4.11
 								Editor.Select.SelectSubObject(null, childMeshGroupTransform, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택
+								selectedObj = childMeshGroupTransform;
 							}
 							else
 							{
 								//Editor.Select.SetSubMeshInGroup(selectedMeshTransform);//이전
 								//Editor.Select.SetSubObjectInGroup(selectedMeshTransform, null, null);//변경 20.4.11
 								Editor.Select.SelectSubObject(selectedMeshTransform, null, null, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);//변경 20.5.27 : 다중 선택
+								selectedObj = selectedMeshTransform;
 							}
 						}
 
@@ -435,6 +408,17 @@ namespace AnyPortrait
 						selectedMeshTransform = Editor.Select.MeshTF_Mod_Gizmo;
 						
 						prevSelectedObj = selectedMeshTransform;
+
+						//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+						if(Editor._option_AutoScrollWhenObjectSelected)
+						{
+							//스크롤 가능한 상황인지 체크하고
+							if(Editor.IsAutoScrollableWhenClickObject_MeshGroup(selectedObj, true))
+							{
+								//자동 스크롤을 요청한다.
+								Editor.AutoScroll_HierarchyMeshGroup(selectedObj);
+							}
+						}
 					}
 				}
 
@@ -532,294 +516,6 @@ namespace AnyPortrait
 				return;
 			}
 
-			#region [미사용 코드] 단일 선택 및 처리
-			////이전
-			////bool isTargetTransform = Editor.Select.ExValue_ModMesh != null;
-			////bool isTargetBone = Editor.Select.Bone != null
-			////						&& Editor.Select.ModBoneOfMod != null
-			////						&& Editor.Select.Modifier.IsTarget_Bone
-			////						&& Editor.Select.ModBoneOfMod._bone == Editor.Select.Bone;
-
-			////변경 20.6.17 : ExKey/Value를 삭제했다. 그냥 바로 변수를 참조하자
-			//bool isTargetTransform = Editor.Select.ModMesh_Main != null;
-			//bool isTargetBone = Editor.Select.Bone != null
-			//						&& Editor.Select.ModBone_Main != null
-			//						&& Editor.Select.Modifier.IsTarget_Bone
-			//						&& Editor.Select.ModBone_Main._bone == Editor.Select.Bone;
-
-			////우선 순위는 ModMesh
-			//if (!isTargetTransform && !isTargetBone)
-			//{
-			//	return;
-			//}
-			//if (!Editor.Controller.IsMouseInGUI(curMouseGL))
-			//{
-			//	return;
-			//}
-
-			////새로 ModMesh의 Matrix 값을 만들어주자 //TODO : 해당 Matrix를 사용하는 Modifier 구현 필요
-			////Undo
-			//object targetObj = null;
-
-			////이전
-			////if (isTargetTransform)	{ targetObj = Editor.Select.ExValue_ModMesh; }
-			////else						{ targetObj = Editor.Select.ModBoneOfMod; }
-
-			////변경 20.6.17 : ExKey/Value를 삭제했다.
-			//if (isTargetTransform)	{ targetObj = Editor.Select.ModMesh_Main; }
-			//else					{ targetObj = Editor.Select.ModBone_Main; }
-
-
-			//if (isFirstMove)
-			//{
-			//	apEditorUtil.SetRecord_Modifier(apUndoGroupData.ACTION.Modifier_Gizmo_MoveTransform, Editor, Editor.Select.Modifier, targetObj, false);
-			//}
-
-			//if (isTargetTransform)
-			//{
-			//	//기존의 Pivot이 포함된 Marix를 확인해야한다.
-			//	//여기서 제어하는 건 Local 값이지만, 노출되는건 World이다.
-			//	//값이 이상해질테니 수정을 하자
-
-			//	//apModifiedMesh targetModMesh = Editor.Select.ExValue_ModMesh;//이전
-			//	apModifiedMesh targetModMesh = Editor.Select.ModMesh_Main;//변경 20.6.17
-
-			//	apMatrix resultMatrix = null;
-
-			//	apMatrix matx_ToParent = null;
-			//	//apMatrix matx_LocalModified = null;
-			//	apMatrix matx_ParentWorld = null;
-
-			//	object selectedTransform = null;
-			//	//if (Editor.Select.ExValue_ModMesh._isMeshTransform)
-			//	if (Editor.Select.ModMesh_Main._isMeshTransform)
-			//	{
-			//		//if (Editor.Select.ExValue_ModMesh._transform_Mesh != null)
-			//		if (Editor.Select.ModMesh_Main._transform_Mesh != null)
-			//		{
-			//			resultMatrix = targetModMesh._transform_Mesh._matrix_TFResult_World;
-
-			//			//selectedTransform = Editor.Select.ExValue_ModMesh._transform_Mesh;
-			//			selectedTransform = Editor.Select.ModMesh_Main._transform_Mesh;
-
-			//			matx_ToParent = targetModMesh._transform_Mesh._matrix_TF_ToParent;
-			//			matx_ParentWorld = targetModMesh._transform_Mesh._matrix_TF_ParentWorld;
-			//		}
-			//	}
-			//	else
-			//	{
-			//		//if (Editor.Select.ExValue_ModMesh._transform_MeshGroup != null)
-			//		if (Editor.Select.ModMesh_Main._transform_MeshGroup != null)
-			//		{
-			//			//selectedTransform = Editor.Select.ExValue_ModMesh._transform_MeshGroup;
-			//			selectedTransform = Editor.Select.ModMesh_Main._transform_MeshGroup;
-
-			//			resultMatrix = targetModMesh._transform_MeshGroup._matrix_TFResult_World;
-
-			//			matx_ToParent = targetModMesh._transform_MeshGroup._matrix_TF_ToParent;
-			//			matx_ParentWorld = targetModMesh._transform_MeshGroup._matrix_TF_ParentWorld;
-			//		}
-			//	}
-
-			//	if (resultMatrix == null)
-			//	{
-			//		return;
-			//	}
-
-
-			//	if (selectedTransform != _prevSelected_TransformBone || isFirstMove)
-			//	{
-			//		_prevSelected_TransformBone = selectedTransform;
-			//		_prevSelected_MousePosW = curMousePosW;
-			//		//_prevSelected_WorldPos = resultMatrix._pos;
-			//	}
-			
-
-			//	apMatrix nextWorldMatrix = new apMatrix(resultMatrix);
-			//	nextWorldMatrix.SetPos(resultMatrix._pos + deltaMoveW);
-
-			//	//ToParent x LocalModified x ParentWorld = Result
-			//	//LocalModified = ToParent-1 x (Result' x ParentWorld-1) < 결합법칙 성립 안되므로 연산 순서 중요함
-			//	apMatrix nextLocalModifiedMatrix = apMatrix.RReverseInverse(matx_ToParent, apMatrix.RInverse(nextWorldMatrix, matx_ParentWorld));
-
-			//	//TRS중에 Pos만 넣어도 된다.
-			//	targetModMesh._transformMatrix.SetPos(nextLocalModifiedMatrix._pos);
-
-			//	targetModMesh.RefreshValues_Check(Editor._portrait);
-
-
-			//	Editor.Select.MeshGroup.RefreshForce();
-
-			//	Editor.SetRepaint();
-			//}
-			//else if (isTargetBone)
-			//{
-			//	//Bone 움직임을 제어하자.
-			//	//ModBone에 값을 넣는다.
-			//	apModifiedBone modBone = Editor.Select.ModBone_Main;
-			//	apBone bone = Editor.Select.Bone;
-			//	apMeshGroup meshGroup = Editor.Select.MeshGroup;
-
-
-			//	//apModifierParamSet paramSet = Editor.Select.ExKey_ModParamSet;//이전
-			//	apModifierParamSet paramSet = Editor.Select.ParamSetOfMod;//변경 20.6.17
-
-			//	//<BONE_EDIT> 하위 본도 수정 가능
-			//	//if (bone._meshGroup != meshGroup)
-			//	//{
-			//	//	return;
-			//	//}
-
-			//	//Move로 제어 가능한 경우는
-			//	//1. IK Tail일 때
-			//	//2. Root Bone일때 (절대값)
-			//	if (bone._isIKTail)
-			//	{
-			//		//Debug.Log("Request IK : " + _boneSelectPosW);
-			//		float weight = 1.0f;
-
-			//		if (bone != _prevSelected_TransformBone || isFirstMove)
-			//		{
-			//			_prevSelected_TransformBone = bone;
-			//			_prevSelected_MousePosW = bone._worldMatrix._pos;
-			//		}
-
-			//		//bool successIK = bone.RequestIK(_boneSelectPosW, weight, !isFirstSelectBone);
-
-			//		_prevSelected_MousePosW += deltaMoveW;
-			//		Vector2 bonePosW = _prevSelected_MousePosW;//DeltaPos + 절대 위치 절충
-
-			//		//Vector2 bonePosW = bone._worldMatrix._pos + deltaMoveW;//DeltaPos 이용
-			//		//Vector2 bonePosW = curMousePosW;//절대 위치 이용
-			//		apBone limitedHeadBone = bone.RequestIK_Limited(bonePosW, weight, true, Editor.Select.ModRegistableBones);
-
-			//		if (limitedHeadBone == null)
-			//		{
-			//			return;
-			//		}
-
-
-			//		//apBone headBone = bone._IKHeaderBone;//<<
-			//		apBone curBone = bone;
-			//		//위로 올라가면서 IK 결과값을 Default에 적용하자
-
-
-
-			//		while (true)
-			//		{
-			//			float deltaAngle = curBone._IKRequestAngleResult;
-			//			//if(Mathf.Abs(deltaAngle) > 30.0f)
-			//			//{
-			//			//	deltaAngle *= deltaAngle * 0.1f;
-			//			//}
-
-			//			apModifiedBone targetModBone = paramSet._boneData.Find(delegate (apModifiedBone a)
-			//			{
-			//				return a._bone == curBone;
-			//			});
-			//			if (targetModBone != null)
-			//			{
-			//				//float nextAngle = curBone._defaultMatrix._angleDeg + deltaAngle;
-			//				//해당 Bone의 ModBone을 가져온다.
-
-			//				//if(curBone == limitedHeadBone)
-			//				//{
-			//				//	//ModBone의 TransformMatrix 값과
-			//				//	//그 값이 100%로 반영되어야 할 Local Matrix의 값을 비교하자
-			//				//	Debug.Log("[" + curBone._name + "] Bone IK [Mod Angle : " + targetModBone._transformMatrix._angleDeg 
-			//				//		+ " / Local Angle : " + curBone._localMatrix._angleDeg + " ] (Delta : " + deltaAngle + ")");
-			//				//}
-			//				//float nextAngle = targetModBone._transformMatrix._angleDeg + deltaAngle;
-			//				float nextAngle = curBone._localMatrix._angleDeg + deltaAngle;
-			//				while (nextAngle < -180.0f)
-			//				{
-			//					nextAngle += 360.0f;
-			//				}
-			//				while (nextAngle > 180)
-			//				{
-			//					nextAngle -= 360.0f;
-			//				}
-
-			//				//DefaultMatrix말고
-			//				//curBone._defaultMatrix.SetRotate(nextAngle);
-
-			//				//ModBone을 수정하자
-			//				targetModBone._transformMatrix.SetRotate(nextAngle);
-			//			}
-
-			//			curBone._isIKCalculated = false;
-			//			curBone._IKRequestAngleResult = 0.0f;
-
-			//			if (curBone == limitedHeadBone)
-			//			{
-			//				break;
-			//			}
-			//			if (curBone._parentBone == null)
-			//			{
-			//				break;
-			//			}
-			//			curBone = curBone._parentBone;
-			//		}
-
-			//		//마지막으론 World Matrix 갱신
-			//		//근데 이게 딱히 소용 없을 듯..
-			//		//Calculated Refresh를 해야함
-			//		//limitedHeadBone.MakeWorldMatrix(true);
-			//		//limitedHeadBone.GUIUpdate(true);
-			//	}
-			//	else if (bone._parentBone == null
-			//		|| (bone._parentBone._IKNextChainedBone != bone))
-			//	{
-			//		//수정 : Parent가 있지만 IK로 연결 안된 경우 / Parent가 없는 경우 2가지 모두 처리한다.
-
-			//		apMatrix parentMatrix = null;
-			//		if (bone._parentBone == null)
-			//		{
-			//			if (bone._renderUnit != null)
-			//			{
-			//				//Render Unit의 World Matrix를 참조하여
-			//				//로컬 값을 Default로 적용하자
-			//				parentMatrix = bone._renderUnit.WorldMatrixWrap;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			parentMatrix = bone._parentBone._worldMatrix;
-			//		}
-
-			//		//apMatrix localMatrix = bone._localMatrix;
-			//		apMatrix newWorldMatrix = new apMatrix(bone._worldMatrix);
-			//		newWorldMatrix.SetPos(newWorldMatrix._pos + deltaMoveW);
-			//		//newWorldMatrix.SetPos(curMousePosW);
-
-			//		if (parentMatrix != null)
-			//		{
-			//			newWorldMatrix.RInverse(parentMatrix);
-			//		}
-			//		//WorldMatrix에서 Local Space에 위치한 Matrix는
-			//		//Default + Local + RigTest이다.
-
-			//		newWorldMatrix.Subtract(bone._defaultMatrix);
-			//		if (bone._isRigTestPosing)
-			//		{
-			//			newWorldMatrix.Subtract(bone._rigTestMatrix);
-			//		}
-
-			//		modBone._transformMatrix.SetPos(newWorldMatrix._pos);
-
-			//	}
-
-
-			//	//if(modBone._renderUnit != null)
-			//	//{
-			//	//	Editor.Select.MeshGroup.AddForceUpdateTarget(modBone._renderUnit);
-			//	//}
-			//	Editor.Select.MeshGroup.RefreshForce();//<<이거 필수. 이게 있어야 이번 Repaint에서 바로 적용이 된다.
-			//} 
-			#endregion
-
-
-
 			//변경 20.6.27 : 다중 처리
 			//ModMesh 리스트와 ModBone 리스트를 모두 돌아서 처리하자
 			//기즈모용 리스트를 받아와서 사용한다.
@@ -840,30 +536,6 @@ namespace AnyPortrait
 			{
 				return;
 			}
-
-			//새로 ModMesh의 Matrix 값을 만들어주자 //TODO : 해당 Matrix를 사용하는 Modifier 구현 필요
-			//Undo
-			//object targetObj = null;//삭제 21.6.30
-			
-			//if(Editor.Select.ModMesh_Main != null)
-			//{
-			//	targetObj = Editor.Select.ModMesh_Main;
-			//}
-			//else if(Editor.Select.ModBone_Main != null)
-			//{
-			//	targetObj = Editor.Select.ModBone_Main;
-			//}
-			
-			//>> [GizmoMain] >> 삭제 21.6.30
-			//if(Editor.Select.ModMesh_Gizmo_Main != null)
-			//{
-			//	targetObj = Editor.Select.ModMesh_Gizmo_Main;
-			//}
-			//else if(Editor.Select.ModBone_Gizmo_Main != null)
-			//{
-			//	targetObj = Editor.Select.ModBone_Gizmo_Main;
-			//}
-
 
 			if (isFirstMove)
 			{

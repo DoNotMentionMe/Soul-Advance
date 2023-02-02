@@ -1,557 +1,476 @@
 ﻿(업데이트 이미지 개수)
-4
+0
 -----------------------------------------
 (영어)
-<size=16>AnyPortrait Update Log v1.4.0/v1.4.1</size>
-(Build July 16, 2022 / August 3, 2022)
+<size=16>AnyPortrait Update Log v1.4.2</size>
+(Build January 19, 2023)
 
 <size=13>Improvements</size>
 
-- <color=blue>Pin Tool</color>
-    A new curve-based "Pin" tool is added as an element of the mesh to improve working efficiency in the Morph modifier.
-    Various tools for editing Pins are added.
-    UI to distinguish "Vertex edit mode" and "Pin edit mode" in Morph modifier are added.
+- <color=blue>Editor settings and Bake settings</color>
+    Some Bake options are shared on a project-by-project
+    The feature that export/import editor environment settings to a file is added
+    The feature to save user-custom Bake options as "default settings" is added
+    Editor preferences and Bake settings are stored in text file format, compatible with version control tools
+    The editor option to show bones as "Ghost bones" when creating bones by mouse click is added
+    The editor option to change the size of vertices or pins shown in the workspace is added
+    The editor option that allows you to turn off the gizmo behavior of "move the target immediately by dragging right after clicking" is added
 
-- <color=blue>Improved UI Images</color>
-    The vertex image rendered in the workspace is changed nicely while improving the rendering performance.
-    Images of control parameter UI are changed while improving rendering performance.
-    Many icons such as Bake Dialog, Inspector, and Hierarchy are changed to be pretty
-    "Pixel Perfect" technique is applied to clearly display the images in the animation timeline.
+- <color=blue>Import PSD file</color>
+    When re-importing a PSD file, the names of the layers and meshes in the PSD are displayed on the screen
+    When re-importing a PSD file, a function to show the image's pixels is added to accurately compare the positions of the PSD layer and the mesh
+    When a PSD file is re-imported, it is improved so that the rendering order of the meshes is properly specified based on the PSD file
+    When generating meshes from PSD files, it is changed that the record for undo is not divided per processing steps
+    When importing a PSD file, the default visibility of meshes is specified based on the visibility of PSD layers
+    When importing a PSD file, an error message appears when the path is invalid
 
-- <color=blue>Added Various Options</color>
-    An option is added to the Bake dialog to determine whether the "default" or "last value" will be applied to undefined control parameters in the next animation to be transitioned.
-    An option is added to the Bake dialog to prevent physics function (Jiggle bones and Physics material) from behaving strangely when the character moves far in just 1 frame.
-    An option is added to the Setting dialog to extend the UI height of Vector type control parameters in the editor
-    An option is added to the Settings dialog to determine if "Visibility Preset" will remain on when other objects are selected
+- <color=blue>Hierarchy UI</color>
+    Another object can be selected by pressing the up/down key after clicking the target
+    The Hierarchy UI on the right automatically scrolls when an object is selected in the workspace
+    When selecting an animation clip, the Hierarchy UI on the left automatically scrolls
+    If you right-click to display the menu, the name of the clicked object appears, and if multiple objects are selected at the same time, the number of additionally selected objects is displayed as well.
+    If you press the Enter key in the "Rename" dialog through the right-click menu, the changed name is applied immediately.
+    When trying to change the order of objects through the right-click menu of the Hierarchy UI on the left, a message asking whether to change the sorting mode to "Custom Method" can be shown.
+    By some right-click menu functions, the object will be selected.
+    Changing the rendering of a bone with holding the Alt key, the visibility of the child bones will also change.
+    If the Color Option is off, a small dot will appear instead, and clicking on it will activate the Color Option immediately.
 
-- <color=blue>Improved Inspector UI</color>
-    Performance of Inspector UI is improved.
-    The tab layout is added to Inspector to make it easier to find the properties you need.
-    The icons and layout of the Inspector UI are changed to be pretty.
-    Character animations are able to be previewed in the Unity editor.
-    The Image list is added.
+- <color=blue>Editing multiple objects</color>
+    Changing the rendering order (Depth) of selected objects at once is supported
+    Duplicating selected objects at once through the right-click menu of the Hierarchy UI is supported
+    When deleting through the right-click menu of the Hierarchy UI, an option for multiple deletions is provided
+    When deleting multiple objects from a mesh group, it has been improved to enable removing even when child mesh groups and meshes are selected together
 
-- <color=blue>Improved Animation Event UI</color>
-    The usability of the Animation Event dialog is improved.
-    A function for users to save events as presets is added.
-    An option is added to change the color of event markers
-    It is changed that event markers are to be rendered in front of sliders on the timeline.
-    Continuous Event markers are expressed more intuitively.
+- <color=blue>Mesh editing screen</color>
+    It is changed that running "Reset vertices" creates a square mesh to fit the Atlas region 
+    The feature that copy and paste selected pins to another mesh is added
+    The feature to convert their position values into relative coordinates based on the pivot when copying and pasting vertices or pins is added
+    It is changed that pins appear as translucent when the "Make Mesh" tab is selected
+    It is improved that the submenu changes in order when you press the number 2 key or number 7 key consecutively among the hotkeys for switching mesh tabs
 
-- <color=blue>Improved PSD file import function</color>
-    The feature to create "Secondary Atlas", which is a secondary image with the same Atlas structure is added to "PSD Reimport dialog".
-    The stability of functions related to set the path when saving PSD files is improved.
+- <color=blue>Animation Timeline UI</color>
+    The slider at the bottom has been changed to work in the opposite way so that you can intuitively adjust the zoom in/out of the animation timeline UI.
+    It is improved that you can move the time slider continuously when clicking and dragging the top of the timeline UI while holding down the Ctrl + Shift keys
+    It is improved that the “last clicked timeline layer” for multi-selecting layers is refreshed even when the target is clicked in the workspace or Hierarchy UI
 
-- Editor execution performance is improved.
-- Improved way of clicking vertices introduced in previous versions is adapted for all cases.
-- When Bake is executed, the target GameObject is focused.
-- "Auto-scroll" function of the animation timeline is improved.
-- A warning appears when disabling the "Auto Normalize" function in the Rigging modifier.
-- The performance of all script functions that reference textures, objects, and animations is improved.
-- A script is added to assist in creating a "Command Buffer" to control character rendering.
-- The registered keys are displayed in the UI of Control Parameters that are not being edited.
-- When the registered Control Parameters in the modifier UI are output, they are changed to be displayed with the preset icon designated by the user.
-- It is improved that the UI of the Rigging modifier can intuitively distinguish the currently unavailable UI elements depending on the situation.
-- It is changed that buttons that are expected to be clicked by users are flash.
-- A button that deletes all Control Parameter keys from the modifier at once and removes the Control Parameter from the modifier at the same time is added.
-- In the latest version of Mac OS, "Metal" is changed to a required option so that the guide dialog about Metal is no longer shown.
-- The readability of the dialog for selecting the texture of the image and the dialog for selecting the image for the mesh is improved.
-- The process of clicking and selecting keyframes etc in the animation timeline is improved.
-- An option to adjust the weight of the Jiggle Bone with a Control Parameter is added.
-- When selecting one or several bones, the layout order is optimized to minimize changes in the bone property UI.
-- The size of the button to remove all vertices in the mesh editing UI is changed to be slightly larger to match the frequency of use.
-- When using the "Reset Value" and "Paste" functions of the modifier controlled by the control parameter, the new dialog for selecting the target property to be adapted appears.
-- It is changed that all vertices are selected immediately after registering the mesh to the Rigging modifier.
-- The ability to refresh all meshes of apPortrait in the scene is added as a "Refresh All Meshes" menu in the Unity Editor menu.
-- A new "Modify" right-click menu is added that allows you to directly modify the mesh or mesh group in the mesh group's hierarchy.
-- (v1.4.1) A function to validate and automatically correct animation event names is added.
-- (v1.4.1) It is changed that "overloading" methods will be excluded that cause an error when assigning callback-style animation events in the Inspector UI.
-- (v1.4.1) The ability to batch assign event listeners in the Callback animation event UI of the Inspector UI is added.
-- (v1.4.1) A function to check the validity of assigned events in the Callback type animation event UI of the Inspector UI is added.
-- (v1.4.1) A function to copy the control parameter name to the clipboard in Inspector UI is added.
-- (v1.4.1) The Korean notation of the button to set whether to automatically play the animation while the root unit is selected is corrected.
-- (v1.4.1) It is changed that Pins created by clicking the workspace with “Add Tool” cannot be moved until clicked again.
-- (v1.4.1) When undoing immediately after adding or deleting a control parameter to a modifier, the control parameter is now properly selected.
-- (v1.4.1) The ability to change options in a batch in the dialog that automatically creates multiple meshes is added.
+- Added script functions to get playback time, etc. from AnimPlayData
+- The speed and stability of searching for the latest version are improved by changing the server that informs the latest version
+- Usability is improved by distinguishing the scroll value of the right UI according to the type of selected object
+- If you press the Enter key in the dialog to set the name of the new portrait, the portrait is created immediately with the set name.
+- If the screen resolution is greater than FHD, the range for clicking vertices or edges is slightly expanded.
+- It is improved that the message asking if you want to complete the FFD tool appears on the more a variety of situations.
+- Since Unity 2022.2, some APIs related to prefabs have been deprecated, so related codes are changed
+- The highlight design of "Selected Items" in the list UI to look is a little prettier
 
 
 
 <size=13>Fixed issues</size>
 
-- An issue is fixed that the error occurred when using the "Blur" tool with no mesh selected when working with the Morph modifier.
-- An issue is fixed that some icon images were displayed at low resolution in the Pro UI.
-- An issue is fixed that when editing mode with Transform modifier is turned on while two or more Control Parameters handle the same object, the object disappears.
-- An issue is fixed that caused other modifiers to be overly restricted when selecting the Color Only modifier and turning on multi-edit mode.
-- An issue is fixed that modifiers that should be deactivated in this edit mode work.
-- An issue is fixed that the edit mode is canceled when the multi-edit mode is turned on while the value of the Control Parameter is not located in the key.
-- An issue is fixed that the multi-edit mode was not applied properly to modifiers in other timelines.
-- An issue is fixed that editor resources were not loaded intermittently when opening the editor through the Inspector.
-- An issue is fixed that animations targeting different root units would stop working when trying to play animations in the same frame using a script.
-- An issue is fixed that the asynchronous initialization function did not work properly.
-- An issue is fixed that the animation playback is too fast to match the frame settings after a long time elapses while the editor is not in focus.
-- An issue is fixed that it is recognized as an error and a log is outputted if Bake is executed without specifying an appropriate script function and if the animation event execution method is "Callback".
-- An issue is fixed that the Control Parameter UI was displayed strangely when opening the "View Menu" in Unity 2019 and later versions.
-- An issue is fixed that you could not select a Control Parameter by clicking it immediately after changing a category of Control Parameters.
-- An issue is fixed that the changed shader asset of a material set is not applied to the preset in the material library.
-- An issue is fixed that the gizmo of "Pose Test" mode of Rigging modifier could not be controlled until the bone was clicked again after clicking outside the gizmo.
-- An issue is fixed that an internal ID issuance error when creating an object before or after undoing will occur with a very low probability.
-- An issue is fixed that whether an object is selected immediately when creating or duplicating an object was not consistent depending on the type of object.
-- An issue is fixed that the workspace will be zoomed in/out when scrolling with the mouse wheel outside the workspace and moving the cursor back to the workspace.
-- An issue is fixed that the shaders of the "Keep Alpha" material preset were rendered strangely when the rendering target was "Render Texture". (You will need to install that package again.)
-- An issue is fixed that the previous Atlas was continuously displayed on the screen even after pressing the Bake button of Atlas again in the PSD file import dialog.
-- An issue is fixed that an error occurred because some code using the "Type" class was not written explicitly.
-- (v1.4.1) An issue is fixed that the marker color property is not duplicated when duplicating an animation event.
-- (v1.4.1) An issue is fixed that the "Remove Animation event button" was missed in the previous version.
-- (v1.4.1) An issue is fixed that an error occurred when undoing after creating a curve connecting pins or deleting a curve.
-- (v1.4.1) An issue is fixed that 2 pins could be connected with 2 curves.
-- (v1.4.1) An issue is fixed that the buttons related to the Prefab were too small in the Inspector UI.
-- (v1.4.1) An issue is fixed that the rendering order was calculated abnormally when the rendering order of objects in a mesh group was changed and the setting tab was not selected and undone.
-- (v1.4.1) An issue is fixed that the remove button ("X") used in Control Parameter UI, Rigging UI, etc. is too dark in Pro UI.
+- An issue is fixed where the UI for entering numbers to change the weight of a single vertex did not work in the Rigging modifier edit screen
+- An issue is fixed where the rendering status of bones does not return to its original state when a different mesh group is selected immediately after the rendering status of bones has been changed to "gray, translucent" in the editing screen of the Rigging modifier
+- An issue is fixed where multiple objects are not removed at the same time by pressing the "Trash can" button in the UI on the right of the mesh group.
+- An issue is fixed where the rendering order of objects could not be changed normally when there was a child mesh group
+- An issue is fixed where objects are sorted in reverse order when there is a child mesh group of 3 levels or higher when importing a PSD file.
+- An issue is fixed where meshes of child mesh groups of 3 levels or higher were not additionally created when re-importing a PSD file
+- An issue is fixed where disconnecting the existing parent bone and baking again causes the bone to move strangely
+- An issue is fixed where the editor could not be run when it was incorrectly recognized that data existed even after the modifier was deleted due to an error
+- An issue is fixed where the character could not be opened in the editor if an error occurred in the animation clip that was linked to the mesh group after the mesh group was deleted or after a similar operation.
+- An issue is fixed where animation events were not called in the last frame where auto loop keyframes were located in loop animation.
+- An issue is fixed where objects in a mesh group are abnormally sorted when undoing after deleting multiple objects at the same time.
+- An issue is fixed where the error log occurs when removing meshes in a child mesh group with the Shift key.
+- An issue is fixed where the mapping target mesh was rendered in black in the Re-import PSD dialog
+- An issue is fixed where layer information and preview did not work properly when first entering the position correction step in the secondary atlas import dialog.
+- An issue is fixed where objects could not be duplicated through the right-click menu of the Hierarchy UI on the left side of the editor while no mesh or mesh group was selected.
+- An issue is fixed where some items in the UI on the right were displayed strangely when a child mesh group was selected while the setting tab of the mesh group was selected.
+- An issue is fixed where the initial value of the physics effect was incorrectly applied and vertices or bones moved strangely when the game was run 
+- An issue is fixed where the physics effect works exaggeratedly when the FPS was too low or the application stopped when the game was running.
+- An issue is fixed where it was difficult to click the horizontal edges and vertical edges
+- An issue is fixed where meshes with the Rigging modifier applied in the child mesh group - could not be targeted for the Transform modifier - could be bypassed and registered through the "yellow eye button" in the Hierarchy UI.
+- An issue is fixed where the Jiggle Bone's Constraint setting would look strange in the workspace when a target is not a root bone and the parent mesh group is rotated
+- An issue is fixed where vertices rather than control points were selected when pressing the "Ctrl+A" hotkey while the FFD tool was on
+- An issue is fixed where non-target child mesh groups were registered or meshes in child mesh groups that should be targeted were not registered when trying to register all meshes in "Morph (Animation)" as timeline layers
+- An issue is fixed where the button to remove objects from the timeline did not appear when an object that was not the target of the timeline was registered as a timeline layer due to a bug, etc.
+- An issue is fixed where object selection was canceled when dragging the mouse on the animation editing screen
 
 
 
 
 -----------------------------------------
 (한국어)
-<size=16>AnyPortrait 업데이트 로그 v1.4.0/v1.4.1</size>
-(2022년 7월 16일 / 2022년 8월 3일 빌드)
+<size=16>AnyPortrait 업데이트 로그 v1.4.2</size>
+(2023년 1월 19일 빌드)
 
 <size=13>개선된 사항</size>
 
-- <color=blue>핀(Pin) 툴</color>
-    Morph 모디파이어에서의 작업 효율을 높이기 위한 커브 기반의 "핀" 도구가 메시의 요소로서 새롭게 추가됨
-    핀 편집을 위한 다양한 도구가 추가됨
-    Morph 모디파이어에서 "버텍스 편집 모드"와 "핀 편집 모드"를 구분하는 UI가 추가됨
+- <color=blue>에디터 설정 및 Bake 설정</color>
+    Bake 관련 일부 옵션이 프로젝트 단위로 공유됨
+    에디터의 환경 설정을 파일로 내보내거나 가져올 수 있는 기능이 추가됨
+    사용자가 설정한 Bake 옵션을 "기본 설정값"으로 저장하는 기능이 추가됨
+    에디터 환경 설정 및 Bake 설정이 텍스트 파일 형식으로 저장되어 버전 관리 툴과 호환됨
+    마우스를 클릭하여 본을 생성할 때 "고스트 본(Ghost)"이 보여지도록 만드는 설정이 추가됨
+    작업 공간에서 보여지는 버텍스나 핀의 크기를 변경할 수 있는 설정이 추가됨
+    "클릭 직후 드래그를 하여 대상을 바로 이동"하는 기존의 기즈모 동작 방식을 끌 수 있는 설정이 추가됨
 
-- <color=blue>개선된 UI 이미지</color>
-    작업 공간에서 출력되는 버텍스 이미지가 예쁘게 변경되고 렌더링 성능이 향상됨
-    컨트롤 파라미터 UI의 이미지가 변경되고, 렌더링 성능이 향상됨
-    Bake 다이얼로그, Inspector, Hierarchy 등의 다수의 아이콘들이 예쁘게 변경됨    
-    애니메이션 타임라인의 이미지를 선명하게 출력하기 위해 "픽셀 퍼펙트(Pixel Perfect)" 기법이 적용됨
+- <color=blue>PSD 파일 가져오기</color>
+    PSD 파일 다시 가져오기시, PSD의 레이어와 메시의 이름이 화면에 출력됨
+    PSD 파일 다시 가져오기시, PSD의 이미지와 메시의 이미지의 위치를 정확히 비교하기 위해, 보정없이 픽셀값 그대로 볼 수 있는 기능이 추가됨
+    PSD 파일 다시 가져오기를 수행한 경우, PSD 파일을 기준으로 추가되는 메시들의 렌더링 순서가 적절히 지정되도록 개선됨
+    PSD 파일로부터 메시들을 생성할 때, 실행 취소를 위한 기록이 처리 단계별로 나누어지지 않도록 변경됨
+    PSD 파일을 가져올 때 원본 레이어의 출력 여부가 메시의 기본값으로 반영되도록 개선됨
+    PSD 파일을 가져올 때 경로가 유효하지 않은 상태에서 메시를 생성하고자 시도한다면 에러 메시지가 나타나며 동작이 멈추도록 변경됨
 
-- <color=blue>추가된 다양한 옵션들</color>
-    애니메이션이 전환될 때 다음 애니메이션에서 정의되지 않은 컨트롤 파라미터에 "기본값"이 적용될지 "마지막 값"이 유지될지 결정하는 옵션이 Bake 다이얼로그에 추가됨
-    캐릭터가 1프레임만에 멀리 이동하는 경우에 물리 기능(지글본, 물리 재질)이 이상하게 동작하는 것을 막는 옵션이 Bake 다이얼로그에 추가됨
-    에디터에서 Vector 타입의 컨트롤 파라미터의 UI의 높이를 확장하는 옵션이 설정 다이얼로그에 추가됨    
-    보기 프리셋이 다른 객체 선택시에도 계속 켜져 있을지 결정하는 옵션이 설정 다이얼로그에 추가됨
+- <color=blue>Hierarchy UI</color>
+    대상을 클릭한 후, 상하 방향키를 이용하여 다른 객체를 선택할 수 있도록 개선됨
+    작업 공간에서 객체를 선택하면 오른쪽의 Hierarchy UI가 자동으로 스크롤됨
+    애니메이션 클립을 선택할 때, 왼쪽의 Hierarchy UI가 자동으로 스크롤이 됨
+    우클릭을 하여 메뉴를 출력할 경우 클릭한 대상의 이름이 등장하며, 여러개의 대상이 동시에 선택된 경우엔 추가로 선택된 객체의 개수가 같이 표시됨
+    우클릭 메뉴의 "이름 변경(Rename)" 다이얼로그에서 Enter 키를 누르면 변경된 이름이 바로 적용됨
+    왼쪽의 Hierarchy UI의 우클릭 메뉴를 통해 객체의 순서를 변경하고자 할 때 정렬 모드를 "사용자 정의 방식"으로 변경할지 묻는 메시지가 등장함
+    우클릭 메뉴의 기능을 수행하면 해당 객체가 선택되도록 변경됨
+    Alt 키를 누르고 본의 렌더링 여부를 변경하면 자식 본들의 출력 여부도 같이 변경됨
+    색상 옵션(Color Option)이 꺼진 경우에 작은 점이 대신 등장하며, 이를 클릭하면 색상 옵션이 바로 활성화됨
 
-- <color=blue>개선된 Inspector UI</color>
-    Inspector UI의 성능이 개선됨
-    탭으로 필요한 속성을 쉽게 찾을 수 있도록 개선됨
-    Inspector UI의 아이콘 및 레이아웃이 예쁘게 변경됨
-    유니티 에디터 상에서 캐릭터의 애니메이션을 미리보는 기능이 추가됨
-    캐릭터에서 사용된 이미지들을 볼 수 있는 항목이 추가됨
+- <color=blue>여러개의 객체를 동시에 편집하기</color>
+    렌더링 순서(Depth)를 변경할 때 선택된 객체들의 렌더링 순서가 함께 변경됨
+    Hierarchy UI의 우클릭 메뉴를 통해 복제할 때, 선택된 객체들이 동시에 모두 복제됨
+    Hierarchy UI의 우클릭 메뉴를 통해 삭제할 때, 다중 삭제가 가능한 옵션이 제공됨
+    메시 그룹에서 여러개의 객체들을 삭제할 때, 서로 다른 타입인 자식 메시 그룹들과 메시들이 함께 선택된 상태에서도 다중 삭제가 가능하도록 개선됨
 
-- <color=blue>개선된 애니메이션 이벤트 UI</color>
-    애니메이션 이벤트 다이얼로그의 UI의 사용성이 개선됨
-    사용자가 이벤트를 프리셋으로 저장할 수 있는 기능이 추가됨
-    이벤트 마커의 색상을 지정할 수 있도록 변경됨
-    이벤트 마커가 타임라인에서 슬라이더보다 앞에서 렌더링되도록 변경됨
-    Continuous 타입의 이벤트의 마커가 더 직관적으로 표현됨    
+- <color=blue>메시 편집 화면</color>
+    "버텍스 초기화"를 실행할 때 Atlas 영역에 맞게 사각형 메시가 생성되도록 변경됨
+    선택한 핀들을 다른 메시로 복사하여 붙여넣는 기능이 추가됨
+    버텍스나 핀을 복사하여 붙여넣을 때, 기준점(Pivot)에 맞는 상대 좌표로 변환하여 붙여넣는 기능이 추가됨
+    "Make Mesh" 탭이 선택된 상태에서 핀들이 반투명하게 보이도록 변경됨
+    메시의 탭을 전환하는 단축키 중 숫자 2 또는 숫자 7을 연속으로 누르면 하위 메뉴가 순서대로 변경되도록 개선됨
 
-- <color=blue>개선된 PSD 파일 임포트 기능</color>
-    동일한 Atlas 구조를 가진 보조 이미지인 "Secondary Atlas"를 만드는 기능이 "PSD 파일 다시 가져오기 기능"에 추가됨
-    PSD 파일 저장시 경로 저장 관련 기능에 대한 안정성이 향상됨
+- <color=blue>타임라인 UI</color>
+    애니메이션 타임라인 UI의 확대/축소를 직관적으로 조절할 수 있도록 하단의 슬라이더가 기존과 반대로 동작하도록 변경됨
+    Ctrl+Shift 키를 누른 상태로 타임라인 UI 상단을 클릭하고 드래그를 하면 타임 슬라이더가 계속 이동되도록 개선됨
+    레이어 다중 선택을 위한 "마지막으로 클릭한 타임라인 레이어"가 작업 공간이나 Hierarchy UI에서 대상을 클릭한 경우에도 갱신되도록 개선됨
 
-- 에디터 실행 성능 개선됨
-- 이전 버전에 도입된 버텍스를 클릭하는 개선된 방식이 모든 경우에 대해 적용됨
-- Bake를 실행하면, 대상이 되는 GameObject가 포커스됨
-- 애니메이션 타임라인의 "자동 스크롤" 기능이 개선됨
-- Rigging 모디파이어에서 "Auto Normalize" 기능을 끌때 경고창이 등장함
-- 텍스쳐나 객체, 애니메이션들을 참조하는 모든 스크립트 함수들의 성능이 개선됨
-- 사용자가 "커맨드 버퍼"를 생성하여 캐릭터 렌더링을 제어하고자 할 때, 이를 보조하는 스크립트가 추가됨
-- 편집 중이지 않은 컨트롤 파라미터들의 UI에서도 등록된 키들이 보여지도록 변경됨
-- 모디파이어 UI에서 등록된 컨트롤 파라미터들이 출력될 때 사용자가 지정한 프리셋 아이콘과 함께 출력되도록 변경됨
-- Rigging 모디파이어의 UI에서 상황에 따라 현재 사용 불가능한 UI를 직관적으로 구분할 수 있도록 개선됨
-- 사용자가 클릭할 것으로 예상되는 버튼이 반짝거리도록 개선됨
-- 모디파이어에서 컨트롤 파라미터의 키들을 한번에 모두 삭제하고 동시에 컨트롤 파라미터를 모디파이어에서 제거하는 버튼이 추가됨
-- 최신 버전의 Mac OS에서 "Metal"이 필수 옵션으로 바뀌면서 더이상 Metal 관련 안내 다이얼로그가 나타나지 않도록 변경됨
-- 이미지의 텍스쳐를 선택하는 다이얼로그와 메시의 이미지를 선택하는 다이얼로그의 가독성이 향상됨
-- 애니메이션 타임라인에서 키프레임 등을 클릭하여 선택하는 처리가 개선됨
-- 지글본의 가중치를 컨트롤 파라미터로 조절하는 옵션이 추가됨
-- 본을 하나 혹은 여러개를 선택할 때 본 속성 UI의 변화가 최소화되도록 레이아웃 순서가 변경됨
-- 메시 편집 UI에서 버텍스를 모두 삭제하는 버튼의 크기가 사용 빈도에 맞게 조금 더 커지도록 변경됨
-- 컨트롤 파라미터로 제어하는 모디파이어의 "Reset Value" 및 "Paste" 기능을 사용할 때, 변경될 대상 속성을 선택하는 다이얼로그가 나타나도록 개선됨
-- 메시를 Rigging 모디파이어에 등록 직후에 메시의 모든 버텍스들이 선택되도록 변경됨
-- 씬에 존재하는 모든 apPortrait의 메시들을 갱신하는 기능이 유니티 에디터 메뉴의 "Refresh All Meshes" 메뉴로서 추가됨
-- 메시 그룹의 Hierarchy에서 메시나 자식 메시 그룹 항목을 우클릭하면 해당 객체를 바로 수정할 수 있는 "Modify" 메뉴가 추가됨
-- (v1.4.1) 애니메이션 이벤트 이름의 유효성을 검사하고 자동으로 수정해주는 기능이 추가됨
-- (v1.4.1) Inspector UI에서 Callback 방식의 애니메이션 이벤트를 할당할 때, 에러를 야기하는 "오버로딩" 함수가 제외되도록 변경됨
-- (v1.4.1) Inspector UI의 Callback 방식의 애니메이션 이벤트 UI에서 이벤트 리스너를 일괄 할당할 수 있는 기능이 추가됨
-- (v1.4.1) Inspector UI의 Callback 방식의 애니메이션 이벤트 UI에서 할당된 이벤트들의 유효성을 검사할 수 있는 기능이 추가됨
-- (v1.4.1) Inspector UI에서 컨트롤 파라미터의 이름을 클립보드로 복사하는 기능이 추가됨
-- (v1.4.1) 루트 유닛을 선택한 상태에서 애니메이션의 자동 재생 여부를 설정하는 버튼의 한국어 표기가 수정됨
-- (v1.4.1) 메시의 핀 편집 화면의 "Add Tool"을 선택한 상태에서, 작업 공간을 클릭하여 생성된 핀은 다시 클릭하기 전까지 이동할 수 없도록 변경됨
-- (v1.4.1) 모디파이어에 컨트롤 파라미터를 추가하거나 삭제한 직후에 실행 취소를 했을 때, 경우에 따라 컨트롤 파라미터가 적절히 선택되도록 개선됨
-- (v1.4.1) 여러개의 메시들을 자동 생성하는 다이얼로그에서 옵션을 일괄 변경할 수 있는 기능이 추가됨
+- AnimPlayData에서 재생 시간 등을 가져오는 함수들이 추가됨
+- 최신 버전을 알려주는 서버를 변경하여, 최신 버전을 조회하는 속도 및 안전성이 향상됨
+- 선택된 대상의 종류에 따라 오른쪽 UI의 스크롤 값을 구분하여 사용성이 향상됨
+- 새로운 Portrait의 이름을 설정하는 다이얼로그에서 Enter 키를 누르면 설정된 이름과 함께 Portrait가 바로 생성됨
+- 화면 해상도가 FHD보다 크다면, 버텍스나 선분을 클릭하는 범위가 조금 더 커짐
+- FFD 도구를 켠 상태에서 다른 작업을 할 때 나타나는 "FFD 작업을 완료할지를 묻는 메시지"가 더 많은 상황에서 나타나도록 개선됨
+- Unity 2022.2부터 프리팹과 관련된 일부 API가 Deprecated됨에 따라 관련된 코드가 변경됨
+- 리스트 UI의 "선택된 항목"의 하이라이트 디자인이 조금 더 예쁘게 보이도록 개선됨
 
 
 
 <size=13>수정된 문제점</size>
 
-- Morph 모디파이어 작업시, 메시를 선택하지 않은 상태에서 "Blur" 도구를 사용했을때 에러가 발생하는 문제가 수정됨
-- Pro UI에서 일부의 아이콘 이미지들이 낮은 해상도로 표시되던 문제가 수정됨
-- Transform 모디파이어 작업시, 2개 이상의 컨트롤 파라미터가 동일한 대상을 제어하는 상태에서 편집 모드를 켜면 해당 객체가 사라져버리는 문제가 수정됨
-- Color Only 모디파이어를 선택하고 다중 편집 모드를 켜면 다른 모디파이어들이 지나치게 제한되는 문제가 수정됨
-- 본 편집 모드에서 비활성화되어야 할 모디파이어가 동작하는 문제가 수정됨
-- 모디파이어 작업시, 컨트롤 파라미터의 값이 키에 위치하지 않은 상태에서 다중 편집 모드를 켜면 편집 모드가 해제되는 문제가 수정됨
-- 애니메이션 작업시, 다중 편집 모드가 다른 타임라인의 모디파이어들에게 제대로 적용되지 않는 문제가 수정됨
-- Inspector를 통해서 에디터를 여는 경우, 간헐적으로 에디터 리소스가 로드되지 않은 문제가 수정됨
-- 서로 다른 루트 유닛을 대상으로 하는 애니메이션들을 동일한 프레임에서 스크립트를 이용하여 재생하고자 하면 동작이 멈추는 문제가 수정됨
-- 비동기 초기화 함수를 호출하면 제대로 초기화가 되지 않는 문제가 수정됨
-- 에디터가 포커스되지 않은 상태에서 시간이 오래 지난 후, 애니메이션 재생이 프레임 설정에 맞지 않게 너무 빠르게 재생되는 문제가 수정됨
-- 애니메이션 이벤트 실행 방식이 "Callback"일 때, 적절한 스크립트 함수를 지정하지 않은 상태에서 Bake를 실행하면 에러로 인식하여 로그가 출력되는 문제가 수정됨
-- 유니티 2019 및 이후 버전에서 "보기 메뉴"를 열 때 컨트롤 파라미터 UI가 이상하게 출력되는 문제가 수정됨
-- 컨트롤 파라미터 UI에서 카테고리를 변경한 직후에 컨트롤 파라미터를 클릭하여 선택할 수 없는 문제가 수정됨
-- 재질 라이브러리에서 쉐이더 에셋을 변경한 직후 프리셋으로 등록하면, 프리셋에는 해당 에셋이 반영되지 않은 문제가 수정됨
-- Rigging 모디파이어에서 "Pose Test"를 켠 상태에서 기즈모의 외부를 클릭했을 때 본을 다시 클릭하기 전까지 기즈모를 제어할 수 없는 문제가 수정됨
-- 실행 취소 전후로 객체 생성시 내부적으로 ID 발급에 관한 오류가 매우 낮은 확률로 발생할 수 있었던 문제가 수정됨
-- 객체를 생성하거나 복제할 때, 해당 객체가 바로 선택되는지 여부가 객체 종류에 따라 일관적이지 않았던 문제가 수정됨
-- 작업 공간 외부에서 마우스 휠로 스크롤을 하고, 다시 작업 공간으로 커서를 이동하면 작업 공간이 확대/축소되는 문제가 수정됨
-- 렌더링 대상이 "렌더 텍스쳐(Render Texture)"인 경우에 "Keep Alpha" 재질 프리셋의 쉐이더들이 이상하게 렌더링되는 문제가 수정됨 (다시 해당 패키지를 설치해야함)
-- PSD 파일 임포트 다이얼로그에서, Atlas의 Bake 버튼을 다시 누른 직후에도 이전 Atlas가 화면에 계속 출력되는 문제가 수정됨
-- "Type" 클래스에 대해서 명시적으로 작성되지 않아 에러가 발생하는 문제가 수정됨
-- (v1.4.1) 애니메이션 이벤트를 복제할 때 마커 색상 속성이 복제되지 않는 문제가 수정됨
-- (v1.4.1) "애니메이션 이벤트 삭제 버튼"이 누락되었던 문제가 수정됨
-- (v1.4.1) 핀들을 연결하는 커브를 생성하거나 또는 커브를 삭제한 후 실행취소를 했을때 에러가 발생하는 문제가 수정됨
-- (v1.4.1) 2개의 핀들을 2개의 커브로 연결할 수 있는 문제가 수정됨
-- (v1.4.1) Inspector UI에서 프리팹 관련 UI의 버튼이 너무 작았던 문제가 수정됨
-- (v1.4.1) 메시 그룹의 객체들의 렌더링 순서를 바꾸고 Setting 탭이 선택되지 않은 상태에서 실행 취소를 하면 렌더링 순서가 비정상적으로 연산되는 문제가 수정됨
-- (v1.4.1) 컨트롤 파라미터, 리깅 UI 등에서 사용되는 삭제 버튼("X")이 Pro UI에서 잘 보이지 않는 문제가 수정됨
-
+- Rigging 모디파이어 편집 화면에서 단일 버텍스의 가중치를 변경하기 위해 숫자를 입력하는 UI가 동작하지 않는 문제가 수정됨
+- Rigging 모디파이어의 편집 화면에서 본의 렌더링 방식이 "회색, 반투명" 등으로 변경된 상태에서 바로 다른 메시 그룹을 선택하면 본의 렌더링 방식이 원래대로 돌아오지 않는 문제가 수정됨
+- 메시 그룹의 오른쪽 UI에서 "휴지통" 버튼에 의해 여러개의 객체가 동시에 삭제되지 않는 문제가 수정됨
+- 자식 메시 그룹이 있는 경우 객체들의 렌더링 순서를 정상적으로 변경할 수 없는 문제가 수정됨
+- PSD 파일 임포트시, 3레벨 이상의 자식 메시 그룹이 있는 경우 객체들의 순서가 역순으로 정렬되는 문제가 수정됨
+- PSD 파일을 다시 로드할 때, 3레벨 이상의 자식 메시 그룹의 메시들이 추가로 생성되지 않는 문제가 수정됨
+- 부모 본이 있는 상태로 Bake를 한 이후, 다시 부모 본과의 연결을 해제하고 Bake를 다시 했을 때 부모 본이 계속 연결된 것으로 인식되어 이상하게 움직이는 문제가 수정됨
+- 오류로 인하여 모디파이어가 삭제된 이후에도 데이터가 존재하는 것으로 잘못 인식될 때 에디터를 실행할 수 없는 문제가 수정됨
+- 메시 그룹을 삭제 했거나 유사한 작업 이후에 해당 메시 그룹과 연결되었던 애니메이션 클립에서 에러가 발생하면 해당 캐릭터를 에디터로 열 수 없게 되는 문제가 수정됨
+- 루프 애니메이션에서 자동 루프 키프레임이 위치한 마지막 프레임에서는 애니메이션 이벤트가 호출되지 않는 문제가 수정됨
+- 메시 그룹의 객체들을 동시에 여러개 삭제한 이후 실행 취소를 할 경우 순서가 비정상적으로 정렬되는 문제가 수정됨
+- Shift로 자식 메시 그룹의 메시들을 삭제한 경우 에러 로그가 발생하는 문제가 수정됨
+- PSD 다시 열기 다이얼로그에서 매핑 대상인 메시가 검은색으로 렌더링되는 문제가 수정됨
+- Secondary Atlas를 가져오는 다이얼로그에서 위치를 보정하는 단계로 처음 진입할 때 레이어 정보와 미리보기가 제대로 동작하지 않는 문제가 수정됨
+- 메시나 메시 그룹을 선택하지 않은 상태에서 에디터 왼쪽의 Hierarchy UI의 우클릭 메뉴를 통해 대상의 객체를 복제(Duplicate)할 수 없는 문제가 수정됨
+- 메시 그룹의 Setting 탭이 선택된 상태에서 자식 메시 그룹을 선택할 경우, 오른쪽 UI의 일부 항목이 이상하게 출력되는 문제가 수정됨
+- 게임 실행시 물리 효과가 실행되는 첫 프레임에서 초기값이 잘못 적용되어 버텍스나 본이 이상하게 움직이는 문제가 수정됨
+- 게임 실행시 FPS가 지나치게 낮거나 어플리케이션이 중지된 경우 물리 효과가 지나치게 과장되어 움직이는 문제가 수정됨
+- 메시를 구성하는 선분이 수평선이나 수직선일 때 마우스로 클릭하기 어려웠던 문제가 수정됨
+- 자식 메시 그룹에 속한 Rigging 모디파이어가 적용된 메시들은 Transform 모디파이어의 대상이 될 수 없는데, 이를 Hierarchy UI의 "노란색 눈 버튼"을 통해 우회하여 등록할 수 있었던 문제가 수정됨
+- 지글 본(Jiggle Bone)의 제한 영역(Constraint) 설정이 "부모 메시 그룹이 회전된 상태에서 대상이 루트 본이 아닌 경우"에 작업 공간에서 이상하게 보여지는 문제가 수정됨
+- FFD 도구가 켜진 상태에서 "Ctrl+A" 단축키를 누른 경우 컨트롤 포인트가 아닌 버텍스가 선택되는 문제가 수정됨
+- 애니메이션에 "Morph (Animation)" 모디파이어를 타임라인으로서 추가하고, 모든 메시를 타임라인 레이어로서 등록하고자 할 때, 대상이 아닌 자식 메시 그룹이 등록이 되고 반대로 대상이 되는 자식 메시 그룹의 메시들이 등록이 되지 않는 문제가 수정됨
+- 버그 등에 의해서 타임라인의 대상이 아닌 객체가 타임라인 레이어로 등록된 경우에, 이를 타임라인으로부터 삭제하는 버튼이 나타나지 않는 문제가 수정됨
+- 애니메이션 편집 화면에서 마우스 드래그시에 객체 선택이 해제되는 문제가 수정됨
 
 
 
 
 -----------------------------------------
 (프랑스어)
-<size=16>Fichier de mise à jour AnyPortrait v1.4.0/v1.4.1</size>
-(Construit le 16 juillet 2022 / 3 août 2022)
+<size=16>Fichier de mise à jour AnyPortrait v1.4.2</size>
+(Construit le 19 janvier 2023)
 
 <size=13>Améliorations</size>
 
-- <color=blue>outil Épingle</color>
-    Un nouvel outil Épingle basé sur les courbes est ajouté en tant qu'élément du maillage pour améliorer l'efficacité du travail dans le modificateur Morph.
-    Divers outils d'édition d'épingles sont ajoutés.
-    L'interface utilisateur pour distinguer le "mode d'édition de vertex" et le "mode d'édition de épingle" dans le modificateur Morph est ajoutée.
+- <color=blue>Paramètres de l'éditeur et paramètres de cuisson</color>
+    Certaines options de Bake sont partagées projet par projet
+    La fonctionnalité qui exporte/importe les paramètres d'environnement de l'éditeur dans un fichier est ajoutée
+    La fonctionnalité permettant d'enregistrer les options de cuisson personnalisées par l'utilisateur en tant que "paramètres par défaut" est ajoutée
+    Les préférences de l'éditeur et les paramètres de cuisson sont stockés au format de fichier texte, compatible avec les outils de contrôle de version
+    L'option de l'éditeur pour afficher les os en tant qu'"os fantômes" lors de la création d'os par clic de souris est ajoutée
+    L'option de l'éditeur pour modifier la taille des sommets ou des broches affichés dans l'espace de travail est ajoutée
+    L'option d'éditeur qui vous permet de désactiver le comportement du gizmo de "déplacer la cible immédiatement en faisant glisser à droite après avoir cliqué" est ajoutée
 
-- <color=blue>Images d'interface utilisateur améliorées</color>
-    L'image de sommet rendue dans l'espace de travail est bien modifiée tout en améliorant les performances de rendu.
-    Les images de l'interface utilisateur des paramètres de contrôle sont modifiées tout en améliorant les performances de rendu.
-    De nombreuses icônes telles que Bake Dialog, Inspector et Hierarchy sont modifiées pour être jolies
-    La technique "Pixel Perfect" est appliquée pour afficher clairement les images dans la chronologie de l'animation.
+- <color=blue>Importer un fichier PSD</color>
+    Lors de la réimportation d'un fichier PSD, les noms des couches et des maillages dans le PSD sont affichés à l'écran
+    Lors de la réimportation d'un fichier PSD, une fonction permettant d'afficher les pixels de l'image est ajoutée pour comparer avec précision les positions de la couche PSD et du maillage
+    Lorsqu'un fichier PSD est réimporté, il est amélioré afin que l'ordre de rendu des maillages soit correctement spécifié en fonction du fichier PSD
+    Lors de la génération de maillages à partir de fichiers PSD, il est modifié que l'enregistrement pour l'annulation n'est pas divisé par étapes de traitement
+    Lors de l'importation d'un fichier PSD, la visibilité par défaut des maillages est spécifiée en fonction de la visibilité des calques PSD
+    Lors de l'importation d'un fichier PSD, un message d'erreur apparaît lorsque le chemin n'est pas valide
 
-- <color=blue>Ajout de diverses options</color>
-    Une option est ajoutée à la boîte de dialogue Bake pour déterminer si la "valeur par défaut" ou la "dernière valeur" sera appliquée aux paramètres de contrôle indéfinis dans la prochaine animation à transitionner.
-    Une option est ajoutée à la boîte de dialogue Bake pour empêcher la fonction physique (Jiggle bones et Physics material) de se comporter étrangement lorsque le personnage se déplace loin en seulement 1 image.
-    Une option est ajoutée à la boîte de dialogue Paramètres pour étendre la hauteur de l'interface utilisateur des paramètres de contrôle de type vecteur dans l'éditeur
-    Une option est ajoutée à la boîte de dialogue Paramètres pour déterminer si "Préréglage de visibilité" restera activé lorsque d'autres objets sont sélectionnés
+- <color=blue>UI hiérarchique</color>
+    Un autre objet peut être sélectionné en appuyant sur la touche haut/bas après avoir cliqué sur la cible
+    L'interface utilisateur de la hiérarchie sur la droite défile automatiquement lorsqu'un objet est sélectionné dans l'espace de travail
+    Lors de la sélection d'un clip d'animation, l'interface utilisateur hiérarchique sur la gauche défile automatiquement
+    Si vous cliquez avec le bouton droit pour afficher le menu, le nom de l'objet sur lequel vous avez cliqué apparaît, et si plusieurs objets sont sélectionnés en même temps, le nombre d'objets supplémentaires sélectionnés s'affiche également.
+    Si vous appuyez sur la touche Entrée dans la boîte de dialogue "Renommer" via le menu contextuel, le nom modifié est appliqué immédiatement.
+    Lorsque vous essayez de modifier l'ordre des objets via le menu contextuel de l'interface utilisateur hiérarchique sur la gauche, un message demandant s'il faut modifier le mode de tri sur "Méthode personnalisée" peut s'afficher.
+    Par certaines fonctions du menu contextuel, l'objet sera sélectionné.
+    Changer le rendu d'un os en maintenant la touche Alt enfoncée, la visibilité des os enfants changera également.
+    Si l'option de couleur est désactivée, un petit point apparaîtra à la place, et cliquer dessus activera immédiatement l'option de couleur.
 
-- <color=blue>Amélioration de l'interface utilisateur de l'inspecteur</color>
-    Les performances de l'interface utilisateur de l'inspecteur sont améliorées.
-    La disposition des onglets est ajoutée à l'inspecteur pour faciliter la recherche des propriétés dont vous avez besoin.
-    Les icônes et la disposition de l'interface utilisateur de l'inspecteur ont été modifiées pour être jolies.
-    Les animations de personnages peuvent être prévisualisées dans l'éditeur Unity.
-    La liste d'images est ajoutée.
+- <color=blue>Modifier plusieurs objets</color>
+    La modification simultanée de l'ordre de rendu (profondeur) des objets sélectionnés est prise en charge
+    La duplication simultanée d'objets sélectionnés via le menu contextuel de l'interface utilisateur hiérarchique est prise en charge
+    Lors de la suppression via le menu contextuel de l'interface utilisateur hiérarchique, une option pour plusieurs suppressions est fournie
+    Lors de la suppression de plusieurs objets d'un groupe de maillages, il a été amélioré pour permettre la suppression même lorsque des groupes de maillages enfants et des maillages sont sélectionnés ensemble
 
-- <color=blue>UI d'événement d'animation améliorée</color>
-    La convivialité de la boîte de dialogue Événement d'animation est améliorée.
-    Une fonction permettant aux utilisateurs d'enregistrer des événements en tant que préréglages est ajoutée.
-    Une option est ajoutée pour changer la couleur des marqueurs d'événements
-    Il est modifié que les marqueurs d'événement doivent être rendus devant les curseurs sur la chronologie.
-    Les marqueurs d'événement continu sont exprimés de manière plus intuitive.
+- <color=blue>Écran d'édition de maillage</color>
+    Il est modifié que l'exécution de "Réinitialiser les sommets" crée un maillage carré pour s'adapter à la région de l'Atlas
+    La fonctionnalité qui copie et colle les broches sélectionnées dans un autre maillage est ajoutée
+    La fonctionnalité permettant de convertir leurs valeurs de position en coordonnées relatives basées sur le pivot lors de la copie et du collage de sommets ou d'épingles est ajoutée
+    Il est modifié que les broches apparaissent comme translucides lorsque l'onglet "Créer un maillage" est sélectionné
+    Il est amélioré que le sous-menu change dans l'ordre lorsque vous appuyez consécutivement sur la touche numéro 2 ou la touche numéro 7 parmi les touches de raccourci pour changer d'onglet de maillage
 
-- <color=blue>Fonction d'importation de fichiers PSD améliorée</color>
-    La fonctionnalité permettant de créer un "Atlas secondaire", qui est une image secondaire avec la même structure d'Atlas, est ajoutée à la "boîte de dialogue de réimportation PSD".
-    La stabilité des fonctions liées à la définition du chemin lors de l'enregistrement des fichiers PSD est améliorée.
+- <color=blue>Interface utilisateur de la chronologie d'animation</color>
+    Le curseur en bas a été modifié pour fonctionner dans le sens opposé afin que vous puissiez ajuster intuitivement le zoom avant/arrière de l'interface utilisateur de la chronologie de l'animation.
+    Il est amélioré que vous puissiez déplacer le curseur temporel en continu lorsque vous cliquez et faites glisser le haut de l'interface utilisateur de la chronologie tout en maintenant les touches Ctrl + Maj enfoncées
+    Il est amélioré que le "dernier calque de chronologie cliqué" pour les calques à sélection multiple soit actualisé même lorsque la cible est cliquée dans l'espace de travail ou l'interface utilisateur hiérarchique
 
-- Les performances d'exécution de l'éditeur sont améliorées.
-- La manière améliorée de cliquer sur les sommets introduite dans les versions précédentes est adaptée à tous les cas.
-- Lorsque Bake est exécuté, le GameObject cible est focalisé.
-- La fonction "Défilement automatique" de la chronologie de l'animation est améliorée.
-- Un avertissement apparaît lors de la désactivation de la fonction "Auto Normalize" dans le modificateur Rigging.
-- Les performances de toutes les fonctions de script qui référencent les textures, les objets et les animations sont améliorées.
-- Un script est ajouté pour aider à créer un "Command Buffer" pour contrôler le rendu des caractères.
-- Les clés enregistrées sont affichées dans l'interface utilisateur des paramètres de contrôle qui ne sont pas en cours de modification.
-- Lorsque les paramètres de contrôle enregistrés dans l'interface utilisateur du modificateur sont sortis, ils sont modifiés pour être affichés avec l'icône prédéfinie désignée par l'utilisateur.
-- Il est amélioré que l'interface utilisateur du modificateur Rigging puisse distinguer intuitivement les éléments d'interface utilisateur actuellement indisponibles en fonction de la situation.
-- Il est modifié que les boutons sur lesquels les utilisateurs s'attendent à ce que les utilisateurs cliquent clignotent.
-- Un bouton qui supprime toutes les touches de paramètre de contrôle du modificateur à la fois et supprime le paramètre de contrôle du modificateur en même temps est ajouté.
-- Dans la dernière version de Mac OS, "Metal" est remplacé par une option obligatoire afin que la boîte de dialogue du guide sur Metal ne s'affiche plus.
-- La lisibilité de la boîte de dialogue de sélection de la texture de l'image et de la boîte de dialogue de sélection de l'image pour le maillage est améliorée.
-- Le processus de clic et de sélection des images clés, etc. dans la chronologie de l'animation est amélioré.
-- Une option pour ajuster le poids du Jiggle Bone avec un paramètre de contrôle est ajoutée.
-- Lors de la sélection d'un ou plusieurs os, l'ordre de mise en page est optimisé pour minimiser les changements dans l'interface utilisateur des propriétés de l'os.
-- La taille du bouton pour supprimer tous les sommets dans l'interface utilisateur d'édition de maillage est modifiée pour être légèrement plus grande pour correspondre à la fréquence d'utilisation.
-- Lors de l'utilisation des fonctions "Reset Value" et "Coller" du modificateur contrôlé par le paramètre de contrôle, la nouvelle boîte de dialogue de sélection de la propriété cible à adapter apparaît.
-- Il est modifié que tous les sommets sont sélectionnés immédiatement après l'enregistrement du maillage dans le modificateur Rigging.
-- La possibilité d'actualiser tous les maillages d'apPortrait dans la scène est ajoutée sous la forme d'un menu "Actualiser tous les maillages" dans le menu de l'éditeur Unity.
-- Un nouveau menu contextuel "Modifier" est ajouté qui vous permet de modifier directement le maillage ou le groupe de maillages dans la hiérarchie du groupe de maillages.
-- (v1.4.1) Une fonction pour valider et corriger automatiquement les noms d'événements d'animation est ajoutée.
-- (v1.4.1) Il est modifié que les méthodes de "surcharge" seront exclues qui provoquent une erreur lors de l'attribution d'événements d'animation de style rappel dans l'interface utilisateur de l'inspecteur.
-- (v1.4.1) La possibilité d'affecter par lots des écouteurs d'événements dans l'interface utilisateur d'événement d'animation de rappel de l'interface utilisateur de l'inspecteur est ajoutée.
-- (v1.4.1) Une fonction permettant de vérifier la validité des événements attribués dans l'interface utilisateur d'événement d'animation de type rappel de l'interface utilisateur de l'inspecteur est ajoutée.
-- (v1.4.1) Une fonction permettant de copier le nom du paramètre de contrôle dans le presse-papiers de l'interface utilisateur de l'inspecteur est ajoutée.
-- (v1.4.1) La notation coréenne du bouton pour définir s'il faut lire automatiquement l'animation lorsque l'unité racine est sélectionnée est corrigée.
-- (v1.4.1) Il est modifié que les épingles créées en cliquant sur l'espace de travail avec "Ajouter un outil" ne peuvent pas être déplacées tant qu'elles ne sont pas cliquées à nouveau.
-- (v1.4.1) Lors de l'annulation immédiatement après l'ajout ou la suppression d'un paramètre de contrôle à un modificateur, le paramètre de contrôle est désormais correctement sélectionné.
-- (v1.4.1) La possibilité de modifier les options d'un lot dans la boîte de dialogue qui crée automatiquement plusieurs maillages est ajoutée.
+- Ajout de fonctions de script pour obtenir le temps de lecture, etc. à partir d'AnimPlayData
+- La vitesse et la stabilité de la recherche de la dernière version sont améliorées en changeant le serveur qui informe de la dernière version
+- La convivialité est améliorée en distinguant la valeur de défilement de la bonne interface utilisateur en fonction du type d'objet sélectionné
+- Si vous appuyez sur la touche Entrée dans la boîte de dialogue pour définir le nom du nouveau portrait, le portrait est créé immédiatement avec le nom défini.
+- Si la résolution de l'écran est supérieure à FHD, la plage de clics sur les sommets ou les bords est légèrement élargie.
+- Il est amélioré que le message vous demandant si vous souhaitez compléter l'outil FFD s'affiche sur la plus grande variété de situations.
+- Depuis Unity 2022.2, certaines API liées aux préfabriqués sont obsolètes, les codes associés sont donc modifiés
+- La conception en surbrillance des "éléments sélectionnés" dans l'interface utilisateur de la liste à regarder est un peu plus jolie
 
 
 
 <size=13>Problème résolu</size>
 
-- Un problème est résolu : lorsque l'erreur se produisait lors de l'utilisation de l'outil "Flou" sans maillage sélectionné lors de l'utilisation du modificateur Morph.
-- Un problème est résolu : certaines images d'icônes étaient affichées en basse résolution dans l'interface utilisateur Pro.
-- Un problème est résolu : lorsque le mode d'édition avec le modificateur de transformation est activé alors que deux ou plusieurs paramètres de contrôle gèrent le même objet, l'objet disparaît.
-- Un problème est résolu : qui entraînait une restriction excessive des autres modificateurs lors de la sélection du modificateur Couleur uniquement et de l'activation du mode d'édition multiple.
-- Un problème est résolu : les modificateurs qui doivent être désactivés dans ce mode d'édition fonctionnent.
-- Un problème est résolu : le mode d'édition est annulé lorsque le mode d'édition multiple est activé alors que la valeur du paramètre de contrôle n'est pas située dans la clé.
-- Un problème est résolu : à savoir que le mode d'édition multiple n'était pas appliqué correctement aux modificateurs dans d'autres chronologies.
-- Un problème est résolu : les ressources de l'éditeur n'étaient pas chargées par intermittence lors de l'ouverture de l'éditeur via l'inspecteur.
-- Un problème est résolu : les animations ciblant différentes unités racine cessent de fonctionner lorsque vous essayez de lire des animations dans la même image à l'aide d'un script.
-- Un problème est résolu : que la fonction d'initialisation asynchrone ne fonctionnait pas correctement.
-- Un problème est résolu : la lecture de l'animation est trop rapide pour correspondre aux paramètres de l'image après un long laps de temps alors que l'éditeur n'est pas au point.
-- Un problème est résolu : il est reconnu comme une erreur et un journal est généré si Bake est exécuté sans spécifier une fonction de script appropriée et si la méthode d'exécution de l'événement d'animation est "Callback".
-- Un problème est résolu : l'interface utilisateur des paramètres de contrôle s'affichait étrangement lors de l'ouverture du "Menu Affichage" dans Unity 2019 et les versions ultérieures.
-- Un problème est résolu : vous ne pouviez pas sélectionner un paramètre de contrôle en cliquant dessus immédiatement après avoir modifié une catégorie de paramètres de contrôle.
-- Un problème est résolu : à savoir que l'actif shader modifié d'un ensemble de matériaux n'est pas appliqué au préréglage dans la bibliothèque de matériaux.
-- Un problème est résolu : à savoir que le gizmo du mode "Test de pose" du modificateur Rigging ne pouvait pas être contrôlé tant que l'os n'était pas cliqué à nouveau après avoir cliqué en dehors du gizmo.
-- Un problème est résolu : selon lequel une erreur d'émission d'ID interne lors de la création d'un objet avant ou après l'annulation se produira avec une très faible probabilité.
-- Un problème est résolu : à savoir si un objet est sélectionné immédiatement lors de la création ou de la duplication d'un objet n'était pas cohérent en fonction du type d'objet.
-- Un problème est résolu : l'espace de travail sera agrandi/dézoomé lors du défilement avec la molette de la souris en dehors de l'espace de travail et du déplacement du curseur vers l'espace de travail.
-- Un problème est résolu : à savoir que les shaders du préréglage de matériau "Keep Alpha" étaient rendus de manière étrange lorsque la cible de rendu était "Render Texture". (Vous devrez réinstaller ce package.)
-- Un problème est résolu : l'Atlas précédent était affiché en continu à l'écran même après avoir appuyé à nouveau sur le bouton Bake d'Atlas dans la boîte de dialogue d'importation de fichiers PSD.
-- Un problème est résolu : une erreur s'est produite car du code utilisant la classe "Type" n'a pas été écrit explicitement.
-- (v1.4.1) Un problème est résolu : la propriété de couleur du marqueur n'est pas dupliquée lors de la duplication d'un événement d'animation.
-- (v1.4.1) Un problème est résolu : à savoir que le "bouton Supprimer l'événement d'animation" manquait dans la version précédente.
-- (v1.4.1) Un problème est résolu : une erreur se produisait lors de l'annulation après la création d'une courbe connectant des broches ou la suppression d'une courbe.
-- (v1.4.1) Un problème est résolu : que 2 broches pouvaient être connectées avec 2 courbes.
-- (v1.4.1) Un problème est résolu : les boutons liés au préfabriqué étaient trop petits dans l'interface utilisateur de l'inspecteur.
-- (v1.4.1) Un problème est résolu : l'ordre de rendu était calculé anormalement lorsque l'ordre de rendu des objets dans un groupe de maillage était modifié et que l'onglet de réglage n'était pas sélectionné et annulé.
-- (v1.4.1) Un problème est résolu : le bouton de suppression ("X") utilisé dans l'interface utilisateur des paramètres de contrôle, l'interface utilisateur de gréement, etc. est trop sombre dans l'interface utilisateur Pro.
+- Un problème est résolu où l'interface utilisateur permettant de saisir des nombres pour modifier le poids d'un seul sommet ne fonctionnait pas dans l'écran d'édition du modificateur de gréement
+- Un problème est résolu où l'état de rendu des os ne revient pas à son état d'origine lorsqu'un groupe de maillage différent est sélectionné immédiatement après que l'état de rendu des os a été changé en "gris, translucide" dans l'écran d'édition du modificateur Rigging
+- Un problème est résolu lorsque plusieurs objets ne sont pas supprimés en même temps en appuyant sur le bouton "Corbeille" dans l'interface utilisateur à droite du groupe de maillage.
+- Un problème est résolu où l'ordre de rendu des objets ne pouvait pas être modifié normalement lorsqu'il y avait un groupe de maillage enfant
+- Un problème est résolu où les objets sont triés dans l'ordre inverse lorsqu'il existe un groupe de maillage enfant de 3 niveaux ou plus lors de l'importation d'un fichier PSD.
+- Un problème est résolu où les maillages des groupes de maillages enfants de 3 niveaux ou plus n'étaient pas créés en plus lors de la réimportation d'un fichier PSD
+- Un problème est résolu où la déconnexion de l'os parent existant et la cuisson à nouveau provoquent un mouvement étrange de l'os
+- Un problème est résolu où l'éditeur ne pouvait pas être exécuté lorsqu'il était incorrectement reconnu que des données existaient même après la suppression du modificateur en raison d'une erreur
+- Un problème est résolu où le personnage ne pouvait pas être ouvert dans l'éditeur si une erreur se produisait dans le clip d'animation qui était lié au groupe de maillage après la suppression du groupe de maillage ou après une opération similaire.
+- Un problème est résolu où les événements d'animation n'étaient pas appelés dans la dernière image où les images clés de boucle automatique étaient situées dans l'animation en boucle.
+- Un problème est résolu où les objets d'un groupe de mailles sont anormalement triés lors de l'annulation après la suppression de plusieurs objets en même temps.
+- Un problème est résolu où le journal des erreurs se produit lors de la suppression de maillages dans un groupe de maillages enfants avec la touche Maj.
+- Un problème est résolu où le maillage cible de mappage était rendu en noir dans la boîte de dialogue Réimporter PSD
+- Un problème est résolu où les informations de couche et l'aperçu ne fonctionnaient pas correctement lors de la première entrée dans l'étape de correction de position dans la boîte de dialogue d'importation de l'atlas secondaire.
+- Un problème est résolu où les objets ne pouvaient pas être dupliqués via le menu contextuel de l'interface utilisateur de la hiérarchie sur le côté gauche de l'éditeur alors qu'aucun maillage ou groupe de maillages n'était sélectionné.
+- Un problème est résolu où certains éléments de l'interface utilisateur à droite s'affichaient étrangement lorsqu'un groupe de maillage enfant était sélectionné alors que l'onglet de configuration du groupe de maillage était sélectionné.
+- Un problème est résolu où la valeur initiale de l'effet physique n'était pas correctement appliquée et les sommets ou les os se déplaçaient étrangement lors de l'exécution du jeu
+- Un problème est résolu où l'effet physique fonctionne de manière exagérée lorsque le FPS était trop bas ou que l'application s'arrêtait lorsque le jeu était en cours d'exécution.
+- Un problème est résolu où il était difficile de cliquer sur les bords horizontaux et les bords verticaux
+- Un problème est résolu où les maillages avec le modificateur Rigging appliqué dans le groupe de maillage enfant - ne pouvaient pas être ciblés pour le modificateur Transformer - pouvaient être contournés et enregistrés via le "bouton œil jaune" dans l'interface utilisateur Hiérarchie.
+- Un problème est résolu où le paramètre de contrainte de Jiggle Bone semblerait étrange dans l'espace de travail lorsqu'une cible n'est pas un os racine et que le groupe de maillage parent est pivoté
+- Un problème est résolu où les sommets plutôt que les points de contrôle étaient sélectionnés en appuyant sur la touche de raccourci "Ctrl + A" alors que l'outil FFD était activé
+- Un problème est résolu où des groupes de maillages enfants non cibles étaient enregistrés ou des maillages dans des groupes de maillages enfants qui devraient être ciblés n'étaient pas enregistrés lors de la tentative d'enregistrement de tous les maillages dans "Morph (Animation)" en tant que couches de chronologie
+- Un problème est résolu où le bouton pour supprimer des objets de la chronologie n'apparaissait pas lorsqu'un objet qui n'était pas la cible de la chronologie était enregistré en tant que calque de chronologie en raison d'un bogue, etc.
+- Un problème est résolu où la sélection d'objet était annulée lors du déplacement de la souris sur l'écran d'édition d'animation
 
 
 
 
 -----------------------------------------
 (독일어)
-<size=16>AnyPortrait-Aktualisierungsprotokoll v1.4.0/v1.4.1</size>
-(Build 16. Juli 2022 / 3. August 2022)
+<size=16>AnyPortrait-Aktualisierungsprotokoll v1.4.2</size>
+(Build 19. Januar 2023)
 
 <size=13>Verbesserungen</size>
 
-- <color=blue>Stift-Werkzeug</color>
-    Ein neues kurvenbasiertes „Stift“-Werkzeug wird als Element des Netzes hinzugefügt, um die Arbeitseffizienz im Morph-Modifikator zu verbessern.
-    Diverse Werkzeuge zur Bearbeitung von "Stift" werden hinzugefügt.
-    UI zur Unterscheidung von „Vertex-Bearbeitungsmodus“ und „Stift-Bearbeitungsmodus“ im Morph-Modifikator wurden hinzugefügt.
+- <color=blue>Editor-Einstellungen und Bake-Einstellungen</color>
+    Einige Bake-Optionen werden projektweise geteilt
+    Die Funktion zum Exportieren/Importieren von Editorumgebungseinstellungen in eine Datei wurde hinzugefügt
+    Die Funktion zum Speichern benutzerdefinierter Bake-Optionen als "Standardeinstellungen" wurde hinzugefügt
+    Editor-Präferenzen und Bake-Einstellungen werden im Textdateiformat gespeichert, das mit Versionskontrolltools kompatibel ist
+    Die Editor-Option, Knochen als "Geisterknochen" anzuzeigen, wenn Knochen per Mausklick erstellt werden, wurde hinzugefügt
+    Die Editor-Option zum Ändern der Größe von Scheitelpunkten oder Pins, die im Arbeitsbereich angezeigt werden, wurde hinzugefügt
+    Die Editor-Option, mit der Sie das Gizmo-Verhalten „Ziel sofort durch Ziehen nach rechts nach dem Klicken verschieben“ deaktivieren können, wurde hinzugefügt
 
-- <color=blue>Verbesserte UI-Bilder</color>
-    Das im Arbeitsbereich gerenderte Scheitelpunktbild wird gut geändert, während die Renderleistung verbessert wird.
-    Bilder der Steuerparameter-UI werden geändert, während die Wiedergabeleistung verbessert wird.
-    Viele Symbole wie Bake Dialog, Inspector und Hierarchy wurden geändert, um hübsch zu sein
-    Die „Pixel Perfect“-Technik wird angewendet, um die Bilder in der Animationszeitachse klar anzuzeigen.
+- <color=blue>PSD-Datei importieren</color>
+    Beim erneuten Importieren einer PSD-Datei werden die Namen der Ebenen und Netze in der PSD auf dem Bildschirm angezeigt
+    Beim erneuten Importieren einer PSD-Datei wird eine Funktion zum Anzeigen der Pixel des Bildes hinzugefügt, um die Positionen der PSD-Ebene und des Netzes genau zu vergleichen
+    Wenn eine PSD-Datei erneut importiert wird, wird sie verbessert, sodass die Rendering-Reihenfolge der Netze basierend auf der PSD-Datei richtig angegeben wird
+    Beim Generieren von Netzen aus PSD-Dateien wird geändert, dass der Datensatz für das Rückgängigmachen nicht nach Bearbeitungsschritten aufgeteilt wird
+    Beim Importieren einer PSD-Datei wird die Standardsichtbarkeit von Netzen basierend auf der Sichtbarkeit von PSD-Ebenen angegeben
+    Beim Importieren einer PSD-Datei erscheint eine Fehlermeldung, wenn der Pfad ungültig ist
 
-- <color=blue>Verschiedene Optionen hinzugefügt</color>
-    Dem Bake-Dialog wird eine Option hinzugefügt, um zu bestimmen, ob der "Standardwert" oder der "letzte Wert" auf undefinierte Steuerparameter in der nächsten zu übergehenden Animation angewendet wird.
-    Dem Bake-Dialog wurde eine Option hinzugefügt, um zu verhindern, dass sich die Physikfunktion (Jiggle Bones und Physics-Material) seltsam verhält, wenn sich die Figur in nur 1 Frame weit bewegt.
-    Dem Einstellungsdialog wurde eine Option hinzugefügt, um die UI-Höhe von Steuerparametern vom Typ Vektor im Editor zu erweitern
-    Dem Einstellungsdialog wurde eine Option hinzugefügt, um zu bestimmen, ob "Sichtbarkeitsvoreinstellung" aktiviert bleibt, wenn andere Objekte ausgewählt werden
+- <color=blue>Hierarchie-UI</color>
+    Ein anderes Objekt kann durch Drücken der Auf-/Ab-Taste ausgewählt werden, nachdem Sie auf das Ziel geklickt haben
+    Die Hierarchie-Benutzeroberfläche auf der rechten Seite scrollt automatisch, wenn ein Objekt im Arbeitsbereich ausgewählt wird
+    Wenn Sie einen Animationsclip auswählen, scrollt die Hierarchie-Benutzeroberfläche auf der linken Seite automatisch
+    Wenn Sie mit der rechten Maustaste klicken, um das Menü anzuzeigen, wird der Name des angeklickten Objekts angezeigt, und wenn mehrere Objekte gleichzeitig ausgewählt sind, wird auch die Anzahl der zusätzlich ausgewählten Objekte angezeigt.
+    Wenn Sie im Dialog "Umbenennen" über das Kontextmenü die Eingabetaste drücken, wird der geänderte Name sofort übernommen.
+    Wenn Sie versuchen, die Reihenfolge von Objekten über das Rechtsklickmenü der Hierarchie-Benutzeroberfläche auf der linken Seite zu ändern, kann eine Meldung angezeigt werden, in der Sie gefragt werden, ob der Sortiermodus in „Benutzerdefinierte Methode“ geändert werden soll.
+    Durch einige Rechtsklick-Menüfunktionen wird das Objekt ausgewählt.
+    Wenn Sie das Rendering eines Bones ändern, indem Sie die Alt-Taste gedrückt halten, ändert sich auch die Sichtbarkeit der untergeordneten Bones.
+    Wenn die Farboption deaktiviert ist, erscheint stattdessen ein kleiner Punkt, und wenn Sie darauf klicken, wird die Farboption sofort aktiviert.
 
-- <color=blue>Verbesserte Benutzeroberfläche des Inspektors</color>
-    Die Leistung der Inspector-Benutzeroberfläche wurde verbessert.
-    Das Registerkartenlayout wird Inspector hinzugefügt, um das Auffinden der benötigten Eigenschaften zu erleichtern.
-    Die Symbole und das Layout der Inspector-Benutzeroberfläche wurden geändert, um hübsch zu sein.
-    Charakteranimationen können im Unity-Editor in der Vorschau angezeigt werden.
-    Die Bildliste wird hinzugefügt.
+- <color=blue>Mehrere Objekte bearbeiten</color>
+    Das gleichzeitige Ändern der Renderreihenfolge (Tiefe) ausgewählter Objekte wird unterstützt
+    Das gleichzeitige Duplizieren ausgewählter Objekte über das Rechtsklickmenü der Hierarchie-Benutzeroberfläche wird unterstützt
+    Beim Löschen über das Rechtsklickmenü der Hierarchie-Benutzeroberfläche wird eine Option zum mehrfachen Löschen bereitgestellt
+    Das Löschen mehrerer Objekte aus einer Mesh-Gruppe wurde verbessert, um das Entfernen auch dann zu ermöglichen, wenn untergeordnete Mesh-Gruppen und Meshes zusammen ausgewählt sind
 
-- <color=blue>Verbesserte Benutzeroberfläche für Animationsereignisse</color>
-    Die Benutzerfreundlichkeit des Dialogfelds „Animationsereignis“ wurde verbessert.
-    Eine Funktion zum Speichern von Ereignissen als Voreinstellungen wurde hinzugefügt.
-    Es wurde eine Option hinzugefügt, um die Farbe von Ereignismarkierungen zu ändern
-    Es wurde geändert, dass Ereignismarkierungen vor Schiebereglern auf der Zeitachse gerendert werden.
-    Kontinuierliche Ereignismarkierungen werden intuitiver ausgedrückt.
+- <color=blue>Mesh-Bearbeitungsbildschirm</color>
+    Es wurde geändert, dass das Ausführen von "Vertices zurücksetzen" ein quadratisches Netz erstellt, das der Atlas-Region entspricht
+    Die Funktion zum Kopieren und Einfügen ausgewählter Pins in ein anderes Netz wurde hinzugefügt
+    Die Funktion zum Umwandeln ihrer Positionswerte in relative Koordinaten basierend auf dem Drehpunkt beim Kopieren und Einfügen von Scheitelpunkten oder Stiften wurde hinzugefügt
+    Es wurde geändert, dass Pins durchscheinend erscheinen, wenn die Registerkarte "Mesh erstellen" ausgewählt ist
+    Es wurde verbessert, dass sich die Reihenfolge des Untermenüs ändert, wenn Sie nacheinander die Taste 2 oder die Taste 7 unter den Hotkeys zum Wechseln der Mesh-Registerkarten drücken
 
-- <color=blue>Verbesserte Importfunktion für PSD-Dateien</color>
-    Die Funktion zum Erstellen eines „sekundären Atlas“, bei dem es sich um ein sekundäres Bild mit derselben Atlasstruktur handelt, wurde dem „PSD Reimport-Dialog“ hinzugefügt.
-    Die Stabilität der Funktionen zum Festlegen des Pfads beim Speichern von PSD-Dateien wurde verbessert.
+- <color=blue>Benutzeroberfläche der Animationszeitachse</color>
+    Der Schieberegler unten wurde so geändert, dass er umgekehrt funktioniert, sodass Sie das Vergrößern/Verkleinern der Benutzeroberfläche der Animationszeitachse intuitiv anpassen können.
+    Es wurde verbessert, dass Sie den Zeitschieber kontinuierlich verschieben können, wenn Sie auf den oberen Rand der Timeline-Benutzeroberfläche klicken und ihn ziehen, während Sie die Tasten Strg + Umschalt gedrückt halten
+    Es wurde verbessert, dass die „zuletzt angeklickte Zeitachsenebene“ für Mehrfachauswahlebenen aktualisiert wird, selbst wenn auf das Ziel im Arbeitsbereich oder in der Hierarchie-Benutzeroberfläche geklickt wird
 
-- Die Ausführungsleistung des Editors wurde verbessert.
-- Die in früheren Versionen eingeführte verbesserte Methode zum Klicken auf Scheitelpunkte wurde für alle Fälle angepasst.
-- Wenn Bake ausgeführt wird, wird das Ziel-GameObject fokussiert.
-- "Auto-Scroll"-Funktion der Animationszeitleiste wurde verbessert.
-- Beim Deaktivieren der Funktion "Auto Normalize" im Rigging-Modifikator erscheint eine Warnung.
-- Die Leistung aller Skriptfunktionen, die Texturen, Objekte und Animationen referenzieren, wurde verbessert.
-- Ein Skript wurde hinzugefügt, um beim Erstellen eines "Befehlspuffers" zu helfen, um die Darstellung von Zeichen zu steuern.
-- Die registrierten Schlüssel werden in der Benutzeroberfläche von Steuerparametern angezeigt, die nicht bearbeitet werden.
-- Wenn die registrierten Steuerparameter in der Modifikator-UI ausgegeben werden, werden sie so geändert, dass sie mit dem vom Benutzer festgelegten voreingestellten Symbol angezeigt werden.
-- Es wurde verbessert, dass die Benutzeroberfläche des Rigging-Modifikators die derzeit nicht verfügbaren UI-Elemente je nach Situation intuitiv unterscheiden kann.
-- Es wurde geändert, dass Schaltflächen, die von Benutzern angeklickt werden sollen, blinken.
-- Eine Schaltfläche, die alle Steuerparameter-Tasten auf einmal aus dem Modifikator löscht und gleichzeitig den Steuerparameter aus dem Modifikator entfernt, wurde hinzugefügt.
-- In der neuesten Version von Mac OS wurde "Metal" in eine erforderliche Option geändert, sodass der Anleitungsdialog zu Metal nicht mehr angezeigt wird.
-- Die Lesbarkeit des Dialogs zur Auswahl der Textur des Bildes und des Dialogs zur Auswahl des Bildes für das Netz wurde verbessert.
-- Der Vorgang des Klickens und Auswählens von Keyframes usw. in der Animationszeitachse wurde verbessert.
-- Eine Option zum Anpassen des Gewichts des Wackelknochens mit einem Steuerparameter wurde hinzugefügt.
-- Bei der Auswahl eines oder mehrerer Bones wird die Layout-Reihenfolge optimiert, um Änderungen in der Benutzeroberfläche der Bone-Eigenschaften zu minimieren.
-- Die Größe der Schaltfläche zum Entfernen aller Scheitelpunkte in der Mesh-Bearbeitungs-Benutzeroberfläche wurde geändert, um sie etwas größer zu machen, um der Nutzungshäufigkeit zu entsprechen.
-- Bei Verwendung der Funktionen "Wert zurücksetzen" und "Einfügen" des vom Steuerparameter gesteuerten Modifikators erscheint der neue Dialog zur Auswahl der anzupassenden Zieleigenschaft.
-- Es wurde geändert, dass alle Scheitelpunkte sofort nach der Registrierung des Netzes im Rigging-Modifikator ausgewählt werden.
-- Die Möglichkeit, alle Meshes von apPortrait in der Szene zu aktualisieren, wurde als Menü "Alle Meshes aktualisieren" im Unity-Editor-Menü hinzugefügt.
-- Ein neues Rechtsklickmenü "Ändern" wurde hinzugefügt, mit dem Sie das Netz oder die Netzgruppe in der Hierarchie der Netzgruppe direkt ändern können.
-- (v1.4.1) Eine Funktion zur Validierung und automatischen Korrektur von Animationsereignisnamen wurde hinzugefügt.
-- (v1.4.1) Es wurde geändert, dass "überladende" Methoden ausgeschlossen werden, die einen Fehler verursachen, wenn Animationsereignisse im Callback-Stil in der Inspector-Benutzeroberfläche zugewiesen werden.
-- (v1.4.1) Die Möglichkeit, Ereignis-Listener in der Callback-Animationsereignis-Benutzeroberfläche der Inspector-Benutzeroberfläche stapelweise zuzuweisen, wurde hinzugefügt.
-- (v1.4.1) Eine Funktion zur Überprüfung der Gültigkeit zugewiesener Ereignisse in der Benutzeroberfläche für Animationsereignisse vom Typ Callback der Inspector-Benutzeroberfläche wurde hinzugefügt.
-- (v1.4.1) Eine Funktion zum Kopieren des Steuerparameternamens in die Zwischenablage in der Inspector-Benutzeroberfläche wurde hinzugefügt.
-- (v1.4.1) Die koreanische Notation der Schaltfläche zum Einstellen, ob die Animation automatisch abgespielt werden soll, während die Root-Einheit ausgewählt ist, wurde korrigiert.
-- (v1.4.1) Es wurde geändert, dass Pins, die durch Klicken auf den Arbeitsbereich mit „Werkzeug hinzufügen“ erstellt wurden, nicht verschoben werden können, bis sie erneut angeklickt werden.
-- (v1.4.1) Beim Rückgängigmachen unmittelbar nach dem Hinzufügen oder Löschen eines Steuerungsparameters zu einem Modifikator wird der Steuerungsparameter jetzt richtig ausgewählt.
-- (v1.4.1) Die Möglichkeit, Optionen in einem Stapel im Dialog zu ändern, der automatisch mehrere Netze erstellt, wurde hinzugefügt.
+- Skriptfunktionen hinzugefügt, um Wiedergabezeit usw. von AnimPlayData zu erhalten
+- Die Geschwindigkeit und Stabilität der Suche nach der neuesten Version wurden verbessert, indem der Server geändert wurde, der die neueste Version informiert
+- Die Benutzerfreundlichkeit wird verbessert, indem der Bildlaufwert der rechten Benutzeroberfläche entsprechend dem Typ des ausgewählten Objekts unterschieden wird
+- Wenn Sie im Dialog die Eingabetaste drücken, um den Namen des neuen Porträts festzulegen, wird das Porträt sofort mit dem festgelegten Namen erstellt.
+- Wenn die Bildschirmauflösung höher als FHD ist, wird der Bereich zum Klicken auf Scheitelpunkte oder Kanten etwas erweitert.
+- Es wurde verbessert, dass die Meldung, in der Sie gefragt werden, ob Sie das FFD-Tool abschließen möchten, in einer Vielzahl von Situationen angezeigt wird.
+- Seit Unity 2022.2 sind einige APIs im Zusammenhang mit Prefabs veraltet, sodass zugehörige Codes geändert wurden
+- Das Highlight-Design von "Selected Items" in der Listen-UI sieht etwas hübscher aus
 
 
 
 <size=13>Problem behoben</size>
 
-– Es wurde ein Problem behoben, bei dem der Fehler auftrat, wenn das Werkzeug "Weichzeichnen" ohne ausgewähltes Netz verwendet wurde, wenn mit dem Modifikator "Morph" gearbeitet wurde.
-– Es wurde ein Problem behoben, bei dem einige Symbolbilder in der Pro-Benutzeroberfläche mit niedriger Auflösung angezeigt wurden.
-- Es wurde ein Problem behoben, bei dem das Objekt verschwindet, wenn der Bearbeitungsmodus mit dem Modifikator "Transformieren" aktiviert ist, während zwei oder mehr Steuerparameter dasselbe Objekt behandeln.
-– Es wurde ein Problem behoben, das dazu führte, dass andere Modifikatoren übermäßig eingeschränkt wurden, wenn der Modifikator „Nur Farbe“ ausgewählt und der Mehrfachbearbeitungsmodus aktiviert wurde.
-- Es wurde ein Problem behoben, dass Modifikatoren, die in diesem Bearbeitungsmodus deaktiviert werden sollten, funktionieren.
-- Es wurde ein Problem behoben, bei dem der Bearbeitungsmodus abgebrochen wurde, wenn der Multi-Bearbeitungsmodus eingeschaltet wurde, während sich der Wert des Steuerparameters nicht im Schlüssel befand.
-– Es wurde ein Problem behoben, bei dem der Mehrfachbearbeitungsmodus nicht richtig auf Modifikatoren in anderen Zeitleisten angewendet wurde.
-– Es wurde ein Problem behoben, bei dem Editor-Ressourcen zeitweise nicht geladen wurden, wenn der Editor über den Inspector geöffnet wurde.
-– Es wurde ein Problem behoben, bei dem Animationen, die auf verschiedene Root-Einheiten abzielten, nicht mehr funktionierten, wenn versucht wurde, Animationen im selben Frame mit einem Skript abzuspielen.
-– Es wurde ein Problem behoben, bei dem die asynchrone Initialisierungsfunktion nicht richtig funktionierte.
-- Es wurde ein Problem behoben, bei dem die Animationswiedergabe zu schnell ist, um mit den Frame-Einstellungen übereinzustimmen, nachdem lange Zeit verstrichen ist, während der Editor nicht im Fokus war.
-- Es wurde ein Problem behoben, dass es als Fehler erkannt und ein Protokoll ausgegeben wird, wenn Bake ohne Angabe einer entsprechenden Skriptfunktion ausgeführt wird und die Ausführungsmethode des Animationsereignisses "Callback" ist.
-– Es wurde ein Problem behoben, bei dem die Steuerparameter-Benutzeroberfläche beim Öffnen des „Ansichtsmenüs“ in Unity 2019 und späteren Versionen seltsam angezeigt wurde.
-- Es wurde ein Problem behoben, bei dem Sie einen Steuerparameter nicht auswählen konnten, indem Sie sofort darauf klickten, nachdem Sie eine Kategorie von Steuerparametern geändert hatten.
-- Es wurde ein Problem behoben, bei dem das geänderte Shader-Asset eines Materialsatzes nicht auf die Voreinstellung in der Materialbibliothek angewendet wird.
-- Es wurde ein Problem behoben, bei dem das Gizmo des „Pose Test“-Modus des Rigging-Modifikators nicht gesteuert werden konnte, bis erneut auf den Bone geklickt wurde, nachdem außerhalb des Gizmos geklickt wurde.
-- Es wurde ein Problem behoben, bei dem ein interner ID-Ausgabefehler beim Erstellen eines Objekts vor oder nach dem Rückgängigmachen mit sehr geringer Wahrscheinlichkeit auftritt.
-- Es wurde ein Problem behoben, bei dem es je nach Objekttyp nicht konsistent war, ob ein Objekt beim Erstellen oder Duplizieren eines Objekts sofort ausgewählt wurde.
-– Es wurde ein Problem behoben, bei dem der Arbeitsbereich vergrößert/verkleinert wird, wenn mit dem Mausrad außerhalb des Arbeitsbereichs gescrollt und der Cursor zurück zum Arbeitsbereich bewegt wird.
-- Es wurde ein Problem behoben, bei dem die Shader der Materialvoreinstellung „Alpha beibehalten“ seltsam gerendert wurden, wenn das Renderziel „Textur rendern“ war. (Sie müssen dieses Paket erneut installieren.)
-- Es wurde ein Problem behoben, bei dem der vorherige Atlas kontinuierlich auf dem Bildschirm angezeigt wurde, auch nachdem die Bake-Schaltfläche von Atlas im PSD-Dateiimportdialog erneut gedrückt wurde.
-– Es wurde ein Problem behoben, bei dem ein Fehler auftrat, weil ein Teil des Codes, der die Klasse „Type“ verwendet, nicht explizit geschrieben wurde.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem die Marker-Farbeigenschaft beim Duplizieren eines Animationsereignisses nicht dupliziert wird.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem die Schaltfläche "Animationsereignis entfernen" in der vorherigen Version übersehen wurde.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem beim Rückgängigmachen nach dem Erstellen einer Kurve Verbindungsstifte oder beim Löschen einer Kurve ein Fehler auftrat.
-- (v1.4.1) Es wurde ein Problem behoben, dass 2 Pins mit 2 Kurven verbunden werden konnten.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem die Schaltflächen für das Prefab in der Inspector-Benutzeroberfläche zu klein waren.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem die Rendering-Reihenfolge abnormal berechnet wurde, wenn die Rendering-Reihenfolge von Objekten in einer Mesh-Gruppe geändert wurde und die Einstellungsregisterkarte nicht ausgewählt und rückgängig gemacht wurde.
-- (v1.4.1) Es wurde ein Problem behoben, bei dem die Schaltfläche zum Entfernen ("X"), die in der Steuerparameter-Benutzeroberfläche, Rigging-Benutzeroberfläche usw. verwendet wird, in der Pro-Benutzeroberfläche zu dunkel ist.
+- Es wurde ein Problem behoben, bei dem die Benutzeroberfläche zur Eingabe von Zahlen zur Änderung der Gewichtung eines einzelnen Scheitelpunkts im Bearbeitungsbildschirm für den Rigging-Modifikator nicht funktionierte
+- Es wurde ein Problem behoben, bei dem der Rendering-Status von Bones nicht in seinen ursprünglichen Zustand zurückkehrt, wenn eine andere Mesh-Gruppe ausgewählt wird, unmittelbar nachdem der Rendering-Status von Bones im Bearbeitungsbildschirm des Rigging-Modifikators auf "grau, durchscheinend" geändert wurde
+- Es wurde ein Problem behoben, bei dem mehrere Objekte nicht gleichzeitig entfernt wurden, indem die Schaltfläche "Mülleimer" in der Benutzeroberfläche rechts neben der Mesh-Gruppe gedrückt wurde.
+- Es wurde ein Problem behoben, bei dem die Rendering-Reihenfolge von Objekten nicht normal geändert werden konnte, wenn eine untergeordnete Netzgruppe vorhanden war
+- Es wurde ein Problem behoben, bei dem Objekte in umgekehrter Reihenfolge sortiert wurden, wenn beim Importieren einer PSD-Datei eine untergeordnete Mesh-Gruppe von 3 Ebenen oder höher vorhanden war.
+- Es wurde ein Problem behoben, bei dem beim erneuten Importieren einer PSD-Datei Meshes von untergeordneten Mesh-Gruppen mit 3 Ebenen oder höher nicht zusätzlich erstellt wurden
+- Es wurde ein Problem behoben, bei dem das Trennen des vorhandenen übergeordneten Knochens und das erneute Backen dazu führt, dass sich der Knochen seltsam bewegt
+- Es wurde ein Problem behoben, bei dem der Editor nicht ausgeführt werden konnte, wenn aufgrund eines Fehlers fälschlicherweise erkannt wurde, dass Daten vorhanden waren, selbst nachdem der Modifikator aufgrund eines Fehlers gelöscht wurde
+- Es wurde ein Problem behoben, bei dem die Figur nicht im Editor geöffnet werden konnte, wenn ein Fehler im Animationsclip auftrat, der mit der Mesh-Gruppe verknüpft war, nachdem die Mesh-Gruppe gelöscht wurde oder nach einem ähnlichen Vorgang.
+– Es wurde ein Problem behoben, bei dem Animationsereignisse nicht im letzten Frame aufgerufen wurden, in dem sich Auto-Loop-Keyframes in der Loop-Animation befanden.
+- Es wurde ein Problem behoben, bei dem Objekte in einer Netzgruppe beim Rückgängigmachen nach dem gleichzeitigen Löschen mehrerer Objekte anormal sortiert wurden.
+- Es wurde ein Problem behoben, bei dem das Fehlerprotokoll auftritt, wenn Meshes in einer untergeordneten Mesh-Gruppe mit der Umschalttaste entfernt werden.
+– Es wurde ein Problem behoben, bei dem das Mapping-Zielnetz im Dialogfeld „PSD erneut importieren“ schwarz gerendert wurde
+- Es wurde ein Problem behoben, bei dem Ebeneninformationen und Vorschau nicht richtig funktionierten, wenn zum ersten Mal der Positionskorrekturschritt im sekundären Atlas-Importdialog aufgerufen wurde.
+- Es wurde ein Problem behoben, bei dem Objekte nicht über das Rechtsklickmenü der Hierarchie-Benutzeroberfläche auf der linken Seite des Editors dupliziert werden konnten, während kein Netz oder keine Netzgruppe ausgewählt war.
+- Es wurde ein Problem behoben, bei dem einige Elemente in der Benutzeroberfläche auf der rechten Seite seltsam angezeigt wurden, wenn eine untergeordnete Mesh-Gruppe ausgewählt wurde, während die Einstellungsregisterkarte der Mesh-Gruppe ausgewählt war.
+- Es wurde ein Problem behoben, bei dem der Anfangswert des Physikeffekts falsch angewendet wurde und Scheitelpunkte oder Knochen sich beim Ausführen des Spiels seltsam bewegten
+- Es wurde ein Problem behoben, bei dem der Physikeffekt übertrieben funktionierte, wenn die FPS zu niedrig waren oder die Anwendung gestoppt wurde, während das Spiel lief.
+- Es wurde ein Problem behoben, bei dem es schwierig war, auf die horizontalen und vertikalen Kanten zu klicken
+- Es wurde ein Problem behoben, bei dem Meshes mit dem Rigging-Modifikator, der in der untergeordneten Mesh-Gruppe angewendet wurde, nicht für den Transform-Modifikator ausgewählt werden konnten, umgangen und über die Schaltfläche "Gelbes Auge" in der Hierarchie-Benutzeroberfläche registriert werden konnten.
+– Es wurde ein Problem behoben, bei dem die Einschränkungseinstellung des Jiggle Bones im Arbeitsbereich seltsam aussah, wenn ein Ziel kein Root-Bone war und die übergeordnete Mesh-Gruppe gedreht wurde
+- Es wurde ein Problem behoben, bei dem Scheitelpunkte anstelle von Kontrollpunkten ausgewählt wurden, wenn die Tastenkombination „Strg+A“ gedrückt wurde, während das FFD-Tool eingeschaltet war
+- Es wurde ein Problem behoben, bei dem Nicht-Ziel-Child-Mesh-Gruppen registriert wurden oder Meshes in Child-Mesh-Gruppen, auf die abgezielt werden sollte, nicht registriert wurden, wenn versucht wurde, alle Meshes in „Morph (Animation)“ als Zeitachsenebenen zu registrieren
+- Es wurde ein Problem behoben, bei dem die Schaltfläche zum Entfernen von Objekten aus der Zeitleiste nicht angezeigt wurde, wenn ein Objekt, das nicht das Ziel der Zeitleiste war, aufgrund eines Fehlers usw. als Zeitleistenebene registriert wurde.
+- Es wurde ein Problem behoben, bei dem die Objektauswahl beim Ziehen der Maus auf dem Animationsbearbeitungsbildschirm abgebrochen wurde
 
 
 
 
 -----------------------------------------
 (스페인어)
-<size=16>AnyPortrait Update Log v1.4.0/v1.4.1</size>
-(Construido el 16 de julio de 2022 / 3 de agosto de 2022)
+<size=16>AnyPortrait Update Log v1.4.2</size>
+(Construido el 19 de enero de 2023)
 
 <size=13>Mejoras</size>
 
-- <color=blue>Herramienta Pin</color>
-    Se agrega una nueva herramienta "Pin" basada en curvas como un elemento de la malla para mejorar la eficiencia de trabajo en el modificador Morph.
-    Se agregan varias herramientas para editar Pines.
-    Se agregó la interfaz de usuario para distinguir el "modo de edición de vértices" y el "modo de edición de pines" en el modificador Morph.
+- <color=blue>Configuración del editor y configuración de horneado</color>
+    Algunas opciones de horneado se comparten en un proyecto por proyecto
+    Se agrega la función que exporta/importa la configuración del entorno del editor a un archivo
+    Se agregó la función para guardar las opciones de horneado personalizadas por el usuario como "configuración predeterminada".
+    Las preferencias del editor y la configuración de horneado se almacenan en formato de archivo de texto, compatible con las herramientas de control de versiones
+    Se agrega la opción del editor para mostrar los huesos como "huesos fantasma" al crear huesos con un clic del mouse.
+    Se agrega la opción del editor para cambiar el tamaño de los vértices o pines que se muestran en el espacio de trabajo.
+    Se agregó la opción del editor que le permite desactivar el comportamiento del gizmo de "mover el objetivo inmediatamente arrastrándolo justo después de hacer clic".
 
-- <color=blue>Imágenes de interfaz de usuario mejoradas</color>
-    La imagen de vértice renderizada en el espacio de trabajo cambia muy bien mientras mejora el rendimiento de renderizado.
-    Las imágenes de la interfaz de usuario del parámetro de control se cambian mientras se mejora el rendimiento de la representación.
-    Muchos íconos como Bake Dialog, Inspector y Hierarchy se cambiaron para que sean bonitos
-    Se aplica la técnica "Pixel Perfect" para mostrar claramente las imágenes en la línea de tiempo de la animación.
+- <color=blue>Importar archivo PSD</color>
+    Al volver a importar un archivo PSD, los nombres de las capas y mallas en el PSD se muestran en la pantalla
+    Al volver a importar un archivo PSD, se agrega una función para mostrar los píxeles de la imagen para comparar con precisión las posiciones de la capa PSD y la malla.
+    Cuando se vuelve a importar un archivo PSD, se mejora para que el orden de representación de las mallas se especifique correctamente en función del archivo PSD.
+    Al generar mallas a partir de archivos PSD, se cambia que el registro para deshacer no se divide por pasos de procesamiento
+    Al importar un archivo PSD, la visibilidad predeterminada de las mallas se especifica en función de la visibilidad de las capas PSD.
+    Al importar un archivo PSD, aparece un mensaje de error cuando la ruta no es válida
 
-- <color=blue>Varias opciones agregadas</color>
-    Se agrega una opción al cuadro de diálogo Hornear para determinar si se aplicará el "predeterminado" o el "último valor" a los parámetros de control indefinidos en la siguiente animación que se cambiará.
-    Se agregó una opción al cuadro de diálogo Hornear para evitar que la función física (jiggle huesos y material de física) se comporte de manera extraña cuando el personaje se mueve lejos en solo 1 cuadro.
-    Se agrega una opción al cuadro de diálogo Configuración para extender la altura de la interfaz de usuario de los parámetros de control de tipo vectorial en el editor
-    Se agrega una opción al cuadro de diálogo Configuración para determinar si "Preajuste de visibilidad" permanecerá activado cuando se seleccionen otros objetos.
+- <color=blue>interfaz de usuario de jerarquía</color>
+    Se puede seleccionar otro objeto presionando la tecla arriba/abajo después de hacer clic en el objetivo
+    La interfaz de usuario de jerarquía a la derecha se desplaza automáticamente cuando se selecciona un objeto en el espacio de trabajo
+    Al seleccionar un clip de animación, la interfaz de usuario de jerarquía de la izquierda se desplaza automáticamente
+    Si hace clic con el botón derecho para mostrar el menú, aparece el nombre del objeto en el que se hizo clic y, si se seleccionan varios objetos al mismo tiempo, también se muestra la cantidad de objetos seleccionados adicionales.
+    Si presiona la tecla Intro en el cuadro de diálogo "Renombrar" a través del menú del botón derecho, el nombre cambiado se aplica inmediatamente.
+    Al intentar cambiar el orden de los objetos a través del menú contextual de la interfaz de usuario de jerarquía a la izquierda, se puede mostrar un mensaje que pregunta si desea cambiar el modo de clasificación a "Método personalizado".
+    Mediante algunas funciones del menú contextual, se seleccionará el objeto.
+    Al cambiar la representación de un hueso manteniendo presionada la tecla Alt, la visibilidad de los huesos secundarios también cambiará.
+    Si la opción de color está desactivada, aparecerá un pequeño punto en su lugar, y al hacer clic en él se activará la opción de color inmediatamente.
 
-- <color=blue>IU de Inspector mejorada</color>
-    Se ha mejorado el rendimiento de la interfaz de usuario del Inspector.
-    El diseño de pestañas se agrega a Inspector para que sea más fácil encontrar las propiedades que necesita.
-    Los íconos y el diseño de la interfaz de usuario del Inspector se cambiaron para que sean bonitos.
-    Las animaciones de personajes se pueden previsualizar en el editor de Unity.
-    Se agrega la lista de imágenes.
+- <color=blue>Edición de múltiples objetos</color>
+    Se admite cambiar el orden de representación (profundidad) de los objetos seleccionados a la vez
+    Se admite la duplicación de objetos seleccionados a la vez a través del menú contextual de la interfaz de usuario de jerarquía
+    Al eliminar a través del menú contextual de la interfaz de usuario de Jerarquía, se proporciona una opción para múltiples eliminaciones
+    Al eliminar varios objetos de un grupo de malla, se ha mejorado para permitir la eliminación incluso cuando los grupos de malla secundarios y las mallas se seleccionan juntos.
 
-- <color=blue>IU de evento de animación mejorada</color>
-    Se ha mejorado la usabilidad del cuadro de diálogo Evento de animación.
-    Se agrega una función para que los usuarios guarden eventos como preestablecidos.
-    Se agrega una opción para cambiar el color de los marcadores de eventos.
-    Se cambia que los marcadores de eventos se representen delante de los controles deslizantes en la línea de tiempo.
-    Los marcadores de eventos continuos se expresan de forma más intuitiva.
+- <color=blue>Pantalla de edición de malla</color>
+    Se cambia que ejecutar "Restablecer vértices" crea una malla cuadrada para adaptarse a la región Atlas
+    Se agrega la función que copia y pega los pines seleccionados a otra malla.
+    Se agrega la función para convertir sus valores de posición en coordenadas relativas basadas en el pivote al copiar y pegar vértices o pines.
+    Se cambia que los pines aparecen como translúcidos cuando se selecciona la pestaña "Crear malla".
+    Se mejoró que el submenú cambia en orden cuando presiona la tecla número 2 o la tecla número 7 consecutivamente entre las teclas de acceso rápido para cambiar las pestañas de malla
 
-- <color=blue>Función de importación de archivos PSD mejorada</color>
-    La función para crear "Atlas secundario", que es una imagen secundaria con la misma estructura de Atlas, se agrega al "Diálogo de reimportación de PSD".
-    Se ha mejorado la estabilidad de las funciones relacionadas con establecer la ruta al guardar archivos PSD.
+- <color=blue>IU de línea de tiempo de animación</color>
+    El control deslizante en la parte inferior se ha cambiado para que funcione de manera opuesta, de modo que pueda ajustar intuitivamente el acercamiento o alejamiento de la interfaz de usuario de la línea de tiempo de la animación.
+    Se mejoró que puede mover el control deslizante de tiempo continuamente al hacer clic y arrastrar la parte superior de la interfaz de usuario de la línea de tiempo mientras mantiene presionadas las teclas Ctrl + Shift
+    Se ha mejorado que la "última capa de la línea de tiempo en la que se hizo clic" para las capas de selección múltiple se actualiza incluso cuando se hace clic en el objetivo en el espacio de trabajo o en la interfaz de usuario de jerarquía.
 
-- Se mejora el rendimiento de ejecución del editor.
-- La forma mejorada de hacer clic en los vértices introducida en versiones anteriores se adapta para todos los casos.
-- Cuando se ejecuta Bake, se enfoca el GameObject objetivo.
-- Se ha mejorado la función "Desplazamiento automático" de la línea de tiempo de la animación.
-- Aparece una advertencia al deshabilitar la función "Auto Normalize" en el modificador Rigging.
-- Se mejoró el rendimiento de todas las funciones de script que hacen referencia a texturas, objetos y animaciones.
-- Se agregó una secuencia de comandos para ayudar a crear un "Búfer de comandos" para controlar la representación de caracteres.
-- Las claves registradas se muestran en la interfaz de usuario de los parámetros de control que no se están editando.
-- Cuando se emiten los parámetros de control registrados en la interfaz de usuario del modificador, se modifican para que se muestren con el icono predeterminado designado por el usuario.
-- Se ha mejorado que la interfaz de usuario del modificador Rigging pueda distinguir intuitivamente los elementos de la interfaz de usuario que actualmente no están disponibles según la situación.
-- Se cambia que los botones en los que se espera que los usuarios hagan clic sean flash.
-- Se agrega un botón que elimina todas las teclas de parámetros de control del modificador a la vez y elimina el parámetro de control del modificador al mismo tiempo.
-- En la última versión de Mac OS, "Metal" se cambia a una opción obligatoria para que ya no se muestre el cuadro de diálogo de la guía sobre Metal.
-- Se mejoró la legibilidad del cuadro de diálogo para seleccionar la textura de la imagen y el cuadro de diálogo para seleccionar la imagen para la malla.
-- Se mejoró el proceso de hacer clic y seleccionar fotogramas clave, etc. en la línea de tiempo de la animación.
-- Se agrega una opción para ajustar el peso del Jiggle Bone con un parámetro de control.
-- Al seleccionar uno o varios huesos, el orden de diseño se optimiza para minimizar los cambios en la interfaz de usuario de propiedades del hueso.
-- El tamaño del botón para eliminar todos los vértices en la interfaz de usuario de edición de malla se cambia para que sea un poco más grande para que coincida con la frecuencia de uso.
-- Al utilizar las funciones "Reset Value" y "Paste" del modificador controlado por el parámetro de control, aparece el nuevo diálogo para seleccionar la propiedad de destino a adaptar.
-- Se cambia que todos los vértices se seleccionen inmediatamente después de dar de alta la malla al modificador Rigging.
-- La capacidad de actualizar todas las mallas de apPortrait en la escena se agrega como un menú "Actualizar todas las mallas" en el menú Editor de Unity.
-- Se agrega un nuevo menú contextual "Modificar" que le permite modificar directamente la malla o el grupo de mallas en la jerarquía del grupo de mallas.
-- (v1.4.1) Se agrega una función para validar y corregir automáticamente los nombres de los eventos de animación.
-- (v1.4.1) Se cambia que se excluirán los métodos de "sobrecarga" que causan un error al asignar eventos de animación de estilo de devolución de llamada en la interfaz de usuario del Inspector.
-- (v1.4.1) Se agregó la capacidad de asignar por lotes detectores de eventos en la IU de evento de animación de devolución de llamada de la IU de Inspector.
-- (v1.4.1) Se agregó una función para verificar la validez de los eventos asignados en la IU de evento de animación de tipo Callback de la IU del Inspector.
-- (v1.4.1) Se agregó una función para copiar el nombre del parámetro de control al portapapeles en la interfaz de usuario de Inspector.
-- (v1.4.1) Se corrige la notación coreana del botón para configurar si reproducir automáticamente la animación mientras se selecciona la unidad raíz.
-- (v1.4.1) Se cambió que los pines creados al hacer clic en el espacio de trabajo con "Agregar herramienta" no se pueden mover hasta que se vuelva a hacer clic.
-- (v1.4.1) Al deshacer inmediatamente después de agregar o eliminar un parámetro de control a un modificador, el parámetro de control ahora se selecciona correctamente.
-- (v1.4.1) Se agrega la capacidad de cambiar las opciones en un lote en el cuadro de diálogo que crea automáticamente múltiples mallas.
+- Se agregaron funciones de script para obtener el tiempo de reproducción, etc. de AnimPlayData
+- La velocidad y la estabilidad de la búsqueda de la última versión se mejoran al cambiar el servidor que informa la última versión
+- La usabilidad se mejora al distinguir el valor de desplazamiento de la interfaz de usuario derecha según el tipo de objeto seleccionado
+- Si presiona la tecla Intro en el cuadro de diálogo para establecer el nombre del nuevo retrato, el retrato se crea inmediatamente con el nombre establecido.
+- Si la resolución de la pantalla es mayor que FHD, el rango para hacer clic en vértices o bordes se amplía ligeramente.
+- Se mejora que el mensaje que pregunta si desea completar la herramienta FFD aparece en la mayor variedad de situaciones.
+- Desde Unity 2022.2, algunas API relacionadas con prefabricados han quedado obsoletas, por lo que se cambiaron los códigos relacionados
+- El diseño destacado de "Elementos seleccionados" en la interfaz de usuario de la lista para verse es un poco más bonito
 
 
 
 <size=13>Problema solucionado</size>
 
-- Se solucionó un problema que ocurría cuando se usaba la herramienta "Desenfoque" sin malla seleccionada cuando se trabajaba con el modificador Morph.
-- Se solucionó el problema de que algunas imágenes de íconos se mostraban a baja resolución en la interfaz de usuario Pro.
-- Se solucionó un problema que cuando el modo de edición con el modificador Transformar está activado mientras dos o más parámetros de control manejan el mismo objeto, el objeto desaparece.
-- Se solucionó un problema que causaba que otros modificadores estuvieran demasiado restringidos al seleccionar el modificador Solo color y activar el modo de edición múltiple.
-- Se solucionó un problema que los modificadores que deben desactivarse en este modo de edición funcionan.
-- Se solucionó el problema de que el modo de edición se cancela cuando el modo de edición múltiple está activado mientras el valor del parámetro de control no se encuentra en la clave.
-- Se solucionó el problema de que el modo de edición múltiple no se aplicaba correctamente a los modificadores en otras líneas de tiempo.
-- Se solucionó el problema de que los recursos del editor no se cargaban de forma intermitente al abrir el editor a través del Inspector.
-- Se solucionó el problema de que las animaciones dirigidas a diferentes unidades raíz dejarían de funcionar al intentar reproducir animaciones en el mismo cuadro usando un script.
-- Se solucionó el problema de que la función de inicialización asincrónica no funcionaba correctamente.
-- Se solucionó el problema de que la reproducción de la animación es demasiado rápida para coincidir con la configuración del cuadro después de que transcurre mucho tiempo mientras el editor no está enfocado.
-- Se solucionó un problema que se reconoce como un error y se genera un registro si se ejecuta Bake sin especificar una función de script adecuada y si el método de ejecución del evento de animación es "Devolución de llamada".
-- Se solucionó el problema de que la interfaz de usuario del parámetro de control se mostraba de manera extraña al abrir el "Menú Ver" en Unity 2019 y versiones posteriores.
-- Se solucionó un problema que no podía seleccionar un parámetro de control haciendo clic en él inmediatamente después de cambiar una categoría de parámetros de control.
-- Se solucionó el problema de que el activo de sombreado modificado de un conjunto de materiales no se aplica al ajuste preestablecido en la biblioteca de materiales.
-- Se solucionó el problema de que el gizmo del modo "Pose Test" del modificador Rigging no se podía controlar hasta que se hacía clic en el hueso nuevamente después de hacer clic fuera del gizmo.
-- Se solucionó el problema de que se produciría un error de emisión de ID interno al crear un objeto antes o después de deshacerlo con una probabilidad muy baja.
-- Se solucionó el problema de que si un objeto se selecciona inmediatamente al crear o duplicar un objeto no era consistente según el tipo de objeto.
-- Se solucionó el problema de que el área de trabajo se acercará o alejará al desplazarse con la rueda del mouse fuera del área de trabajo y mover el cursor de regreso al área de trabajo.
-- Se solucionó el problema de que los sombreadores del ajuste preestablecido de material "Mantener alfa" se renderizaban de forma extraña cuando el objetivo de renderizado era "Renderizar textura". (Tendrá que instalar ese paquete nuevamente).
-- Se solucionó el problema de que el Atlas anterior se mostraba continuamente en la pantalla incluso después de presionar el botón Hornear de Atlas nuevamente en el cuadro de diálogo de importación de archivos PSD.
-- Se solucionó un problema de que se produjo un error porque parte del código que usaba la clase "Type" no se escribió explícitamente.
-- (v1.4.1) Se solucionó el problema de que la propiedad de color del marcador no se duplica al duplicar un evento de animación.
-- (v1.4.1) Se solucionó el problema de que el botón "Eliminar evento de animación" no se encontraba en la versión anterior.
-- (v1.4.1) Se solucionó un problema que ocurría al deshacer después de crear una curva conectando pines o eliminando una curva.
-- (v1.4.1) Se solucionó el problema de que 2 pines se podían conectar con 2 curvas.
-- (v1.4.1) Se solucionó el problema de que los botones relacionados con Prefab eran demasiado pequeños en la interfaz de usuario del Inspector.
-- (v1.4.1) Se solucionó el problema de que el orden de representación se calculaba de manera anormal cuando se cambiaba el orden de representación de los objetos en un grupo de malla y la pestaña de configuración no se seleccionaba ni se deshacía.
-- (v1.4.1) Se solucionó el problema de que el botón Eliminar ("X") que se usa en la interfaz de usuario de parámetros de control, la interfaz de usuario de Rigging, etc. está demasiado oscuro en la interfaz de usuario Pro.
+- Se solucionó un problema en el que la interfaz de usuario para ingresar números para cambiar el peso de un solo vértice no funcionaba en la pantalla de edición del modificador Rigging
+- Se solucionó un problema por el cual el estado de representación de los huesos no vuelve a su estado original cuando se selecciona un grupo de malla diferente inmediatamente después de que el estado de representación de los huesos se haya cambiado a "gris, translúcido" en la pantalla de edición del modificador Rigging
+- Se solucionó un problema por el que no se eliminaban varios objetos al mismo tiempo al presionar el botón "Papelera" en la interfaz de usuario a la derecha del grupo de malla.
+- Se solucionó un problema por el cual el orden de representación de los objetos no se podía cambiar normalmente cuando había un grupo de malla secundario
+- Se solucionó un problema por el que los objetos se ordenaban en orden inverso cuando había un grupo de malla secundaria de 3 niveles o más al importar un archivo PSD.
+- Se solucionó un problema por el cual las mallas de grupos de mallas secundarias de 3 niveles o más no se creaban adicionalmente al volver a importar un archivo PSD
+- Se solucionó un problema en el que desconectar el hueso principal existente y volver a hornear hace que el hueso se mueva de forma extraña.
+- Se solucionó un problema por el cual el editor no se podía ejecutar cuando se reconocía incorrectamente que existían datos incluso después de que se eliminó el modificador debido a un error.
+- Se solucionó un problema por el cual el personaje no se podía abrir en el editor si ocurría un error en el clip de animación que estaba vinculado al grupo de malla después de que se eliminó el grupo de malla o después de una operación similar.
+- Se solucionó un problema donde los eventos de animación no se llamaron en el último cuadro donde los fotogramas clave de bucle automático se ubicaron en la animación de bucle.
+- Se solucionó un problema por el cual los objetos en un grupo de malla se ordenaban de manera anormal al deshacer después de eliminar varios objetos al mismo tiempo.
+- Se solucionó un problema en el que se producía el registro de errores al eliminar mallas en un grupo de mallas secundarias con la tecla Mayús.
+- Se solucionó un problema donde la malla de destino de mapeo se representaba en negro en el cuadro de diálogo Reimportar PSD
+- Se solucionó un problema por el cual la información de capa y la vista previa no funcionaban correctamente al ingresar por primera vez al paso de corrección de posición en el cuadro de diálogo de importación de atlas secundario.
+- Se solucionó un problema por el cual los objetos no se podían duplicar a través del menú contextual de la interfaz de usuario de Jerarquía en el lado izquierdo del editor mientras no se seleccionaba ninguna malla o grupo de mallas.
+- Se solucionó un problema por el cual algunos elementos en la interfaz de usuario a la derecha se mostraban de manera extraña cuando se seleccionaba un grupo de malla secundario mientras se seleccionaba la pestaña de configuración del grupo de malla.
+- Se solucionó un problema por el que el valor inicial del efecto físico se aplicaba incorrectamente y los vértices o los huesos se movían de forma extraña cuando se ejecutaba el juego.
+- Se solucionó un problema en el que el efecto físico funcionaba de manera exagerada cuando el FPS era demasiado bajo o la aplicación se detenía cuando el juego se estaba ejecutando.
+- Se solucionó un problema por el que era difícil hacer clic en los bordes horizontales y los bordes verticales
+- Se solucionó un problema en el que las mallas con el modificador Rigging aplicado en el grupo de mallas secundarias (no se podían seleccionar para el modificador Transformar) se podían omitir y registrar a través del "botón de ojo amarillo" en la interfaz de usuario de jerarquía.
+- Se solucionó un problema en el que la configuración de Restricción de Jiggle Bone se veía extraña en el espacio de trabajo cuando un objetivo no es un hueso raíz y el grupo de malla principal está girado
+- Se solucionó un problema por el que se seleccionaban vértices en lugar de puntos de control al presionar la tecla de acceso rápido "Ctrl+A" mientras la herramienta FFD estaba activada.
+- Se solucionó un problema por el que se registraban grupos de mallas secundarias que no eran objetivo o las mallas en grupos de mallas secundarias que deberían ser objetivo no se registraban al intentar registrar todas las mallas en "Morph (Animación)" como capas de línea de tiempo
+- Se solucionó un problema por el cual el botón para eliminar objetos de la línea de tiempo no aparecía cuando un objeto que no era el objetivo de la línea de tiempo se registraba como una capa de la línea de tiempo debido a un error, etc.
+- Se solucionó un problema por el que se cancelaba la selección de objetos al arrastrar el mouse en la pantalla de edición de animación.
 
 
 
@@ -559,662 +478,570 @@
 
 -----------------------------------------
 (이탈리아어)
-<size=16>Registro aggiornamenti AnyPortrait v1.4.0/v1.4.1</size>
-(Build 16 luglio 2022 / 3 agosto 2022)
+<size=16>Registro aggiornamenti AnyPortrait v1.4.2</size>
+(Build 19 gennaio 2023)
 
 <size=13>Miglioramenti</size>
 
-- <color=blue>Strumento "Pin"</color>
-    Un nuovo strumento "Pin" basato sulla curva è stato aggiunto come elemento della mesh per migliorare l'efficienza lavorativa nel modificatore Morph.
-    Sono stati aggiunti vari strumenti per la modifica dei "Pin".
-    È stata aggiunta l'interfaccia utente per distinguere "Modalità di modifica Vertice" e "Modalità di modifica Pin" nel modificatore Morph.
+- <color=blue>Impostazioni dell'editor e Impostazioni di cottura</color>
+    Alcune opzioni Bake sono condivise su un progetto per progetto
+    È stata aggiunta la funzione che consente di esportare/importare le impostazioni dell'ambiente dell'editor in un file
+    È stata aggiunta la funzione per salvare le opzioni Bake personalizzate dall'utente come "impostazioni predefinite".
+    Le preferenze dell'editor e le impostazioni di Bake sono memorizzate in formato di file di testo, compatibile con gli strumenti di controllo della versione
+    È stata aggiunta l'opzione dell'editor per mostrare le ossa come "Ossa fantasma" durante la creazione delle ossa con un clic del mouse
+    È stata aggiunta l'opzione dell'editor per modificare la dimensione dei vertici o dei pin mostrati nell'area di lavoro
+    È stata aggiunta l'opzione dell'editor che consente di disattivare il comportamento del gizmo di "sposta immediatamente il bersaglio trascinandolo a destra dopo aver fatto clic"
 
-- <color=blue>Immagini dell'interfaccia utente migliorate</color>
-    L'immagine del vertice resa nell'area di lavoro è cambiata bene mentre migliora le prestazioni di rendering.
-    Le immagini dell'interfaccia utente dei parametri di controllo vengono modificate migliorando le prestazioni di rendering.
-    Molte icone come Bake Dialog, Inspector e Hierarchy sono state modificate per essere belle
-    La tecnica "Pixel Perfect" viene applicata per visualizzare chiaramente le immagini nella timeline dell'animazione.
+- <color=blue>Importa file PSD</color>
+    Quando si reimporta un file PSD, i nomi dei layer e delle mesh nel PSD vengono visualizzati sullo schermo
+    Quando si reimporta un file PSD, viene aggiunta una funzione per mostrare i pixel dell'immagine per confrontare accuratamente le posizioni del livello PSD e della mesh
+    Quando un file PSD viene reimportato, viene migliorato in modo che l'ordine di rendering delle mesh sia specificato correttamente in base al file PSD
+    Quando si generano mesh da file PSD, viene modificato in modo che il record per l'annullamento non sia suddiviso per fasi di elaborazione
+    Quando si importa un file PSD, la visibilità predefinita delle mesh viene specificata in base alla visibilità dei livelli PSD
+    Quando si importa un file PSD, viene visualizzato un messaggio di errore quando il percorso non è valido
 
-- <color=blue>Aggiunte varie opzioni</color>
-    Viene aggiunta un'opzione alla finestra di dialogo Bake per determinare se il valore "predefinito" o "ultimo valore" verrà applicato a parametri di controllo non definiti nella successiva animazione di cui eseguire la transizione.
-    È stata aggiunta un'opzione alla finestra di dialogo Bake per evitare che la funzione fisica (ossa oscillanti e materiale fisico) si comporti in modo strano quando il personaggio si sposta molto in un solo fotogramma.
-    È stata aggiunta un'opzione alla finestra di dialogo Impostazioni per estendere l'altezza dell'interfaccia utente dei parametri di controllo del tipo vettoriale nell'editor
-    Viene aggiunta un'opzione alla finestra di dialogo Impostazioni per determinare se "Predefinito visibilità" rimarrà attivo quando vengono selezionati altri oggetti
+- <color=blue>Interfaccia gerarchica</color>
+    È possibile selezionare un altro oggetto premendo il tasto su/giù dopo aver fatto clic sul bersaglio
+    L'interfaccia utente della gerarchia sulla destra scorre automaticamente quando un oggetto viene selezionato nell'area di lavoro
+    Quando si seleziona una clip di animazione, l'interfaccia utente della gerarchia a sinistra scorre automaticamente
+    Facendo clic con il pulsante destro del mouse per visualizzare il menu, viene visualizzato il nome dell'oggetto selezionato e, se vengono selezionati più oggetti contemporaneamente, viene visualizzato anche il numero di oggetti selezionati in aggiunta.
+    Se si preme il tasto Invio nella finestra di dialogo "Rinomina" tramite il menu di scelta rapida, il nome modificato viene applicato immediatamente.
+    Quando si tenta di modificare l'ordine degli oggetti tramite il menu di scelta rapida dell'interfaccia utente della gerarchia a sinistra, può essere visualizzato un messaggio che chiede se modificare la modalità di ordinamento in "Metodo personalizzato".
+    Con alcune funzioni del menu di scelta rapida, l'oggetto verrà selezionato.
+    Modificando il rendering di un osso tenendo premuto il tasto Alt, cambierà anche la visibilità delle ossa figlie.
+    Se l'opzione colore è disattivata, verrà invece visualizzato un puntino e facendo clic su di esso si attiverà immediatamente l'opzione colore.
 
-- <color=blue>Interfaccia utente Ispettore migliorata</color>
-    Le prestazioni dell'interfaccia utente di Inspector sono migliorate.
-    Il layout delle schede viene aggiunto a Impostazioni per facilitare la ricerca delle proprietà necessarie.
-    Le icone e il layout dell'interfaccia utente di Inspector sono stati modificati per essere belli.
-    Le animazioni dei personaggi possono essere visualizzate in anteprima nell'editor Unity.
-    Viene aggiunto l'elenco delle immagini.
+- <color=blue>Modifica di più oggetti</color>
+    È supportata la modifica simultanea dell'ordine di rendering (profondità) degli oggetti selezionati
+    È supportata la duplicazione contemporanea degli oggetti selezionati tramite il menu di scelta rapida dell'interfaccia utente della gerarchia
+    Quando si elimina tramite il menu di scelta rapida dell'interfaccia utente della gerarchia, viene fornita un'opzione per più eliminazioni
+    Quando si eliminano più oggetti da un gruppo di mesh, è stato migliorato per consentire la rimozione anche quando i gruppi di mesh secondari e le mesh sono selezionati insieme
 
-- <color=blue>Interfaccia utente dell'evento di animazione migliorata</color>
-    L'usabilità della finestra di dialogo Evento di animazione è stata migliorata.
-    È stata aggiunta una funzione per consentire agli utenti di salvare gli eventi come predefiniti.
-    È stata aggiunta un'opzione per cambiare il colore degli indicatori di evento
-    È cambiato che gli indicatori di evento devono essere visualizzati davanti ai cursori sulla timeline.
-    Gli indicatori di eventi continui sono espressi in modo più intuitivo.
+- <color=blue>Schermata di modifica della mesh</color>
+    È stato modificato il fatto che l'esecuzione di "Ripristina vertici" crea una mesh quadrata per adattarsi alla regione dell'Atlante
+    Viene aggiunta la funzione che copia e incolla i pin selezionati su un'altra mesh
+    Viene aggiunta la funzione per convertire i loro valori di posizione in coordinate relative basate sul pivot quando si copiano e incollano vertici o perni
+    È stato modificato il fatto che i pin appaiano traslucidi quando è selezionata la scheda "Crea mesh".
+    È stato migliorato il fatto che il sottomenu cambi in ordine quando si preme consecutivamente il tasto numero 2 o il tasto numero 7 tra i tasti di scelta rapida per cambiare le schede mesh
 
-- <color=blue>Funzione di importazione file PSD migliorata</color>
-    La funzione per creare "Atlante secondario", che è un'immagine secondaria con la stessa struttura dell'Atlante, viene aggiunta alla "Finestra di dialogo di reimportazione PSD".
-    La stabilità delle funzioni relative all'impostazione del percorso durante il salvataggio di file PSD è migliorata.
+- <color=blue>Interfaccia utente della sequenza temporale dell'animazione</color>
+    Il dispositivo di scorrimento in basso è stato modificato per funzionare in modo opposto in modo da poter regolare in modo intuitivo lo zoom avanti/indietro dell'interfaccia utente della sequenza temporale dell'animazione.
+    È stato migliorato il fatto che puoi spostare continuamente il dispositivo di scorrimento temporale quando fai clic e trascini la parte superiore dell'interfaccia utente della timeline tenendo premuti i tasti Ctrl + Maiusc
+    È stato migliorato il fatto che "l'ultimo livello della sequenza temporale su cui si è fatto clic" per i livelli a selezione multipla viene aggiornato anche quando si fa clic sulla destinazione nell'area di lavoro o nell'interfaccia utente della gerarchia
 
-- Le prestazioni di esecuzione dell'editor sono migliorate.
-- Il modo migliorato di fare clic sui vertici introdotto nelle versioni precedenti è adattato a tutti i casi.
-- Quando Bake viene eseguito, il GameObject di destinazione è focalizzato.
-- La funzione "scorrimento automatico" della sequenza temporale dell'animazione è stata migliorata.
-- Viene visualizzato un avviso quando si disabilita la funzione "Auto Normalize" nel modificatore Rigging.
-- Le prestazioni di tutte le funzioni di script che fanno riferimento a trame, oggetti e animazioni sono state migliorate.
-- Viene aggiunto uno script per facilitare la creazione di un "Command Buffer" per controllare il rendering dei personaggi.
-- Le chiavi registrate vengono visualizzate nell'interfaccia utente dei parametri di controllo che non vengono modificati.
-- Quando i parametri di controllo registrati nell'interfaccia utente del modificatore vengono emessi, vengono modificati per essere visualizzati con l'icona preimpostata designata dall'utente.
-- È stato migliorato che l'interfaccia utente del modificatore Rigging può distinguere intuitivamente gli elementi dell'interfaccia utente attualmente non disponibili a seconda della situazione.
-- È stato modificato che i pulsanti che dovrebbero essere cliccati dagli utenti siano lampeggianti.
-- Viene aggiunto un pulsante che elimina contemporaneamente tutte le chiavi dei parametri di controllo dal modificatore e allo stesso tempo rimuove il parametro di controllo dal modificatore.
-- Nell'ultima versione di Mac OS, "Metal" è stato modificato in un'opzione richiesta in modo che la finestra di dialogo della guida su Metal non sia più mostrata.
-- È migliorata la leggibilità della finestra di dialogo per la selezione della trama dell'immagine e della finestra di dialogo per la selezione dell'immagine per la trama.
-- Il processo di clic e selezione dei fotogrammi chiave, ecc. nella sequenza temporale dell'animazione è stato migliorato.
-- È stata aggiunta un'opzione per regolare il peso del Jiggle Bone con un parametro di controllo.
-- Quando si selezionano una o più ossa, l'ordine del layout è ottimizzato per ridurre al minimo le modifiche nell'interfaccia utente delle proprietà delle ossa.
-- La dimensione del pulsante per rimuovere tutti i vertici nell'interfaccia utente di modifica della mesh è stata modificata per essere leggermente più grande per corrispondere alla frequenza di utilizzo.
-- Quando si utilizzano le funzioni "Reset Value" e "Paste" del modificatore controllato dal parametro di controllo, viene visualizzata la nuova finestra di dialogo per la selezione della proprietà target da adattare.
-- È cambiato che tutti i vertici vengono selezionati immediatamente dopo aver registrato la mesh nel modificatore Rigging.
-- La possibilità di aggiornare tutte le mesh di apPortrait nella scena è stata aggiunta come menu "Aggiorna tutte le mesh" nel menu Unity Editor.
-- È stato aggiunto un nuovo menu di scelta rapida "Modifica" che consente di modificare direttamente la mesh o il gruppo di mesh nella gerarchia del gruppo di mesh.
-- (v1.4.1) È stata aggiunta una funzione per convalidare e correggere automaticamente i nomi degli eventi di animazione.
-- (v1.4.1) È stato modificato l'esclusione dei metodi di "sovraccarico" che causano un errore durante l'assegnazione di eventi di animazione in stile callback nell'interfaccia utente di Inspector.
-- (v1.4.1) È stata aggiunta la possibilità di assegnare in batch listener di eventi nell'interfaccia utente dell'evento di animazione Callback dell'interfaccia utente dell'ispettore.
-- (v1.4.1) È stata aggiunta una funzione per verificare la validità degli eventi assegnati nell'interfaccia utente degli eventi di animazione di tipo Callback dell'interfaccia utente dell'ispettore.
-- (v1.4.1) È stata aggiunta una funzione per copiare il nome del parametro di controllo negli appunti nell'interfaccia utente di Inspector.
-- (v1.4.1) La notazione coreana del pulsante per impostare se riprodurre automaticamente l'animazione mentre è selezionata l'unità radice è stata corretta.
-- (v1.4.1) È stato modificato che i Pin creati facendo clic sull'area di lavoro con "Aggiungi strumento" non possono essere spostati fino a quando non si fa nuovamente clic.
-- (v1.4.1) Quando si annulla immediatamente dopo aver aggiunto o eliminato un parametro di controllo a un modificatore, il parametro di controllo ora è selezionato correttamente.
-- (v1.4.1) È stata aggiunta la possibilità di modificare le opzioni in un batch nella finestra di dialogo che crea automaticamente più mesh.
+- Aggiunte funzioni di script per ottenere il tempo di riproduzione, ecc. da AnimPlayData
+- La velocità e la stabilità della ricerca dell'ultima versione sono migliorate cambiando il server che informa l'ultima versione
+- L'usabilità è migliorata distinguendo il valore di scorrimento dell'interfaccia utente destra in base al tipo di oggetto selezionato
+- Se si preme il tasto Invio nella finestra di dialogo per impostare il nome del nuovo ritratto, il ritratto viene creato immediatamente con il nome impostato.
+- Se la risoluzione dello schermo è maggiore di FHD, l'intervallo per fare clic su vertici o bordi viene leggermente ampliato.
+- È stato migliorato il fatto che il messaggio che chiede se si desidera completare lo strumento FFD appaia in una varietà di situazioni.
+- Da Unity 2022.2, alcune API relative ai prefabbricati sono state deprecate, quindi i codici correlati sono stati modificati
+- Il design di evidenziazione di "Elementi selezionati" nell'interfaccia utente dell'elenco da guardare è un po' più carino
 
 
 
 <size=13>Risolto il problema</size>
 
-- È stato risolto un problema per cui l'errore si verificava quando si utilizzava lo strumento "Sfocatura" senza alcuna mesh selezionata quando si lavorava con il modificatore Morph.
-- È stato risolto un problema per cui alcune immagini delle icone venivano visualizzate a bassa risoluzione nell'interfaccia utente Pro.
-- È stato risolto un problema per cui quando la modalità di modifica con il modificatore Trasforma è attivata mentre due o più parametri di controllo gestiscono lo stesso oggetto, l'oggetto scompare.
-- È stato risolto un problema che causava l'eccessiva limitazione di altri modificatori quando si selezionava il modificatore Solo colore e si attivava la modalità di modifica multipla.
-- È stato risolto un problema per cui i modificatori che dovrebbero essere disattivati ​​in questa modalità di modifica funzionano.
-- È stato risolto un problema per cui la modalità di modifica viene annullata quando la modalità di modifica multipla è attivata mentre il valore del parametro di controllo non si trova nella chiave.
-- È stato risolto un problema per cui la modalità di modifica multipla non veniva applicata correttamente ai modificatori in altre linee temporali.
-- È stato risolto un problema per cui le risorse dell'editor non venivano caricate in modo intermittente all'apertura dell'editor tramite Impostazioni.
-- È stato risolto un problema per cui le animazioni destinate a diverse unità radice smettevano di funzionare quando si tentava di riprodurre animazioni nello stesso fotogramma utilizzando uno script.
-- È stato risolto un problema per cui la funzione di inizializzazione asincrona non funzionava correttamente.
-- È stato risolto un problema per cui la riproduzione dell'animazione è troppo veloce per corrispondere alle impostazioni del fotogramma dopo che è trascorso molto tempo mentre l'editor non è a fuoco.
-- È stato risolto un problema per cui viene riconosciuto come errore e viene emesso un registro se Bake viene eseguito senza specificare una funzione di script appropriata e se il metodo di esecuzione dell'evento di animazione è "Callback".
-- È stato risolto un problema per cui l'interfaccia utente dei parametri di controllo veniva visualizzata in modo strano all'apertura del "Menu Visualizza" in Unity 2019 e versioni successive.
-- È stato risolto un problema per cui non era possibile selezionare un parametro di controllo facendo clic su di esso immediatamente dopo aver modificato una categoria di parametri di controllo.
-- È stato risolto un problema per cui la risorsa shader modificata di un set di materiali non veniva applicata alla preimpostazione nella libreria dei materiali.
-- È stato risolto un problema per cui il gizmo della modalità "Test di posa" del modificatore di Rigging non poteva essere controllato fino a quando l'osso non veniva cliccato di nuovo dopo aver fatto clic all'esterno del gizmo.
-- È stato risolto un problema per cui un errore di emissione dell'ID interno durante la creazione di un oggetto prima o dopo l'annullamento si verificava con una probabilità molto bassa.
-- È stato risolto un problema per cui se un oggetto veniva selezionato immediatamente durante la creazione o la duplicazione di un oggetto non era coerente a seconda del tipo di oggetto.
-- È stato risolto un problema per cui l'area di lavoro veniva ingrandita/rimpicciolita quando si scorreva con la rotellina del mouse all'esterno dell'area di lavoro e si spostava nuovamente il cursore nell'area di lavoro.
-- È stato risolto un problema per cui gli shader del preset del materiale "Keep Alpha" erano renderizzati in modo strano quando il target di rendering era "Render Texture". (Dovrai installare di nuovo quel pacchetto.)
-- È stato risolto un problema per cui l'Atlante precedente veniva visualizzato continuamente sullo schermo anche dopo aver premuto nuovamente il pulsante Bake di Atlas nella finestra di dialogo di importazione del file PSD.
-- È stato risolto un problema per cui si verificava un errore perché parte del codice che utilizzava la classe "Type" non era stato scritto in modo esplicito.
-- (v1.4.1) È stato risolto un problema per cui la proprietà del colore dell'indicatore non veniva duplicata durante la duplicazione di un evento di animazione.
-- (v1.4.1) È stato risolto un problema per cui il "pulsante Rimuovi evento animazione" non era presente nella versione precedente.
-- (v1.4.1) È stato risolto un problema per cui si verificava un errore durante l'annullamento dopo la creazione di una curva che collega i pin o l'eliminazione di una curva.
-- (v1.4.1) È stato risolto un problema per cui 2 pin potevano essere collegati con 2 curve.
-- (v1.4.1) È stato risolto un problema per cui i pulsanti relativi al Prefabbricato erano troppo piccoli nell'interfaccia utente di Inspector.
-- (v1.4.1) È stato risolto un problema per cui l'ordine di rendering veniva calcolato in modo anomalo quando l'ordine di rendering degli oggetti in un gruppo di mesh veniva modificato e la scheda delle impostazioni non veniva selezionata e annullata.
-- (v1.4.1) È stato risolto un problema per cui il pulsante di rimozione ("X") utilizzato nell'interfaccia utente dei parametri di controllo, nell'interfaccia utente Rigging e così via è troppo scuro nell'interfaccia utente Pro.
+- È stato risolto un problema per cui l'interfaccia utente per l'immissione di numeri per modificare il peso di un singolo vertice non funzionava nella schermata di modifica del modificatore di rigging
+- È stato risolto un problema per cui lo stato di rendering delle ossa non torna al suo stato originale quando viene selezionato un gruppo di mesh diverso immediatamente dopo che lo stato di rendering delle ossa è stato modificato in "grigio, traslucido" nella schermata di modifica del modificatore Rigging
+- È stato risolto un problema per cui più oggetti non vengono rimossi contemporaneamente premendo il pulsante "Cestino" nell'interfaccia utente a destra del gruppo mesh.
+- È stato risolto un problema per cui l'ordine di rendering degli oggetti non poteva essere modificato normalmente quando era presente un gruppo mesh figlio
+- È stato risolto un problema per cui gli oggetti vengono ordinati in ordine inverso quando è presente un gruppo mesh figlio di 3 livelli o superiore durante l'importazione di un file PSD.
+- È stato risolto un problema per cui le mesh dei gruppi di mesh secondari di 3 livelli o superiori non venivano create ulteriormente durante la reimportazione di un file PSD
+- È stato risolto un problema per cui la disconnessione dell'osso genitore esistente e la cottura di nuovo provocano movimenti strani dell'osso
+- È stato risolto un problema per cui l'editor non poteva essere eseguito quando veniva erroneamente riconosciuto che i dati esistevano anche dopo che il modificatore era stato eliminato a causa di un errore
+- È stato risolto un problema per cui il personaggio non poteva essere aperto nell'editor se si verificava un errore nella clip di animazione collegata al gruppo mesh dopo l'eliminazione del gruppo mesh o dopo un'operazione simile.
+- È stato risolto un problema per cui gli eventi di animazione non venivano richiamati nell'ultimo fotogramma in cui si trovavano i fotogrammi chiave del ciclo automatico nell'animazione del ciclo.
+- È stato risolto un problema per cui gli oggetti in un gruppo mesh vengono ordinati in modo anomalo durante l'annullamento dopo aver eliminato più oggetti contemporaneamente.
+- È stato risolto un problema per cui si verifica il registro degli errori durante la rimozione di mesh in un gruppo di mesh figlio con il tasto Maiusc.
+- È stato risolto un problema per cui la mesh di destinazione della mappatura veniva renderizzata in nero nella finestra di dialogo Reimporta PSD
+- È stato risolto un problema per cui le informazioni sul livello e l'anteprima non funzionavano correttamente quando si accedeva per la prima volta al passaggio di correzione della posizione nella finestra di dialogo di importazione dell'atlante secondario.
+- È stato risolto un problema per cui gli oggetti non potevano essere duplicati tramite il menu di scelta rapida dell'interfaccia utente Gerarchia sul lato sinistro dell'editor mentre non era selezionata alcuna mesh o gruppo di mesh.
+- È stato risolto un problema per cui alcuni elementi nell'interfaccia utente sulla destra venivano visualizzati in modo strano quando veniva selezionato un gruppo mesh figlio mentre era selezionata la scheda delle impostazioni del gruppo mesh.
+- È stato risolto un problema per cui il valore iniziale dell'effetto fisico veniva applicato in modo errato e i vertici o le ossa si muovevano in modo strano durante l'esecuzione del gioco
+- È stato risolto un problema per cui l'effetto fisico funzionava in modo esagerato quando l'FPS era troppo basso o l'applicazione si interrompeva mentre il gioco era in esecuzione.
+- È stato risolto un problema per cui era difficile fare clic sui bordi orizzontali e verticali
+- È stato risolto un problema per cui le mesh con il modificatore Rigging applicato nel gruppo mesh figlio - che non potevano essere scelte come target per il modificatore Transform - potevano essere aggirate e registrate tramite il "pulsante occhio giallo" nell'interfaccia utente Gerarchia.
+- È stato risolto un problema per cui l'impostazione del vincolo di Jiggle Bone appariva strana nell'area di lavoro quando un obiettivo non è un osso radice e il gruppo mesh principale viene ruotato
+- È stato risolto un problema per cui venivano selezionati i vertici anziché i punti di controllo quando si premeva il tasto di scelta rapida "Ctrl+A" mentre lo strumento FFD era attivo
+- È stato risolto un problema per cui i gruppi mesh secondari non target venivano registrati o le mesh nei gruppi mesh secondari che dovevano essere targetizzati non venivano registrate durante il tentativo di registrare tutte le mesh in "Morph (animazione)" come livelli della sequenza temporale
+- È stato risolto un problema per cui il pulsante per rimuovere gli oggetti dalla sequenza temporale non veniva visualizzato quando un oggetto che non era il target della sequenza temporale veniva registrato come livello della sequenza temporale a causa di un bug, ecc.
+- È stato risolto un problema per cui la selezione dell'oggetto veniva annullata trascinando il mouse sulla schermata di modifica dell'animazione
+
 
 
 
 -----------------------------------------
 (덴마크어)
-<size=16>AnyPortrait Update Log v1.4.0/v1.4.1</size>
-(Byg den 16. juli 2022 / 3. august 2022)
+<size=16>AnyPortrait Update Log v1.4.2</size>
+(Byg den 19. januar 2023)
 
 <size=13>Forbedringer</size>
 
-- <color=blue>Stiftværktøj</color>
-    Et nyt kurvebaseret stiftværktøj er tilføjet som et element i nettet for at forbedre arbejdseffektiviteten i Morph-modifieren.
-    Forskellige værktøjer til redigering af pins er tilføjet.
-    UI til at skelne mellem "vertex edit mode" og "pin edit mode" i Morph modifier er tilføjet.
+- <color=blue>Redigeringsindstillinger og Bageindstillinger</color>
+    Nogle Bage-muligheder deles på et projekt-for-projekt
+    Funktionen, som eksporterer/importerer editormiljøindstillinger til en fil, tilføjes
+    Funktionen til at gemme brugertilpassede bageindstillinger som "standardindstillinger" er tilføjet
+    Editor-præferencer og Bake-indstillinger gemmes i tekstfilformat, der er kompatibelt med versionskontrolværktøjer
+    Editoren mulighed for at vise knogler som "Ghost bones", når du opretter knogler med museklik, tilføjes
+    Redigeringsmuligheden for at ændre størrelsen på hjørner eller stifter, der vises i arbejdsområdet, tilføjes
+    Redigeringsmuligheden, der giver dig mulighed for at slå dims-adfærden fra "flyt målet med det samme ved at trække lige efter klik" er tilføjet
 
-- <color=blue>Forbedrede UI-billeder</color>
-    Det vertexbillede, der gengives i arbejdsområdet, ændres pænt, mens det forbedrer gengivelsesydelsen.
-    Billeder af kontrolparameter UI ændres, mens gengivelsesydelsen forbedres.
-    Mange ikoner såsom Bake Dialog, Inspector og Hierarchy er ændret til at være smukke
-    "Pixel Perfect"-teknikken anvendes til tydeligt at vise billederne i animationens tidslinje.
+- <color=blue>Importer PSD-fil</color>
+    Når du genimporterer en PSD-fil, vises navnene på lagene og maskerne i PSD'en på skærmen
+    Når du genimporterer en PSD-fil, tilføjes en funktion til at vise billedets pixels for nøjagtigt at sammenligne positionerne af PSD-laget og nettet
+    Når en PSD-fil genimporteres, forbedres den, så gengivelsesrækkefølgen af maskerne er korrekt specificeret baseret på PSD-filen
+    Når der genereres meshes fra PSD-filer, ændres det, at posten for fortryd ikke er opdelt efter behandlingstrin
+    Når du importerer en PSD-fil, er standardsynligheden af masker angivet baseret på synligheden af PSD-lag
+    Når du importerer en PSD-fil, vises en fejlmeddelelse, når stien er ugyldig
 
-- <color=blue>Tilføjet forskellige indstillinger</color>
-    En mulighed tilføjes til Bage-dialogen for at bestemme, om "standard" eller "sidste værdi" vil blive anvendt på udefinerede kontrolparametre i den næste animation, der skal overføres.
-    Der føjes en mulighed til Bake-dialogen for at forhindre, at fysikfunktionen (Jiggle bones og Physics-materiale) opfører sig mærkeligt, når karakteren bevæger sig langt på kun 1 frame.
-    Der føjes en mulighed til indstillingsdialogen for at udvide UI-højden for vektortypekontrolparametre i editoren
-    En indstilling føjes til dialogboksen Indstillinger for at bestemme, om "Visibility Preset" forbliver aktiveret, når andre objekter er valgt
+- <color=blue>Hierarchy UI</color>
+    Et andet objekt kan vælges ved at trykke på op/ned-tasten efter at have klikket på målet
+    Hierarki-brugergrænsefladen til højre ruller automatisk, når et objekt er valgt i arbejdsområdet
+    Når du vælger et animationsklip, ruller Hierarchy UI til venstre automatisk
+    Hvis du højreklikker for at få vist menuen, vises navnet på det klikkede objekt, og hvis flere objekter er valgt på samme tid, vises antallet af yderligere valgte objekter også.
+    Hvis du trykker på Enter-tasten i dialogboksen "Omdøb" gennem højrekliksmenuen, anvendes det ændrede navn med det samme.
+    Når du forsøger at ændre rækkefølgen af objekter gennem højrekliksmenuen i Hierarchy UI til venstre, kan der vises en meddelelse, der spørger, om sorteringstilstanden skal ændres til "Custom Method".
+    Ved nogle højreklikmenufunktioner vil objektet blive valgt.
+    Ændring af gengivelsen af en knogle ved at holde Alt-tasten nede, vil synligheden af barneknoglerne også ændre sig.
+    Hvis farveindstillingen er slået fra, vises en lille prik i stedet, og ved at klikke på den aktiveres farveindstillingen med det samme.
 
-- <color=blue>Forbedret Inspector UI</color>
-    Ydelse af Inspector UI er forbedret.
-    Fanelayoutet er tilføjet til Inspector for at gøre det nemmere at finde de egenskaber, du har brug for.
-    Ikonerne og layoutet af Inspector UI er ændret til at være smukt.
-    Karakteranimationer kan forhåndsvises i Unity-editoren.
-    Billedlisten tilføjes.
+- <color=blue>Redigering af flere objekter</color>
+    Ændring af gengivelsesrækkefølgen (dybden) af valgte objekter på én gang understøttes
+    Duplikering af valgte objekter på én gang gennem højrekliksmenuen i Hierarchy UI understøttes
+    Når du sletter via højrekliksmenuen i Hierarchy UI, er der mulighed for flere sletninger
+    Når du sletter flere objekter fra en mesh-gruppe, er den blevet forbedret for at muliggøre fjernelse, selv når underordnede mesh-grupper og -masker er valgt sammen
 
-- <color=blue>Forbedret Animation Event UI</color>
-    Anvendeligheden af ​​dialogboksen Animation Event er forbedret.
-    En funktion for brugere til at gemme hændelser som forudindstillinger er tilføjet.
-    Der tilføjes en mulighed for at ændre farven på begivenhedsmarkører
-    Det er ændret, at begivenhedsmarkører skal gengives foran skydere på tidslinjen.
-    Kontinuerlige begivenhedsmarkører udtrykkes mere intuitivt.
+- <color=blue>Mesh-redigeringsskærm</color>
+    Det er ændret, at kørsel af "Nulstil hjørner" skaber et firkantet mesh, der passer til Atlas-området
+    Funktionen, der kopierer og indsætter valgte stifter til et andet mesh, tilføjes
+    Funktionen til at konvertere deres positionsværdier til relative koordinater baseret på pivoten, når du kopierer og indsætter hjørner eller stifter, tilføjes
+    Det er ændret, at stifter fremstår som gennemskinnelige, når fanen "Make Mesh" er valgt
+    Det er forbedret, at undermenuen ændres i rækkefølge, når du trykker på nummer 2-tasten eller nummer 7-tasten fortløbende blandt genvejstasterne til at skifte mesh-faneblad
 
-- <color=blue>Forbedret PSD-filimportfunktion</color>
-    Funktionen til at skabe "Sekundær Atlas", som er et sekundært billede med samme Atlas-struktur, føjes til "PSD Reimport dialog".
-    Stabiliteten af ​​funktioner relateret til at indstille stien, når du gemmer PSD-filer, er forbedret.
+- <color=blue>Animation Timeline UI</color>
+    Skyderen i bunden er ændret til at virke på den modsatte måde, så du intuitivt kan justere zoom ind/ud af animationstidslinjens brugergrænseflade.
+    Det er forbedret, at du kan flytte tidsskyderen kontinuerligt, når du klikker og trækker i toppen af tidslinjens brugergrænseflade, mens du holder Ctrl + Shift-tasterne nede
+    Det er forbedret, at "sidst klikkede tidslinjelag" for multi-selektionslag opdateres, selv når målet klikkes i arbejdsområdet eller Hierarchy UI
 
-- Editor-udførelsesydelse er forbedret.
-- Forbedret måde at klikke på hjørner introduceret i tidligere versioner er tilpasset til alle tilfælde.
-- Når Bake udføres, er målet GameObject fokuseret.
-- Funktionen "Auto-scroll" af animationens tidslinje er forbedret.
-- Der vises en advarsel, når funktionen "Auto Normalize" deaktiveres i Rigging-modifikatoren.
-- Ydeevnen af ​​alle scriptfunktioner, der refererer til teksturer, objekter og animationer, er forbedret.
-- Et script tilføjes for at hjælpe med at oprette en "Kommandobuffer" til at styre karaktergengivelsen.
-- De registrerede nøgler vises i brugergrænsefladen for kontrolparametre, der ikke redigeres.
-- Når de registrerede kontrolparametre i modifikatorbrugergrænsefladen udlæses, ændres de til at blive vist med det forudindstillede ikon, der er angivet af brugeren.
-- Det er forbedret, at UI af Rigging-modifikatoren intuitivt kan skelne mellem de aktuelt utilgængelige UI-elementer afhængigt af situationen.
-- Det er ændret, at knapper, der forventes at blive klikket af brugere, er flash.
-- Der tilføjes en knap, der sletter alle kontrolparametertaster fra modifikatoren på én gang og fjerner kontrolparameteren fra modifikatoren.
-- I den seneste version af Mac OS ændres "Metal" til en påkrævet indstilling, så guidedialogen om Metal ikke længere vises.
-- Læsbarheden af ​​dialogen til valg af billedets tekstur og dialogboksen til at vælge billedet til nettet er forbedret.
-- Processen med at klikke og vælge keyframes osv. i animationstidslinjen er forbedret.
-- Der tilføjes en mulighed for at justere vægten af ​​Jiggle Bone med en kontrolparameter.
-- Når du vælger en eller flere knogler, er layoutrækkefølgen optimeret for at minimere ændringer i knogleegenskabens brugergrænseflade.
-- Størrelsen på knappen for at fjerne alle hjørner i mesh-redigerings-UI'en er ændret til at være lidt større for at matche brugsfrekvensen.
-- Ved brug af funktionerne "Nulstil værdi" og "Sæt ind" i den modifikator, der styres af kontrolparameteren, vises den nye dialogboks til valg af den målegenskab, der skal tilpasses.
-- Det er ændret, at alle toppunkter vælges umiddelbart efter registrering af nettet til Rigging-modifikatoren.
-- Muligheden for at opdatere alle masker af apPortrait i scenen tilføjes som en "Opdater alle masker"-menuen i Unity Editor-menuen.
-- Der tilføjes en ny "Rediger" højrekliksmenu, der giver dig mulighed for direkte at ændre mesh- eller mesh-gruppen i mesh-gruppens hierarki.
-- (v1.4.1) En funktion til at validere og automatisk korrigere animationshændelsesnavne tilføjes.
-- (v1.4.1) Det er ændret, at "overloading"-metoder vil blive udelukket, der forårsager en fejl ved tildeling af tilbagekalds-animationshændelser i Inspector UI.
-- (v1.4.1) Muligheden for at batchtildele hændelseslyttere i Callback-animationsbegivenhedens UI i Inspector UI tilføjes.
-- (v1.4.1) En funktion til at kontrollere gyldigheden af ​​tildelte hændelser i animationsbegivenhedens UI af Callback-typen i Inspector UI er tilføjet.
-- (v1.4.1) En funktion til at kopiere kontrolparameternavnet til udklipsholderen i Inspector UI er tilføjet.
-- (v1.4.1) Den koreanske notation af knappen til at indstille, om animationen automatisk skal afspilles, mens rodenheden er valgt, er rettet.
-- (v1.4.1) Det er ændret, at pins, der er oprettet ved at klikke på arbejdsområdet med "Tilføj værktøj", ikke kan flyttes, før der klikkes igen.
-- (v1.4.1) Når du fortryder umiddelbart efter tilføjelse eller sletning af en kontrolparameter til en modifikator, er kontrolparameteren nu korrekt valgt.
-- (v1.4.1) Muligheden for at ændre indstillinger i en batch i dialogen, der automatisk opretter flere masker, tilføjes.
+- Tilføjet script-funktioner for at få afspilningstid osv. fra AnimPlayData
+- Hastigheden og stabiliteten ved at søge efter den seneste version forbedres ved at ændre den server, der informerer om den seneste version
+- Brugervenlighed forbedres ved at skelne rulleværdien af den rigtige brugergrænseflade i henhold til typen af det valgte objekt
+- Hvis du trykker på Enter-tasten i dialogen for at indstille navnet på det nye portræt, oprettes portrættet med det samme med sætnavnet.
+- Hvis skærmopløsningen er større end FHD, udvides området for klikspidser eller kanter en smule.
+- Det er forbedret, at meddelelsen, der spørger, om du vil fuldføre FFD-værktøjet, vises i flere forskellige situationer.
+- Siden Unity 2022.2 er nogle API'er relateret til præfabrikater blevet udfaset, så relaterede koder er ændret
+- Fremhævsdesignet af "Selected Items" i listens brugergrænseflade at se er lidt smukkere
 
 
 
 <size=13>Faste problem</size>
 
-- Et problem er rettet, at fejlen opstod ved brug af "Blur"-værktøjet uden valgt mesh, når du arbejdede med Morph-modifikatoren.
-- Et problem er rettet, at nogle ikonbilleder blev vist i lav opløsning i Pro UI.
-- Et problem er rettet, at når redigeringstilstand med Transform modifier er slået til, mens to eller flere kontrolparametre håndterer det samme objekt, forsvinder objektet.
-- Der er rettet et problem, der forårsagede, at andre modifikatorer blev overdrevent begrænset, når du valgte Color Only modifier og aktiverede multi-redigeringstilstand.
-- Et problem er rettet, at modifikatorer, der skal deaktiveres i denne redigeringstilstand, fungerer.
-- Et problem er rettet, at redigeringstilstanden annulleres, når multiredigeringstilstanden er slået til, mens værdien af ​​kontrolparameteren ikke er placeret i tasten.
-- Et problem er rettet, at multi-redigeringstilstanden ikke blev anvendt korrekt på modifikatorer i andre tidslinjer.
-- Et problem er rettet, at editorressourcer ikke blev indlæst med mellemrum, når editoren blev åbnet gennem Inspektøren.
-- Et problem er rettet, at animationer, der er målrettet mod forskellige rodenheder, ville holde op med at virke, når de forsøgte at afspille animationer i samme frame ved hjælp af et script.
-- Et problem er rettet, at den asynkrone initialiseringsfunktion ikke fungerede korrekt.
-- Et problem er rettet, at animationsafspilningen er for hurtig til at matche rammeindstillingerne efter lang tid, mens editoren ikke er i fokus.
-- Et problem er rettet, at det genkendes som en fejl, og der udsendes en log, hvis Bake udføres uden at angive en passende script-funktion, og hvis animationshændelsesudførelsesmetoden er "Callback".
-- Et problem er rettet, at kontrolparameterbrugergrænsefladen blev vist mærkeligt, da man åbnede "Vis menu" i Unity 2019 og senere versioner.
-- Et problem er rettet, at du ikke kunne vælge en kontrolparameter ved at klikke på den umiddelbart efter at have ændret en kategori af kontrolparametre.
-- Et problem er rettet, at det ændrede shader-aktiv for et materialesæt ikke anvendes på forudindstillingen i materialebiblioteket.
-- Et problem er løst, at dimsen i "Pose Test"-tilstanden i Rigging-modifier ikke kunne kontrolleres, før knoglen blev klikket igen efter klik uden for dimsen.
-- Et problem er rettet, at en intern ID-udstedelsesfejl ved oprettelse af et objekt før eller efter fortrydelse vil forekomme med meget lav sandsynlighed.
-- Et problem er løst, at hvorvidt et objekt vælges med det samme, når et objekt blev oprettet eller duplikeret, ikke var konsistent afhængigt af objekttypen.
-- Et problem er rettet, at arbejdsområdet vil blive zoomet ind/ud, når man scroller med musehjulet uden for arbejdsområdet og flytter markøren tilbage til arbejdsområdet.
-- Et problem er rettet, at shaders af "Keep Alpha"-materialeforudindstillingen blev gengivet mærkeligt, når gengivelsesmålet var "Render Texture". (Du skal installere den pakke igen.)
-- Et problem er rettet, at det forrige Atlas kontinuerligt blev vist på skærmen, selv efter at have trykket på knappen Bag på Atlas igen i PSD-filimportdialogen.
-- Et problem er rettet, at der opstod en fejl, fordi noget kode, der bruger "Type"-klassen, ikke blev skrevet eksplicit.
-- (v1.4.1) Et problem er rettet, at markørfarveegenskaben ikke duplikeres, når en animationsbegivenhed duplikeres.
-- (v1.4.1) Et problem er rettet, at knappen "Fjern animationsbegivenhed" manglede i den tidligere version.
-- (v1.4.1) Et problem er rettet, at der opstod en fejl ved fortrydelse efter oprettelse af en kurve, der forbinder stifter eller sletning af en kurve.
-- (v1.4.1) Et problem er rettet, at 2 ben kunne forbindes med 2 kurver.
-- (v1.4.1) Et problem er rettet, at knapperne relateret til Prefab var for små i Inspector UI.
-- (v1.4.1) Et problem er rettet, at gengivelsesrækkefølgen blev beregnet unormalt, da gengivelsesrækkefølgen af objekter i en maskegruppe blev ændret, og indstillingsfanen ikke blev valgt og fortrydet.
-- (v1.4.1) Et problem er rettet, at fjernknappen ("X"), der bruges i kontrolparameter-brugergrænsefladen, rigging-brugergrænsefladen osv. er for mørk i Pro-brugergrænsefladen.
+- Et problem er rettet, hvor brugergrænsefladen til indtastning af tal for at ændre vægten af et enkelt toppunkt ikke fungerede i redigeringsskærmen til rigging-modifikator
+- Et problem er løst, hvor gengivelsesstatus for knogler ikke vender tilbage til sin oprindelige tilstand, når en anden mesh-gruppe er valgt umiddelbart efter, at gengivelsesstatus for knogler er blevet ændret til "grå, gennemskinnelig" i redigeringsskærmen i Rigging-modifikatoren
+- Et problem er løst, hvor flere objekter ikke fjernes på samme tid ved at trykke på "Trash can"-knappen i brugergrænsefladen til højre for mesh-gruppen.
+- Et problem er løst, hvor gengivelsesrækkefølgen af objekter ikke kunne ændres normalt, når der var en underordnet mesh-gruppe
+- Et problem er løst, hvor objekter er sorteret i omvendt rækkefølge, når der er en underordnet mesh-gruppe på 3 niveauer eller højere ved import af en PSD-fil.
+- Et problem er løst, hvor masker af underordnede mesh-grupper på 3 niveauer eller højere ikke blev oprettet yderligere ved genimport af en PSD-fil
+- Et problem er løst, hvor afbrydelse af den eksisterende moderknogle og bagning igen får knoglen til at bevæge sig mærkeligt
+- Et problem er rettet, hvor editoren ikke kunne køres, når det forkert blev genkendt, at data eksisterede, selv efter at ændringen blev slettet på grund af en fejl
+- Et problem er rettet, hvor karakteren ikke kunne åbnes i editoren, hvis der opstod en fejl i animationsklippet, der blev linket til mesh-gruppen, efter at mesh-gruppen blev slettet eller efter en lignende handling.
+- Et problem er rettet, hvor animationshændelser ikke blev kaldt i det sidste billede, hvor autoloop-keyframes var placeret i loop-animation.
+- Et problem er rettet, hvor objekter i en maskegruppe er unormalt sorteret, når de fortryder efter sletning af flere objekter på samme tid.
+- Et problem er rettet, hvor fejlloggen opstår, når du fjerner masker i en underordnet maskegruppe med Shift-tasten.
+- Et problem er rettet, hvor mapping-målnettet blev gengivet i sort i dialogboksen Genimport af PSD
+- Et problem er rettet, hvor laginformation og forhåndsvisning ikke fungerede korrekt, da man først gik ind i positionskorrektionstrinnet i den sekundære atlasimportdialog.
+- Et problem er løst, hvor objekter ikke kunne duplikeres gennem højrekliksmenuen i Hierarchy UI i venstre side af editoren, mens der ikke var valgt nogen mesh- eller mesh-gruppe.
+- Et problem er løst, hvor nogle elementer i brugergrænsefladen til højre blev vist mærkeligt, da en underordnet mesh-gruppe blev valgt, mens indstillingsfanen for mesh-gruppen blev valgt.
+- Et problem er rettet, hvor den oprindelige værdi af fysikeffekten blev anvendt forkert, og hjørner eller knogler bevægede sig mærkeligt, da spillet blev kørt
+- Et problem er rettet, hvor fysikeffekten virker overdrevet, når FPS var for lav, eller applikationen stoppede, da spillet kørte.
+- Et problem er løst, hvor det var svært at klikke på de vandrette kanter og lodrette kanter
+- Et problem er løst, hvor masker med rigging-modifikatoren anvendt i den underordnede mesh-gruppe - ikke kunne målrettes for transformationsmodifikatoren - kunne omgås og registreres via den "gule øje-knap" i Hierarki-brugergrænsefladen.
+- Et problem er rettet, hvor indstillingen af Jiggle Bone's Constraint ville se mærkelig ud i arbejdsområdet, når et mål ikke er en rodknogle, og den overordnede mesh-gruppe er roteret
+- Et problem er rettet, hvor spidser i stedet for kontrolpunkter blev valgt, når du trykkede på "Ctrl+A"-genvejstasten, mens FFD-værktøjet var tændt
+- Et problem er rettet, hvor ikke-målrettede underordnede mesh-grupper blev registreret, eller masker i underordnede mesh-grupper, der skulle målrettes mod, ikke blev registreret, når man forsøgte at registrere alle mesh i "Morph (Animation)" som tidslinjelag
+- Et problem er rettet, hvor knappen til at fjerne objekter fra tidslinjen ikke dukkede op, når et objekt, der ikke var målet for tidslinjen, blev registreret som et tidslinjelag på grund af en fejl osv.
+- Et problem er løst, hvor objektvalg blev annulleret, når du trak musen på animationsredigeringsskærmen
 
 
 
 
 -----------------------------------------
 (일본어)
-<size=16> AnyPortrait更新ログv1.4.0/v1.4.1</size>
-（2022年7月16日/2022年8月3日ビルド）
+<size=16> AnyPortrait更新ログv1.4.2</size>
+（2023年1月19日ビルド）
 
 <size=13>改善点</size>
 
-- <color=blue>ピンツール</color>
-    新しいカーブベースの「ピン」ツールがメッシュの要素として追加され、モーフモディファイヤの作業効率が向上します。
-    ピンを編集するためのさまざまなツールが追加されています。
-    モーフモディファイヤで「頂点編集モード」と「ピン編集モード」を区別するUIを追加しました。
+- <color=blue>エディタと「Bake」の設定</color>
+    「Bake」の一部のオプションがプロジェクトごとに共有されています。
+    エディタの環境設定をファイルにエクスポートまたはインポートする機能が追加されます。
+    ユーザーが設定した「Bake」オプションを「デフォルト」として保存する機能が追加されます。
+    エディタと「Bake」の設定は「テキストファイル」形式で保存され、バージョン管理ツールと互換性があります。
+    マウスをクリックしてボーンを作成すると、「ゴースト」形式で表示されるようにする設定が追加されます。
+    ワークスペースに表示される「頂点」または「ピン」のサイズを変更できる設定が追加されます。
+    「クリック直後にドラッグしてオブジェクトを直接移動」する既存のギズモの動作方式をオフにできる設定が追加されます。
 
-- <color=blue>改善されたUI画像</color>
-    ワークスペースでレンダリングされる頂点イメージは、レンダリングパフォーマンスを向上させながら、適切に変更されます。
-    レンダリングパフォーマンスを向上させながら、制御パラメーターUIの画像を変更します。
-    Bake Dialog、Inspector、Hierarchyなどの多くのアイコンがきれいに変更されています
-    「ピクセルパーフェクト」技術は、アニメーションのタイムラインに画像を明確に表示するために適用されます。
+- <color=blue>PSD ファイルをインポート</color>
+    PSDファイルを再インポートすると、PSDのレイヤーとメッシュの名前が画面に出力されます。
+    PSDファイルを再インポートすると、PSDの画像とメッシュの画像の位置を正確に比較するために、「ピクセル」をそのまま表示する機能が追加されます。
+    PSDファイルの再インポートを実行すると、PSDファイルに基づいて追加されるメッシュのレンダリング順序が適切に指定されるように改善されます。
+    PSDファイルからメッシュを作成すると、「元に戻す」の記録が処理ステップごとに分割されないように変更されます。
+    PSDファイルをインポートすると、元のレイヤーが出力されるかどうかがメッシュのデフォルト値に反映されるように改善されます。
+    PSDファイルをインポートするときにパスが無効でメッシュを生成しようとすると、エラーメッセージが表示され、動作が停止するように変更されます。
 
-- <color=blue>さまざまなオプションを追加</color>
-    「Bake」ダイアログにオプションが追加され、次に遷移するアニメーションの未定義の制御パラメータに「デフォルト」または「最後の値」のどちらを適用するかを決定します。
-    「Bake」ダイアログにオプションが追加され、キャラクターが1フレームだけ遠くに移動したときに、物理機能（ジグルボーンと物理マテリアル）が奇妙に動作するのを防ぎます。
-    エディターのベクタータイプ制御パラメーターのUIの高さを拡張するオプションが「設定」ダイアログに追加されました
-    「設定」ダイアログにオプションが追加され、他のオブジェクトが選択されたときに[可視性プリセット]がオンのままになるかどうかを決定します
+- <color=blue>Hierarchy UI</color>
+    ターゲットをクリックした後、上下方向キーを使用して他のオブジェクトを選択できるように改善されます。
+    ワークスペースでオブジェクトを選択すると、右側の「Hierarchy UI」が自動的にスクロールします。
+    「アニメーションクリップ」を選択すると、左側の「Hierarchy UI」が自動的にスクロールします。
+    右クリックしてメニューを出力すると、クリックしたターゲットの名前が登場し、複数のターゲットが同時に選択された場合には、追加で選択されたオブジェクトの数が一緒に表示されます。
+    右クリックメニューの「Rename」ダイアログで「Enter」キーを押すと、変更された名前がすぐに適用されます。
+    左側の「Hierarchy UI」の右クリックメニューからオブジェクトの順序を変更したい場合は、ソートモードを「カスタム方式」に変更するかどうかを尋ねるメッセージが表示されます。
+    右クリックメニューの機能を実行すると、そのオブジェクトが選択されるように変更されます。
+    「Alt」キーを押してボーンをレンダリングするかどうかを変更すると、子ボーンが出力されるかどうかが変わります。
+    「カラーオプション(Color Option) 」がオフの場合、「小さな点」が代わりに登場し、それをクリックすると「カラーオプション」がすぐに有効になります。
 
-- <color=blue>改善されたインスペクターUI</color>
-    インスペクターUIのパフォーマンスが向上しました。
-    タブレイアウトがインスペクターに追加され、必要なプロパティを簡単に見つけられるようになりました。
-    インスペクターUIのアイコンとレイアウトがきれいに変更されました。
-    キャラクターアニメーションはUnityエディターでプレビューできます。
-    画像リストが追加されます。
+- <color=blue>複数のオブジェクトの編集</color>
+    「レンダリング順序」(Depth) を変更すると、選択したオブジェクトのレンダリング順序が同時に変更されます。
+     「Hierarchy UI」の右クリックメニューから複製すると、選択したオブジェクトは同時にすべて複製されます。
+     「Hierarchy UI」の右クリックメニューから削除すると、複数の削除が可能なオプションが提供されます。
+     メッシュグループから複数のオブジェクトを削除する場合、異なるタイプの「子メッシュグループ」と「メッシュ」が一緒に選択された状態でも複数削除が可能になるように改善されました。
 
-- <color=blue>アニメーションイベントUIの改善</color>
-    アニメーションイベントダイアログの使いやすさが向上しました。
-    イベントをプリセットとして保存する機能を追加しました。
-    イベントマーカーの色を変更するオプションが追加されました
-    イベントマーカーがタイムラインのスライダーの前に表示されるように変更されました。
-    連続イベントマーカーは、より直感的に表現されます。
+- <color=blue>メッシュ編集画面</color>
+    「頂点の初期化(Reset Vertices) 」を実行すると、「Atlas 領域」に合わせて長方形メッシュが生成されるように変更されます。
+    選択したピンを別のメッシュにコピーして貼り付ける機能が追加されます。
+    頂点やピンをコピーして貼り付けるとき、「Pivot」に合った相対座標に変換して貼り付ける機能が追加されます。
+    「Make Mesh」タブが選択された状態でピンが半透明に見えるように変更されます。
+    メッシュのタブを切り替えるショートカットのうち、数字「2」キーまたは数字「7」キーを連続して押すと、サブメニューが順番に変更されるように改善されます。
 
-- <color=blue>改良されたPSDファイルのインポート機能</color>
-    「PSD再インポートダイアログ」に、同じアトラス構造のセカンダリイメージである「セカンダリアトラス」を作成する機能を追加しました。
-    PSDファイル保存時のパス設定に関連する機能の安定性が向上しました。
+- <color=blue>タイムラインUI</color>
+    タイムラインUIのズームを直感的に調整できるように、下部のスライダが従来とは逆に動作するように変更されます。
+    「Ctrl + Shift」キーを押しながらタイムラインUIの上部をクリックしてドラッグすると、「タイムスライダ」が移動し続けるように改善されます。
+    レイヤーを複数選択するための「最後にクリックしたタイムラインレイヤー」が、「ワークスペース」または「Hierarchy UI」でターゲットをクリックした場合でも更新されるように改善されます。
 
-- エディターの実行パフォーマンスが向上しました。
-- 以前のバージョンで導入された頂点をクリックする改善された方法は、すべての場合に適応されます。
-- Bakeが実行されると、ターゲットのGameObjectがフォーカスされます。
-- アニメーションタイムラインの「自動スクロール」機能が改善されました。
-- リギングモディファイアの「自動正規化」機能を無効にすると、警告が表示されます。
-- テクスチャ、オブジェクト、およびアニメーションを参照するすべてのスクリプト関数のパフォーマンスが向上しました。
-- キャラクターレンダリングを制御するための「コマンドバッファ」の作成を支援するスクリプトが追加されました。
-- 登録されたキーは、編集されていない制御パラメータのUIに表示されます。
-- モディファイアUIに登録されている制御パラメータを出力すると、ユーザー指定のプリセットアイコンで表示されるように変更されます。
-- リギングモディファイアのUIが、状況に応じて現在利用できないUI要素を直感的に区別できるように改善されました。
-- ユーザーがクリックすると予想されるボタンが点滅するように変更されました。
-- モディファイアからすべての制御パラメータキーを一度に削除し、同時にモディファイアから制御パラメータを削除するボタンが追加されました。
-- 最新バージョンのMac OSでは、「Metal」が必須オプションに変更され、Metalに関するガイドダイアログが表示されなくなりました。
-- 画像のテクスチャを選択するためのダイアログとメッシュの画像を選択するためのダイアログの読みやすさが向上しました。
-- アニメーションタイムラインでキーフレームなどをクリックして選択するプロセスが改善されました。
-- 制御パラメータを使用してジグルボーンの重量を調整するオプションが追加されました。
-- 1つまたは複数のボーンを選択する場合、ボーンプロパティUIの変更を最小限に抑えるために、レイアウトの順序が最適化されます。
-- メッシュ編集UIですべての頂点を削除するボタンのサイズが、使用頻度に合わせて少し大きくなるように変更されました。
-- 制御パラメータで制御される修飾子の「値のリセット」および「貼り付け」機能を使用すると、適合させるターゲットプロパティを選択するための新しいダイアログが表示されます。
-- メッシュをリギングモディファイヤに登録した直後に、すべての頂点が選択されるように変更されました。
-- シーン内のapPortraitのすべてのメッシュを更新する機能が、Unity Editorメニューの「Refresh All Meshes」メニューとして追加されました。
-- メッシュグループの階層内のメッシュまたはメッシュグループを直接変更できる新しい「変更」右クリックメニューが追加されました。
--（v1.4.1）アニメーションイベント名を検証して自動修正する機能を追加しました。
--（v1.4.1）インスペクターUIでコールバックスタイルのアニメーションイベントを割り当てるときにエラーを引き起こす「オーバーロード」メソッドが除外されるように変更されました。
--（v1.4.1）インスペクターUIのコールバックアニメーションイベントUIでイベントリスナーをバッチ割り当てする機能が追加されました。
--（v1.4.1）インスペクターUIのコールバック型アニメーションイベントUIに割り当てられたイベントの有効性を確認する機能を追加しました。
--（v1.4.1）インスペクターUIのクリップボードに制御パラメーター名をコピーする機能を追加しました。
--（v1.4.1）ルートユニットが選択されているときにアニメーションを自動的に再生するかどうかを設定するボタンの韓国語表記が修正されました。
--（v1.4.1）「ツールの追加」でワークスペースをクリックして作成したピンは、もう一度クリックするまで移動できないように変更されました。
--（v1.4.1）モディファイアに制御パラメータを追加または削除した直後に元に戻すと、制御パラメータが正しく選択されるようになりました。
--（v1.4.1）複数のメッシュを自動的に作成するダイアログのオプションをバッチで変更する機能が追加されました。
+- 「AnimPlayData」から再生時間などを取得するスクリプト関数が追加されます。
+- 最新バージョンを知らせるサーバーが変更され、最新バージョンを照会する速度と安全性が向上します。
+- 選択したターゲットの種類によって右UIのスクロール値が区別され、使い勝手が向上します。
+- 「新しいPortrait」の名前を設定するダイアログで「Enter」キーを押すと、生成がすぐに完了します。
+- 画面解像度が「FHD」より大きい場合、頂点または線をクリックする範囲が少し拡張されます。
+- 「FFD」ツールの電源を入れた状態で「FFD操作を完了するかどうかを尋ねるメッセージ」がより多くの状況で表示されるように改善されます。
+- 「Unity 2022.2」以降、「Prefab」に関連する一部のAPIが「Deprecated」されると、関連するコードが変更されます。
+- リストUIの「選択されたアイテム」のデザインが少しよりきれいに見えるように改善されます。
 
 
 
 <size=13>修正された問題</size>
 
-- モーフモディファイヤで作業しているときにメッシュが選択されていない状態で「ぼかし」ツールを使用するとエラーが発生する問題が修正されました。
-- 一部のアイコン画像がProUIで低解像度で表示される問題が修正されました。
-- 2つ以上の制御パラメータが同じオブジェクトを処理しているときに、変換モディファイアを使用した編集モードをオンにすると、オブジェクトが消えるという問題が修正されました。
-- [カラーのみ]モディファイヤを選択してマルチエディットモードをオンにすると、他のモディファイアが過度に制限される問題が修正されました。
-- この編集モードで非アクティブ化する必要のある修飾子が機能する問題が修正されました。
-- 制御パラメーターの値がキーにないときにマルチエディットモードをオンにすると、エディットモードがキャンセルされる問題が修正されました。
-- マルチエディットモードが他のタイムラインのモディファイアに適切に適用されなかった問題が修正されました。
-- インスペクターでエディターを開いたときにエディターリソースが断続的に読み込まれない問題が修正されました。
-- スクリプトを使用して同じフレームでアニメーションを再生しようとすると、異なるルートユニットを対象とするアニメーションが機能しなくなる問題が修正されました。
-- 非同期初期化機能が正しく機能しなかった問題が修正されました。
-- エディタにフォーカスがない状態で長時間経過すると、アニメーションの再生が速すぎてフレーム設定に一致しないという問題が修正されました。
-- 適切なスクリプト関数を指定せずにBakeを実行し、アニメーションイベントの実行方法が「Callback」の場合、エラーとして認識されてログが出力される問題を修正しました。
-- Unity 2019以降のバージョンで「表示メニュー」を開くと、制御パラメータUIが奇妙に表示される問題が修正されました。
-- 制御パラメータのカテゴリを変更した直後に制御パラメータをクリックしても選択できない問題が修正されました。
-- マテリアルセットの変更されたシェーダーアセットがマテリアルライブラリのプリセットに適用されないという問題が修正されました。
-- リギングモディファイアの「ポーズテスト」モードのギズモは、ギズモの外側をクリックした後にボーンが再度クリックされるまで制御できなかった問題が修正されました。
-- 元に戻す前または後にオブジェクトを作成するときに内部ID発行エラーが発生する可能性が非常に低いという問題が修正されました。
-- オブジェクトの作成時または複製時にオブジェクトがすぐに選択されるかどうかが、オブジェクトのタイプによって一貫していないという問題が修正されました。
-- ワークスペースの外側でマウスホイールを使用してスクロールし、カーソルをワークスペースに戻すと、ワークスペースがズームイン/ズームアウトされる問題が修正されました。
-- レンダリングターゲットが「RenderTexture」の場合、「KeepAlpha」マテリアルプリセットのシェーダーが奇妙にレンダリングされる問題が修正されました。 （そのパッケージを再度インストールする必要があります。）
-- PSDファイルのインポートダイアログでアトラスのベイクボタンをもう一度押した後も、前のアトラスが画面に表示され続ける問題が修正されました。
-- 「Type」クラスを使用する一部のコードが明示的に記述されていないためにエラーが発生するという問題が修正されました。
--（v1.4.1）アニメーションイベントを複製するときにマーカーの色プロパティが複製されない問題が修正されました。
--（v1.4.1）以前のバージョンで「アニメーションの削除イベントボタン」が見落とされていた問題が修正されました。
--（v1.4.1）ピンを接続する曲線を作成した後、または曲線を削除した後に元に戻すときにエラーが発生する問題が修正されました。
--（v1.4.1）2つのピンが2つの曲線で接続される可能性があるという問題が修正されました。
--（v1.4.1）プレハブに関連するボタンがインスペクターUIで小さすぎるという問題が修正されました。
--（v1.4.1）メッシュグループ内のオブジェクトのレンダリング順序が変更され、設定タブが選択されて元に戻されなかった場合に、レンダリング順序が異常に計算される問題が修正されました。
--（v1.4.1）コントロールパラメーターUI、リギングUIなどで使用される削除ボタン（ "X"）がProUIで暗すぎる問題が修正されました。
+- 「Rigging」モディファイアの編集画面で単一の頂点の重みを変更するために数値を入力するUIが動作しない問題が修正されます。
+- 「Rigging」モディファイアの編集画面でボーンのレンダリング方式が変更された状態ですぐに別のメッシュグループを選択すると、レンダリング方式が元に戻らない問題が修正されます。
+- メッシュグループの右側のUIの「ごみ箱」ボタンでは、複数のオブジェクトが同時に削除されない問題が修正されます。
+- 子メッシュグループがある場合、オブジェクトのレンダリング順序を正常に変更できない問題が修正されます。
+- PSDファイルインポート時に、「3レベル」以上の子メッシュグループがある場合、オブジェクトの順序が逆順にソートされる問題が修正されます。
+- PSDファイルをリロードすると、「3レベル」以上の子メッシュグループのメッシュが追加生成されない問題が修正されます。
+- 親ボーンとの接続を解除して「Bake」を再度したとき、親ボーンが接続され続けていると認識され、奇妙に動く問題が修正されます。
+- エラーによってモディファイアが削除された後も、あたかもデータが存在すると誤って認識されたときにエディタを実行できない問題が修正されます。
+- メッシュグループを削除したり、類似した操作後にそのメッシュグループに関連付けられたアニメーションクリップでエラーが発生すると、その文字をエディタで開くことができなくなる問題が修正されます。
+- ループアニメーションで「自動ループキーフレーム（Auto-Loop Keyframe）」が位置する最後のフレームでは、アニメーションイベントが呼び出されない問題が修正されます。
+- メッシュグループのオブジェクトを同時に複数削除した後に元に戻す場合、順序が異常にソートされる問題が修正されます。
+- 「Shift」キーを押しながら子メッシュグループのメッシュを削除した場合、エラーログが発生する問題が修正されます。
+- PSDを再度開くダイアログでマッピング先のメッシュが黒くレンダリングされる問題を修正しました。
+- 「Secondary Atlas」をインポートするダイアログで位置を補正する段階に初めて入ると、レイヤー情報とプレビューが正しく動作しない問題が修正されます。
+- メッシュやメッシュグループを選択していない状態でエディタの左側の「Hierarchy UI」の右クリックメニューでターゲットのオブジェクトを複製できない問題が修正されます。
+- メッシュグループの「設定」タブを選択した状態で子メッシュグループを選択すると、右側のUIの一部の項目が奇妙に出力される問題が修正されます。
+- ゲーム実行時に「物理効果」が実行される最初のフレームで初期値が誤って適用され、頂点やボーンが奇妙に動く問題が修正されます。
+- ゲーム実行時に「FPS」が低すぎたり、アプリケーションが停止した場合、「物理効果」が過度に誇張され、動く問題が修正されます。
+- メッシュを構成する線分が水平線または垂直線のときにクリックして選択しにくかった問題が修正されます。
+- 子メッシュグループに属する「Rigging」モディファイアが適用されたメッシュは「Transform」モディファイアの対象になることができないが、これを「Hierarchy UI」の「黄色い目ボタン」を通じてバイパスして登録できた問題が修正されます。
+- 「ジグルボーン(Jiggle Bone)」の「Constraint」が「親メッシュグループが回転した状態でターゲットがルートボーンでない場合」には、ワークスペースで奇妙に見える問題が修正されます。
+- 「FFD」ツールがオンの状態で「Ctrl+A」ショートカットを押すと、コントロールポイントではなく頂点が選択される問題が修正されます。
+- すべてのメッシュをアニメーションに「Morph (Animation)」モディファイアのタイムラインレイヤーとして登録しようとするとき、「対象ではない子メッシュグループ」が登録になったり、「対象となる子メッシュグループのメッシュ」が登録されない 問題が修正されます。
+- バグなどによってタイムラインの対象でないオブジェクトがタイムラインレイヤーに登録された場合に、これをタイムラインから削除するボタンが表示されない問題が修正されます。
+- アニメーション編集画面でマウスをドラッグすると、オブジェクトの選択がキャンセルされる問題が修正されました。
+
 
 
 
 -----------------------------------------
 (중국어-번체)
-<size=16>AnyPortrait更新日誌v1.4.0/v1.4.1</size>
-（2022年7月16日/2022年8月3日）
+<size=16>AnyPortrait更新日誌v1.4.2</size>
+（2023年1月19日）
 
 <size=13>改進</size>
 
-- <color=blue>固定工具</color>
-    添加了一個新的基於曲線的“Pin”工具作為網格元素，以提高變形修改器的工作效率。
-    添加了各種用於編輯 Pin 圖的工具。
-    添加了用於區分變形修改器中的“頂點編輯模式”和“引腳編輯模式”的 UI。
+- <color=blue>編輯器設置和烘焙設置</color>
+    一些 Bake 選項在逐個項目上共享
+    添加導出/導入編輯器環境設置到文件的功能
+    添加了將用戶自定義烘焙選項保存為“默認設置”的功能
+    編輯器首選項和烘焙設置以文本文件格式存儲，與版本控制工具兼容
+    添加了通過鼠標單擊創建骨骼時將骨骼顯示為“幽靈骨骼”的編輯器選項
+    添加了用於更改工作區中顯示的頂點或圖釘大小的編輯器選項
+    添加了允許您關閉“單擊後立即通過拖動立即移動目標”的 Gizmo 行為的編輯器選項
 
-- <color=blue>改進的用戶界面圖像</color>
-    在提高渲染性能的同時，很好地改變了工作空間中渲染的頂點圖像。
-    在提高渲染性能的同時更改了控制參數 UI 的圖像。
-    Bake Dialog、Inspector 和 Hierarchy 等許多圖標都變漂亮了
-    “像素完美”技術用於在動畫時間軸中清晰顯示圖像。
+- <color=blue>導入 PSD 文件</color>
+    重新導入 PSD 文件時，PSD 中的層和網格的名稱顯示在屏幕上
+    重新導入PSD文件時，增加了顯示圖像像素的功能，以準確比較PSD圖層和網格的位置
+    重新導入 PSD 文件時，改進後可以根據 PSD 文件正確指定網格的渲染順序
+    從PSD文件生成網格時，更改為不按處理步驟劃分撤消記錄
+    導入 PSD 文件時，網格的默認可見性是根據 PSD 圖層的可見性指定的
+    導入 PSD 文件時，路徑無效時出現錯誤消息
 
-- <color=blue>添加了各種選項</color>
-    Bake 對話框中添加了一個選項，以確定“默認”或“最後一個值”是否將應用於下一個要轉換的動畫中的未定義控制參數。
-    烘焙對話框中添加了一個選項，以防止物理功能（抖動骨骼和物理材質）在角色僅在 1 幀內移動很遠時出現異常行為。
-    在設置對話框中添加了一個選項，用於在編輯器中擴展 Vector 類型控件參數的 UI 高度
-    在“設置”對話框中添加了一個選項，以確定在選擇其他對象時“可見性預設”是否會保持打開狀態
+- <color=blue>層次結構 UI</color>
+    單擊目標後按向上/向下鍵可以選擇另一個對象
+    當在工作區中選擇對象時，右側的層次結構 UI 會自動滾動
+    選擇動畫片段時，左側的層次結構 UI 會自動滾動
+    如果右鍵單擊顯示菜單，則顯示單擊的對象的名稱，如果同時選擇多個對象，還會顯示額外選擇的對象的數量。
+    如果通過右鍵單擊菜單在“重命名”對話框中按 Enter 鍵，則會立即應用更改後的名稱。
+    當嘗試通過左側 Hierarchy UI 的右鍵菜單更改對象的順序時，會出現一條消息，詢問是否將排序模式更改為“自定義方法”。
+    通過一些右鍵菜單功能，對象將被選中。
+    按住 Alt 鍵改變骨骼的渲染，子骨骼的可見性也會改變。
+    如果顏色選項關閉，則會出現一個小點，單擊它會立即激活顏色選項。
 
-- <color=blue>改進的 Inspector UI</color>
-    Inspector UI 的性能得到改進。
-    選項卡佈局已添加到 Inspector 中，以便更輕鬆地找到所需的屬性。
-    Inspector UI 的圖標和佈局已更改為漂亮。
-    角色動畫可以在 Unity 編輯器中預覽。
-    圖像列表已添加。
+- <color=blue>編輯多個對象</color>
+    支持一次更改選定對象的渲染順序（深度）
+    支持通過 Hierarchy UI 的右鍵菜單一次復制選定的對象
+    通過Hierarchy UI的右鍵菜單刪除時，提供了多次刪除的選項
+    從網格組中刪除多個對象時，已改進為即使同時選擇子網格組和網格也可以刪除
 
-- <color=blue>改進的動畫事件 UI</color>
-    動畫事件對話框的可用性得到了改進。
-    添加了用戶將事件保存為預設的功能。
-    添加了一個選項來更改事件標記的顏色
-    更改事件標記將呈現在時間軸上的滑塊前面。
-    連續事件標記更直觀地表達。
+- <color=blue>網格編輯畫面</color>
+    更改為運行“重置頂點”創建方形網格以適合 Atlas 區域
+    添加了將所選引腳複製並粘貼到另一個網格的功能
+    新增複製粘貼頂點或引腳時，將其位置值轉換為基於樞軸的相對坐標的功能
+    選擇“製作網格”選項卡時，引腳顯示為半透明
+    改進網格標籤切換熱鍵中連續按數字2鍵或數字7鍵時子菜單順序變化
 
-- <color=blue>改進的PSD文件導入功能</color>
-    在“PSD 重新導入對話框”中添加了創建“輔助圖集”的功能，該功能是具有相同圖集結構的輔助圖像。
-    提高了保存PSD文件時設置路徑相關功能的穩定性。
+- <color=blue>動畫時間線用戶界面</color>
+    底部的滑塊已更改為以相反的方式工作，以便您可以直觀地調整動畫時間軸 UI 的放大/縮小。
+    改進了按住Ctrl + Shift鍵的同時單擊並拖動時間線UI頂部可以連續移動時間滑塊
+    改進了即使在工作區或層次結構 UI 中單擊目標時，多選圖層的“最後單擊的時間軸圖層”也會刷新
 
-- 改進了編輯器執行性能。
-- 以前版本中引入的改進的單擊頂點方式適用於所有情況。
-- 執行 Bake 時，目標 GameObject 被聚焦。
-- 改進了動畫時間線的“自動滾動”功能。
-- 在綁定修改器中禁用“自動標準化”功能時會出現警告。
-- 改進了所有引用紋理、對象和動畫的腳本函數的性能。
-- 添加了一個腳本來幫助創建“命令緩衝區”來控制角色渲染。
-- 已註冊的鍵顯示在未編輯的控制參數的 UI 中。
-- 輸出修改器 UI 中註冊的控制參數時，它們將更改為以用戶指定的預設圖標顯示。
-- 改進了 Rigging 修改器的 UI 可以根據情況直觀區分當前不可用的 UI 元素。
-- 預計用戶點擊的按鈕變為flash。
-- 添加了一個按鈕，該按鈕一次從修改器中刪除所有控制參數鍵並同時從修改器中刪除控制參數。
-- 在最新版本的 Mac OS 中，“Metal”更改為必填選項，因此不再顯示有關 Metal 的引導對話框。
-- 選擇圖像紋理的對話框和選擇網格圖像的對話框的可讀性得到改善。
-- 改進了在動畫時間線上單擊和選擇關鍵幀等的過程。
-- 添加了使用控制參數調整抖動骨骼重量的選項。
-- 選擇一個或多個骨骼時，優化佈局順序以最小化骨骼屬性 UI 的變化。
-- 網格編輯 UI 中刪除所有頂點的按鈕大小更改為稍大，以匹配使用頻率。
-- 當使用由控制參數控制的修改器的“重置值”和“粘貼”功能時，將出現用於選擇要調整的目標屬性的新對話框。
-- 更改為在將網格註冊到 Rigging 修改器後立即選擇所有頂點。
-- 在 Unity Editor 菜單中添加了刷新場景中所有 apPortrait 網格的功能，作為“刷新所有網格”菜單。
-- 添加了一個新的“修改”右鍵菜單，允許您直接修改網格組層次結構中的網格或網格組。
-- (v1.4.1) 添加了驗證和自動更正動畫事件名稱的功能。
-- (v1.4.1) 在 Inspector UI 中分配回調樣式動畫事件時，將排除“重載”方法會導致錯誤的更改。
-- (v1.4.1) 在 Inspector UI 的回調動畫事件 UI 中添加了批量分配事件偵聽器的功能。
-- (v1.4.1) 在Inspector UI的回調類型動畫事件UI中增加了檢查分配事件有效性的功能。
-- (v1.4.1) 添加了將控制參數名稱複製到 Inspector UI 中的剪貼板的功能。
-- (v1.4.1) 更正了設置是否在選擇根單元時自動播放動畫的按鈕的韓文符號。
-- (v1.4.1) 使用“添加工具”單擊工作區創建的引腳已更改，直到再次單擊才能移動。
-- (v1.4.1) 當在修改器中添加或刪除控制參數後立即撤消時，現在可以正確選擇控制參數。
-- (v1.4.1) 添加了在自動創建多個網格的對話框中批量更改選項的功能。
+- 增加了從AnimPlayData獲取播放時間等的腳本函數
+- 通過更改通知最新版本的服務器提高了搜索最新版本的速度和穩定性
+- 通過根據所選對象的類型區分右側 UI 的滾動值來提高可用性
+- 如果在對話框中按回車鍵設置新肖像的名稱，則立即使用設置的名稱創建肖像。
+- 如果屏幕分辨率大於FHD，點擊頂點或邊的範圍會稍微擴大。
+- 改進了更多情況下提示是否完成FFD工具的提示。
+- 從Unity 2022.2開始，一些與預製件相關的API已經被棄用，所以相關代碼被更改
+- 列表UI中“已選項目”的高亮設計看起來更漂亮了
 
 
 
 <size=13>修復了問題</size>
 
-- 修復了在使用變形修改器時在未選擇網格的情況下使用“模糊”工具時發生錯誤的問題。
-- 修復了 Pro UI 中某些圖標圖像以低分辨率顯示的問題。
-- 修復了在兩個或多個控制參數處理同一對象時打開帶有變換修改器的編輯模式時，該對象消失的問題。
-- 修復了在選擇“僅顏色”修改器並打開多重編輯模式時導致其他修改器受到過度限制的問題。
-- 修復了在此編輯模式下應停用的修飾符起作用的問題。
-- 修復了當控制參數的值不在鍵中時打開多重編輯模式時取消編輯模式的問題。
-- 修復了多重編輯模式未正確應用於其他時間線中的修改器的問題。
-- 修復了通過 Inspector 打開編輯器時沒有間歇性加載編輯器資源的問題。
-- 修復了在嘗試使用腳本在同一幀中播放動畫時，針對不同根單元的動畫將停止工作的問題。
-- 修復了異步初始化功能無法正常工作的問題。
-- 修復了在編輯器未對焦時，動畫播放過快而無法匹配幀設置的問題。
-- 修正了在未指定適當的腳本函數的情況下執行 Bake 並且動畫事件執行方法為“回調”的情況下被識別為錯誤並輸出日誌的問題。
-- 修復了在 Unity 2019 及更高版本中打開“查看菜單”時控制參數 UI 顯示異常的問題。
-- 修復了在更改控制參數類別後無法通過立即單擊來選擇控制參數的問題。
-- 修復了材質集更改後的著色器資源未應用到材質庫中的預設的問題。
-- 修復了 Rigging 修改器的“姿勢測試”模式的 Gizmo 無法控制的問題，直到在 Gizmo 外部單擊後再次單擊骨骼。
-- 修復了在撤銷之前或之後創建對象時發生內部 ID 發布錯誤的概率非常低的問題。
-- 修復了創建或複制對象時是否立即選擇對像根據對像類型不一致的問題。
-- 修復了在工作區外使用鼠標滾輪滾動並將光標移回工作區時工作區將放大/縮小的問題。
-- 修復了渲染目標為“渲染紋理”時“保持Alpha”材質預設的著色器渲染異常的問題。 （您將需要再次安裝該軟件包。）
-- 修復了在 PSD 文件導入對話框中再次按下 Atlas 的 Bake 按鈕後，之前的 Atlas 仍繼續顯示在屏幕上的問題。
-- 修復了由於未明確編寫使用“Type”類的某些代碼而發生錯誤的問題。
-- (v1.4.1) 修復了複製動畫事件時不復制標記顏色屬性的問題。
-- (v1.4.1) 修復了上一版本遺漏了“移除動畫事件按鈕”的問題。
-- (v1.4.1) 修復了創建連接引腳的曲線或刪除曲線後撤消時發生錯誤的問題。
-- (v1.4.1) 修復了 2 個引腳可以用 2 條曲線連接的問題。
-- (v1.4.1) 修復了 Inspector UI 中與 Prefab 相關的按鈕太小的問題。
-- (v1.4.1) 修正了當網格組中對象的渲染順序發生變化並且未選擇和撤消設置選項卡時渲染順序計算異常的問題。
-- (v1.4.1) 修復了 Pro UI 中 Control Parameter UI、Rigging UI 等中使用的移除按鈕 ("X") 太暗的問題。
+- 修復了用於輸入數字以更改單個頂點權重的 UI 在索具修改器編輯屏幕中不起作用的問題
+- 修復了在綁定修改器的編輯屏幕中將骨骼的渲染狀態更改為“灰色，半透明”後立即選擇不同的網格組時，骨骼的渲染狀態不會返回其原始狀態的問題
+- 修復了通過按下網格組右側 UI 中的“垃圾桶”按鈕無法同時刪除多個對象的問題。
+- 修復了存在子網格組時無法正常更改對象渲染順序的問題
+- 修復了當導入 PSD 文件時存在 3 級或更高級別的子網格組時對像以相反順序排序的問題。
+- 修復了重新導入 PSD 文件時未額外創建 3 級或更高級別的子網格組網格的問題
+- 修復了斷開現有父骨骼並再次烘焙導致骨骼奇怪移動的問題
+- 修改器因錯誤被刪除後仍被錯誤識別為數據存在時編輯器無法運行的問題已修復
+- 修復了在刪除網格組或類似操作後，如果鏈接到網格組的動畫剪輯發生錯誤，則無法在編輯器中打開角色的問題。
+- 修復了在自動循環關鍵幀位於循環動畫中的最後一幀中未調用動畫事件的問題。
+- 修復了同時刪除多個對像後撤消時網格組中對象排序異常的問題。
+- 修復了使用 Shift 鍵刪除子網格組中的網格時出現錯誤日誌的問題。
+- 修復了在“重新導入 PSD”對話框中映射目標網格呈現為黑色的問題
+- 修復了在二級圖集導入對話框中首次進入位置校正步驟時圖層信息和預覽無法正常工作的問題。
+- 修復了在未選擇網格或網格組時無法通過編輯器左側層次結構 UI 的右鍵單擊菜單複制對象的問題。
+- 修復了在選擇網格組的設置選項卡時選擇子網格組時，右側 UI 中的某些項目顯示異常的問題。
+- 修復了物理效果的初始值應用不正確以及遊戲運行時頂點或骨骼奇怪移動的問題
+- 修復了當 FPS 過低或應用程序在遊戲運行時停止時物理效果誇大的問題。
+- 修復了難以單擊水平邊緣和垂直邊緣的問題
+- 修復了一個問題，即在子網格組中應用了 Rigging 修改器的網格 - 無法成為變換修改器的目標 - 可以繞過並通過層次結構 UI 中的“黃眼按鈕”進行註冊。
+- 修復了當目標不是根骨骼且父網格組已旋轉時，Jiggle Bone 的約束設置在工作區中看起來很奇怪的問題
+- 修復了在 FFD 工具打開時按“Ctrl+A”熱鍵時選擇頂點而不是控制點的問題
+- 修復了在嘗試將“變形（動畫）”中的所有網格註冊為時間軸層時註冊非目標子網格組或未註冊應作為目標的子網格組中的網格的問題
+- 修復了由於錯誤等原因將不是時間軸目標的對象註冊為時間軸層時，用於從時間軸移除對象的按鈕未出現的問題。
+- 修復了在動畫編輯屏幕上拖動鼠標時取消對象選擇的問題
+
 
 
 
 -----------------------------------------
 (중국어-간체)
-<size=16>AnyPortrait更新日志v1.4.0/v1.4.1</size>
-（2022年7月16日/2022年8月3日）
+<size=16>AnyPortrait更新日志v1.4.2</size>
+（2023年1月19日）
 
 <size=13>改进</size>
 
-- <color=blue>固定工具</color>
-    添加了一个新的基于曲线的“Pin”工具作为网格元素，以提高变形修改器的工作效率。
-    添加了各种用于编辑 Pin 图的工具。
-    添加了用于区分变形修改器中的“顶点编辑模式”和“引脚编辑模式”的 UI。
+- <color=blue>编辑器设置和烘焙设置</color>
+    一些 Bake 选项在逐个项目上共享
+    添加导出/导入编辑器环境设置到文件的功能
+    添加了将用户自定义烘焙选项保存为“默认设置”的功能
+    编辑器首选项和烘焙设置以文本文件格式存储，与版本控制工具兼容
+    添加了通过鼠标单击创建骨骼时将骨骼显示为“幽灵骨骼”的编辑器选项
+    添加了用于更改工作区中显示的顶点或图钉大小的编辑器选项
+    添加了允许您关闭“单击后立即通过拖动立即移动目标”的 Gizmo 行为的编辑器选项
 
-- <color=blue>改进的用户界面图像</color>
-    在提高渲染性能的同时，很好地改变了工作空间中渲染的顶点图像。
-    在提高渲染性能的同时更改了控制参数 UI 的图像。
-    Bake Dialog、Inspector 和 Hierarchy 等许多图标都变漂亮了
-    “像素完美”技术用于在动画时间轴中清晰显示图像。
+- <color=blue>导入 PSD 文件</color>
+    重新导入 PSD 文件时，PSD 中的层和网格的名称显示在屏幕上
+    重新导入PSD文件时，增加了显示图像像素的功能，以准确比较PSD图层和网格的位置
+    重新导入 PSD 文件时，改进后可以根据 PSD 文件正确指定网格的渲染顺序
+    从PSD文件生成网格时，更改为不按处理步骤划分撤消记录
+    导入 PSD 文件时，网格的默认可见性是根据 PSD 图层的可见性指定的
+    导入 PSD 文件时，路径无效时出现错误信息
 
-- <color=blue>添加了各种选项</color>
-    Bake 对话框中添加了一个选项，以确定“默认”或“最后一个值”是否将应用于下一个要转换的动画中的未定义控制参数。
-    烘焙对话框中添加了一个选项，以防止物理功能（抖动骨骼和物理材质）在角色仅在 1 帧内移动很远时出现异常行为。
-    在设置对话框中添加了一个选项，用于在编辑器中扩展 Vector 类型控件参数的 UI 高度
-    在“设置”对话框中添加了一个选项，以确定在选择其他对象时“可见性预设”是否会保持打开状态
+- <color=blue>层次结构 UI</color>
+    单击目标后按向上/向下键可以选择另一个对象
+    当在工作区中选择对象时，右侧的层次结构 UI 会自动滚动
+    选择动画片段时，左侧的层次结构 UI 会自动滚动
+    如果右键单击显示菜单，则显示单击的对象的名称，如果同时选择多个对象，还会显示额外选择的对象的数量。
+    如果通过右键单击菜单在“重命名”对话框中按 Enter 键，则会立即应用更改后的名称。
+    当尝试通过左侧 Hierarchy UI 的右键菜单更改对象的顺序时，会出现一条消息，询问是否将排序模式更改为“自定义方法”。
+    通过一些右键菜单功能，对象将被选中。
+    按住 Alt 键改变骨骼的渲染，子骨骼的可见性也会改变。
+    如果颜色选项关闭，则会出现一个小点，单击它会立即激活颜色选项。
 
-- <color=blue>改进的 Inspector UI</color>
-    Inspector UI 的性能得到改进。
-    选项卡布局已添加到 Inspector 中，以便更轻松地找到所需的属性。
-    Inspector UI 的图标和布局已更改为漂亮。
-    角色动画可以在 Unity 编辑器中预览。
-    图像列表已添加。
+- <color=blue>编辑多个对象</color>
+    支持一次更改选定对象的渲染顺序（深度）
+    支持通过 Hierarchy UI 的右键菜单一次复制选定的对象
+    通过Hierarchy UI的右键菜单删除时，提供了多次删除的选项
+    从网格组中删除多个对象时，已改进为即使同时选择子网格组和网格也可以删除
 
-- <color=blue>改进的动画事件 UI</color>
-    动画事件对话框的可用性得到了改进。
-    添加了用户将事件保存为预设的功能。
-    添加了一个选项来更改事件标记的颜色
-    更改事件标记将呈现在时间轴上的滑块前面。
-    连续事件标记更直观地表达。
+- <color=blue>网格编辑画面</color>
+    更改为运行“重置顶点”创建方形网格以适合 Atlas 区域
+    添加了将所选引脚复制并粘贴到另一个网格的功能
+    新增复制粘贴顶点或引脚时，将其位置值转换为基于枢轴的相对坐标的功能
+    选择“制作网格”选项卡时，引脚显示为半透明
+    改进网格标签切换热键中连续按数字2键或数字7键时子菜单顺序变化
 
-- <color=blue>改进的PSD文件导入功能</color>
-    在“PSD 重新导入对话框”中添加了创建“辅助图集”的功能，该功能是具有相同图集结构的辅助图像。
-    提高了保存PSD文件时设置路径相关功能的稳定性。
+- <color=blue>动画时间线用户界面</color>
+    底部的滑块已更改为以相反的方式工作，以便您可以直观地调整动画时间轴 UI 的放大/缩小。
+    改进了按住Ctrl + Shift键的同时单击并拖动时间线UI顶部可以连续移动时间滑块
+    改进了即使在工作区或层次结构 UI 中单击目标时，多选图层的“最后单击的时间轴图层”也会刷新
 
-- 改进了编辑器执行性能。
-- 以前版本中引入的改进的单击顶点方式适用于所有情况。
-- 执行 Bake 时，目标 GameObject 被聚焦。
-- 改进了动画时间线的“自动滚动”功能。
-- 在绑定修改器中禁用“自动标准化”功能时会出现警告。
-- 改进了所有引用纹理、对象和动画的脚本函数的性能。
-- 添加了一个脚本来帮助创建“命令缓冲区”来控制角色渲染。
-- 已注册的键显示在未编辑的控制参数的 UI 中。
-- 输出修改器 UI 中注册的控制参数时，它们将更改为以用户指定的预设图标显示。
-- 改进了 Rigging 修改器的 UI 可以根据情况直观区分当前不可用的 UI 元素。
-- 预计用户点击的按钮变为flash。
-- 添加了一个按钮，该按钮一次从修改器中删除所有控制参数键并同时从修改器中删除控制参数。
-- 在最新版本的 Mac OS 中，“Metal”更改为必填选项，因此不再显示有关 Metal 的引导对话框。
-- 选择图像纹理的对话框和选择网格图像的对话框的可读性得到改善。
-- 改进了在动画时间线上单击和选择关键帧等的过程。
-- 添加了使用控制参数调整抖动骨骼重量的选项。
-- 选择一个或多个骨骼时，优化布局顺序以最小化骨骼属性 UI 的变化。
-- 网格编辑 UI 中删除所有顶点的按钮大小更改为稍大，以匹配使用频率。
-- 当使用由控制参数控制的修改器的“重置值”和“粘贴”功能时，将出现用于选择要调整的目标属性的新对话框。
-- 更改为在将网格注册到 Rigging 修改器后立即选择所有顶点。
-- 在 Unity Editor 菜单中添加了刷新场景中所有 apPortrait 网格的功能，作为“刷新所有网格”菜单。
-- 添加了一个新的“修改”右键菜单，允许您直接修改网格组层次结构中的网格或网格组。
-- (v1.4.1) 添加了验证和自动更正动画事件名称的功能。
-- (v1.4.1) 在 Inspector UI 中分配回调样式动画事件时，将排除“重载”方法会导致错误的更改。
-- (v1.4.1) 在 Inspector UI 的回调动画事件 UI 中添加了批量分配事件侦听器的功能。
-- (v1.4.1) 在Inspector UI的回调类型动画事件UI中增加了检查分配事件有效性的功能。
-- (v1.4.1) 添加了将控制参数名称复制到 Inspector UI 中的剪贴板的功能。
-- (v1.4.1) 更正了设置是否在选择根单元时自动播放动画的按钮的韩文符号。
-- (v1.4.1) 使用“添加工具”单击工作区创建的引脚已更改，直到再次单击才能移动。
-- (v1.4.1) 当在修改器中添加或删除控制参数后立即撤消时，现在可以正确选择控制参数。
-- (v1.4.1) 添加了在自动创建多个网格的对话框中批量更改选项的功能。
+- 增加了从AnimPlayData获取播放时间等的脚本函数
+- 通过更改通知最新版本的服务器提高了搜索最新版本的速度和稳定性
+- 通过根据所选对象的类型区分右侧 UI 的滚动值来提高可用性
+- 如果在对话框中按回车键设置新肖像的名称，则立即使用设置的名称创建肖像。
+- 如果屏幕分辨率大于FHD，点击顶点或边的范围会稍微扩大。
+- 改进了更多情况下提示是否完成FFD工具的提示。
+- 从Unity 2022.2开始，一些与预制件相关的API已经被弃用，所以相关代码被更改
+- 列表UI中“已选项目”的高亮设计看起来更漂亮了
 
 
 
 <size=13>修复了问题</size>
 
-- 修复了在使用变形修改器时在未选择网格的情况下使用“模糊”工具时发生错误的问题。
-- 修复了 Pro UI 中某些图标图像以低分辨率显示的问题。
-- 修复了在两个或多个控制参数处理同一对象时打开带有变换修改器的编辑模式时，该对象消失的问题。
-- 修复了在选择“仅颜色”修改器并打开多重编辑模式时导致其他修改器受到过度限制的问题。
-- 修复了在此编辑模式下应停用的修饰符起作用的问题。
-- 修复了当控制参数的值不在键中时打开多重编辑模式时取消编辑模式的问题。
-- 修复了多重编辑模式未正确应用于其他时间线中的修改器的问题。
-- 修复了通过 Inspector 打开编辑器时没有间歇性加载编辑器资源的问题。
-- 修复了在尝试使用脚本在同一帧中播放动画时，针对不同根单元的动画将停止工作的问题。
-- 修复了异步初始化功能无法正常工作的问题。
-- 修复了在编辑器未对焦时，动画播放过快而无法匹配帧设置的问题。
-- 修正了在未指定适当的脚本函数的情况下执行 Bake 并且动画事件执行方法为“回调”时会被识别为错误并输出日志的问题。
-- 修复了在 Unity 2019 及更高版本中打开“查看菜单”时控制参数 UI 显示异常的问题。
-- 修复了在更改控制参数类别后无法通过立即单击来选择控制参数的问题。
-- 修复了材质集更改后的着色器资源未应用到材质库中的预设的问题。
-- 修复了 Rigging 修改器的“姿势测试”模式的 Gizmo 无法控制的问题，直到在 Gizmo 外部单击后再次单击骨骼。
-- 修复了在撤销之前或之后创建对象时发生内部 ID 发布错误的概率非常低的问题。
-- 修复了创建或复制对象时是否立即选择对象根据对象类型不一致的问题。
-- 修复了在工作区外使用鼠标滚轮滚动并将光标移回工作区时工作区将放大/缩小的问题。
-- 修复了渲染目标为“渲染纹理”时“保持Alpha”材质预设的着色器渲染异常的问题。 （您将需要再次安装该软件包。）
-- 修复了在 PSD 文件导入对话框中再次按下 Atlas 的 Bake 按钮后，之前的 Atlas 仍继续显示在屏幕上的问题。
-- 修复了由于未明确编写使用“Type”类的某些代码而发生错误的问题。
-- (v1.4.1) 修复了复制动画事件时不复制标记颜色属性的问题。
-- (v1.4.1) 修复了上一版本遗漏了“移除动画事件按钮”的问题。
-- (v1.4.1) 修复了创建连接引脚的曲线或删除曲线后撤消时发生错误的问题。
-- (v1.4.1) 修复了 2 个引脚可以用 2 条曲线连接的问题。
-- (v1.4.1) 修复了 Inspector UI 中与 Prefab 相关的按钮太小的问题。
-- (v1.4.1) 修正了当网格组中对象的渲染顺序发生变化并且未选择和撤消设置选项卡时渲染顺序计算异常的问题。
-- (v1.4.1) 修复了 Pro UI 中 Control Parameter UI、Rigging UI 等中使用的移除按钮 ("X") 太暗的问题。
+- 修复了用于输入数字以更改单个顶点权重的 UI 在索具修改器编辑屏幕中不起作用的问题
+- 修复了在绑定修改器的编辑屏幕中将骨骼的渲染状态更改为“灰色，半透明”后立即选择不同的网格组时，骨骼的渲染状态不会返回其原始状态的问题
+- 修复了通过按下网格组右侧 UI 中的“垃圾桶”按钮无法同时删除多个对象的问题。
+- 修复了存在子网格组时无法正常更改对象渲染顺序的问题
+- 修复了当导入 PSD 文件时存在 3 级或更高级别的子网格组时对象以相反顺序排序的问题。
+- 修复了重新导入 PSD 文件时未额外创建 3 级或更高级别的子网格组网格的问题
+- 修复了断开现有父骨骼并再次烘焙导致骨骼奇怪移动的问题
+- 修改器因错误被删除后仍被错误识别为数据存在时编辑器无法运行的问题已修复
+- 修复了在删除网格组或类似操作后，如果链接到网格组的动画剪辑发生错误，则无法在编辑器中打开角色的问题。
+- 修复了在自动循环关键帧位于循环动画中的最后一帧中未调用动画事件的问题。
+- 修复了同时删除多个对象后撤消时网格组中对象排序异常的问题。
+- 修复了使用 Shift 键删除子网格组中的网格时出现错误日志的问题。
+- 修复了在“重新导入 PSD”对话框中映射目标网格呈现为黑色的问题
+- 修复了在二级图集导入对话框中首次进入位置校正步骤时图层信息和预览无法正常工作的问题。
+- 修复了在未选择网格或网格组时无法通过编辑器左侧层次结构 UI 的右键单击菜单复制对象的问题。
+- 修复了在选择网格组的设置选项卡时选择子网格组时，右侧 UI 中的某些项目显示异常的问题。
+- 修复了物理效果的初始值应用不正确以及游戏运行时顶点或骨骼奇怪移动的问题
+- 修复了当 FPS 过低或应用程序在游戏运行时停止时物理效果夸大的问题。
+- 修复了难以单击水平边缘和垂直边缘的问题
+- 修复了一个问题，即在子网格组中应用了 Rigging 修改器的网格 - 无法成为变换修改器的目标 - 可以绕过并通过层次结构 UI 中的“黄眼按钮”进行注册。
+- 修复了当目标不是根骨骼且父网格组已旋转时，Jiggle Bone 的约束设置在工作区中看起来很奇怪的问题
+- 修复了在 FFD 工具打开时按“Ctrl+A”热键时选择顶点而不是控制点的问题
+- 修复了在尝试将“变形（动画）”中的所有网格注册为时间轴层时注册非目标子网格组或未注册应作为目标的子网格组中的网格的问题
+- 修复了由于错误等原因将不是时间轴目标的对象注册为时间轴层时，用于从时间轴移除对象的按钮未出现的问题。
+- 修复了在动画编辑屏幕上拖动鼠标时取消对象选择的问题
+
 
 
 
 -----------------------------------------
 (폴란드어)
-<size=16>Dziennik aktualizacji AnyPortret v1.4.0/v1.4.1</size>
-(Zbuduj 16 lipca 2022 / 3 sierpnia 2022 r.)
+<size=16>Dziennik aktualizacji AnyPortret v1.4.2</size>
+(Zbuduj 19 stycznia 2023 r.)
 
 <size=13>Ulepszenia</size>
 
-- <color=blue>Przypinanie</color>
-    Nowe narzędzie „Pin” oparte na krzywych zostało dodane jako element siatki, aby poprawić wydajność pracy w modyfikatorze Morph.
-    Dodano różne narzędzia do edycji Pinów.
-    Dodano interfejs do rozróżniania „Trybu edycji wierzchołków” i „Trybu edycji przypięć” w modyfikatorze Morph.
+- <color=blue>Ustawienia edytora i ustawienia pieczenia</color>
+    Niektóre opcje Bake są udostępniane w poszczególnych projektach
+    Dodano funkcję eksportu/importu ustawień środowiska edytora do pliku
+    Dodano funkcję zapisywania niestandardowych opcji Bake użytkownika jako „ustawień domyślnych”.
+    Preferencje edytora i ustawienia Bake są przechowywane w formacie pliku tekstowego, kompatybilnego z narzędziami kontroli wersji
+    Dodano opcję edytora pokazującą kości jako „kości duchów” podczas tworzenia kości za pomocą kliknięcia myszką
+    Dodano opcję edytora umożliwiającą zmianę rozmiaru wierzchołków lub pinezek wyświetlanych w obszarze roboczym
+    Dodano opcję edytora, która pozwala wyłączyć zachowanie metauchwytu „natychmiast przesuń cel przez przeciągnięcie zaraz po kliknięciu”
 
-- <color=blue>Poprawione obrazy interfejsu użytkownika</color>
-    Obraz wierzchołków renderowany w obszarze roboczym jest ładnie zmieniany, poprawiając jednocześnie wydajność renderowania.
-    Obrazy interfejsu użytkownika parametru sterującego są zmieniane przy jednoczesnym zwiększeniu wydajności renderowania.
-    Wiele ikon, takich jak Bake Dialog, Inspector i Hierarchy, zostało zmienionych na ładne
-    Stosowana jest technika „Pixel Perfect”, aby wyraźnie wyświetlić obrazy na osi czasu animacji.
+- <color=blue>Importuj plik PSD</color>
+    Podczas ponownego importowania pliku PSD na ekranie wyświetlane są nazwy warstw i siatek w pliku PSD
+    Podczas ponownego importowania pliku PSD dodawana jest funkcja wyświetlania pikseli obrazu w celu dokładnego porównania pozycji warstwy PSD i siatki
+    Gdy plik PSD jest ponownie importowany, jest on ulepszany, tak aby kolejność renderowania siatek była prawidłowo określona na podstawie pliku PSD
+    Podczas generowania siatek z plików PSD zmieniono, że rekord do cofnięcia nie jest dzielony według kroków przetwarzania
+    Podczas importowania pliku PSD domyślna widoczność siatek jest określana na podstawie widoczności warstw PSD
+    Podczas importowania pliku PSD pojawia się komunikat o błędzie, gdy ścieżka jest nieprawidłowa
 
-- <color=blue>Dodano różne opcje</color>
-    Do okna dialogowego Bake dodano opcję określającą, czy „domyślna” czy „ostatnia wartość” zostanie zastosowana do niezdefiniowanych parametrów kontrolnych w następnej animacji, która ma zostać przeniesiona.
-    Do okna dialogowego Bake dodano opcję, aby zapobiec dziwnemu zachowywaniu się funkcji fizyki (drżące kości i materiał fizyczny), gdy postać porusza się daleko w zaledwie 1 klatce.
-    Opcja została dodana do okna dialogowego Ustawienia, aby rozszerzyć wysokość UI parametrów kontrolnych typu Vector w edytorze
-    Do okna dialogowego Ustawienia została dodana opcja określająca, czy „Wstępne ustawienie widoczności” pozostanie włączone po wybraniu innych obiektów
+- <color=blue>Interfejs hierarchii</color>
+    Inny obiekt można wybrać, naciskając klawisz góra/dół po kliknięciu celu
+    Interfejs Hierarchii po prawej stronie automatycznie przewija się po wybraniu obiektu w obszarze roboczym
+    Podczas wybierania klipu animacji interfejs Hierarchii po lewej stronie automatycznie przewija się
+    Jeśli klikniesz prawym przyciskiem myszy, aby wyświetlić menu, pojawi się nazwa klikniętego obiektu, a jeśli jednocześnie zaznaczono wiele obiektów, zostanie wyświetlona również liczba dodatkowo wybranych obiektów.
+    Jeśli naciśniesz klawisz Enter w oknie dialogowym „Zmień nazwę” poprzez menu prawego przycisku myszy, zmieniona nazwa zostanie natychmiast zastosowana.
+    Podczas próby zmiany kolejności obiektów za pomocą menu dostępnego po kliknięciu prawym przyciskiem myszy interfejsu Hierarchii po lewej stronie może zostać wyświetlony komunikat z pytaniem, czy zmienić tryb sortowania na „Metoda niestandardowa”.
+    Niektóre funkcje menu dostępne po kliknięciu prawym przyciskiem myszy umożliwiają wybranie obiektu.
+    Zmieniając renderowanie kości przytrzymując klawisz Alt, zmieni się również widoczność kości potomnych.
+    Jeśli opcja koloru jest wyłączona, zamiast niej pojawi się mała kropka, a kliknięcie jej spowoduje natychmiastową aktywację opcji koloru.
 
-- <color=blue>Ulepszony interfejs inspektora</color>
-    Poprawiono wydajność interfejsu Inspektora.
-    Układ kart jest dodawany do Inspektora, aby ułatwić znalezienie potrzebnych właściwości.
-    Ikony i układ interfejsu inspektora zostały zmienione, aby były ładne.
-    Animacje postaci można podejrzeć w edytorze Unity.
-    Lista obrazów została dodana.
+- <color=blue>Edycja wielu obiektów</color>
+    Obsługiwana jest jednoczesna zmiana kolejności renderowania (głębokości) wybranych obiektów
+    Obsługiwane jest jednoczesne kopiowanie wybranych obiektów za pomocą menu dostępnego po kliknięciu prawym przyciskiem myszy w interfejsie Hierarchy
+    Podczas usuwania za pomocą menu dostępnego po kliknięciu prawym przyciskiem myszy w interfejsie Hierarchii dostępna jest opcja wielokrotnego usuwania
+    Podczas usuwania wielu obiektów z grupy siatek udoskonalono, aby umożliwić usuwanie nawet wtedy, gdy potomne grupy siatek i siatki są wybrane razem
 
-- <color=blue>Ulepszony interfejs użytkownika animacji</color>
-    Poprawiono użyteczność okna dialogowego Zdarzenie animacji.
-    Dodano funkcję umożliwiającą użytkownikom zapisywanie zdarzeń jako ustawień wstępnych.
-    Dodano opcję zmiany koloru znaczników zdarzeń
-    Zmieniono, że znaczniki zdarzeń mają być renderowane przed suwakami na osi czasu.
-    Znaczniki zdarzeń ciągłych są wyrażane bardziej intuicyjnie.
+- <color=blue>Ekran edycji siatki</color>
+    Zmieniono, że uruchomienie „Resetuj wierzchołki” tworzy kwadratową siatkę pasującą do regionu Atlas
+    Dodano funkcję kopiowania i wklejania wybranych pinów do innej siatki
+    Dodano funkcję konwertowania ich wartości pozycji na współrzędne względne na podstawie obrotu podczas kopiowania i wklejania wierzchołków lub pinezek
+    Zmieniono, że szpilki są wyświetlane jako półprzezroczyste, gdy wybrana jest karta „Utwórz siatkę”.
+    Ulepszono, że podmenu zmienia się w kolejności po naciśnięciu kolejno klawisza numer 2 lub klawisz numer 7 wśród skrótów klawiszowych do przełączania zakładek siatki
 
-- <color=blue>Ulepszona funkcja importu plików PSD</color>
-    Funkcja tworzenia „Atlasu pomocniczego”, który jest obrazem wtórnym o tej samej strukturze atlasu, została dodana do „Okno dialogowe ponownego importu PSD”.
-    Poprawiono stabilność funkcji związanych z ustawianiem ścieżki podczas zapisywania plików PSD.
+- <color=blue>Interfejs osi czasu animacji</color>
+    Suwak na dole został zmieniony tak, aby działał w odwrotny sposób, dzięki czemu można intuicyjnie dostosowywać powiększanie/pomniejszanie interfejsu osi czasu animacji.
+    Ulepszono możliwość ciągłego przesuwania suwaka czasu podczas klikania i przeciągania górnej części interfejsu osi czasu przy jednoczesnym przytrzymaniu klawiszy Ctrl + Shift
+    Poprawiono to, że „ostatnio kliknięta warstwa osi czasu” dla warstw wielokrotnego wyboru jest odświeżana nawet po kliknięciu celu w obszarze roboczym lub interfejsie Hierarchii
 
-- Poprawiono wydajność wykonywania edytora.
-- Ulepszony sposób klikania wierzchołków wprowadzony w poprzednich wersjach jest dostosowany do wszystkich przypadków.
-- Kiedy Bake jest wykonywany, skupia się docelowy GameObject.
-- Ulepszono funkcję „automatycznego przewijania” osi czasu animacji.
-- Po wyłączeniu funkcji „Automatyczna normalizacja” w modyfikatorze podwieszania pojawia się ostrzeżenie.
-- Poprawiono działanie wszystkich funkcji skryptu, które odwołują się do tekstur, obiektów i animacji.
-- Dodano skrypt, który pomaga w tworzeniu „Bufora poleceń” do sterowania renderowaniem postaci.
-- Zarejestrowane klucze są wyświetlane w interfejsie użytkownika parametrów sterowania, które nie są edytowane.
-- Gdy zarejestrowane parametry kontrolne w interfejsie modyfikatora zostaną wyprowadzone, zostaną one zmienione tak, aby były wyświetlane z ikoną ustawień wstępnych wyznaczoną przez użytkownika.
-- Poprawiono, że UI modyfikatora Rigging może intuicyjnie rozróżniać aktualnie niedostępne elementy UI w zależności od sytuacji.
-- Zmieniono, że przyciski, które mają być klikane przez użytkowników, są flashowe.
-- Dodano przycisk, który jednocześnie usuwa wszystkie klawisze parametrów kontrolnych z modyfikatora i jednocześnie usuwa parametr kontrolny z modyfikatora.
-- W najnowszej wersji systemu Mac OS „Metal” jest zmieniany na wymaganą opcję, dzięki czemu okno dialogowe przewodnika dotyczące metalu nie jest już wyświetlane.
-- Poprawiono czytelność okna dialogowego wyboru tekstury obrazu oraz okna dialogowego wyboru obrazu dla siatki.
-- Poprawiono proces klikania i wybierania klatek kluczowych itp. na osi czasu animacji.
-- Dodano opcję dostosowania wagi Jiggle Bone za pomocą parametru kontrolnego.
-- Podczas wybierania jednej lub kilku kości kolejność układu jest zoptymalizowana w celu zminimalizowania zmian w interfejsie użytkownika właściwości kości.
-- Rozmiar przycisku do usuwania wszystkich wierzchołków w interfejsie użytkownika edycji siatki został nieco większy, aby dopasować go do częstotliwości użycia.
-- Podczas korzystania z funkcji „Reset Value” i „Paste” modyfikatora kontrolowanego przez parametr kontrolny pojawia się nowe okno dialogowe wyboru właściwości docelowej do dostosowania.
-- Zmieniono, że wszystkie wierzchołki są wybierane natychmiast po zarejestrowaniu siatki w modyfikatorze Rigging.
-- Możliwość odświeżenia wszystkich siatek apPortrait w scenie została dodana jako menu „Odśwież wszystkie siatki” w menu Unity Editor.
-- Dodano nowe menu „Modyfikuj” pod prawym przyciskiem myszy, które umożliwia bezpośrednią modyfikację siatki lub grupy siatki w hierarchii grupy siatki.
-- (v1.4.1) Dodano funkcję sprawdzania poprawności i automatycznego poprawiania nazw zdarzeń animacji.
-- (v1.4.1) Zmieniono, że "przeciążające" metody będą wykluczane, które powodują błąd podczas przypisywania zdarzeń animacji w stylu wywołania zwrotnego w interfejsie Inspectora.
-- (v1.4.1) Dodano możliwość zbiorczego przypisywania detektorów zdarzeń w interfejsie użytkownika animacji wywołania zwrotnego w interfejsie inspektora.
-- (v1.4.1) Dodano funkcję sprawdzania poprawności przypisanych zdarzeń w interfejsie użytkownika animacji typu Callback w interfejsie inspektora.
-- (v1.4.1) Dodano funkcję do kopiowania nazwy parametru kontrolnego do schowka w interfejsie Inspectora.
-- (v1.4.1) Poprawiono koreańską notację przycisku określającą, czy animacja ma być automatycznie odtwarzana, gdy wybrana jest jednostka główna.
-- (v1.4.1) Zmieniono, że Piny utworzone przez kliknięcie obszaru roboczego za pomocą „Dodaj narzędzie” nie mogą zostać przeniesione, dopóki nie zostaną ponownie kliknięte.
-- (v1.4.1) Podczas cofania natychmiast po dodaniu lub usunięciu parametru kontrolnego do modyfikatora, parametr kontrolny jest teraz prawidłowo wybrany.
-- (v1.4.1) Dodano możliwość zmiany opcji w partii w oknie dialogowym, które automatycznie tworzy wiele siatek.
+- Dodano funkcje skryptu, aby uzyskać czas odtwarzania itp. z AnimPlayData
+- Szybkość i stabilność wyszukiwania najnowszej wersji została poprawiona poprzez zmianę serwera informującego o najnowszej wersji
+- Poprawiono użyteczność, rozróżniając wartość przewijania prawego interfejsu użytkownika w zależności od typu wybranego obiektu
+- Jeśli naciśniesz klawisz Enter w oknie dialogowym, aby ustawić nazwę nowego portretu, portret zostanie natychmiast utworzony z ustawioną nazwą.
+- Jeśli rozdzielczość ekranu jest większa niż FHD, zakres klikania wierzchołków lub krawędzi jest nieco rozszerzony.
+- Poprawiono to, że komunikat z pytaniem, czy chcesz ukończyć narzędzie FFD, pojawia się w bardziej różnych sytuacjach.
+- Od Unity 2022.2 niektóre interfejsy API związane z prefabrykatami zostały wycofane, więc powiązane kody zostały zmienione
+- Projekt wyróżnienia „Wybranych elementów” w interfejsie listy jest trochę ładniejszy
 
 
 
 <size=13>Naprawiono problem</size>
 
-- Naprawiono błąd polegający na tym, że podczas pracy z modyfikatorem Morph przy użyciu narzędzia „Rozmycie” bez wybranej siatki wystąpił błąd.
-- Naprawiono błąd, który powodował, że niektóre obrazy ikon były wyświetlane w niskiej rozdzielczości w interfejsie użytkownika Pro.
-- Rozwiązano problem polegający na tym, że po włączeniu trybu edycji z modyfikatorem Transform, gdy dwa lub więcej parametrów sterujących obsługuje ten sam obiekt, obiekt znika.
-- Naprawiono błąd, który powodował nadmierne ograniczenie innych modyfikatorów podczas wybierania modyfikatora Tylko kolor i włączania trybu wieloedycji.
-- Naprawiono problem polegający na tym, że modyfikatory, które powinny być dezaktywowane w tym trybie edycji, działają.
-- Rozwiązano problem polegający na tym, że tryb edycji jest anulowany po włączeniu trybu wieloedycji, gdy wartość parametru kontrolnego nie znajduje się w kluczu.
-- Rozwiązano problem polegający na tym, że tryb multiedycji nie był prawidłowo stosowany do modyfikatorów w innych osiach czasu.
-- Naprawiono błąd polegający na tym, że zasoby edytora nie były ładowane sporadycznie podczas otwierania edytora za pomocą Inspektora.
-- Naprawiono błąd polegający na tym, że animacje skierowane na różne jednostki główne przestawały działać podczas próby odtwarzania animacji w tej samej klatce za pomocą skryptu.
-- Naprawiono problem polegający na tym, że funkcja asynchronicznej inicjalizacji nie działała prawidłowo.
-- Naprawiono problem polegający na tym, że odtwarzanie animacji jest zbyt szybkie, aby dopasować ustawienia klatki po długim czasie, gdy edytor nie jest ostry.
-- Rozwiązano problem polegający na tym, że jest on rozpoznawany jako błąd i jest generowany dziennik, jeśli funkcja Bake zostanie wykonana bez określenia odpowiedniej funkcji skryptu i jeśli metodą wykonywania zdarzenia animacji jest „Callback”.
-- Naprawiono błąd powodujący dziwne wyświetlanie interfejsu parametrów kontrolnych podczas otwierania „Menu widoku” w Unity 2019 i nowszych wersjach.
-- Naprawiono błąd, w wyniku którego nie można było wybrać parametru kontrolnego, klikając go natychmiast po zmianie kategorii parametrów kontrolnych.
-- Rozwiązano problem polegający na tym, że zmieniony zasób cieniowania zestawu materiałów nie jest stosowany do ustawienia wstępnego w bibliotece materiałów.
-- Naprawiono błąd, który powodował, że nie można było sterować gadżetem trybu „Test pozycji” modyfikatora olinowania, dopóki kość nie została ponownie kliknięta po kliknięciu poza gadżetem.
-- Rozwiązano problem polegający na tym, że wewnętrzny błąd wydawania identyfikatora podczas tworzenia obiektu przed lub po cofnięciu będzie występował z bardzo małym prawdopodobieństwem.
-- Rozwiązano problem polegający na tym, że wybór obiektu od razu podczas tworzenia lub duplikowania obiektu nie był spójny w zależności od typu obiektu.
-- Naprawiono błąd polegający na tym, że obszar roboczy będzie powiększany/pomniejszany podczas przewijania kółkiem myszy poza obszar roboczy i przesuwania kursora z powrotem do obszaru roboczego.
-- Naprawiono błąd, który powodował, że shadery z ustawienia materiału „Zachowaj alfa” były renderowane dziwnie, gdy celem renderowania była „Tekstura renderowania”. (Będziesz musiał ponownie zainstalować ten pakiet.)
-- Naprawiono błąd polegający na tym, że poprzedni Atlas był stale wyświetlany na ekranie, nawet po ponownym naciśnięciu przycisku Bake Atlasa w oknie dialogowym importu pliku PSD.
-— Rozwiązano problem polegający na tym, że wystąpił błąd, ponieważ część kodu korzystającego z klasy „Type” nie została napisana wprost.
-- (v1.4.1) Naprawiono problem polegający na tym, że właściwość koloru znacznika nie jest duplikowana podczas duplikowania zdarzenia animacji.
-- (v1.4.1) Usunięto problem polegający na tym, że w poprzedniej wersji brakowało przycisku „Usuń zdarzenie animacji”.
-- (v1.4.1) Naprawiono błąd polegający na tym, że wystąpił błąd podczas cofania po utworzeniu sworzni łączących krzywą lub usunięciu krzywej.
-- (v1.4.1) Naprawiono problem polegający na tym, że 2 piny mogły być połączone z 2 krzywymi.
-- (v1.4.1) Naprawiono problem polegający na tym, że przyciski związane z prefabrykatem były zbyt małe w interfejsie inspektora.
-- (v1.4.1) Naprawiono problem polegający na tym, że kolejność renderowania była obliczana nieprawidłowo, gdy kolejność renderowania obiektów w grupie siatki została zmieniona, a zakładka ustawień nie została wybrana i cofnięta.
-- (v1.4.1) Naprawiono problem polegający na tym, że przycisk usuwania („X”) używany w interfejsie parametrów sterowania, interfejsie podwieszania itp. jest zbyt ciemny w interfejsie Pro.
+- Naprawiono problem polegający na tym, że interfejs użytkownika do wprowadzania liczb w celu zmiany wagi pojedynczego wierzchołka nie działał na ekranie edycji modyfikatora Rigging
+- Rozwiązano problem polegający na tym, że status renderowania kości nie powraca do pierwotnego stanu, gdy wybrana jest inna grupa siatek natychmiast po zmianie stanu renderowania kości na „szary, półprzezroczysty” na ekranie edycji modyfikatora Rigging
+- Rozwiązano problem polegający na tym, że wiele obiektów nie jest usuwanych w tym samym czasie przez naciśnięcie przycisku „Kosz na śmieci” w interfejsie użytkownika po prawej stronie grupy siatki.
+- Rozwiązano problem polegający na tym, że nie można było normalnie zmienić kolejności renderowania obiektów, gdy istniała podrzędna grupa siatki
+- Rozwiązano problem polegający na tym, że obiekty są sortowane w odwrotnej kolejności, gdy podczas importowania pliku PSD istnieje podrzędna grupa siatki o co najmniej 3 poziomach.
+- Rozwiązano problem polegający na tym, że podczas ponownego importowania pliku PSD nie były dodatkowo tworzone siatki podrzędnych grup siatek o poziomie 3 lub wyższym
+- Naprawiono problem polegający na tym, że odłączenie istniejącej kości macierzystej i ponowne pieczenie powodowało dziwny ruch kości
+- Naprawiono problem polegający na tym, że edytora nie można było uruchomić, gdy błędnie rozpoznano, że dane istniały nawet po usunięciu modyfikatora z powodu błędu
+- Naprawiono problem polegający na tym, że postać nie mogła zostać otwarta w edytorze, jeśli wystąpił błąd w klipie animacji, który był połączony z grupą siatki po usunięciu grupy siatki lub po podobnej operacji.
+- Rozwiązano problem polegający na tym, że zdarzenia animacji nie były wywoływane w ostatniej klatce, w której klatki kluczowe z automatyczną pętlą znajdowały się w animacji w pętli.
+- Rozwiązano problem polegający na tym, że obiekty w grupie siatki są nieprawidłowo sortowane podczas cofania po usunięciu wielu obiektów jednocześnie.
+- Rozwiązano problem polegający na tym, że dziennik błędów pojawiał się podczas usuwania siatek w podrzędnej grupie siatek za pomocą klawisza Shift.
+- Rozwiązano problem polegający na tym, że siatka docelowa mapowania była renderowana na czarno w oknie dialogowym Importuj PSD ponownie
+- Rozwiązano problem polegający na tym, że informacje o warstwach i podgląd nie działały poprawnie podczas pierwszego wprowadzania kroku korekty pozycji w oknie dialogowym importu atlasu dodatkowego.
+- Rozwiązano problem polegający na tym, że obiektów nie można było powielić za pomocą menu dostępnego po kliknięciu prawym przyciskiem myszy w interfejsie Hierarchii po lewej stronie edytora, gdy nie wybrano siatki ani grupy siatek.
+- Rozwiązano problem polegający na tym, że niektóre elementy w interfejsie użytkownika po prawej stronie były dziwnie wyświetlane, gdy wybrano podrzędną grupę siatki, gdy wybrano kartę ustawień grupy siatki.
+- Naprawiono problem, w którym początkowa wartość efektu fizyki była nieprawidłowo stosowana, a wierzchołki lub kości poruszały się dziwnie podczas uruchamiania gry
+- Naprawiono problem polegający na tym, że efekt fizyki działał przesadnie, gdy liczba klatek na sekundę była zbyt niska lub aplikacja zatrzymywała się, gdy gra była uruchomiona.
+- Naprawiono problem polegający na tym, że trudno było kliknąć poziome i pionowe krawędzie
+- Naprawiono problem polegający na tym, że siatki z modyfikatorem Rigging zastosowanym w grupie siatki podrzędnej - nie mogły być celem modyfikatora Transform - mogły zostać pominięte i zarejestrowane za pomocą „żółtego przycisku oka” w interfejsie Hierarchii.
+- Rozwiązano problem polegający na tym, że ustawienie Jiggle Bone's Constraint wyglądało dziwnie w obszarze roboczym, gdy cel nie jest kością korzeniową, a nadrzędna grupa siatki jest obrócona
+- Rozwiązano problem polegający na tym, że po naciśnięciu skrótu klawiszowego „Ctrl+A”, gdy narzędzie FFD było włączone, wybierano wierzchołki zamiast punktów kontrolnych
+- Rozwiązano problem polegający na tym, że rejestrowano niedocelowe podrzędne grupy siatek lub siatki w podrzędnych grupach siatek, które powinny być celem, nie były rejestrowane podczas próby zarejestrowania wszystkich siatek w „Przekształceniu (animacji)” jako warstwach osi czasu
+- Naprawiono problem polegający na tym, że przycisk usuwania obiektów z osi czasu nie pojawiał się, gdy obiekt, który nie był celem osi czasu, został zarejestrowany jako warstwa osi czasu z powodu błędu itp.
+- Rozwiązano problem polegający na tym, że wybór obiektów był anulowany podczas przeciągania myszą na ekranie edycji animacji
 
 
 

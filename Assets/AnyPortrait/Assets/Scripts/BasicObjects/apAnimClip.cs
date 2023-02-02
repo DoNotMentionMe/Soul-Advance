@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -219,11 +219,48 @@ namespace AnyPortrait
 
 		}
 
+		//[1.4.2] AnimClip을 에디터에서 선택할 때, 매번 Link하기는 어려우므로, 가볍게 데이터가 잘 Link되어 있는지 체크한다.
+		// Validate가 실패한 경우 (false 리턴) Link와 RemoveUnlinkedTimeline를 호출하자
+		public bool ValidateForLinkEditor()
+		{
+			//주요 데이터 중에 하나라도 Null이 발견되면 실패
+			if(_portrait == null)
+			{
+				return false;
+			}
+
+			if(_targetMeshGroupID >= 0 && _targetMeshGroup == null)
+			{
+				//TargetMeshGroup이 연결되지 않은 경우
+				return false;
+			}
+
+			int nTimelines = _timelines != null ? _timelines.Count : 0;
+			if(nTimelines > 0)
+			{
+				for (int i = 0; i < nTimelines; i++)
+				{
+					bool isValid = _timelines[i].ValidateForLinkEditor();
+					if(!isValid)
+					{
+						//유효하지 않은 Timeline 발견
+						return false;
+					}
+				}
+			}
+			//유효하당
+			return true;
+		}
+
+
+
 		public void LinkEditor(apPortrait portrait)
 		{
 			_portrait = portrait;
 			_targetMeshGroup = _portrait.GetMeshGroup(_targetMeshGroupID);
 
+			//[v1.4.2] 여기에 안전장치 마련해야 > 이후의 Timeline> TimelineLayer에서 에러를 방지할 수 있다.
+			//TargetMeshGroup이 Null일 수도 있음을 Link 전체에서 확인하자
 
 			//ID를 등록해주자
 			//_portrait.RegistUniqueID_AnimClip(_uniqueID);
@@ -236,7 +273,7 @@ namespace AnyPortrait
 				_endFrame = _startFrame + 1;
 			}
 
-			//TODO : 멤버 추가시 값을 추가하자
+			//타임라인 링크
 			for (int i = 0; i < _timelines.Count; i++)
 			{
 				_timelines[i].Link(this);
@@ -972,7 +1009,7 @@ namespace AnyPortrait
 			bool isEnd = false;
 
 			
-			if (tDelta > 0)
+			if (tDelta > 0)//정재생
 			{
 				//Speed Ratio가 크면 프레임이 한번에 여러개 이동할 수 있다.
 				while (_tUpdate > TimePerFrame)
@@ -989,16 +1026,13 @@ namespace AnyPortrait
 							_curFrame = _startFrame;
 							_tUpdateTotal -= TimeLength;
 
-							//Animation 이벤트도 리셋한다. (루프에 의한 것이므로 전체 리셋)
-							//이전
-							//if (_animEvents != null && _animEvents.Count > 0)
-							//{
-							//	for (int i = 0; i < _animEvents.Count; i++)
-							//	{
-							//		_animEvents[i].ResetCallFlag();
-							//	}
-							//}
-							//변경
+							//[v1.4.2] 루프시의 애니메이션 이벤트 개선
+							//루프에 의해 프레임이 맨 앞으로 이동하면
+							//EndFrame까지의 이벤트 중 호출되지 않았던 이벤트들을 몰아서 호출하자
+							CallEventsByLoop(_endFrame, true);//End에서 Loop 발생
+
+
+							//Animation 이벤트도 리셋한다. (루프에 의한 것이므로 전체 리셋)							
 							ResetEvents();
 						}
 						else
@@ -1015,7 +1049,7 @@ namespace AnyPortrait
 					//UpdateControlParam(false, _parentPlayUnit._layer, _parentPlayUnit.UnitWeight, _parentPlayUnit.BlendMethod);
 				}
 			}
-			else if (tDelta < 0)
+			else if (tDelta < 0)//역재생
 			{
 				while (_tUpdate < 0.0f)
 				{
@@ -1031,16 +1065,11 @@ namespace AnyPortrait
 							_curFrame = _endFrame;
 							_tUpdateTotal += TimeLength;
 
-							//Animation 이벤트도 리셋한다. (루프에 의한 것이므로 전체 리셋)
-							//이전
-							//if (_animEvents != null && _animEvents.Count > 0)
-							//{
-							//	for (int i = 0; i < _animEvents.Count; i++)
-							//	{
-							//		_animEvents[i].ResetCallFlag();
-							//	}
-							//}
-							//변경
+
+							//[v1.4.2] 루프시의 애니메이션 이벤트 개선
+							CallEventsByLoop(_startFrame, false);//Start에서 Loop 발생
+
+							//Animation 이벤트도 리셋한다. (루프에 의한 것이므로 전체 리셋)							
 							ResetEvents();
 						}
 						else
@@ -1073,13 +1102,15 @@ namespace AnyPortrait
 
 			//추가
 			//AnimEvent도 업데이트 하자
-			if (_animEvents != null && _animEvents.Count > 0)
+			int nAnimEvents = _animEvents != null ? _animEvents.Count : 0;
+			if (nAnimEvents > 0)
 			{
 				apAnimEvent animEvent = null;
-				for (int i = 0; i < _animEvents.Count; i++)
+				for (int i = 0; i < nAnimEvents; i++)
 				{
 					animEvent = _animEvents[i];
 					animEvent.Calculate(CurFrameFloat, CurFrame, (tDelta > 0.0f), Mathf.Abs(tDelta) > 0.0001f, tDelta, _speedRatio);
+					
 					if (animEvent.IsEventCallable())
 					{
 						if (_portrait._animEventCallMode == apPortrait.ANIM_EVENT_CALL_MODE.SendMessage)
@@ -1168,6 +1199,9 @@ namespace AnyPortrait
 
 							if (stateSpeed > 0.0f)
 							{	
+								//[v1.4.2] 루프시의 애니메이션 이벤트 개선
+								CallEventsByLoop(_endFrame, true);//End에서 Loop 발생
+
 								//UnityEngine.Debug.LogWarning("Frame Over the Length (Forward)");
 								//만약 밖에서 이벤트 초기화가 안되었다면 여기서 하자
 								ResetEvents();
@@ -1203,6 +1237,9 @@ namespace AnyPortrait
 
 							if (stateSpeed < 0.0f)
 							{
+								//[v1.4.2] 루프시의 애니메이션 이벤트 개선
+								CallEventsByLoop(_startFrame, false);//Start에서 Loop 발생
+
 								//UnityEngine.Debug.LogWarning("Frame Over the Length (Backward)");
 								//만약 밖에서 이벤트 초기화가 안되었다면 여기서 하자
 								ResetEvents();
@@ -1599,29 +1636,63 @@ namespace AnyPortrait
 			}
 		}
 
-		// 1.16 추가 : 이벤트 처리를 위한 초기화
-		//1. 그냥 전부 초기화 (ResetCallFlag 호출)
-		//public void ResetAnimEventCallFlagAll()
-		//{
-		//	//프레임 이동시에 AnimEvent를 다시 리셋한다.
-		//	if (_animEvents == null || _animEvents.Count == 0)
-		//	{
-		//		return;
-		//	}
-		//	for (int i = 0; i < _animEvents.Count; i++)
-		//	{
-		//		_animEvents[i].ResetCallFlag();
-		//	}
-		//}
+
+
+		private void CallEventsByLoop(int loopedFrame, bool isForwardPlay)
+		{
+			int nAnimEvents = _animEvents != null ? _animEvents.Count : 0;
+			if(nAnimEvents == 0)
+			{
+				return;
+			}
+
+			//루프가 되면 EndFrame 또는 StartFrame에 있는 이벤트가 호출되지 않고 Reset이 될 수 있다.
+			//Start 또는 End의 범위의 안에 있는 이벤트들 중에서 아직 호출되지 않은 것들을 모두 호출시키자
+			apAnimEvent animEvent = null;
+			for (int i = 0; i < nAnimEvents; i++)
+			{
+				animEvent = _animEvents[i];
+				animEvent.CalculateByLoop(loopedFrame, isForwardPlay);
+
+				//Loop를 하면서 이벤트를 호출할 수 있다.
+				if(animEvent.IsEventCallable())
+				{
+					//UnityEngine.Debug.Log("Loop에 의한 나머지 이벤트 호출 (" + animEvent._eventName + ") - 프레임 : " + loopedFrame);
+					if (_portrait._animEventCallMode == apPortrait.ANIM_EVENT_CALL_MODE.SendMessage)
+					{
+						if (_portrait._optAnimEventListener != null)
+						{
+							//애니메이션 이벤트를 호출해줍시다. (SendMessage)
+							_portrait._optAnimEventListener.SendMessage(animEvent._eventName, animEvent.GetCalculatedParam(), SendMessageOptions.DontRequireReceiver);
+
+						}
+					}
+					else
+					{
+						//UnityEvent 호출 방식
+						if(animEvent._linkedUnityEvent != null)
+						{
+							animEvent._linkedUnityEvent.Invoke(animEvent);
+						}
+					}
+				}
+			}
+
+		}
+
+
 		public void ResetEvents()
 		{
 			//Animation 이벤트도 리셋한다.
-			if (_animEvents != null && _animEvents.Count > 0)
+			int nAnimEvents = _animEvents != null ? _animEvents.Count : 0;
+			if(nAnimEvents == 0)
 			{
-				for (int i = 0; i < _animEvents.Count; i++)
-				{
-					_animEvents[i].ResetCallFlag();
-				}
+				return;
+			}
+
+			for (int i = 0; i < nAnimEvents; i++)
+			{
+				_animEvents[i].ResetCallFlag();
 			}
 		}
 

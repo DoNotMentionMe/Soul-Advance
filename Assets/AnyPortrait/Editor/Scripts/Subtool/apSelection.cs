@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -141,6 +141,26 @@ namespace AnyPortrait
 				return AnimClip.IsPlaying_Editor;
 			}
 		}
+
+		//애니메이션 기즈모 리셋을 할지 여부를 체크하기 위한 변수 (v1.4.2)
+		private enum ANIM_GIZMO_LINKED_STATUS
+		{
+			/// <summary>아직 연결되지 않았다. AnimClip를 교체하거나 선택하기 전의 값.</summary>
+			None,
+			/// <summary>타임라인이 선택되지 않은 상태. 기즈모가 존재하긴 한다.</summary>
+			NoTimeline,
+			/// <summary>Vertex 편집이 가능한 Anim 모디파이어</summary>
+			AnimMod_EditVertex,
+			/// <summary>Color Only용 Anim 모디파이어</summary>
+			AnimMod_EditColor,
+			/// <summary>TF만 편집 가능한 Anim 모디파이어</summary>
+			AnimMod_EditTF,
+			/// <summary>Control Param 타입의 타임라인</summary>
+			ControlParam,
+			/// <summary>알 수 없는 방식의 타임라인</summary>
+			UnknownTimeline,
+		}
+		private ANIM_GIZMO_LINKED_STATUS _animGizmoLinkedStatus = ANIM_GIZMO_LINKED_STATUS.None;
 
 
 
@@ -299,6 +319,7 @@ namespace AnyPortrait
 		public apTransform_MeshGroup MeshGroupTF_Main		{ get { return (_selectionType == SELECTION_TYPE.MeshGroup || AnimClip != null) ? _subObjects.MeshGroupTF : null; } }
 		public List<apTransform_Mesh> MeshTFs_All			{ get { return (_selectionType == SELECTION_TYPE.MeshGroup || AnimClip != null) ? _subObjects.AllMeshTFs : null; } }
 		public List<apTransform_MeshGroup> MeshGroupTFs_All	{ get { return (_selectionType == SELECTION_TYPE.MeshGroup || AnimClip != null) ? _subObjects.AllMeshGroupTFs : null; } }
+		public List<apBone> Bones_All						{ get { return (_selectionType == SELECTION_TYPE.MeshGroup || AnimClip != null) ? _subObjects.AllBones : null; } }
 
 		//ParamSetGroup / ParamSetGroupAnimPack
 		/// <summary>Modifier에서 현재 선택중인 ParamSetGroup [주의 : Animated Modifier에서는 이 값을 사용하지 말고 다른 값을 사용해야한다]</summary>
@@ -630,6 +651,7 @@ namespace AnyPortrait
 		//본 생성시 Width를 한번 수정했으면 그 값이 이어지도록 한다.
 		//단, Parent -> Child로 추가되서 자동으로 변경되는 경우는 제외 (직접 수정하는 경우만 적용)
 		public int _lastBoneShapeWidth = 30;
+		public int _lastBoneShapeTaper = 100;
 		public bool _isLastBoneShapeWidthChanged = false;
 
 		//Mesh Edit 변수
@@ -1089,6 +1111,8 @@ namespace AnyPortrait
 		private apGUIContentWrapper _guiContent_Right2MeshGroup_ObjectProp_Name = null;
 		private apGUIContentWrapper _guiContent_Right2MeshGroup_ObjectProp_Type = null;
 		private apGUIContentWrapper _guiContent_Right2MeshGroup_ObjectProp_NickName = null;
+
+		private apGUIContentWrapper _guiContent_Right2MeshGroup_JiggleBone = null;
 
 		private apGUIContentWrapper _guiContent_MaterialSet_ON = null;
 		private apGUIContentWrapper _guiContent_MaterialSet_OFF = null;
@@ -1782,7 +1806,7 @@ namespace AnyPortrait
 				// 애니메이션 모드라면, 이 함수가 호출될 때 
 				AutoSelectAnimTimelineLayer(false);
 				Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.Info, null, null);
-				SetAnimClipGizmoEvent(true);
+				SetAnimClipGizmoEvent();
 			}
 
 			//이 함수 호출 이후엔, 다음의 코드가 실행되어야 한다.
@@ -1873,7 +1897,7 @@ namespace AnyPortrait
 
 		/// <summary>
 		/// 특정 메시그룹의 RenderUnit과 Bone의 ExEdit에 대한 Flag를 갱신한다.
-		/// Ex Edit가 변경되는 모든 시점에서 이 함수를 호출한다.
+		/// Ex Edit가 변경되는 모든 시점(편집 모드 전환, 객체 추가/삭제 등)에서 이 함수를 호출한다.
 		/// AnimClip이 선택되어 있다면 animClip이 null이 아닌 값을 넣어준다.
 		/// AnimClip이 없다면 ParamSetGroup이 있어야 한다. (Static 타입 제외)
 		/// 둘다 null이라면 Ex Edit가 아닌 것으로 처리한다.
@@ -4578,6 +4602,8 @@ namespace AnyPortrait
 			_guiContent_Right2MeshGroup_ObjectProp_Name = null;
 			_guiContent_Right2MeshGroup_ObjectProp_Type = null;
 			_guiContent_Right2MeshGroup_ObjectProp_NickName = null;
+
+			_guiContent_Right2MeshGroup_JiggleBone = null;
 
 			_guiContent_MaterialSet_ON = null;
 			_guiContent_MaterialSet_OFF = null;

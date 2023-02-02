@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -630,20 +630,25 @@ namespace AnyPortrait
 				{
 					yOffset = height - 2;
 				}
-				Color prevColor = GUI.backgroundColor;
 
-				if(EditorGUIUtility.isProSkin)
-				{
-					GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-				}
-				else
-				{
-					GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-				}
-				
+				#region [미사용 코드]
+				//Color prevColor = GUI.backgroundColor;
 
-				GUI.Box(new Rect(lastRect.x + scrollX, lastRect.y + yOffset , width + 10, height + 3), "");
-				GUI.backgroundColor = prevColor;
+				//if(EditorGUIUtility.isProSkin)
+				//{
+				//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+				//}
+				//else
+				//{
+				//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+				//}
+
+				//GUI.Box(new Rect(lastRect.x + scrollX, lastRect.y + yOffset , width + 10, height + 3), "");
+				//GUI.backgroundColor = prevColor; 
+				#endregion
+
+				//변경 v1.4.2
+				apEditorUtil.DrawListUnitBG(lastRect.x + scrollX + 1, lastRect.y + yOffset , width + 10 - 2, height + 3, apEditorUtil.UNIT_BG_STYLE.Main);
 			}
 
 			EditorGUILayout.BeginHorizontal(GUILayout.Height(height));

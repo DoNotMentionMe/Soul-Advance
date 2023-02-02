@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -803,6 +803,47 @@ namespace AnyPortrait
 		AnimEventWarning_Unknown = 775,
 		FixNow = 776,
 		ChangeAll = 777,
+		Setting_AutoScrollListObjSelected = 778,
+		DLG_Project = 779,
+		DLG_Bake_SaveSettingsAsDefault = 780,
+		DLG_Bake_SaveSettingsSuccess_Title = 781,
+		DLG_Bake_SaveSettingsSuccess_Body = 782,
+		DLG_Bake_SaveSettingsFailed_Title = 783,
+		DLG_Bake_SaveSettingsFailed_Body = 784,
+		DLG_ImportEditorPref_Title = 785,
+		DLG_ImportEditorPref_Body = 786,
+		DLG_FailedImportEditorPref_Title = 787,
+		DLG_FailedImportEditorPref_Body = 788,
+		DLG_Bake_SettingSavedMessage = 789,
+		DLG_Bake_RemoveDefaultSettings = 790,
+		DLG_Bake_RemoveSettings_Title = 791,
+		DLG_Bake_RemoveSettings_Body = 792,
+		DLG_Bake_RemoveSettings_Btn_OnlyFileInfo = 793,
+		DLG_Bake_RemoveSettings_Btn_RemoveAll = 794,
+		DLG_PSD_InvalidPath_Title = 795,
+		DLG_PSD_InvalidPath_Body = 796,
+		DLG_WarningChangeSortMode_Title = 797,
+		DLG_WarningChangeSortMode_Body = 798,
+		DLG_RightClickMultipleObj_Title = 799,
+		DLG_RightClickMultipleObj_Body_Duplicate = 800,
+		DLG_RightClickMultipleObj_Body_Remove = 801,
+		DLG_RightClickMultipleObj_OnlyClicked = 802,
+		DLG_RightClickMultipleObj_Body_AllSelected = 803,
+		Setting_PreviewNewBones = 804,
+		Setting_VertOpt_Appearance = 805,
+		DLG_EndFFDWhenControlParamChanged_Body = 806,
+		DLG_EndFFDWhenAnimFrameChanged_Body = 807,
+		DLG_RiggedChildMeshUnableToMod_Title = 808,
+		DLG_RiggedChildMeshUnableToMod_Body = 809,
+		DLG_ColorOptionIsDisabled_Title = 810,
+		DLG_ColorOptionIsDisabled_Body = 811,
+		Setting_ObjectMovableWithoutClickingGizmoUI = 812,
+		DLG_NotOpenEditorOnPrefabEditingScreen_Title = 813,
+		DLG_NotOpenEditorOnPrefabEditingScreen_Body = 814,
+		DLG_NotOpenEditorPrefabAsset_Title = 815,
+		DLG_NotOpenEditorPrefabAsset_Body = 816,
+		DLG_ApplyPrefabInfo_Title = 817,
+		DLG_ApplyPrefabInfo_Body = 818,
 	}
 
 

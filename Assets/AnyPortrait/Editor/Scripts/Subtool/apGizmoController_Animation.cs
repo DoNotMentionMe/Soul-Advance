@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -904,9 +904,25 @@ namespace AnyPortrait
 							//본이 선택되었다.
 							//변경 20.6.30 : 통합된 함수
 							Editor.Select.SelectSubObject(null, null, resultBone, multiSelect, apSelection.TF_BONE_SELECT.Exclusive);
-							
+
 							isBoneSelected = true;
 							isSelectionCompleted = true;//본 선택 또는 선택 해제가 되었다.
+
+
+							//v1.4.2 : GUI가 아닌 하단UI에서 레이어를 "클릭한 것"과 동일하게 판정하자 (레이어 다중 선택 위함)
+							Editor.Select.SyncLastClickedTimelineLayerInfo(resultBone);
+
+
+							//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+							if(Editor._option_AutoScrollWhenObjectSelected)
+							{
+								//스크롤 가능한 상황인지 체크하고
+								if(Editor.IsAutoScrollableWhenClickObject_Animation(resultBone, true))
+								{
+									//자동 스크롤을 요청한다.
+									Editor.AutoScroll_HierarchyAnimation(resultBone);
+								}
+							}
 						}
 					}
 				}
@@ -975,6 +991,20 @@ namespace AnyPortrait
 							
 							isTransformSelected = true;
 							isSelectionCompleted = true;
+
+							//v1.4.2 : GUI가 아닌 하단UI에서 레이어를 "클릭한 것"과 동일하게 판정하자 (레이어 다중 선택 위함)
+							Editor.Select.SyncLastClickedTimelineLayerInfo(selectedMeshTransform);
+							
+							//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+							if(Editor._option_AutoScrollWhenObjectSelected)
+							{
+								//스크롤 가능한 상황인지 체크하고
+								if(Editor.IsAutoScrollableWhenClickObject_Animation(selectedMeshTransform, true))
+								{
+									//자동 스크롤을 요청한다.
+									Editor.AutoScroll_HierarchyAnimation(selectedMeshTransform);
+								}
+							}
 						}
 					}
 				}
@@ -1014,8 +1044,6 @@ namespace AnyPortrait
 			{
 				prevSelectedObjs.Add(Editor.Select.Bone_Mod_Gizmo);
 			}
-
-
 
 
 			if ((isBoneSelected || isTransformSelected) && prevSelectedObjs.Count > 0)
@@ -1682,7 +1710,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -1970,7 +2005,17 @@ namespace AnyPortrait
 				{
 					Editor._portrait.LinkAndRefreshInEditor(false, apUtil.LinkRefresh.Set_AnimClip(targetAnimClip));
 					Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.Timelines | apEditor.REFRESH_TIMELINE_REQUEST.LinkKeyframeAndModifier, null, null);
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+					
+					
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 강제로 FFD를 취소하자
+						Editor.Gizmos.RevertFFDTransformForce();
+
+					}
 				}
 			}
 
@@ -2501,7 +2546,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					//FFD 모드는 강제로 취소한다.
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -3141,7 +3193,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -3836,7 +3895,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -4309,7 +4375,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -4701,7 +4774,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -5151,6 +5231,9 @@ namespace AnyPortrait
 				return null;
 			}
 
+
+
+
 			//apModifierBase linkedModifier = Editor.Select.AnimTimeline._linkedModifier;
 			apAnimKeyframe workKeyframe = Editor.Select.AnimWorkKeyframe_Main;
 			apModifiedMesh targetModMesh = Editor.Select.ModMesh_Main;
@@ -5161,6 +5244,14 @@ namespace AnyPortrait
 				return null;
 			}
 
+
+			//v1.4.2 : FFD 모드시에는 FFD 포인트를 선택해야한다.
+			if(Editor.Gizmos.IsFFDMode)
+			{
+				Editor.Gizmos.SelectAllFFDPoints();
+				Editor.SetRepaint();
+				return apHotKey.HotKeyResult.MakeResult();
+			}
 
 			bool isAnyChanged = false;
 
@@ -5343,7 +5434,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -5668,7 +5766,15 @@ namespace AnyPortrait
 				{
 					Editor._portrait.LinkAndRefreshInEditor(false, apUtil.LinkRefresh.Set_AnimClip(targetAnimClip));
 					Editor.RefreshTimelineLayers(apEditor.REFRESH_TIMELINE_REQUEST.Timelines | apEditor.REFRESH_TIMELINE_REQUEST.LinkKeyframeAndModifier, null, null);
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -5928,7 +6034,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 
@@ -6329,7 +6442,14 @@ namespace AnyPortrait
 				if(isAnyKeyframeAdded)
 				{
 					//WorkKeyframe 선택 및 ModData 동기화
-					Editor.Select.AutoSelectAnimWorkKeyframe();
+					bool isWorkKeyframeChanged = false;
+					Editor.Select.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+
+					if(isWorkKeyframeChanged && Editor.Gizmos.IsFFDMode)
+					{
+						//여기서는 FFD를 강제로 해제하자.
+						Editor.Gizmos.RevertFFDTransformForce();
+					}
 				}
 			}
 

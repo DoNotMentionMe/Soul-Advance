@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -53,8 +53,9 @@ namespace AnyPortrait
 		[SerializeField]
 		public int _depth = 0;
 
-		[SerializeField]
-		public int _level = 0;//Parent부터 내려오는 Level
+		//삭제 [v1.4.2]
+		//[SerializeField]
+		//public int _level = 0;//Parent부터 내려오는 Level
 
 
 		//Shader 정보
@@ -748,38 +749,26 @@ namespace AnyPortrait
 		{
 			_isClipping_Parent = true;
 
-			if (_clipChildMeshes.Exists(delegate (ClipMeshSet a)
-			 {
-				 return a._meshTransform == meshTransform;
-			 }))
+			ClipMeshSet existClipMeshSet = _clipChildMeshes.Find(delegate (ClipMeshSet a)
 			{
-				//겹친다면 Pass
-				SortClipMeshTransforms();
+				return a._meshTransform == meshTransform;
+			});
+			
+			if(existClipMeshSet != null)
+			{
+				//이미 등록된 Clipped Mesh라면
+				existClipMeshSet._renderUnit = renderUnit;//렌더 유닛은 갱신
+
+				SortClipMeshTransforms();//Clipped Mesh들을 Sorting한다.
 				return;
 			}
 
+			//새로 추가한다.
 			int clippIndex = _clipChildMeshes.Count;
 			_clipChildMeshes.Add(new ClipMeshSet(meshTransform, renderUnit));
+
 			meshTransform._isClipping_Child = true;
 			meshTransform._clipIndexFromParent = clippIndex;
-
-			#region [미사용 코드]
-			//_clipChildMeshTransformIDs.Add(meshTransform._transformUniqueID);
-			//_clipChildMeshTransforms.Add(meshTransform);
-			//_clipChildRenderUnits.Add(renderUnit);
-
-			//이전 코드 : 3개 고정
-			//for (int i = 0; i < 3; i++)
-			//{
-			//	if(_clipChildMeshTransforms[i] == null)
-			//	{
-			//		_clipChildMeshTransforms[i] = meshTransform;
-			//		_clipChildMeshTransformIDs[i] = meshTransform._transformUniqueID;
-			//		_clipChildRenderUnits[i] = renderUnit;
-			//		break;
-			//	}
-			//} 
-			#endregion
 
 			SortClipMeshTransforms();
 		}

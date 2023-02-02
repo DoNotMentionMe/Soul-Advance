@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -106,6 +106,8 @@ namespace AnyPortrait
 
 		public void Link(apAnimClip animClip)
 		{
+			//[1.4.2] TargetMeshGroup의 Null 체크를 할 것
+
 			_parentAnimClip = animClip;
 
 			animClip._portrait.RegistUniqueID(apIDManager.TARGET.AnimTimeline, _uniqueID);
@@ -122,11 +124,11 @@ namespace AnyPortrait
 						if (_parentAnimClip._targetMeshGroup != null)
 						{
 							_linkedModifier = _parentAnimClip._targetMeshGroup.GetModifier(_modifierUniqueID);
+
+							//연결된 모디파이어가 없다면 삭제되도록 만든다.
 							if (_linkedModifier == null)
 							{
-								//Debug.LogError("Timeline Link : Error - No Mod [" + _modifierUniqueID + "]");//<<디버그용
 								_modifierUniqueID = -1;
-
 							}
 						}
 					}
@@ -159,17 +161,11 @@ namespace AnyPortrait
 				{
 					case apAnimClip.LINK_TYPE.AnimatedModifier:
 						if (a._transformID < 0 && a._boneID < 0)//Bone도 추가
-					{
+						{
 							return true;
 						}
 						break;
 
-				//case apAnimClip.LINK_TYPE.Bone:
-				//	if (a._boneUniqueID < 0)
-				//	{
-				//		return true;
-				//	}
-				//	break;
 
 				case apAnimClip.LINK_TYPE.ControlParam:
 						if (a._controlParamID < 0)
@@ -180,6 +176,43 @@ namespace AnyPortrait
 				}
 				return false;
 			});
+		}
+
+
+		//[1.4.2] 에디터에서 AnimClip 선택시 Link를 새로 해야할지 여부를 빠르게 판단하는 함수
+		public bool ValidateForLinkEditor()
+		{
+			if(_parentAnimClip == null)
+			{
+				return false;
+			}
+
+			switch (_linkType)
+			{
+				case apAnimClip.LINK_TYPE.AnimatedModifier:
+					if (_linkedModifier == null)
+					{
+						return false;
+					}
+					break;
+			}
+
+			int nLayers = _layers != null ? _layers.Count : 0;
+
+			if (nLayers > 0)
+			{
+				for (int i = 0; i < nLayers; i++)
+				{
+					bool isValid = _layers[i].ValidateForLinkEditor();
+					if(!isValid)
+					{
+						return false;
+					}
+				}
+			}
+
+			return true;
+			
 		}
 
 
@@ -444,7 +477,6 @@ namespace AnyPortrait
 					if (selectedObject is apTransform_Mesh)
 					{
 						apTransform_Mesh meshTransform = selectedObject as apTransform_Mesh;
-
 
 						for (int i = 0; i < _layers.Count; i++)
 						{

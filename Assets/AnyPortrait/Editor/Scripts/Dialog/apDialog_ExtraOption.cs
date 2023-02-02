@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1651,42 +1651,51 @@ namespace AnyPortrait
 						//타겟이면 배경색을 그려주자
 						lastRect = GUILayoutUtility.GetLastRect();
 
+						apEditorUtil.UNIT_BG_STYLE bgStyle = apEditorUtil.UNIT_BG_STYLE.Main;
+
 						if (curSubUnit._selectedType == UNIT_SELECTED.Main)
 						{
-							if (EditorGUIUtility.isProSkin)
-							{
-								GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-							}
-							else
-							{
-								GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-							}
+							//if (EditorGUIUtility.isProSkin)
+							//{
+							//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+							//}
+							//else
+							//{
+							//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+							//}
+
+							bgStyle = apEditorUtil.UNIT_BG_STYLE.Main;//v1.4.2
 						}
 						else
 						{
 							//같이 선택되었다면
-							if (EditorGUIUtility.isProSkin)
-							{
-								GUI.backgroundColor = new Color(1.0f, 0.5f, 0.5f, 1.0f);
-							}
-							else
-							{
-								GUI.backgroundColor = new Color(1.0f, 0.4f, 0.4f, 1.0f);
-							}
+							//if (EditorGUIUtility.isProSkin)
+							//{
+							//	GUI.backgroundColor = new Color(1.0f, 0.5f, 0.5f, 1.0f);
+							//}
+							//else
+							//{
+							//	GUI.backgroundColor = new Color(1.0f, 0.4f, 0.4f, 1.0f);
+							//}
+
+							bgStyle = apEditorUtil.UNIT_BG_STYLE.Sub;//v1.4.2
 						}
-
-
-						
-
-						//int yOffset = 6;
 						int yOffset = 3;
 						if (i == 0)
 						{
-							//yOffset = 7 - depthListHeight_RightList;
 							yOffset = 4 - depthListHeight_RightList;
 						}
-						GUI.Box(new Rect(lastRect.x, lastRect.y + depthListHeight_RightList + yOffset, depthListWidth_RightInner + 10, depthListHeight_RightList + 5), "");
-						GUI.backgroundColor = prevColor;
+						
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + depthListHeight_RightList + yOffset, depthListWidth_RightInner + 10, depthListHeight_RightList + 5), "");
+						//GUI.backgroundColor = prevColor;
+
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(	lastRect.x + 1,
+														lastRect.y + depthListHeight_RightList + yOffset,
+														depthListWidth_RightInner + 10 - 2,
+														depthListHeight_RightList + 5,
+														bgStyle);
 					}
 
 					EditorGUILayout.BeginHorizontal(GUILayout.Width(depthListWidth_RightInner), GUILayout.Height(depthListHeight_RightList));

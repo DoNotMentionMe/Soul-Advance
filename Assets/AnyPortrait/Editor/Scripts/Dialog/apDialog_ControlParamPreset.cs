@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -499,21 +499,24 @@ namespace AnyPortrait
 			if (presetUnit == _selectedUnit)
 			{
 				Rect lastRect = GUILayoutUtility.GetLastRect();
-				Color prevColor = GUI.backgroundColor;
+				//Color prevColor = GUI.backgroundColor;
 
 				if(EditorGUIUtility.isProSkin)
 				{
-					GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+					//GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
 					guiStyle.normal.textColor = Color.cyan;
 				}
 				else
 				{
-					GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+					//GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
 					guiStyle.normal.textColor = Color.white;
 				}
 
-				GUI.Box(new Rect(lastRect.x, lastRect.y + btnHeight + yOffset, width + 4, btnHeight), "");
-				GUI.backgroundColor = prevColor;
+				//GUI.Box(new Rect(lastRect.x, lastRect.y + btnHeight + yOffset, width + 4, btnHeight), "");
+				//GUI.backgroundColor = prevColor;
+
+				//변경 v1.4.2
+				apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + btnHeight + yOffset, width + 4 - 2, btnHeight, apEditorUtil.UNIT_BG_STYLE.Main);
 			}
 
 			EditorGUILayout.BeginHorizontal(GUILayout.Width(width - 20), GUILayout.Height(btnHeight));

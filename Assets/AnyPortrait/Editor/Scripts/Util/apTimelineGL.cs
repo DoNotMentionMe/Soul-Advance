@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -82,7 +82,8 @@ namespace AnyPortrait
 		private static int _keyDragFrameIndex_Cur = -1;
 
 		//private static EventType _curEventType;
-		private static apSelection _selection;
+		private static apSelection _selection = null;
+		private static apEditor _editor = null;
 
 		private static bool _isShift = false;
 		private static bool _isCtrl = false;
@@ -558,6 +559,7 @@ namespace AnyPortrait
 
 			//_curEventType = curEventType;
 			_selection = selection;
+			_editor = selection._editor;
 
 			_isMouseEvent = isMouseEvent;
 
@@ -1708,7 +1710,7 @@ namespace AnyPortrait
 
 			float cursorSelectWidth = imgSizeWidth * 4;
 			float cursorSelectHeight = imgSizeHeight + 8 + (yOffset / 2);
-			bool isInputDirectMove = _isShift && _isCtrl;
+			bool isInputDirectMove = _isShift && _isCtrl;//Shift+Ctrl 키를 누르면 시간바를 바로 옮길 수 있다.
 
 			if (_timelineEvent == TIMELINE_EVENT.None)
 			{
@@ -1742,29 +1744,44 @@ namespace AnyPortrait
 							SetTimelineEvent(TIMELINE_EVENT.DragPlayBar);
 							_isMouseEventUsed = true;
 						}
-						else if (isInputDirectMove
-							&& _mousePos.x > 0.0f && _mousePos.x < _layoutWidth
-							&& _mousePos.y > cursorSelectPos.y - (cursorSelectHeight * 0.5f) && _mousePos.y < cursorSelectPos.y + (cursorSelectHeight * 0.5f))
+					}
+
+					if(!_isMouseEventUsed && isInputDirectMove)
+					{
+						//마우스 이벤트가 처리되지 않은 상태에서 > Down 또는 Pressed로 바로 이동
+						if (IsMouseUpdatable_Down(true))
 						{
-							//Debug.LogError("< 타임라인 헤더 클릭 : ClickHeaderExceptPlayBar>");
-
-							//일단 바로 이동 + 마우스 이벤트를 막는다.
-							int posToFrame = Mathf.Clamp(PosToFrame(_mousePos.x), _startFrame, _endFrame);
-							if (_selection != null && _selection.AnimClip != null)
+							if (_mousePos.x > 0.0f && _mousePos.x < _layoutWidth
+								&& _mousePos.y > cursorSelectPos.y - (cursorSelectHeight * 0.5f) && _mousePos.y < cursorSelectPos.y + (cursorSelectHeight * 0.5f))
 							{
-								int prevFrame = _selection.AnimClip.CurFrame;
-								if (prevFrame != posToFrame)
-								{
-									_selection.AnimClip.SetFrame_Editor(posToFrame);
-									_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-									isChangeFrame = true;
-								}
-							}
+								//Debug.LogError("< 타임라인 헤더 클릭 : ClickHeaderExceptPlayBar>");
 
-							SetTimelineEvent(TIMELINE_EVENT.ClickHeaderExceptPlayBar);
-							_isMouseEventUsed = true;
+								//일단 바로 이동 + 마우스 이벤트를 막는다.
+								int posToFrame = Mathf.Clamp(PosToFrame(_mousePos.x), _startFrame, _endFrame);
+								if (_selection != null && _selection.AnimClip != null)
+								{
+									int prevFrame = _selection.AnimClip.CurFrame;
+									if (prevFrame != posToFrame)
+									{
+										//v1.4.2 : FFD 모드에서는 이동이 불가할 수도 있다.
+										bool isExecutable = _editor.CheckModalAndExecutable();
+										
+										if(isExecutable)
+										{
+											//프레임을 이동시키자
+											_selection.AnimClip.SetFrame_Editor(posToFrame);
+											_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+											isChangeFrame = true;
+										}
+									}
+								}
+
+								SetTimelineEvent(TIMELINE_EVENT.ClickHeaderExceptPlayBar);
+								_isMouseEventUsed = true;
+							}
 						}
 					}
+					
 				}
 
 				//2. 드래그를 해보자
@@ -1782,9 +1799,25 @@ namespace AnyPortrait
 							int prevFrame = _selection.AnimClip.CurFrame;
 							if (prevFrame != posToFrame)
 							{
-								_selection.AnimClip.SetFrame_Editor(posToFrame);
-								_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
-								isChangeFrame = true;
+								//v1.4.2 : FFD 모드에서는 이동이 불가할 수도 있다.
+								bool isExecutable = _editor.CheckModalAndExecutable();
+
+								
+								if (isExecutable)
+								{
+									_selection.AnimClip.SetFrame_Editor(posToFrame);
+									_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+									isChangeFrame = true;
+								}
+								else
+								{
+									//드래그 중에 FFD 안내가 나왔으나 "취소"를 눌렀다면
+									//드래그를 더이상 할 수 없다. [v1.4.2]
+									SetTimelineEvent(TIMELINE_EVENT.None);
+									_isMouseEventUsed = true;
+									//Debug.Log("FFD 취소에 따른 프레임 이동 취소");
+								}
+
 							}
 						}
 					}
@@ -1792,9 +1825,52 @@ namespace AnyPortrait
 				//3. 영역 클릭하여 시간 이동시
 				else if (_timelineEvent == TIMELINE_EVENT.ClickHeaderExceptPlayBar)
 				{
-					if (_leftBtnStatus == apMouse.MouseBtnStatus.Up || _leftBtnStatus == apMouse.MouseBtnStatus.Released)
+					//일단 빈칸에 Shift + Ctrl을 눌러서 타임 슬라이더를 이동하시 시작했다면
+					//Y 위치는 고려하지 않고, X 위치와 마우스 Up 이벤트만 체크한다.
+					if (_leftBtnStatus == apMouse.MouseBtnStatus.Up 
+						|| _leftBtnStatus == apMouse.MouseBtnStatus.Released
+						|| !isInputDirectMove)
 					{
 						SetTimelineEvent(TIMELINE_EVENT.None);
+					}
+					else
+					{
+						//Debug.Log("계속 시간 이동 중");
+						
+						if (_mousePos.x > 0.0f && _mousePos.x < _layoutWidth
+							//&& _mousePos.y > cursorSelectPos.y - (cursorSelectHeight * 0.5f) && _mousePos.y < cursorSelectPos.y + (cursorSelectHeight * 0.5f)
+							)
+						{
+							//Debug.LogError("< 타임라인 헤더 클릭 : ClickHeaderExceptPlayBar>");
+
+							//일단 바로 이동 + 마우스 이벤트를 막는다.
+							int posToFrame = Mathf.Clamp(PosToFrame(_mousePos.x), _startFrame, _endFrame);
+							if (_selection != null && _selection.AnimClip != null)
+							{
+								int prevFrame = _selection.AnimClip.CurFrame;
+								if (prevFrame != posToFrame)
+								{
+									//v1.4.2 FFD와 같은 모달 상태를 체크한다.
+									bool isExecutable = _editor.CheckModalAndExecutable();
+									
+									if (isExecutable)
+									{
+										_selection.AnimClip.SetFrame_Editor(posToFrame);
+										_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+										isChangeFrame = true;
+									}
+									else
+									{
+										//드래그 중에 FFD 안내가 나왔으나 "취소"를 눌렀다면
+										//드래그를 더이상 할 수 없다. [v1.4.2]
+										SetTimelineEvent(TIMELINE_EVENT.None);
+										_isMouseEventUsed = true;
+										//Debug.Log("FFD 취소에 따른 프레임 이동 취소 (단축키 클릭시)");
+									}
+								}
+							}
+							_isMouseEventUsed = true;
+						}
 					}
 				}
 			}
@@ -3519,9 +3595,10 @@ namespace AnyPortrait
 
 
 		public static bool EndKeyframeControl()
-		{
-			
+		{	
 			bool isEventOccurred = false;
+
+
 			if (_isMouseEvent && !_isMouseEventUsed)
 			{	
 				switch (_keyframeControlType)
@@ -3536,6 +3613,9 @@ namespace AnyPortrait
 							bool isAnySelected = false;
 							if (_targetSelectType == TARGET_SELECT_TYPE.Keyframe)
 							{
+
+								apAnimKeyframe selectedKeyframe = null;
+								
 
 								if (_selectableKeyframes.Count > 0)
 								{
@@ -3566,7 +3646,9 @@ namespace AnyPortrait
 										//그 외에는 동일
 										if (selectType != apGizmos.SELECT_TYPE.New)
 										{
-											_selection.SelectAnimKeyframe(_selectableKeyframes[0], true, selectType);
+											selectedKeyframe = _selectableKeyframes[0];
+											_selection.SelectAnimKeyframe(selectedKeyframe, true, selectType);
+											
 										}
 
 
@@ -3575,13 +3657,36 @@ namespace AnyPortrait
 									{
 										//Selection Type에 맞게 "키프레임 한개"를 선택 (또는 해제) 한다.
 										//추가 : 한개 선택시에는 Frame을 이동한다.
-										_selection.SelectAnimKeyframe(_selectableKeyframes[0], true, selectType, _isSelectLoopDummy);
+										selectedKeyframe = _selectableKeyframes[0];
+										_selection.SelectAnimKeyframe(selectedKeyframe, true, selectType, _isSelectLoopDummy);
+										
+
+
+										//[1.4.2] 새로운 키프레임 선택시 옵션에 따라
+										//우측 리스트가 자동으로 스크롤된다.
+										if(_editor._option_AutoScrollWhenObjectSelected)
+										{
+											object selectedObj = null;
+
+											//스크롤 가능한 상황인지 체크하고 (타임라인 레이어용)
+											if(_editor.IsAutoScrollableWhenClickObject_AnimationTimelinelayer(selectedKeyframe._parentTimelineLayer, true, out selectedObj))
+											{
+												//자동 스크롤을 요청한다.
+												_editor.AutoScroll_HierarchyAnimation(selectedObj);
+											}
+										}
 									}
+
+
+
+
+
+
 
 									EditorRepaint();
 
 
-									//마우스를 클릭하믄
+									//마우스를 클릭하고 있는 상태에서
 									if (_leftBtnStatus != apMouse.MouseBtnStatus.Up && _leftBtnStatus != apMouse.MouseBtnStatus.Released)
 									{
 										if (_selectType != SELECT_TYPE.Subtract)
@@ -3719,20 +3824,60 @@ namespace AnyPortrait
 								{
 									//Debug.Log("Multiple Select [" + _targetSelectableKeyframes.Count + "]");
 									//마우스를 떼었으면 끝
+									bool isCheckScroll = false;//[1.4.2] 여러개의 키프레임을 선택할때, 오른쪽 리스트의 스크롤을 바꾼다.
+
 									switch (_selectType)
 									{
 										case SELECT_TYPE.New:
-											_selection.SelectAnimMultipleKeyframes(_selectableKeyframes, apGizmos.SELECT_TYPE.New, true);
+											{
+												int nSelectableKeyframes = _selectableKeyframes != null ? _selectableKeyframes.Count : 0;
+												if (nSelectableKeyframes > 0)
+												{
+													_selection.SelectAnimMultipleKeyframes(_selectableKeyframes, apGizmos.SELECT_TYPE.New, true);
+												}
+												else
+												{
+													//_selection.SubObjects.Select(null, null, null, apSelection.MULTI_SELECT.Main, apSelection.TF_BONE_SELECT.Exclusive);
+													//_selection.AutoSelectAnimTimelineLayer(false, false);
+
+													_selection.SubObjects.Select(null, null, null, apSelection.MULTI_SELECT.Main, apSelection.TF_BONE_SELECT.Exclusive);
+													_selection.SelectAnimTimelineLayer(null, apSelection.MULTI_SELECT.Main, true, true, true);
+													
+													//_selection.SelectAnimKeyframe(null, false, apGizmos.SELECT_TYPE.New);
+													bool isWorkKeyframeChanged = false;
+													_selection.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);
+												}	
+												isCheckScroll = true;
+											}
+											
 											break;
 
 										case SELECT_TYPE.Add:
 											_selection.SelectAnimMultipleKeyframes(_selectableKeyframes, apGizmos.SELECT_TYPE.Add, true);
+											isCheckScroll = true;
 											break;
 
 										case SELECT_TYPE.Subtract:
 											_selection.SelectAnimMultipleKeyframes(_selectableKeyframes, apGizmos.SELECT_TYPE.Subtract, true);
 											break;
 									}
+
+									if(isCheckScroll && _selectableKeyframes != null && _selectableKeyframes.Count > 0)
+									{
+										//[1.4.2] 타임라인 레이어에 따라 선택한 오브젝트로 오른쪽 UI 스크롤을 옮긴다.
+										if(_editor._option_AutoScrollWhenObjectSelected)
+										{	
+											object selectedObj = null;
+
+											//스크롤 가능한 상황인지 체크하고 (타임라인 레이어용)
+											if(_editor.IsAutoScrollableWhenClickObject_AnimationTimelinelayer(_selectableKeyframes[0]._parentTimelineLayer, true, out selectedObj))
+											{
+												//자동 스크롤을 요청한다.
+												_editor.AutoScroll_HierarchyAnimation(selectedObj);
+											}
+										}
+									}
+
 								}
 								else
 								{
@@ -3949,6 +4094,38 @@ namespace AnyPortrait
 
 		private static void OnDragKeyframeUp()
 		{
+			//키프레임을 드래그하여 이동하거나 복사하는 처리
+			//대상이 되는 키프레임들이 있는지 확인한다.
+			//이 처리 전에 FFD를 종료해야한다.
+			int nTargetKeyframes = _moveKeyframeList != null ? _moveKeyframeList.Count : 0;
+			int nTargetCommonKeyframes = _moveCommonKeyframeList != null ? _moveCommonKeyframeList.Count : 0;
+
+			if(nTargetKeyframes == 0 && nTargetCommonKeyframes == 0)
+			{
+				//만약 선택된게 없었다면
+				//마우스 처리만 종료한다.
+				_moveKeyframeList.Clear();
+				_moveCommonKeyframeList.Clear();
+
+				//드래그가 끝났으면 무조건 마우스 이벤트 종료
+				ReleaseMouseEvent();
+				return;
+			}
+
+
+			//v1.4.2 : FFD 같은 모달 상태에서
+			bool isExecutable = _editor.CheckModalAndExecutable();
+			if(!isExecutable)
+			{
+				//모달 상태가 유지된다면
+				_moveKeyframeList.Clear();
+				_moveCommonKeyframeList.Clear();
+
+				//마우스 이벤트 종료
+				ReleaseMouseEvent();
+				return;
+			}
+
 
 			List<apAnimTimelineLayer> refreshLayer = new List<apAnimTimelineLayer>();
 
@@ -3957,18 +4134,16 @@ namespace AnyPortrait
 			//Debug.Log("OnDragKeyframeUp [" + _moveKeyframeList.Count + "] (" + _selectType + ")");
 			//이동한 이후에
 			//Frame Index가 겹친게 있다면 Selection을 기준으로 남기고 나머지는 삭제해야한다.
-			//if (_selection.AnimKeyframes != null && _selection.AnimKeyframes.Count > 0)
-			if (_moveKeyframeList.Count > 0)
-			{
-				
+			if (nTargetKeyframes > 0)
+			{	
 				if (_selectType != SELECT_TYPE.Add)
 				{
 					//1) 이동
 					//Undo 등록
 					//Keyframe의 위치만 바꾼 것이므로
 					apEditorUtil.SetRecord_Portrait(	apUndoGroupData.ACTION.Anim_MoveKeyframe, 
-														_selection.Editor, 
-														_selection.Editor._portrait, 
+														_editor, 
+														_editor._portrait, 
 														//null, 
 														false,
 														apEditorUtil.UNDO_STRUCT.ValueOnly);
@@ -4030,7 +4205,7 @@ namespace AnyPortrait
 					if (isMovePlayFrame)
 					{
 						_selection.AnimClip.SetFrame_Editor(movePlayFrame);
-						_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+						_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
 					}
 				}
 				else
@@ -4039,8 +4214,8 @@ namespace AnyPortrait
 					//Undo 등록
 					//이건 Mod의 값도 바뀌는 것이다.
 					apEditorUtil.SetRecord_PortraitMeshGroupAndAllModifiers(apUndoGroupData.ACTION.Anim_CopyKeyframe, 
-											_selection.Editor,
-											_selection.Editor._portrait, 
+											_editor,
+											_editor._portrait, 
 											_selection.AnimClip._targetMeshGroup, 
 											//null, 
 											false,
@@ -4106,7 +4281,7 @@ namespace AnyPortrait
 						}
 
 						//복사한다.
-						apAnimKeyframe copiedKeyframe = _selection.Editor.Controller.AddCopiedAnimKeyframe(
+						apAnimKeyframe copiedKeyframe = _editor.Controller.AddCopiedAnimKeyframe(
 																moveKeyframe._nextFrameIndex,
 																parentLayer,
 																true,
@@ -4130,7 +4305,7 @@ namespace AnyPortrait
 					if (isMovePlayFrame)
 					{
 						_selection.AnimClip.SetFrame_Editor(movePlayFrame);
-						_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+						_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
 					}
 				}
 
@@ -4138,7 +4313,7 @@ namespace AnyPortrait
 			}
 
 			//2. Summary Common Keyframe에 대해서도 처리한다.
-			if(_moveCommonKeyframeList.Count > 0)
+			if(nTargetCommonKeyframes > 0)
 			{
 				//처리 전에 먼저,
 				//이동 대상이 되는 전체 키프레임을 리스트로 정리한다.
@@ -4158,8 +4333,8 @@ namespace AnyPortrait
 				{
 					//Undo 등록
 					apEditorUtil.SetRecord_PortraitMeshGroupAndAllModifiers(apUndoGroupData.ACTION.Anim_MoveKeyframe, 
-																_selection.Editor,
-																_selection.Editor._portrait, 
+																_editor,
+																_editor._portrait, 
 																_selection.AnimClip._targetMeshGroup, 
 																//null, 
 																false,
@@ -4229,7 +4404,7 @@ namespace AnyPortrait
 					if (isMovePlayFrame)
 					{
 						_selection.AnimClip.SetFrame_Editor(movePlayFrame);
-						_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+						_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
 					}
 				}
 				else
@@ -4237,8 +4412,8 @@ namespace AnyPortrait
 					//2) 복사
 					//Undo 등록
 					apEditorUtil.SetRecord_PortraitMeshGroupAndAllModifiers(apUndoGroupData.ACTION.Anim_CopyKeyframe, 
-						_selection.Editor,
-						_selection.Editor._portrait, 
+						_editor,
+						_editor._portrait, 
 						_selection.AnimClip._targetMeshGroup, 
 						//null, 
 						false,
@@ -4306,7 +4481,7 @@ namespace AnyPortrait
 							}
 
 							//복사한다.
-							apAnimKeyframe copiedKeyframe = _selection.Editor.Controller.AddCopiedAnimKeyframe(
+							apAnimKeyframe copiedKeyframe = _editor.Controller.AddCopiedAnimKeyframe(
 																		moveCommonKeyframe._nextFrameIndex,
 																		parentLayer,
 																		true,
@@ -4333,7 +4508,7 @@ namespace AnyPortrait
 					if (isMovePlayFrame)
 					{
 						_selection.AnimClip.SetFrame_Editor(movePlayFrame);
-						_selection.Editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
+						_editor.SetMeshGroupChanged();//<<추가 : 강제 업데이트를 해야한다.
 					}
 
 				}
@@ -4351,7 +4526,15 @@ namespace AnyPortrait
 
 			//Common AnimKeyframe을 갱신
 			_selection.RefreshCommonAnimKeyframes();
-			_selection.AutoSelectAnimWorkKeyframe();
+
+			bool isWorkKeyframeChanged = false;
+			_selection.AutoSelectAnimWorkKeyframe(out isWorkKeyframeChanged);//FFD 처리는 앞에서 했으므로, 혹시라도 FFD가 발생하면 Revert를 하자.
+
+			if (isWorkKeyframeChanged && _editor.Gizmos.IsFFDMode)
+			{
+				_editor.Gizmos.RevertFFDTransformForce();
+			}
+			
 
 			_moveKeyframeList.Clear();
 			_moveCommonKeyframeList.Clear();

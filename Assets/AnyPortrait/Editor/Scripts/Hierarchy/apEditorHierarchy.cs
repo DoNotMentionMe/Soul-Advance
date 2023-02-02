@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -32,6 +32,7 @@ namespace AnyPortrait
 
 		public List<apEditorHierarchyUnit> _units_All = new List<apEditorHierarchyUnit>();
 		public List<apEditorHierarchyUnit> _units_Root = new List<apEditorHierarchyUnit>();
+		private Dictionary<object, apEditorHierarchyUnit> _object2Unit = new Dictionary<object, apEditorHierarchyUnit>();
 
 		//개선 20.3.28 : Pool을 이용하자
 		private apEditorHierarchyUnitPool _unitPool = new apEditorHierarchyUnitPool();
@@ -40,7 +41,7 @@ namespace AnyPortrait
 		private apEditorHierarchyMenu _rightMenu = null;
 		private object _loadKey_Rename = null;//이름 변경 다이얼로그의 유효성 테스트를 위한 로드키 
 		private object _loadKey_Search = null;
-
+		
 		public enum CATEGORY
 		{
 			Overall_Name,
@@ -102,6 +103,9 @@ namespace AnyPortrait
 		private object _loadKey_MultipleObjectRemoved = null;
 
 
+		
+
+
 		public void SetNeedReset()
 		{
 			_isNeedReset = true;
@@ -114,6 +118,15 @@ namespace AnyPortrait
 			_editor = editor;
 
 			_rightMenu = new apEditorHierarchyMenu(_editor, OnSelectRightMenu);
+
+			if(_units_All == null) { _units_All = new List<apEditorHierarchyUnit>(); }
+			_units_All.Clear();
+
+			if(_units_Root == null) { _units_Root = new List<apEditorHierarchyUnit>(); }
+			_units_Root.Clear();
+
+			if(_object2Unit == null) { _object2Unit = new Dictionary<object, apEditorHierarchyUnit>(); }
+			_object2Unit.Clear();
 
 			if(_unitPool == null)
 			{
@@ -153,6 +166,7 @@ namespace AnyPortrait
 			_isNeedReset = false;
 			_units_All.Clear();
 			_units_Root.Clear();
+			_object2Unit.Clear();
 
 			
 
@@ -402,7 +416,7 @@ namespace AnyPortrait
 										_guiContent_ModRegisted);
 			
 
-			newUnit.SetEvent(OnUnitClick);
+			newUnit.SetEvent(OnUnitClick, OnCheckSelectedHierarchy);
 			newUnit.SetLabel(icon, text, (int)savedKey, savedObj);
 
 			_units_All.Add(newUnit);
@@ -460,11 +474,11 @@ namespace AnyPortrait
 
 			if(isOrderChangable == ORDER_CHANGABLE.Changable)
 			{
-				newUnit.SetEvent(OnUnitClick, null, OnUnitClickOrderChanged);
+				newUnit.SetEvent(OnUnitClick, null, OnCheckSelectedHierarchy, OnUnitClickOrderChanged);
 			}
 			else
 			{
-				newUnit.SetEvent(OnUnitClick);
+				newUnit.SetEvent(OnUnitClick, OnCheckSelectedHierarchy);
 			}
 
 			//추가 21.6.13 : 우클릭 지원
@@ -480,6 +494,15 @@ namespace AnyPortrait
 			if (isRoot)
 			{
 				_units_Root.Add(newUnit);
+			}
+
+			//추가 [1.4.2] 오브젝트 매핑
+			if(savedObj != null)
+			{
+				if(!_object2Unit.ContainsKey(savedObj))
+				{
+					_object2Unit.Add(savedObj, newUnit);
+				}
 			}
 
 			if (parent != null)
@@ -512,13 +535,22 @@ namespace AnyPortrait
 										_guiContent_ModRegisted);
 
 
-			newUnit.SetEvent(OnUnitClick);
+			newUnit.SetEvent(OnUnitClick, OnCheckSelectedHierarchy);
 			newUnit.SetOnlyButton(icon, text, (int)savedKey, savedObj);
 
 			_units_All.Add(newUnit);
 			if (isRoot)
 			{
 				_units_Root.Add(newUnit);
+			}
+
+			//추가 [1.4.2] 오브젝트 매핑
+			if(savedObj != null)
+			{
+				if(!_object2Unit.ContainsKey(savedObj))
+				{
+					_object2Unit.Add(savedObj, newUnit);
+				}
 			}
 
 			if (parent != null)
@@ -728,6 +760,13 @@ namespace AnyPortrait
 
 				_units_All.Remove(dUnit);
 
+				//[1.4.2] 오브젝트 매핑에서도 삭제
+				if(dUnit._savedObj != null)
+				{
+					_object2Unit.Remove(dUnit._savedObj);
+				}
+
+
 				//20.3.18 그냥 삭제하지 말고 Pool에 넣자
 				_unitPool.PushUnit(dUnit);
 			}
@@ -781,16 +820,16 @@ namespace AnyPortrait
 													ORDER_CHANGABLE orderChangable = ORDER_CHANGABLE.Changable)
 		{
 			apEditorHierarchyUnit unit = _units_All.Find(delegate (apEditorHierarchyUnit a)
+			{
+				if (obj != null)
 				{
-					if (obj != null)
-					{
-						return (CATEGORY)a._savedKey == category && a._savedObj == obj;
-					}
-					else
-					{
-						return (CATEGORY)a._savedKey == category;
-					}
-				});
+					return (CATEGORY)a._savedKey == category && a._savedObj == obj;
+				}
+				else
+				{
+					return (CATEGORY)a._savedKey == category;
+				}
+			});
 
 			if (objName == null)
 			{
@@ -881,6 +920,21 @@ namespace AnyPortrait
 			}
 		}
 
+
+		// 일반 이벤트
+		//-----------------------------------------------------------------------------------------
+		//추가 22.12.12 : 막 클릭한 Hierarchy는 별도의 단축키가 적용된다.
+		public bool OnCheckSelectedHierarchy(apEditorHierarchyUnit unit)
+		{
+			if(unit == null || unit._savedObj == null)
+			{
+				return false;
+			}
+
+			return Editor.LastClickedHierarchy == apEditor.LAST_CLICKED_HIERARCHY.Main;
+		}
+
+
 		// Click Event
 		//-----------------------------------------------------------------------------------------
 		public void OnUnitClick(apEditorHierarchyUnit eventUnit, int savedKey, object savedObj, bool isCtrl, bool isShift)
@@ -895,19 +949,37 @@ namespace AnyPortrait
 			
 			//여기서 이벤트를 설정해주자
 			bool isAnyAdded = false;//추가 20.7.14 : 뭔가 추가가 되었다면, Refresh를 해야한다.
+			
+			//v1.4.2 : 애니메이션 추가시 스크롤이 자동으로 바뀌는데, 새로 생성한 직후에는 RefreshUnit 이후에 스크롤을 해야하므로 처리가 딜레이된다.
+			bool isDelayedAutoScroll_AnimClip = false;
+			apAnimClip delayedScrollObj_AnimClip = null;
+
+			
+
+
 			CATEGORY category = (CATEGORY)savedKey;
-			//Debug.Log("Unit Select : " + category);
+
+			//처리가 필요없는 Label 메뉴는 바로 리턴하자
 			switch (category)
 			{
 				case CATEGORY.Overall_Name:
 				case CATEGORY.Images_Name:
 				case CATEGORY.Mesh_Name:
 				case CATEGORY.MeshGroup_Name:
-				//case CATEGORY.Face_Name:
 				case CATEGORY.Animation_Name:
 				case CATEGORY.Param_Name:
-					break;
+					return;//<<리턴
+			}
 
+			//v1.4.2 : FFD가 켜진 상태에서는 메뉴 선택이 제한될 수 있다.
+			bool isExecutable = Editor.CheckModalAndExecutable();
+			if(!isExecutable)
+			{
+				return;
+			}
+
+			switch (category)
+			{
 				case CATEGORY.Overall_Item:
 					//전체 선택
 					apRootUnit rootUnit = savedObj as apRootUnit;
@@ -917,6 +989,9 @@ namespace AnyPortrait
 						if (Editor.Select.RootUnit == rootUnit)
 						{
 							selectedUnit = eventUnit;
+
+							//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+							_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
 						}
 					}
 					break;
@@ -930,6 +1005,9 @@ namespace AnyPortrait
 							if (Editor.Select.TextureData == textureData)
 							{
 								selectedUnit = eventUnit;
+
+								//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+								_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
 							}
 						}
 					}
@@ -968,6 +1046,9 @@ namespace AnyPortrait
 									Editor._isRequestRemoveVerticesIfImportedFromPSD_Step2 = false;
 									Editor._requestMeshRemoveVerticesIfImportedFromPSD = mesh;
 								}
+
+								//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+								_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
 							}
 						}
 					}
@@ -1006,6 +1087,9 @@ namespace AnyPortrait
 							if (Editor.Select.MeshGroup == meshGroup)
 							{
 								selectedUnit = eventUnit;
+
+								//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+								_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
 							}
 						}
 					}
@@ -1038,9 +1122,15 @@ namespace AnyPortrait
 							if (Editor.Select.AnimClip == animClip)
 							{
 								selectedUnit = eventUnit;
-							}
 
-							
+								//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+								_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+
+								//[v1.4.2]
+								//애니메이션의 경우 UI가 작아지므로,
+								//스크롤을 자동으로 해야한다.
+								Editor.AutoScroll_HierarchyMain(animClip);
+							}
 						}
 					}
 					break;
@@ -1068,6 +1158,10 @@ namespace AnyPortrait
 						if(newAnimClip != null)
 						{
 							Editor.Select.SelectAnimClip(newAnimClip);
+
+							//애니메이션 생성 직후 스크롤을 조절한다.
+							isDelayedAutoScroll_AnimClip = true;
+							delayedScrollObj_AnimClip = newAnimClip;
 						}
 
 						isAnyAdded = true;
@@ -1085,6 +1179,9 @@ namespace AnyPortrait
 							if (Editor.Select.Param == cParam)
 							{
 								selectedUnit = eventUnit;
+
+								//추가 22.10.27 [v1.4.2] : Hierarchy 클릭을 Editor에 알린다.
+								_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
 							}
 						}
 					}
@@ -1121,6 +1218,13 @@ namespace AnyPortrait
 			if (isAnyAdded)
 			{
 				RefreshUnits();
+
+				if (isDelayedAutoScroll_AnimClip
+					&& delayedScrollObj_AnimClip != null)
+				{
+					//Refresh 이후 애니메이션 클립에 의한 스크롤을 해야한다.
+					Editor.AutoScroll_HierarchyMain(delayedScrollObj_AnimClip, true);
+				}			
 			}
 			else
 			{
@@ -1150,6 +1254,8 @@ namespace AnyPortrait
 				}
 			}
 		}
+
+
 
 
 		public void OnUnitClickOrderChanged(apEditorHierarchyUnit eventUnit, int savedKey, object savedObj, bool isOrderUp)
@@ -1268,97 +1374,145 @@ namespace AnyPortrait
 			//Debug.Log("우클릭");
 			if(_rightMenu != null && savedObj != null)
 			{
+				//v1.4.2 : FFD가 켜지면 적용 여부를 묻고 경우에 따라 우클릭 메뉴를 보이지 않는다.
+				bool isExecutable = Editor.CheckModalAndExecutable();
+				if(!isExecutable)
+				{
+					return;
+				}
+
+
 				//우클릭 메뉴를 열자 (해당되는 항목만)
+
+				//클릭한 객체의 이름을 받자
+				string objName = null;
+				bool isShowMenu = false;
+
+				_rightMenu.ReadyToMakeMenu();//메뉴 구성 시작
+
+				
 				CATEGORY category = (CATEGORY)savedKey;
+
 				switch (category)
 				{
 					case CATEGORY.Overall_Item:
 						{
 							//루트유닛
-							_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove,
-												savedKey, savedObj);
+							isShowMenu = true;
+							
+							if(savedObj is apRootUnit)
+							{
+								objName = (savedObj as apRootUnit).Name;
+							}
+
+							_rightMenu.SetMenu_MoveUpDown();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Remove();
 						}
 						break;
 					case CATEGORY.Images_Item:
 						{
 							//이미지
-							_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+							isShowMenu = true;
+							
+							if(savedObj is apTextureData)
+							{
+								objName = (savedObj as apTextureData)._name;
+							}
+
+							_rightMenu.SetMenu_Rename();
+							_rightMenu.SetMenu_MoveUpDown();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Remove();
+							_rightMenu.SetMenu_RemoveMultiple();
 						}
 						break;
 
 					case CATEGORY.Mesh_Item:
 						{
 							//메시
-							_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+							isShowMenu = true;
+							
+							if(savedObj is apMesh)
+							{
+								objName = (savedObj as apMesh)._name;
+							}
+
+							_rightMenu.SetMenu_Rename();
+							_rightMenu.SetMenu_MoveUpDown();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Duplicate();
+							_rightMenu.SetMenu_Remove();
+							_rightMenu.SetMenu_RemoveMultiple();
 						}
 						break;
 					case CATEGORY.MeshGroup_Item:
 						{
-							apMeshGroup meshGroup = savedObj as apMeshGroup;
-							if(meshGroup != null && meshGroup._parentMeshGroup != null)
+							//메시 그룹
+							isShowMenu = true;
+							
+							if(savedObj is apMeshGroup)
 							{
-								//Child MeshGroup인 경우
-								_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+								objName = (savedObj as apMeshGroup)._name;
 							}
-							else
+
+							_rightMenu.SetMenu_Rename();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Duplicate();
+							_rightMenu.SetMenu_Remove();
+							_rightMenu.SetMenu_RemoveMultiple();
+
+							apMeshGroup meshGroup = savedObj as apMeshGroup;
+							if(meshGroup != null && meshGroup._parentMeshGroup == null)
 							{
-								//Root MeshGroup인 경우
-								_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+								//Root MeshGroup이라면 Move Up/Move Down을 추가한다.
+								_rightMenu.SetMenu_MoveUpDown();
 							}
 						}
 						break;
 					case CATEGORY.Animation_Item:
 						{
-							_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+							//애니메이션
+							isShowMenu = true;
+							
+							if(savedObj is apAnimClip)
+							{
+								objName = (savedObj as apAnimClip)._name;
+							}
+
+							_rightMenu.SetMenu_Rename();
+							_rightMenu.SetMenu_MoveUpDown();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Duplicate();
+							_rightMenu.SetMenu_Remove();
+							_rightMenu.SetMenu_RemoveMultiple();
 						}
 						break;
 					case CATEGORY.Param_Item:
 						{
-							_rightMenu.ShowMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove
-												| apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple,
-												savedKey, savedObj);
+							//컨트롤 파라미터
+							isShowMenu = true;
+							
+							if(savedObj is apControlParam)
+							{
+								objName = (savedObj as apControlParam)._keyName;
+							}
+
+							_rightMenu.SetMenu_Rename();
+							_rightMenu.SetMenu_MoveUpDown();
+							_rightMenu.SetMenu_Search();
+							_rightMenu.SetMenu_Duplicate();
+							_rightMenu.SetMenu_Remove();
+							_rightMenu.SetMenu_RemoveMultiple();
 						}
 					break;
+				}
+
+
+				if (isShowMenu)
+				{
+					//우클릭 메뉴를 보여주자
+					_rightMenu.ShowMenu(objName, 1, savedKey, savedObj, eventUnit);
 				}
 				
 			}
@@ -1366,13 +1520,25 @@ namespace AnyPortrait
 
 
 		//우클릭 메뉴에서 항목을 선택했을 때
-		private void OnSelectRightMenu(apEditorHierarchyMenu.MENU_ITEM_HIERARCHY menuType, int hierachyUnitType, object requestedObj)
+		private void OnSelectRightMenu(	apEditorHierarchyMenu.MENU_ITEM_HIERARCHY menuType,
+										int hierachyUnitType,
+										object requestedObj,
+										apEditorHierarchyUnit clickedUnit)
 		{
 			if(_editor == null || _editor._portrait == null)
 			{
 				return;
 			}
 			apObjectOrders orders = _editor._portrait._objectOrders;//위치 변경용
+
+			//변경사항 v1.4.2
+			//- 만약 위치 변경시 Hierarchy 정렬 모드가 Custom이 아니라면 변경하지 말고 메시지를 보여야 한다.
+			//- 복제시 복제된 객체를 바로 선택한다. 이때, AnimClip의 경우 스크롤도 자동으로 이동한다. (Refresh 후에 하도록 변수를 만들자)
+
+			bool isDelayedAutoScroll_AnimClip = false;
+			apAnimClip delayedScrollTargetAnimClip = null;
+
+
 			CATEGORY category = (CATEGORY)hierachyUnitType;
 			switch (category)
 			{
@@ -1384,11 +1550,36 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.RootUnit, rootUnit._childMeshGroup._uniqueID, true);
+									{
+										orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.RootUnit, rootUnit._childMeshGroup._uniqueID, true);
+
+										//변경 후엔 해당 객체를 선택하자
+										if(Editor.Select.RootUnit != rootUnit)
+										{
+											Editor.Select.SelectRootUnit(rootUnit);
+											if (Editor.Select.RootUnit == rootUnit)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+											}
+										}
+									}
 									break;
 
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.RootUnit, rootUnit._childMeshGroup._uniqueID, false);
+									{
+										orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.RootUnit, rootUnit._childMeshGroup._uniqueID, false);
+
+										//변경 후엔 해당 객체를 선택하자
+										if(Editor.Select.RootUnit != rootUnit)
+										{
+											Editor.Select.SelectRootUnit(rootUnit);
+											if (Editor.Select.RootUnit == rootUnit)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+											}
+										}
+									}
+									
 									break;
 
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
@@ -1415,6 +1606,7 @@ namespace AnyPortrait
 											}
 										}
 									}
+
 									break;
 							}
 						}
@@ -1429,21 +1621,54 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename:
-									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, textureData, textureData._name, OnObjectRenamed);
+									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, textureData, clickedUnit, textureData._name, OnObjectRenamed);
 									break;
+
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Image, textureData._uniqueID, true);
-									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Image, textureData._uniqueID, false);
+									{
+										if(Editor.HierarchySortMode == apEditor.HIERARCHY_SORT_MODE.Custom)
+										{
+											//정렬 모드가 "사용자 정의 모드"라면 > 위치 이동
+											bool isMoveUp = menuType == apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp;
+
+											orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Image, textureData._uniqueID, isMoveUp);
+
+											//위치 변경 후 해당 객체를 선택한다.
+											if (Editor.Select.TextureData != textureData)
+											{
+												Editor.Select.SelectImage(textureData);
+												if (Editor.Select.TextureData == textureData)
+												{
+													_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+												}
+											}
+										}
+										else
+										{
+											//정렬 모드를 사용자 정의 모드로 바꿀지 물어보고 처리
+											bool isResult = EditorUtility.DisplayDialog(	Editor.GetText(TEXT.DLG_WarningChangeSortMode_Title),
+																						Editor.GetText(TEXT.DLG_WarningChangeSortMode_Body),
+																						Editor.GetText(TEXT.DLG_Change),
+																						Editor.GetText(TEXT.Cancel));
+											if(isResult)
+											{
+												Editor.SetHierarchySortMode(apEditor.HIERARCHY_SORT_MODE.Custom);
+											}
+										}
+									}
 									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
-									_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									{
+										_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									}
+									
 									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove:
 									{
 										//경고 메시지를 먼저 보여준다.
-
 										string strDialogInfo = _editor.Controller.GetRemoveItemMessage(
 																				_editor._portrait,
 																				textureData,
@@ -1462,6 +1687,7 @@ namespace AnyPortrait
 										}
 									}
 									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.RemoveMultiple:
 									{
 										_loadKey_MultipleObjectRemoved = 
@@ -1484,20 +1710,66 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename:
-									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, mesh, mesh._name, OnObjectRenamed);
+									{
+										_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, mesh, clickedUnit, mesh._name, OnObjectRenamed);
+									}
 									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Mesh, mesh._uniqueID, true);
-									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Mesh, mesh._uniqueID, false);
+									{
+										if (Editor.HierarchySortMode == apEditor.HIERARCHY_SORT_MODE.Custom)
+										{
+											//정렬 모드가 "사용자 정의 모드"라면 > 위치 이동
+											bool isMoveUp = menuType == apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp;
+
+											orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.Mesh, mesh._uniqueID, isMoveUp);
+
+											//위치 변경 후 해당 객체를 선택한다.
+											if (Editor.Select.Mesh != mesh)
+											{
+												Editor.Select.SelectMesh(mesh);
+												if (Editor.Select.Mesh == mesh)
+												{
+													_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+												}
+											}
+											
+										}
+										else
+										{
+											//정렬 모드를 사용자 정의 모드로 바꿀지 물어보고 처리
+											bool isResult = EditorUtility.DisplayDialog(	Editor.GetText(TEXT.DLG_WarningChangeSortMode_Title),
+																						Editor.GetText(TEXT.DLG_WarningChangeSortMode_Body),
+																						Editor.GetText(TEXT.DLG_Change),
+																						Editor.GetText(TEXT.Cancel));
+											if(isResult)
+											{
+												Editor.SetHierarchySortMode(apEditor.HIERARCHY_SORT_MODE.Custom);
+											}
+										}
+									}
 									break;
+
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
-									_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									{
+										_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									}
 									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate:
 									{
-										_editor.Controller.DuplicateMesh(mesh);
+										apMesh duplicatedMesh = _editor.Controller.DuplicateMesh(mesh);
+										if(duplicatedMesh != null)
+										{
+											//복제가 되었다면 바로 선택 [v1.4.2]
+											Editor.Select.SelectMesh(duplicatedMesh);
+											if (Editor.Select.Mesh == duplicatedMesh)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+											}
+										}
 									}
 									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove:
@@ -1543,22 +1815,67 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename:
-									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, meshGroup, meshGroup._name, OnObjectRenamed);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp://Root MeshGroup인 경우
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.MeshGroup, meshGroup._uniqueID, true);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown://Root MeshGroup인 경우
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.MeshGroup, meshGroup._uniqueID, false);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
-									_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate:
 									{
-										_editor.Controller.DuplicateMeshGroup(meshGroup, null, meshGroup._parentMeshGroup == null, true);
+										_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, meshGroup, clickedUnit, meshGroup._name, OnObjectRenamed);
 									}
 									break;
+
+									//Root MeshGroup인 경우에만 호출될 것이다.
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
+									{
+										if (Editor.HierarchySortMode == apEditor.HIERARCHY_SORT_MODE.Custom)
+										{
+											//정렬 모드가 "사용자 정의 모드"라면 > 위치 이동
+											bool isMoveUp = menuType == apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp;
+											orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.MeshGroup, meshGroup._uniqueID, isMoveUp);
+
+											//위치 변경 후 해당 객체를 선택한다.
+											if (Editor.Select.MeshGroup != meshGroup)
+											{
+												Editor.Select.SelectMeshGroup(meshGroup);
+												if (Editor.Select.MeshGroup == meshGroup)
+												{
+													_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+												}
+											}
+										}
+										else
+										{
+											//정렬 모드를 사용자 정의 모드로 바꿀지 물어보고 처리
+											bool isResult = EditorUtility.DisplayDialog(	Editor.GetText(TEXT.DLG_WarningChangeSortMode_Title),
+																						Editor.GetText(TEXT.DLG_WarningChangeSortMode_Body),
+																						Editor.GetText(TEXT.DLG_Change),
+																						Editor.GetText(TEXT.Cancel));
+											if(isResult)
+											{
+												Editor.SetHierarchySortMode(apEditor.HIERARCHY_SORT_MODE.Custom);
+											}
+										}
+									}
+									break;
+
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
+									{
+										_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									}
+									break;
+
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate:
+									{
+										apMeshGroup duplicatedMeshGroup = _editor.Controller.DuplicateMeshGroup(meshGroup, null, meshGroup._parentMeshGroup == null, true);
+										if(duplicatedMeshGroup != null)
+										{
+											//복제가 되었다면 바로 선택 [v1.4.2]
+											Editor.Select.SelectMeshGroup(duplicatedMeshGroup);
+											if (Editor.Select.MeshGroup == duplicatedMeshGroup)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+											}
+										}
+									}
+									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove:
 									{
 										string strRemoveDialogInfo = _editor.Controller.GetRemoveItemMessage(
@@ -1602,22 +1919,76 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename:
-									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, animClip, animClip._name, OnObjectRenamed);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.AnimClip, animClip._uniqueID, true);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.AnimClip, animClip._uniqueID, false);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
-									_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
-									break;
-								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate:
 									{
-										_editor.Controller.DuplicateAnimClip(animClip);
+										_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, animClip, clickedUnit, animClip._name, OnObjectRenamed);
 									}
 									break;
+
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
+									{
+										if (Editor.HierarchySortMode == apEditor.HIERARCHY_SORT_MODE.Custom)
+										{
+											//정렬 모드가 "사용자 정의 모드"라면 > 위치 이동
+											bool isMoveUp = menuType == apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp;
+
+											orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.AnimClip, animClip._uniqueID, isMoveUp);
+
+											//위치 변경 후 해당 객체를 선택한다.
+											if (Editor.Select.AnimClip != animClip)
+											{
+												Editor.Select.SelectAnimClip(animClip);
+												if (Editor.Select.AnimClip == animClip)
+												{
+													_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+
+													//애니메이션의 경우 UI가 작아지므로, 스크롤을 자동으로 해야한다.
+													Editor.AutoScroll_HierarchyMain(animClip);
+												}
+											}
+											
+										}
+										else
+										{
+											//정렬 모드를 사용자 정의 모드로 바꿀지 물어보고 처리
+											bool isResult = EditorUtility.DisplayDialog(	Editor.GetText(TEXT.DLG_WarningChangeSortMode_Title),
+																						Editor.GetText(TEXT.DLG_WarningChangeSortMode_Body),
+																						Editor.GetText(TEXT.DLG_Change),
+																						Editor.GetText(TEXT.Cancel));
+											if(isResult)
+											{
+												Editor.SetHierarchySortMode(apEditor.HIERARCHY_SORT_MODE.Custom);
+											}
+										}
+									}
+									break;
+
+
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
+									{
+										_loadKey_Search = apDialog_SearchObjects.ShowDialog_Portrait(_editor, OnObjectSearched);
+									}
+									break;
+
+								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Duplicate:
+									{
+										apAnimClip duplicatedAnimClip = _editor.Controller.DuplicateAnimClip(animClip);
+										if (duplicatedAnimClip != null)
+										{
+											//복제가 되었다면 바로 선택 [v1.4.2]
+											Editor.Select.SelectAnimClip(duplicatedAnimClip);
+											if (Editor.Select.AnimClip == duplicatedAnimClip)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+
+												//애니메이션의 경우 UI가 작아지므로, 스크롤을 자동으로 해야한다. (딜레이로 처리)
+												isDelayedAutoScroll_AnimClip = true;
+												delayedScrollTargetAnimClip = duplicatedAnimClip;
+											}
+										}
+									}
+									break;
+
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Remove:
 									{
 										bool isResult = EditorUtility.DisplayDialog(	_editor.GetText(TEXT.RemoveAnimClip_Title),
@@ -1652,13 +2023,40 @@ namespace AnyPortrait
 							switch (menuType)
 							{
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Rename:
-									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, cParam, cParam._keyName, OnObjectRenamed);
+									_loadKey_Rename = apDialog_Rename.ShowDialog(_editor, cParam, clickedUnit, cParam._keyName, OnObjectRenamed);
 									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.ControlParam, cParam._uniqueID, true);
-									break;
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveDown:
-									orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.ControlParam, cParam._uniqueID, false);
+									{
+										if (Editor.HierarchySortMode == apEditor.HIERARCHY_SORT_MODE.Custom)
+										{
+											//정렬 모드가 "사용자 정의 모드"라면 > 위치 이동
+											bool isMoveUp = menuType == apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.MoveUp;
+											orders.ChangeOrder(Editor._portrait, apObjectOrders.OBJECT_TYPE.ControlParam, cParam._uniqueID, isMoveUp);
+
+											//위치 변경 후 해당 객체를 선택한다.
+											if (Editor.Select.Param != cParam)
+											{
+												Editor.Select.SelectControlParam(cParam);
+												if (Editor.Select.Param == cParam)
+												{
+													_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+												}
+											}
+										}
+										else
+										{
+											//정렬 모드를 사용자 정의 모드로 바꿀지 물어보고 처리
+											bool isResult = EditorUtility.DisplayDialog(	Editor.GetText(TEXT.DLG_WarningChangeSortMode_Title),
+																						Editor.GetText(TEXT.DLG_WarningChangeSortMode_Body),
+																						Editor.GetText(TEXT.DLG_Change),
+																						Editor.GetText(TEXT.Cancel));
+											if(isResult)
+											{
+												Editor.SetHierarchySortMode(apEditor.HIERARCHY_SORT_MODE.Custom);
+											}
+										}
+									}
 									break;
 
 								case apEditorHierarchyMenu.MENU_ITEM_HIERARCHY.Search:
@@ -1671,6 +2069,10 @@ namespace AnyPortrait
 										if(dupParam != null)
 										{
 											Editor.Select.SelectControlParam(dupParam);
+											if (Editor.Select.Param == dupParam)
+											{
+												_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+											}
 										}
 									}
 									break;
@@ -1712,10 +2114,16 @@ namespace AnyPortrait
 			//메뉴를 선택하면 변경이 될 것이므로 Dirty
 			apEditorUtil.SetEditorDirty();
 			Editor.RefreshControllerAndHierarchy(false);
+
+			//추가된 AnimClip이 있다면 Refresh 후에 자동으로 스크롤을 이동시키자
+			if(isDelayedAutoScroll_AnimClip && delayedScrollTargetAnimClip != null)
+			{
+				Editor.AutoScroll_HierarchyMain(delayedScrollTargetAnimClip, true);//true : 생성 직후 렌더링 전엔 PosY가 계산되지 않으므로, 강제로 Calculate를 실행해야한다.
+			}									
 		}
 
 		//오브젝트 이름 바꾸기 다이얼로그 결과
-		public void OnObjectRenamed(bool isSuccess, object loadKey, object targetObject, string name)
+		public void OnObjectRenamed(bool isSuccess, object loadKey, object targetObject, apEditorHierarchyUnit targetHierarchyUnit, string name)
 		{
 			if(!isSuccess
 				|| loadKey == null
@@ -1744,6 +2152,19 @@ namespace AnyPortrait
 													apEditorUtil.UNDO_STRUCT.ValueOnly);
 
 				textureData._name = name;
+
+				//[v1.4.2]
+				//Rename후 객체를 선택하자 (단, 선택되지 않은 경우만)
+				if (Editor.Select.TextureData != textureData)
+				{
+					Editor.Select.SelectImage(textureData);//<< 선택하자
+					if (Editor.Select.TextureData == textureData)
+					{
+						_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+					}
+				}
+				
+
 			}
 			else if(targetObject is apMesh)
 			{
@@ -1757,6 +2178,17 @@ namespace AnyPortrait
 												apEditorUtil.UNDO_STRUCT.ValueOnly);
 
 				mesh._name = name;
+
+				//Rename후 객체를 선택하자[v1.4.2]
+				if (Editor.Select.Mesh != mesh)
+				{
+					Editor.Select.SelectMesh(mesh);
+					if (Editor.Select.Mesh == mesh)
+					{
+						_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+					}
+				}
+				
 			}
 			else if(targetObject is apMeshGroup)
 			{
@@ -1764,6 +2196,17 @@ namespace AnyPortrait
 
 				//메시 그룹의 이름은 아래 함수를 이용한다.
 				_editor.Controller.RenameMeshGroup(meshGroup, name);
+
+				//Rename후 객체를 선택하자[v1.4.2]
+				if (Editor.Select.MeshGroup != meshGroup)
+				{
+					Editor.Select.SelectMeshGroup(meshGroup);
+					if (Editor.Select.MeshGroup == meshGroup)
+					{
+						_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+					}
+				}
+				
 			}
 			else if(targetObject is apAnimClip)
 			{
@@ -1776,6 +2219,19 @@ namespace AnyPortrait
 													false,
 													apEditorUtil.UNDO_STRUCT.ValueOnly);					
 				animClip._name = name;
+
+				//Rename후 객체를 선택하자[v1.4.2]
+				if (Editor.Select.AnimClip != animClip)
+				{
+					Editor.Select.SelectAnimClip(animClip);
+					if (Editor.Select.AnimClip == animClip)
+					{
+						_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+
+						//애니메이션의 경우 UI가 작아지므로, 스크롤을 자동으로 해야한다.
+						Editor.AutoScroll_HierarchyMain(animClip);
+					}
+				}
 			}
 			else if(targetObject is apControlParam)
 			{
@@ -1791,6 +2247,18 @@ namespace AnyPortrait
 				else
 				{
 					_editor.Controller.ChangeParamName(controlParam, name);
+
+					//Rename후 객체를 선택하자[v1.4.2]
+					if (Editor.Select.Param != controlParam)
+					{
+						Editor.Select.SelectControlParam(controlParam);
+
+						if (Editor.Select.Param == controlParam)
+						{
+							_editor.OnHierachyClicked(apEditor.LAST_CLICKED_HIERARCHY.Main);
+						}
+					}
+					
 				}
 			}
 
@@ -2100,6 +2568,306 @@ namespace AnyPortrait
 					}
 				}
 			}
+		}
+
+
+		// 커서 이동 함수
+		//--------------------------------------------------------------------
+		/// <summary>
+		/// 1.4.2 : 현재 선택된 커서를 찾고, 그 전후의 오브젝트들을 리턴한다.
+		/// 출력 순서를 고려해야한다. (재귀적으로 동작)
+		/// </summary>
+		/// <param name="curObject"></param>
+		/// <param name="prevObject"></param>
+		/// <param name="nextObject"></param>
+		public void FindCursor(out object curObject, out object prevObject, out object nextObject, apEditor.HIERARCHY_FILTER hierarchyFilter)
+		{
+			//렌더링 순서를 그대로 수행한다.
+			//Prev, Cur, Next를 찾는다.
+			//다만, Prev, Next가 같은 타입이어야 한다.
+			curObject = null;
+			prevObject = null;
+			nextObject = null;
+
+			apEditorHierarchyUnit selectedUnit_Cur = null;
+			apEditorHierarchyUnit selectedUnit_Prev = null;
+			apEditorHierarchyUnit selectedUnit_Next = null;
+
+			//루트 노드는 For문으로 돌리고, 그 이후부터는 재귀 호출
+			bool isUnitRenderable = false;
+			for (int i = 0; i < _units_Root.Count; i++)
+			{
+				CATEGORY category = (CATEGORY)_units_Root[i]._savedKey;
+				isUnitRenderable = false;
+
+				switch (category)
+				{
+					case CATEGORY.Overall_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.RootUnit) != 0;
+						break;
+					case CATEGORY.Images_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Image) != 0;
+						break;
+					case CATEGORY.Mesh_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Mesh) != 0;
+						break;
+					case CATEGORY.MeshGroup_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.MeshGroup) != 0;
+						break;
+					case CATEGORY.Animation_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Animation) != 0;
+						break;
+					case CATEGORY.Param_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Param) != 0;
+						break;
+				}
+				if (isUnitRenderable)
+				{
+					bool isFindAll = FindCursor_Recursive(_units_Root[i],
+															ref selectedUnit_Cur,
+															ref selectedUnit_Prev,
+															ref selectedUnit_Next);
+
+					if(isFindAll)
+					{
+						break;
+					}
+				}
+			}
+
+			//Prev, Next는 Cur와 같은 타입이어야 한다.
+			if(selectedUnit_Cur != null)
+			{
+				//Cur 유닛과 같은 Key (Category = 타입)를 가져야 한다.
+				int curKey = selectedUnit_Cur._savedKey;
+				if(selectedUnit_Prev != null)
+				{
+					if(selectedUnit_Prev._savedKey != curKey)
+					{
+						selectedUnit_Prev = null;
+					}
+				}
+				if(selectedUnit_Next != null)
+				{
+					if(selectedUnit_Next._savedKey != curKey)
+					{
+						selectedUnit_Next = null;
+					}
+				}
+			}
+
+			//결과 넣어서 종료
+			if(selectedUnit_Cur != null)
+			{
+				curObject = selectedUnit_Cur._savedObj;
+			}
+			if(selectedUnit_Prev != null)
+			{
+				prevObject = selectedUnit_Prev._savedObj;
+			}
+			if(selectedUnit_Next != null)
+			{
+				nextObject = selectedUnit_Next._savedObj;
+			}
+		}
+
+		/// <summary>재귀적으로 현재,이전,다음 선택된 유닛을 찾는다. 모두 찾았다면 true 리턴</summary>
+		private bool FindCursor_Recursive(	apEditorHierarchyUnit unit,
+											ref apEditorHierarchyUnit selectedUnit_Cur,
+											ref apEditorHierarchyUnit selectedUnit_Prev,
+											ref apEditorHierarchyUnit selectedUnit_Next)
+		{
+			//이미 3개의 유닛을 찾았다면 리턴
+			if(selectedUnit_Cur != null
+				&& selectedUnit_Prev != null
+				&& selectedUnit_Next != null)
+			{
+				return true;
+			}
+
+			if(unit.IsSelected)
+			{
+				//이 유닛이 선택되었을 때
+				if(selectedUnit_Cur == null)
+				{
+					//현재 커서로 갱신
+					selectedUnit_Cur = unit;
+				}
+			}
+			else
+			{
+				//이 유닛이 선택되지 않았다면
+				if(selectedUnit_Cur == null)
+				{
+					//아직 Cur가 선택되기 전이다. > Prev를 갱신하자 + 다음으로 이동
+					selectedUnit_Prev = unit;
+				}
+				else
+				{
+					//Cur가 선택된 이후다. > Next를 갱신하고 종료한다.
+					selectedUnit_Next = unit;
+					return true;
+				}
+			}
+			
+			if (unit._childUnits.Count > 0)
+			{
+				for (int i = 0; i < unit._childUnits.Count; i++)
+				{
+					//재귀적으로 호출
+					bool isFindAll = FindCursor_Recursive(	unit._childUnits[i],
+															ref selectedUnit_Cur,
+															ref selectedUnit_Prev,
+															ref selectedUnit_Next);
+
+					if(isFindAll)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;//다 못찾고 이 재귀 루틴은 종료
+		}
+
+
+		// 자동 스크롤을 위한 함수들
+		//--------------------------------------------------------------------
+		public apEditorHierarchyUnit FindUnitByObject(object targetObj)
+		{
+			if(targetObj == null)
+			{
+				return null;
+			}
+
+			//1. 오브젝트 매핑에서 찾자
+			apEditorHierarchyUnit result = null;
+			if(_object2Unit.TryGetValue(targetObj, out result))
+			{
+				if(result != null)
+				{
+					//오브젝트 매핑에서 찾았다.
+					return result;
+				}
+			}
+
+			//2. 전체 유닛을 검색하자
+			int nUnits = _units_All != null ? _units_All.Count : 0;
+			if(nUnits == 0)
+			{
+				return null;
+			}
+
+			//해당 오브젝트를 가진 Unit을 리턴한다.
+			result = _units_All.Find(delegate(apEditorHierarchyUnit a)
+			{
+				if(a._savedObj != null
+				&& a._savedObj == targetObj)
+				{
+					return true;
+				}
+				return false;
+			});
+
+			return result;
+		}
+
+		/// <summary>
+		/// 입력된 Unit의 PosY 위치를 계산한다. Hierarchy 렌더링과 같은 방식으로 동작한다.
+		/// </summary>
+		public int CalculateUnitPosY(apEditorHierarchyUnit targetUnit, apEditor.HIERARCHY_FILTER hierarchyFilter, out bool result)
+		{
+			int curUnitPosY = 0;
+			result = false;
+
+			//루트 노드는 For문으로 돌리고, 그 이후부터는 재귀 호출
+			bool isUnitRenderable = false;
+			for (int i = 0; i < _units_Root.Count; i++)
+			{
+				CATEGORY category = (CATEGORY)_units_Root[i]._savedKey;
+				isUnitRenderable = false;
+
+				switch (category)
+				{
+					case CATEGORY.Overall_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.RootUnit) != 0;
+						break;
+					case CATEGORY.Images_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Image) != 0;
+						break;
+					case CATEGORY.Mesh_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Mesh) != 0;
+						break;
+					case CATEGORY.MeshGroup_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.MeshGroup) != 0;
+						break;
+					case CATEGORY.Animation_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Animation) != 0;
+						break;
+					case CATEGORY.Param_Name:
+						isUnitRenderable = (int)(hierarchyFilter & apEditor.HIERARCHY_FILTER.Param) != 0;
+						break;
+				}
+				if (isUnitRenderable)
+				{
+					bool isFind = CalculateUnitPosY_Recursive(_units_Root[i], targetUnit, ref curUnitPosY);
+
+					if(isFind)
+					{
+						//해당 유닛을 찾았다.
+						result = true;
+						return curUnitPosY;
+					}
+
+					curUnitPosY += 10;//여백
+				}
+			}
+
+			//못찾았당..
+			result = false;
+			return curUnitPosY;
+		}
+
+		private bool CalculateUnitPosY_Recursive(	apEditorHierarchyUnit curUnit,
+													apEditorHierarchyUnit targetUnit,
+													ref int curUnitPosY)
+		{
+			if(curUnit == null)
+			{
+				return false;
+			}
+
+			//타겟을 찾았다면 true 리턴
+			if(curUnit == targetUnit)
+			{
+				return true;
+			}
+
+			//Height 만큼 커서 위치 이동
+			curUnitPosY += apEditorHierarchyUnit.HEIGHT;
+
+			//자식 Unit 계산
+			if (curUnit.IsFoldOut)
+			{
+				if (curUnit._childUnits != null && curUnit._childUnits.Count > 0)
+				{
+					for (int i = 0; i < curUnit._childUnits.Count; i++)
+					{
+						//재귀적으로 호출
+						bool isFind = CalculateUnitPosY_Recursive(	curUnit._childUnits[i],
+																	targetUnit,
+																	ref curUnitPosY);
+
+						if(isFind)
+						{
+							//자식 유닛에서 대상을 찾았다면 더 찾지 않는다.
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 

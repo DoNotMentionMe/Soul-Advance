@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -717,19 +717,26 @@ namespace AnyPortrait
 					if (animClip == _selectedAnimClip)
 					{
 						Rect lastRect = GUILayoutUtility.GetLastRect();
-						prevCaptureColor = GUI.backgroundColor;
 
-						if(EditorGUIUtility.isProSkin)
-						{
-							GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-						}
-						else
-						{
-							GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
-						}
+						#region [미사용 코드]
+						//prevGUIColor = GUI.backgroundColor;
 
-						GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
-						GUI.backgroundColor = prevGUIColor;
+						//if(EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
+
+						//GUI.Box(new Rect(lastRect.x, lastRect.y + 20, width, 20), "");
+						//GUI.backgroundColor = prevGUIColor; 
+						#endregion
+
+						//변경 v1.4.2
+						apEditorUtil.DrawListUnitBG(lastRect.x + 1, lastRect.y + 20, width - 2, 20, apEditorUtil.UNIT_BG_STYLE.Main);
+
 
 						curGUIStyle = guiStyle_Selected;
 					}
@@ -840,7 +847,7 @@ namespace AnyPortrait
 														(int)(_editor._captureFrame_PosY + apGL.WindowSizeHalf.y),
 														srcThumbWidth, srcThumbHeight,
 														thumbnailWidth, thumbnailHeight,
-														_editor._scroll_MainCenter, _editor._iZoomX100,
+														_editor._scroll_CenterWorkSpace, _editor._iZoomX100,
 														_editor._captureFrame_Color, 0, "");
 
 			//에디터에 대신 렌더링해달라고 요청을 합시다.
@@ -1000,7 +1007,7 @@ namespace AnyPortrait
 																(int)(_editor._captureFrame_PosY + apGL.WindowSizeHalf.y),
 																_editor._captureFrame_SrcWidth, _editor._captureFrame_SrcHeight,
 																_editor._captureFrame_DstWidth, _editor._captureFrame_DstHeight,
-																_editor._scroll_MainCenter, _editor._iZoomX100,
+																_editor._scroll_CenterWorkSpace, _editor._iZoomX100,
 																_editor._captureFrame_Color, 0, saveFilePath);
 
 					//에디터에 대신 렌더링해달라고 요청을 합시다.
@@ -1144,7 +1151,7 @@ namespace AnyPortrait
 															(int)(_editor._captureFrame_PosY + apGL.WindowSizeHalf.y),
 															_editor._captureFrame_SrcWidth, _editor._captureFrame_SrcHeight,
 															_editor._captureFrame_DstWidth, _editor._captureFrame_DstHeight,
-															_editor._scroll_MainCenter, _editor._iZoomX100,
+															_editor._scroll_CenterWorkSpace, _editor._iZoomX100,
 															_editor._captureFrame_Color, 
 															_editor._captureFrame_IsPhysics,
 															_curAnimProcess, saveFilePath);
@@ -1253,7 +1260,7 @@ namespace AnyPortrait
 														(int)(_editor._captureFrame_PosY + apGL.WindowSizeHalf.y),
 														_editor._captureFrame_SrcWidth, _editor._captureFrame_SrcHeight,
 														_editor._captureFrame_DstWidth, _editor._captureFrame_DstHeight,
-														_editor._scroll_MainCenter, _editor._iZoomX100,
+														_editor._scroll_CenterWorkSpace, _editor._iZoomX100,
 														_editor._captureFrame_Color, 
 														_editor._captureFrame_IsPhysics,
 														_curAnimProcess, filePath);

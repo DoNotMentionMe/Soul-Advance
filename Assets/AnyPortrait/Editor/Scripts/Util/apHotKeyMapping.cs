@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1198,6 +1198,14 @@ namespace AnyPortrait
 		public HotkeyMapUnit GetHotkey(KEY_TYPE keyType)
 		{
 			return _hotKeyType2Unit[keyType];
+		}
+
+		public HotkeyMapUnit GetHotkeyByID(string ID)
+		{
+			return _units_All.Find(delegate(HotkeyMapUnit a)
+			{
+				return string.Equals(a._ID, ID);
+			});
 		}
 
 		public bool IsHotkeyAvailable(KEY_TYPE keyType)

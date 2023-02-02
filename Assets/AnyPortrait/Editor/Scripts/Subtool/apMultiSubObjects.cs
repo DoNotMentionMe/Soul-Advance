@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -83,11 +83,14 @@ namespace AnyPortrait
 		private int _nTimelineLayers = 0;
 
 		//WorkKeyframe까지 찾자.
-		//이것까지해야 MultiSubObject에서의 처리가 끝난다.
+		//이것까지해야 MultiSubObject에서의 처리가 끝난다.		
 		private apAnimKeyframe _workKeyframe = null;
 		private List<apAnimKeyframe> _workKeyframes_Sub = new List<apAnimKeyframe>();
 		private List<apAnimKeyframe> _workKeyframes_All = new List<apAnimKeyframe>();
 		private int _nWorkKeyframes = 0;
+		private int _workAnimFrameIndex = -1;//Work Frame을 기록할 때 애니메이션 프레임도 기록한다.
+
+		
 
 
 
@@ -370,6 +373,7 @@ namespace AnyPortrait
 			if (_workKeyframes_All == null) { _workKeyframes_All = new List<apAnimKeyframe>(); }
 			_workKeyframes_Sub.Clear();
 			_workKeyframes_All.Clear();
+			_workAnimFrameIndex = -1;
 
 			_nWorkKeyframes = 0;
 
@@ -428,6 +432,7 @@ namespace AnyPortrait
 			_workKeyframe = null;
 			_workKeyframes_Sub.Clear();
 			_workKeyframes_All.Clear();
+			_workAnimFrameIndex = -1;
 
 			_nWorkKeyframes = 0;
 		}
@@ -495,8 +500,8 @@ namespace AnyPortrait
 			_workKeyframe = null;
 			_workKeyframes_Sub.Clear();
 			_workKeyframes_All.Clear();
-
 			_nWorkKeyframes = 0;
+			_workAnimFrameIndex = -1;
 		}
 
 		// Function - Select : 선택과 관련된 함수
@@ -1850,11 +1855,6 @@ namespace AnyPortrait
 			apAnimTimelineLayer targetLayer = null;
 
 
-			//if(selectedMainObject == null)
-			//{
-			//	Debug.Log("None");
-			//}
-
 			if(selectedTimeline == null)
 			{
 				
@@ -2003,33 +2003,77 @@ namespace AnyPortrait
 
 		/// <summary>
 		/// 애니메이션의 프레임이 변경되거나, 선택 정보가 바뀌면 이 함수를 무조건 호출하자.
-		/// AutoSelectAnimWorkKeyframe 함수의 역할을 한다.
+		/// AutoSelectAnimWorkKeyframe 함수의 역할을 한다.		
 		/// </summary>
-		public void AutoSelectWorkKeyframes(apAnimClip animClip, bool isPlaying)
+		public void AutoSelectWorkKeyframes(apAnimClip animClip, bool isPlaying, out bool isWorkKeyframeChanged)
 		{
+			//이전의 Work Keyframe들을 저장한다. (변화를 체크하기 위함)
+			//이전의 Work Keyframe들이 새롭게 선택된 키프레임들에 모두 포함되어 있다면, 변화가 없는 것으로 판단. (더 추가되는건 괜찮다?)
+
+			bool isAnimFrameIndexChanged = false;//애니메이션 프레임이 바뀌었다면 귀찮게 Keyframe을 하나씩 대조하지 말자
+
+			if (animClip != null)
+			{
+				//비교를 하자
+				if (_workAnimFrameIndex != animClip.CurFrame)
+				{
+					//재생되는 프레임이 바뀌었다.
+					isAnimFrameIndexChanged = true;
+				}
+			}
+			else
+			{
+				isAnimFrameIndexChanged = true;//AnimClip이 없다면 애니메이션 프레임이 바뀐 것과 마찬가지
+			}
+
+			List<apAnimKeyframe> prevKeyframes_All = null;
+			int nPrevWorkKeyframes = 0;
+			if (!isAnimFrameIndexChanged)
+			{
+				//재생되는 프레임이 바뀌지 않았다면
+				//일일이 대조를 해야한다.
+				prevKeyframes_All = new List<apAnimKeyframe>();
+				nPrevWorkKeyframes = _workKeyframes_All != null ? _workKeyframes_All.Count : 0;
+				if (nPrevWorkKeyframes > 0)
+				{
+					for (int i = 0; i < nPrevWorkKeyframes; i++)
+					{
+						prevKeyframes_All.Add(_workKeyframes_All[i]);
+					}
+				}
+			}
+
 			//WorkKeyframe들을 일단 초기화.
 			ClearWorkKeyframes();
 
-			if(animClip == null 
-				|| isPlaying				//플레이 중에는 WorkKeyframe이 설정되지 않는다.
-				|| _nTimelineLayers == 0	//선택된 타임라인 레이어가 없다.
+			if (animClip == null
+				|| isPlaying                //플레이 중에는 WorkKeyframe이 설정되지 않는다.
+				|| _nTimelineLayers == 0    //선택된 타임라인 레이어가 없다.
 				)
-			{	
+			{
+				isWorkKeyframeChanged = true;//기존의 WorkKeyframe이 모두 선택되지 않았으므로 바뀐것과 마찬가지
 				return;
 			}
+
+
 			int curFrame = animClip.CurFrame;
 			apAnimTimelineLayer curTimelineLayer = null;
 			apAnimKeyframe curKeyframe = null;
+
+
+			//재생중인 프레임을 기록하자
+			_workAnimFrameIndex = curFrame;
+
 			for (int iTL = 0; iTL < _nTimelineLayers; iTL++)
 			{
 				curTimelineLayer = _timelineLayers_All[iTL];
-				if(curTimelineLayer == null) { continue; }
+				if (curTimelineLayer == null) { continue; }
 
 				curKeyframe = curTimelineLayer.GetKeyframeByFrameIndex(curFrame);
 
-				if(curKeyframe == null) { continue; }
+				if (curKeyframe == null) { continue; }
 
-				if(curTimelineLayer == _timelineLayer)
+				if (curTimelineLayer == _timelineLayer)
 				{
 					//메인인 경우
 					_workKeyframe = curKeyframe;
@@ -2045,6 +2089,40 @@ namespace AnyPortrait
 			}
 
 			_nWorkKeyframes = _workKeyframes_All.Count;
+
+
+			//재생되는 프레임이 바뀌었다면
+			if (isAnimFrameIndexChanged || nPrevWorkKeyframes == 0)
+			{
+				isWorkKeyframeChanged = true;
+				return;
+			}
+
+
+			//이전의 키프레임들이 모두 선택되어있는지 체크하자
+			
+			//선택된 키프레임들이 이전의 키프레임보다 적다면 체크할 필요가 없다.
+			if(_nWorkKeyframes < nPrevWorkKeyframes)
+			{
+				isWorkKeyframeChanged = true;//이전의 키프레임들 중에 선택되지 않은게 분명히 있다.
+				return;
+			}
+
+
+			bool isAnyNotContained = false;
+			apAnimKeyframe prevKeyframe = null;
+			for (int iPrev = 0; iPrev < nPrevWorkKeyframes; iPrev++)
+			{
+				prevKeyframe = prevKeyframes_All[iPrev];
+				if(!_workKeyframes_All.Contains(prevKeyframe))
+				{
+					//제외된 이전의 키프레임 발견
+					isAnyNotContained = true;
+					break;
+				}
+			}
+
+			isWorkKeyframeChanged = isAnyNotContained;//제외된게 하나라도 있다.
 		}
 
 

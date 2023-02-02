@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1253,6 +1253,51 @@ namespace AnyPortrait
 		public void ResetAnimSpeed()
 		{
 			SetAnimSpeed(1.0f);
+		}
+
+
+		public int GetAnimationCurrentFrame(string animClipName)
+		{
+			apAnimPlayData animPlayData = GetAnimPlayData_Opt(animClipName);
+			if(animPlayData == null)
+			{
+				Debug.LogError("No AnimCip : " + animClipName);
+				return -1;
+			}
+			return animPlayData.CurrentFrame;
+		}
+
+		public int GetAnimationStartFrame(string animClipName)
+		{
+			apAnimPlayData animPlayData = GetAnimPlayData_Opt(animClipName);
+			if(animPlayData == null)
+			{
+				Debug.LogError("No AnimCip : " + animClipName);
+				return -1;
+			}
+			return animPlayData.StartFrame;
+		}
+
+		public int GetAnimationEndFrame(string animClipName)
+		{
+			apAnimPlayData animPlayData = GetAnimPlayData_Opt(animClipName);
+			if(animPlayData == null)
+			{
+				Debug.LogError("No AnimCip : " + animClipName);
+				return -1;
+			}
+			return animPlayData.EndFrame;
+		}
+
+		public float GetAnimationNormalizedTime(string animClipName)
+		{
+			apAnimPlayData animPlayData = GetAnimPlayData_Opt(animClipName);
+			if(animPlayData == null)
+			{
+				Debug.LogError("No AnimCip : " + animClipName);
+				return -1.0f;
+			}
+			return animPlayData.NormalizedTime;
 		}
 
 

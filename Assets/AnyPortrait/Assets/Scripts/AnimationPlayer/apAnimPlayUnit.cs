@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -1131,6 +1131,9 @@ namespace AnyPortrait
 			
 
 			bool isResetFrame = false;
+
+
+			//루프가 아닌데 재생 시간이 재생 방향의 반대로 설정된 경우
 			if (!_linkedAnimClip.IsLoop && _isMecanimResetable)
 			{
 				if (speed > 0.0f)

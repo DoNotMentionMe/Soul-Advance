@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -144,7 +144,7 @@ namespace AnyPortrait
 				|| Editor._meshEditMode != apEditor.MESH_EDIT_MODE.MakeMesh
 				|| Editor._meshEditeMode_MakeMesh_Tab != apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.TRS)
 			{
-				Debug.LogWarning("Select Failed");
+				//Debug.LogWarning("Select Failed");
 				return null;
 			}
 
@@ -153,7 +153,7 @@ namespace AnyPortrait
 			List<apVertex> vertices = mesh._vertexData;
 			if(vertices.Count == 0)
 			{
-				Debug.LogWarning("Vert Count 0");
+				//Debug.LogWarning("Vert Count 0");
 				return null;
 			}
 			
@@ -265,6 +265,14 @@ namespace AnyPortrait
 				|| Editor._meshEditeMode_MakeMesh_Tab != apEditor.MESH_EDIT_MODE_MAKEMESH_TAB.TRS)
 			{
 				return null;
+			}
+
+			//v1.4.2 : FFD 모드시에는 FFD 포인트를 선택해야한다.
+			if(Editor.Gizmos.IsFFDMode)
+			{
+				Editor.Gizmos.SelectAllFFDPoints();
+				Editor.SetRepaint();
+				return apHotKey.HotKeyResult.MakeResult();
 			}
 
 			apMesh mesh = Editor.Select.Mesh;

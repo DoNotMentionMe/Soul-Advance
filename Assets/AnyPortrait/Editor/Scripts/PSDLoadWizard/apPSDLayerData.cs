@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -47,8 +47,10 @@ namespace AnyPortrait
 
 		public float _opacity = 1.0f;
 		public Color _transparentColor2X = Color.black;
+		public bool _isVisible = true;
 
 		public Texture2D _image = null;
+		public Texture2D _image_Nearest = null;//추가 v1.4.2 : Nearest 필터링 이미지도 만든다.
 
 		public bool _isBakable = false;
 
@@ -107,6 +109,8 @@ namespace AnyPortrait
 			//_srcPsdLayer = psdLayer;
 			_isClippingValid = true;//일단 가능하다고 체크
 
+			_isVisible = true;
+
 			if (psdLayer.HasImage)
 			{
 				//1. 이미지 타입의 레이어
@@ -127,7 +131,9 @@ namespace AnyPortrait
 
 				_opacity = psdLayer.Opacity;
 				_transparentColor2X = new Color(0.5f, 0.5f, 0.5f, _opacity);
+				_isVisible = psdLayer.IsVisible;
 
+				//Debug.Log("이미지 [" + _name + "] Visible : " + _isVisible);
 
 				_colorData = new byte[_width * _height * 4];//W x H x RGBA(4)
 															//_colors = new Color[_width * _height];
@@ -310,8 +316,15 @@ namespace AnyPortrait
 				//_image.SetPixels(_colors);
 				_image.LoadRawTextureData(_colorData);
 				_image.wrapMode = TextureWrapMode.Clamp;
+				_image.filterMode = FilterMode.Bilinear;
 				_image.Apply();
 
+
+				_image_Nearest = new Texture2D(_width, _height, TextureFormat.RGBA32, false);
+				_image_Nearest.LoadRawTextureData(_colorData);
+				_image_Nearest.wrapMode = TextureWrapMode.Clamp;
+				_image_Nearest.filterMode = FilterMode.Point;//Nearest 샘플링
+				_image_Nearest.Apply();
 
 			}
 			else
@@ -319,6 +332,7 @@ namespace AnyPortrait
 				_isImageLayer = false;
 
 				_image = null;
+				_image_Nearest = null;
 				_width = 0;
 				_height = 0;
 				_colorData = null;
@@ -338,6 +352,9 @@ namespace AnyPortrait
 
 				_opacity = 1.0f;
 				_transparentColor2X = Color.black;
+				_isVisible = psdLayer.IsVisible;
+
+				//Debug.Log("그룹 [" + _name + "] Visible : " + _isVisible);
 			}
 
 			_posOffsetLocal = _posOffset;

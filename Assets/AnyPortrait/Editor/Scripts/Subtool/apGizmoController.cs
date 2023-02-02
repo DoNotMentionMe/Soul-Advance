@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -203,6 +203,17 @@ namespace AnyPortrait
 					Editor.Select.SelectMeshTF(selectedMeshTransform, multiSelect);//다중 선택 가능
 
 					//resultObj = selectedMeshTransform;//기존
+
+					//[1.4.2] 선택된 객체에 맞게 자동 스크롤
+					if(Editor._option_AutoScrollWhenObjectSelected)
+					{
+						//스크롤 가능한 상황인지 체크하고
+						if(Editor.IsAutoScrollableWhenClickObject_MeshGroup(selectedMeshTransform, true))
+						{
+							//자동 스크롤을 요청한다.
+							Editor.AutoScroll_HierarchyMeshGroup(selectedMeshTransform);
+						}
+					}
 				}
 				else
 				{
@@ -1273,18 +1284,25 @@ namespace AnyPortrait
 
 		public void TransformChanged_Depth__MeshGroup_Setting(int depth)
 		{
-			if (Editor.Select.MeshGroup == null || !Editor.Select.IsMeshGroupSettingEditDefaultTransform)
+			apMeshGroup targetMeshGroup = Editor.Select.MeshGroup;
+			if (targetMeshGroup == null || !Editor.Select.IsMeshGroupSettingEditDefaultTransform)
 			{
 				return;
 			}
 
 			if (Editor.Select.MeshTF_Main == null && Editor.Select.MeshGroupTF_Main == null)
-			{ return; }
+			{
+				return;
+			}
 
 			//>> [GizmoMain] >>
-			if(Editor.Select.SubObjects.GizmoMeshTF == null && Editor.Select.SubObjects.GizmoMeshGroupTF == null) { return; }
+			if(Editor.Select.SubObjects.GizmoMeshTF == null && Editor.Select.SubObjects.GizmoMeshGroupTF == null)
+			{
+				return;
+			}
 
 			apRenderUnit curRenderUnit = null;
+			
 			//apMatrix curMatrixParam = null;
 
 			//코멘트 20.6.25 : Depth는 다중 선택을 지원하지 않는다.
@@ -1322,30 +1340,41 @@ namespace AnyPortrait
 			if (curRenderUnit == null) { return; }
 
 			//Undo
-			apEditorUtil.SetRecord_MeshGroup(	apUndoGroupData.ACTION.MeshGroup_Gizmo_MoveTransform, 
+			//이전
+			//apEditorUtil.SetRecord_MeshGroup(	apUndoGroupData.ACTION.MeshGroup_Gizmo_MoveTransform, 
+			//									Editor, 
+			//									Editor.Select.MeshGroup, 
+			//									//targetObj, 
+			//									false, true,
+			//									//apEditorUtil.UNDO_STRUCT.ValueOnly
+			//									apEditorUtil.UNDO_STRUCT.StructChanged//변경 22.8.2 [v1.4.1] 실행 취소 버그 막기 위해
+			//									);
+
+			//변경 22.8.19 : 관련된 모든 메시 그룹들이 영향을 받는다. [v1.4.2]
+			apEditorUtil.SetRecord_MeshGroup_AllParentAndChildren(
+												apUndoGroupData.ACTION.MeshGroup_Gizmo_MoveTransform,
 												Editor, 
 												Editor.Select.MeshGroup, 
-												//targetObj, 
-												false, true,
-												//apEditorUtil.UNDO_STRUCT.ValueOnly
 												apEditorUtil.UNDO_STRUCT.StructChanged//변경 22.8.2 [v1.4.1] 실행 취소 버그 막기 위해
 												);
 
-			bool bSort = false;
+			//bool bSort = false;
 			if (curRenderUnit.GetDepth() != depth)
 			{
 				//curRenderUnit.SetDepth(depth);
-				Editor.Select.MeshGroup.ChangeRenderUnitDepth(curRenderUnit, depth);
+				Editor.Select.MeshGroup.ChangeRenderUnitDepth(curRenderUnit, depth);//여기에 이미 Sorting이 들어간다.
 
 				Editor.OnAnyObjectAddedOrRemoved(true);
 
-				bSort = true;
+				//bSort = true;
 				apEditorUtil.ReleaseGUIFocus();
 			}
-			if (bSort)
-			{
-				Editor.Select.MeshGroup.SortRenderUnits(true);
-			}
+
+			//삭제. ChangeRenderUnitDetph 코드에 이미 Sort가 포함되어있다.
+			//if (bSort)
+			//{
+			//	Editor.Select.MeshGroup.SortRenderUnits(true);
+			//}
 			Editor.RefreshControllerAndHierarchy(false);
 			Editor.SetRepaint();
 		}

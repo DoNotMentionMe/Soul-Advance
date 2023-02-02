@@ -1,5 +1,5 @@
 ﻿/*
-*	Copyright (c) 2017-2022. RainyRizzle. All rights reserved
+*	Copyright (c) 2017-2023. RainyRizzle Inc. All rights reserved
 *	Contact to : https://www.rainyrizzle.com/ , contactrainyrizzle@gmail.com
 *
 *	This file is part of [AnyPortrait].
@@ -31,6 +31,10 @@ namespace AnyPortrait
 		public delegate void FUNC_UNIT_CLICK_ORDER_CHANGED(apEditorHierarchyUnit eventUnit, int savedKey, object savedObj, bool isOrderUp);
 		public delegate void FUNC_UNIT_CLICK_RESTORE_TMPWORK();
 
+		//추가 22.12.12 : 선택된 Hierarchy인지 조회
+		public delegate bool FUNC_CHECK_SELECTED_HIERARCHY(apEditorHierarchyUnit unit);
+
+
 		//추가 21.6.12 : 우클릭은 따로 체크한다.
 		public delegate void FUNC_UNIT_RIGHTCLICK(apEditorHierarchyUnit eventUnit, int savedKey, object savedObj);
 
@@ -54,6 +58,7 @@ namespace AnyPortrait
 		{
 			None,//<<안보입니더
 			NoKey,//MoKey는 없지만 출력은 됩니다.
+			NoKeyDisabled,//NoKey와 다르지만 옵션 등에 의해 클릭한다고 해서 바로 Key가 생성되지 않음
 			Current_Visible,
 			Current_NonVisible,
 			TmpWork_Visible,
@@ -85,6 +90,8 @@ namespace AnyPortrait
 		
 		private bool _isSelected = false;
 		private bool _isSubSelected = false;//추가 20.5.24 : 여러개를 선택하면 메인 + 서브들로 구분된다. 선택 색상이 바뀜
+		public bool IsSelected { get { return _isSelected; } }
+
 
 		//추가 20.5.28 : 다중 선택 가능 여부 > 이게 true이면 선택된 상태에서도 Label이 아닌 Button이 보여진다.
 		private bool _isMultiSelectable = false;
@@ -140,6 +147,7 @@ namespace AnyPortrait
 		private FUNC_UNIT_CLICK_VISIBLE _funcClickVisible = null;
 		private FUNC_UNIT_CLICK_ORDER_CHANGED _funcClickOrderChanged = null;
 		private FUNC_UNIT_RIGHTCLICK _funcRightClick = null;
+		private FUNC_CHECK_SELECTED_HIERARCHY _funcCheckSelectedHierarchy = null;
 
 		//이전
 		//private GUIContent _guiContent_Text = new GUIContent();
@@ -184,6 +192,7 @@ namespace AnyPortrait
 		
 		//변경 19.11.16
 		private apGUIContentWrapper _guiContent_NoKey = null;
+		private apGUIContentWrapper _guiContent_NoKeyDisabled = null;
 		private apGUIContentWrapper[] _guiContent_Visible = new apGUIContentWrapper[5];
 		private apGUIContentWrapper[] _guiContent_Nonvisible = new apGUIContentWrapper[5];
 
@@ -260,6 +269,8 @@ namespace AnyPortrait
 		private bool _isRenderable = false;
 		private int _leftSpaceWidth = 0;
 		private int _cursorX = 0;
+		private int _lastRenderedPosY = -1;
+
 
 
 		//추가 20.7.4 : 선형 인덱스. 이게 정해지면 Shift키로 여러개를 선택할 수 있다.
@@ -294,6 +305,8 @@ namespace AnyPortrait
 			}
 
 			_linearIndex = -1;
+
+			_lastRenderedPosY = -1;
 
 			InitPrevRender();
 		}
@@ -356,6 +369,7 @@ namespace AnyPortrait
 			_funcClickVisible = null;
 			_funcClickOrderChanged = null;
 			_funcRightClick = null;//추가 21.6.12
+			_funcCheckSelectedHierarchy = null;//추가 22.12.12
 
 			if(_guiContent_Text == null)
 			{
@@ -491,7 +505,7 @@ namespace AnyPortrait
 											apGUIContentWrapper guiVisible_Default, apGUIContentWrapper guiNonVisible_Default,
 											apGUIContentWrapper guiVisible_ModKey, apGUIContentWrapper guiNonVisible_ModKey,
 											apGUIContentWrapper guiVisible_Rule, apGUIContentWrapper guiNonVisible_Rule,
-											apGUIContentWrapper gui_NoKey,
+											apGUIContentWrapper gui_NoKey, apGUIContentWrapper gui_NoKeyDisabled,
 											FUNC_REFRESH_VISIBLE_PREFIX funcVisiblePrePostFix
 											)
 		{
@@ -517,26 +531,32 @@ namespace AnyPortrait
 			_guiContent_Nonvisible[(int)VISIBLE_ICON.Rule] = guiNonVisible_Rule;
 
 			_guiContent_NoKey = gui_NoKey;
+			_guiContent_NoKeyDisabled = gui_NoKeyDisabled;
 
 			_funcRefreshVisiblePreFix = funcVisiblePrePostFix;//추가 19.11.24
 		}
 
-		public void SetEvent(FUNC_UNIT_CLICK funcUnitClick)
+		public void SetEvent(FUNC_UNIT_CLICK funcUnitClick,
+							FUNC_CHECK_SELECTED_HIERARCHY funcCheckSelectedHierarchy)
 		{
 			_funcClick = funcUnitClick;
 			_funcClickVisible = null;
 			_funcClickOrderChanged = null;
 			_isOrderChangable = false;
+			_funcCheckSelectedHierarchy = funcCheckSelectedHierarchy;//추가 22.12.12
 		}
 
 		//Visible 속성이 붙은 경우는 위 함수(SetEvent)대신 이걸 호출해야한다.
-		public void SetEvent(FUNC_UNIT_CLICK funcUnitClick, FUNC_UNIT_CLICK_VISIBLE funcClickVisible, FUNC_UNIT_CLICK_ORDER_CHANGED funcClickOrderChanged = null)
+		public void SetEvent(	FUNC_UNIT_CLICK funcUnitClick,
+								FUNC_UNIT_CLICK_VISIBLE funcClickVisible,
+								FUNC_CHECK_SELECTED_HIERARCHY funcCheckSelectedHierarchy,
+								FUNC_UNIT_CLICK_ORDER_CHANGED funcClickOrderChanged = null)
 		{
 			_funcClick = funcUnitClick;
 			_funcClickVisible = funcClickVisible;
 			_funcClickOrderChanged = funcClickOrderChanged;
-
 			_isOrderChangable = _funcClickOrderChanged != null;
+			_funcCheckSelectedHierarchy = funcCheckSelectedHierarchy;//추가 22.12.12
 		}
 
 		//추가 21.6.12 : 우클릭을 입력하자
@@ -784,7 +804,13 @@ namespace AnyPortrait
 
 		// GUI
 		//--------------------------------------------------------------------------
-		public void GUI_Render(int posY, int width, Vector2 scroll, int scrollLayoutHeight, bool isGUIEvent, int level, bool isOrderButtonVisible = false)
+		public void GUI_Render(	int posY,
+								int width,
+								Vector2 scroll,
+								int scrollLayoutHeight,
+								bool isGUIEvent,
+								int level,
+								bool isOrderButtonVisible = false)
 		{
 			//Level에 따른 여백
 			//_leftSpaceWidth = level * 10;
@@ -798,6 +824,9 @@ namespace AnyPortrait
 				_leftSpaceWidth = (level - 1) * 10;
 			}
 			_cursorX = 0;
+
+			//마지막 렌더 위치를 저장하자
+			_lastRenderedPosY = posY;
 
 			//추가 19.11.22
 			//만약 렌더링하지 않아도 된다면 렌더링하지 않고 여백만 주고 넘어가야한다.
@@ -826,36 +855,61 @@ namespace AnyPortrait
 			//배경 렌더링
 			if (_isSelected || _isSubSelected)
 			{
-				Color prevColor = GUI.backgroundColor;
+				apEditorUtil.UNIT_BG_STYLE bgStyle = apEditorUtil.UNIT_BG_STYLE.Main;
 
+				//Color prevColor = GUI.backgroundColor;
+
+				//현재 Hierarchy가 선택되어 있다면 반짝거리게 하자
 				if (_isSelected)
 				{
-					if (EditorGUIUtility.isProSkin)
+					if(_funcCheckSelectedHierarchy != null
+						&& _funcCheckSelectedHierarchy(this))
 					{
-						GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//현재 선택된 Hierarchy라면
+						//GUI.backgroundColor = apEditorUtil.GetAnimatedHighlightHierarchyUnitColor();
+
+						//v1.4.2 : 반짝반짝한 색상
+						bgStyle = apEditorUtil.UNIT_BG_STYLE.MainAnimated;
 					}
 					else
 					{
-						GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//현재 선택된 Hierarchy가 아니라면
+						//if (EditorGUIUtility.isProSkin)
+						//{
+						//	GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f, 1.0f);
+						//}
+						//else
+						//{
+						//	GUI.backgroundColor = new Color(0.4f, 0.8f, 1.0f, 1.0f);
+						//}
+
+						//v1.4.2 일반 색상
+						bgStyle = apEditorUtil.UNIT_BG_STYLE.Main;
 					}
+					
 				}
 				else
 				{
-					//서브 선택인 경우, 녹색 계열로 보여주자
-					if (EditorGUIUtility.isProSkin)
-					{
-						GUI.backgroundColor = new Color(1.0f, 0.5f, 0.5f, 1.0f);
-					}
-					else
-					{
-						GUI.backgroundColor = new Color(1.0f, 0.4f, 0.4f, 1.0f);
-					}
+					////서브 선택인 경우, 녹색 계열로 보여주자
+					//if (EditorGUIUtility.isProSkin)
+					//{
+					//	GUI.backgroundColor = new Color(1.0f, 0.5f, 0.5f, 1.0f);
+					//}
+					//else
+					//{
+					//	GUI.backgroundColor = new Color(1.0f, 0.4f, 0.4f, 1.0f);
+					//}
+
+					//v1.4.2 서브 선택
+					bgStyle = apEditorUtil.UNIT_BG_STYLE.Sub;
 				}
 				
 
-				GUI.Box(new Rect(lastRect.x + scroll.x, lastRect.y + (HEIGHT - 1), width + 10, HEIGHT + 1), NO_TEXT);
-				//GUI.Box(new Rect(lastRect.x + scroll.x, lastRect.y + HEIGHT, width + 10, HEIGHT), NO_TEXT, apEditorUtil.WhiteGUIStyle_Box);
-				GUI.backgroundColor = prevColor;
+				//GUI.Box(new Rect(lastRect.x + scroll.x + 1, lastRect.y + (HEIGHT - 1), width + 10, HEIGHT + 1), NO_TEXT, apEditorUtil.WhiteGUIStyle_Box);
+				//GUI.backgroundColor = prevColor;
+
+				//변경 v1.4.2
+				apEditorUtil.DrawListUnitBG(lastRect.x + scroll.x + 1, lastRect.y + (HEIGHT - 1), width + 10, HEIGHT + 1, bgStyle);
 			}
 
 			//EditorGUILayout.BeginHorizontal(GUILayout.Height(HEIGHT));
@@ -997,6 +1051,7 @@ namespace AnyPortrait
 						case VISIBLE_TYPE.Rule_Visible:			visibleGUIContent = _guiContent_Visible[(int)VISIBLE_ICON.Rule]; break;
 						case VISIBLE_TYPE.Rule_NonVisible:		visibleGUIContent = _guiContent_Nonvisible[(int)VISIBLE_ICON.Rule]; break;
 						case VISIBLE_TYPE.NoKey:				visibleGUIContent = _guiContent_NoKey; break;
+						case VISIBLE_TYPE.NoKeyDisabled:		visibleGUIContent = _guiContent_NoKeyDisabled; break;
 						
 
 					}
@@ -1397,6 +1452,7 @@ namespace AnyPortrait
 								case VISIBLE_TYPE.Rule_Visible:			visibleGUIContent = _guiContent_Visible[(int)VISIBLE_ICON.Rule]; break;
 								case VISIBLE_TYPE.Rule_NonVisible:		visibleGUIContent = _guiContent_Nonvisible[(int)VISIBLE_ICON.Rule]; break;
 								case VISIBLE_TYPE.NoKey:				visibleGUIContent = _guiContent_NoKey; break;
+								case VISIBLE_TYPE.NoKeyDisabled:		visibleGUIContent = _guiContent_NoKeyDisabled; break;
 
 							}
 						}
@@ -1436,6 +1492,57 @@ namespace AnyPortrait
 			//	RefreshPrevRender();
 			//}
 		}
+
+
+		// Functions
+		//--------------------------------------------------------------------------
+		/// <summary>
+		/// 부모 UI로 가면서 Fold를 해제한다. Fold가 하나라도 되어 있었다면 true를 리턴한다.
+		/// </summary>
+		public bool UnfoldAllParent()
+		{
+			bool isAnyUnfolded = false;
+			apEditorHierarchyUnit curUnit = this;//시작은 자기 자신(this)
+			
+			while(true)
+			{
+				if(curUnit == null)
+				{
+					break;
+				}
+
+				if (curUnit != this)
+				{
+					//본인 제외 foldOut을 체크
+
+					if (!curUnit._isFoldOut)
+					{
+						//접혀있다면 펴자
+						isAnyUnfolded = true;
+						curUnit._isFoldOut = true;
+					}
+				}
+				
+
+				//부모로 이동
+				if(curUnit._parentUnit == null
+					|| curUnit._parentUnit == this)
+				{
+					break;
+				}
+
+				curUnit = curUnit._parentUnit;//한칸 위로 이동
+			}
+
+			return isAnyUnfolded;
+		}
+
+		public int GetLastPosY()
+		{
+			return _lastRenderedPosY;
+		}
+
+
 	}
 
 
