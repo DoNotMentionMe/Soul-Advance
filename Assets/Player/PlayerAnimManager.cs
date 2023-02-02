@@ -61,7 +61,11 @@ namespace Adv
         }
 
         public void SetControlParamInt(string ParamName, int ParamInt) => mApPortrait.SetControlParamInt(ParamName, ParamInt);
-        public void CurrentAnimSpeedSlowDown(float speed) => mApPortrait.SetAnimationSpeed(speed * property.BL动画倍率);
+        public void CurrentAnimSpeedSlowDown(float speed)
+        {
+            mApPortrait.SetAnimationSpeed(speed * property.BL动画倍率);
+            effectAnim.speed = speed * property.BL动画倍率;
+        }
         public bool IsAnimEnded(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.Ended;
         public bool IsAnimNone(AnimName animName) => animList[((int)animName)].PlaybackStatus == apAnimPlayData.AnimationPlaybackStatus.None;
         public apAnimPlayData GetApAnimPlayData(AnimName animName) => animList[((int)animName)];
@@ -98,7 +102,6 @@ namespace Adv
         {
             //StopAllCoroutines();
             CurrentAnimSpeedSlowDown(1);
-            effectAnim.speed = 1;
             //ControlAnimSpeeding = false;
             effectAnim.Play("Idle");
             攻击碰撞体.SetCollEnable(false);
@@ -167,7 +170,6 @@ namespace Adv
         {
             ControlAnimSpeeding = true;
             CurrentAnimSpeedSlowDown(speed);
-            effectAnim.speed = speed;
             // DOVirtual.DelayedCall(FreezeTime, () =>
             // {
             // });
@@ -183,7 +185,6 @@ namespace Adv
                 //Debug.Log($"FirstAnimStopEnd,{Time.time}");
             }
             CurrentAnimSpeedSlowDown(1);
-            effectAnim.speed = 1;
             ControlAnimSpeeding = false;
             yield return waitForIntervalHittedEffect;
         }

@@ -14,17 +14,11 @@ namespace Adv
         [SerializeField] Canvas KS开始UI;
         [SerializeField] Canvas JZZ加载中UI;
         [SerializeField] Canvas JS结算UI;
-        [SerializeField] TextMeshProUGUI ZS帧数显示;
         [SerializeField] TextMeshProUGUI LJ连击数;
         [SerializeField] TextMeshProUGUI XL血量;
         [SerializeField] TextMeshProUGUI NL能量;
         [SerializeField] FloatEventChannel On玩家连击Event;
-        [SerializeField] float updateTimeval;//更新帧数的时间间隔
         [SerializeField] PlayerProperty playerProperty;
-
-        private int frame;//帧数
-
-        private float timer = 0;//计时器
 
         protected override void Awake()
         {
@@ -53,16 +47,6 @@ namespace Adv
         {
             XL血量.text = string.Concat("血量：", playerProperty.HP.ToString());
             NL能量.text = string.Concat("能量：", playerProperty.DQNL当前能量.ToString());
-            if (timer >= updateTimeval)
-            {
-                ZS帧数显示.text = ((int)(Time.timeScale / Time.deltaTime)).ToString();
-
-                timer = 0;
-            }
-            else
-            {
-                timer += Time.deltaTime;
-            }
         }
 
         private void OnDestroy()

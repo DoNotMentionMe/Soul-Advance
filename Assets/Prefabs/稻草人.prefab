@@ -2054,6 +2054,7 @@ GameObject:
   - component: {fileID: 1009536904146693879}
   - component: {fileID: 1009536904146693878}
   - component: {fileID: 1009536904146693865}
+  - component: {fileID: 4139805120409003574}
   m_Layer: 0
   m_Name: animManager
   m_TagString: Untagged
@@ -6437,7 +6438,7 @@ MonoBehaviour:
   _bakeSrcEditablePortrait: {fileID: 0}
   _sortingLayerID: 1559257001
   _sortingOrder: 0
-  _sortingOrderOption: 0
+  _sortingOrderOption: 2
   _sortingOrderPerDepth: 1
   _isUsingMecanim: 0
   _mecanimAnimClipResourcePath: "Assets/Art/Anim/Enemy/\u7A3B\u8349\u4EBA"
@@ -7004,6 +7005,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!210 &4139805120409003574
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1009536904146693876}
+  m_Enabled: 1
+  m_SortingLayerID: 1559257001
+  m_SortingLayer: 3
+  m_SortingOrder: -10
 --- !u!1 &1009536904300640707
 GameObject:
   m_ObjectHideFlags: 0
@@ -7179,7 +7191,7 @@ MonoBehaviour:
       _defaultLocalZ: -5
     _isBaked: 1
     _ZPerDepth: 1
-    _sortingOrderOption: 0
+    _sortingOrderOption: 2
     _sortingOrderPerDepth: 1
 --- !u!1 &1009536904537958503
 GameObject:
@@ -11775,7 +11787,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1559257001
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4328888138158665694
 GameObject:
@@ -12452,7 +12464,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1559257001
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4328888138976950594
 GameObject:
@@ -12889,7 +12901,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1559257001
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4328888139317983968
 GameObject:
@@ -13206,7 +13218,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1559257001
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4328888139732304641
 GameObject:
@@ -13523,7 +13535,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1559257001
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4328888140024685653
 GameObject:
