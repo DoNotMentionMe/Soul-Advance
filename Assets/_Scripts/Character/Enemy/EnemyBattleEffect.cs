@@ -17,10 +17,16 @@ namespace Adv
         [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 顿帧减速 = true;
         [Tooltip("勾选则使用ApPortrait控制动画顿帧和闪烁")]
         [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 使用骨骼动画 = true;
-        [Foldout("被击中表现设置")][ShowIf("使用骨骼动画")][SerializeField] float AnimFreezeFrameRange;
+        [Foldout("被击中表现设置")][ShowIf("顿帧")][SerializeField] bool 使用官方动画 = false;
+        [Foldout("被击中表现设置")][ShowIf(EConditionOperator.Or, "使用骨骼动画", "使用官方动画")][SerializeField] float AnimFreezeFrameRange;
         [Space]
         [Foldout("被击中表现设置")][SerializeField] Vector2 CharacterShakeStrength;
-        [Foldout("被击中表现设置")][SerializeField] float FlashTime = 0.13f;
+        [Foldout("被击中表现设置")][SerializeField] bool 受伤闪烁 = true;
+        [Foldout("被击中表现设置")][ShowIf("受伤闪烁")][SerializeField] bool 骨骼动画闪烁 = false;
+        [Foldout("被击中表现设置")][ShowIf("受伤闪烁")][SerializeField] bool 物理材质闪烁 = false;
+        [Foldout("被击中表现设置")][ShowIf("物理材质闪烁")][SerializeField] Material 原本材质;
+        [Foldout("被击中表现设置")][ShowIf("物理材质闪烁")][SerializeField] Material Flash材质;
+        [Foldout("被击中表现设置")][ShowIf("受伤闪烁")][SerializeField] float FlashTime = 0.13f;
         [Space]
         [Foldout("被击中表现设置")][SerializeField] bool 可以被击退 = true;
         [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Front;//正面
@@ -36,6 +42,7 @@ namespace Adv
         [Foldout("死亡表现设置")][SerializeField] UnityEvent OnDied;
         [Foldout("组件")][SerializeField] BehaviorTree mBehaviorTree;
         [Foldout("组件")][ShowIf("使用骨骼动画")][SerializeField] apPortrait mApPortrait;
+        [Foldout("组件")][ShowIf("使用官方动画")][SerializeField] Animator animator;
         [Foldout("组件")][SerializeField] Transform 动画;
         [Foldout("组件")][ShowIf("可以被击退")][SerializeField] Rigidbody2D mRigidbody;
 
@@ -49,10 +56,13 @@ namespace Adv
         private Coroutine HittedFreezeTimeCoroutine;
         private WaitForSeconds waitForFlashTime;
         private WaitForSeconds waitForFreezeTime;
+        private Renderer animRenderer;
 
         private void Awake()
         {
             waitForFlashTime = new WaitForSeconds(FlashTime);
+            if (物理材质闪烁)
+                animRenderer = animator.gameObject.GetComponent<Renderer>();
         }
 
         private void Start()
@@ -202,9 +212,13 @@ namespace Adv
             FreezeFrameing.Value = true;
             if (使用骨骼动画)
                 mApPortrait?.SetAnimationSpeed(AnimFreezeFrameRange);
+            else if (使用官方动画)
+                animator.speed = AnimFreezeFrameRange;
             yield return waitForFreezeTime;
             if (使用骨骼动画)
                 mApPortrait?.SetAnimationSpeed(1);
+            else if (使用官方动画)
+                animator.speed = AnimFreezeFrameRange;
             FreezeFrameing.Value = false;
 
             HittedFreezeTimeCoroutine = null;
@@ -219,12 +233,24 @@ namespace Adv
 
         IEnumerator Flash()
         {
-            if (使用骨骼动画)
-                mApPortrait?.SetControlParamInt("Hitted", 1);
-            yield return waitForFlashTime;
-            if (使用骨骼动画)
-                mApPortrait?.SetControlParamInt("Hitted", 0);
+            if (受伤闪烁)
+            {
+                if (骨骼动画闪烁)
+                    mApPortrait?.SetControlParamInt("Hitted", 1);
+                else if (物理材质闪烁)
+                    animRenderer.material = Flash材质;
 
+            }
+            yield return waitForFlashTime;
+            if (受伤闪烁)
+            {
+                if (骨骼动画闪烁)
+                    mApPortrait?.SetControlParamInt("Hitted", 0);
+                else if (物理材质闪烁)
+                    animRenderer.material = 原本材质;
+
+
+            }
             HittedFlashCoroutine = null;
         }
 

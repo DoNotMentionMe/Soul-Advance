@@ -26,6 +26,14 @@ namespace Adv
             coroutine = StartCoroutine(nameof(ExecuteCoroutine));
         }
 
+        public void Execute(float waitTime)
+        {
+            waitForWaitTime = new WaitForSeconds(waitTime);
+            if (coroutine != null)
+                StopCoroutine(coroutine);
+            coroutine = StartCoroutine(nameof(ExecuteCoroutine));
+        }
+
         IEnumerator ExecuteCoroutine()
         {
             OnStart?.Invoke();

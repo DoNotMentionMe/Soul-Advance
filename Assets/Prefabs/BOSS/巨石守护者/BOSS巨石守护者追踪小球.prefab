@@ -482,8 +482,12 @@ MonoBehaviour:
   "\u987F\u5E27": 0
   "\u987F\u5E27\u51CF\u901F": 0
   "\u4F7F\u7528\u9AA8\u9ABC\u52A8\u753B": 0
+  "\u4F7F\u7528\u5B98\u65B9\u52A8\u753B": 0
   AnimFreezeFrameRange: 0
   CharacterShakeStrength: {x: 0.4, y: 0}
+  "\u53D7\u4F24\u95EA\u70C1": 1
+  "\u9AA8\u9ABC\u52A8\u753B\u95EA\u70C1": 0
+  "\u7269\u7406\u6750\u8D28\u95EA\u70C1": 0
   FlashTime: 0.13
   "\u53EF\u4EE5\u88AB\u51FB\u9000": 0
   HitBackStartSpeed_Front: 0
@@ -501,6 +505,7 @@ MonoBehaviour:
       m_Calls: []
   mBehaviorTree: {fileID: 0}
   mApPortrait: {fileID: 0}
+  animator: {fileID: 0}
   "\u52A8\u753B": {fileID: 5351782611767737258}
   mRigidbody: {fileID: 0}
 --- !u!61 &5351782612994170139

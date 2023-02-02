@@ -10,6 +10,8 @@ namespace Adv
     [TaskDescription("水平方向面向玩家")]
     public class LookAtPlayer : Action
     {
+        [SerializeField] bool AutoGetPlayer = true;
+        [SerializeField] SharedPlayerFSM playerFSM;
         [SerializeField] SharedTransform mTransform;
 
         private float direction;
@@ -18,10 +20,14 @@ namespace Adv
 
         public override void OnStart()
         {
-            if (playerNull)
+            if (AutoGetPlayer && playerNull)
             {
                 player = PlayerFSM.Player.transform;
                 playerNull = false;
+            }
+            else if (!AutoGetPlayer)
+            {
+                player = playerFSM.Value.transform;
             }
 
             direction = player.position.x - mTransform.Value.position.x;

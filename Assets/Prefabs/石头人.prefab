@@ -2982,7 +2982,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 1
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -3009,7 +3008,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 2
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -3036,7 +3034,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 3
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -3063,7 +3060,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 4
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -3090,7 +3086,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 5
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -3361,7 +3356,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 0
-    _level: 0
     _isSocket: 0
   _modifierStack:
     _modifiers_Volume: []
@@ -4164,8 +4158,12 @@ MonoBehaviour:
   "\u987F\u5E27": 1
   "\u987F\u5E27\u51CF\u901F": 0
   "\u4F7F\u7528\u9AA8\u9ABC\u52A8\u753B": 1
+  "\u4F7F\u7528\u5B98\u65B9\u52A8\u753B": 0
   AnimFreezeFrameRange: 0
   CharacterShakeStrength: {x: 0.4, y: 0}
+  "\u53D7\u4F24\u95EA\u70C1": 1
+  "\u9AA8\u9ABC\u52A8\u753B\u95EA\u70C1": 1
+  "\u7269\u7406\u6750\u8D28\u95EA\u70C1": 0
   FlashTime: 0.13
   "\u53EF\u4EE5\u88AB\u51FB\u9000": 0
   HitBackStartSpeed_Front: 0
@@ -4183,6 +4181,7 @@ MonoBehaviour:
       m_Calls: []
   mBehaviorTree: {fileID: 1300135106890726798}
   mApPortrait: {fileID: 1300135107265717882}
+  animator: {fileID: 0}
   "\u52A8\u753B": {fileID: 1300135107265717877}
   mRigidbody: {fileID: 2510641180252735786}
 --- !u!114 &2510641180252735796
