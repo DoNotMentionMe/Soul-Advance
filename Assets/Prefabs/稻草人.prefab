@@ -1874,6 +1874,8 @@ MonoBehaviour:
   "\u53D7\u4F24\u95EA\u70C1": 1
   "\u9AA8\u9ABC\u52A8\u753B\u95EA\u70C1": 1
   "\u7269\u7406\u6750\u8D28\u95EA\u70C1": 0
+  "\u539F\u672C\u6750\u8D28": {fileID: 0}
+  "Flash\u6750\u8D28": {fileID: 0}
   FlashTime: 0.13
   "\u53EF\u4EE5\u88AB\u51FB\u9000": 1
   HitBackStartSpeed_Front: 7
@@ -18650,25 +18652,14 @@ MonoBehaviour:
   "\u72EC\u7ACB\u653B\u51FB\u529B": 0
   "\u653B\u51FB\u529B": 0
   property: {fileID: 1009536904090981109}
+  "On\u73A9\u5BB6\u53D7\u4F24Event": {fileID: 11400000, guid: 24685cae7e7c0d742910e8414711f491, type: 2}
+  Attacker: {fileID: 1009536904090981118}
   AttackLayer:
     serializedVersion: 2
     m_Bits: 64
   AttackHittedEvent:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 11400000, guid: 24685cae7e7c0d742910e8414711f491, type: 2}
-        m_TargetAssemblyTypeName: Adv.OneParameterEventChannel`1[[UnityEngine.GameObject,
-          UnityEngine
-        m_MethodName: Broadcast
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 1009536904090981118}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   AttackHittedEventWithColl:
     m_PersistentCalls:
       m_Calls: []

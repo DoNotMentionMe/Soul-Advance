@@ -36,6 +36,10 @@ ScriptedImporter:
     _asset: {fileID: 2674135870893880689, guid: cd7816c05e2d44444bd41454938aa902, type: 3}
   - _key: DaoCaoRen
     _asset: {fileID: 2674135870893880689, guid: 73fe4303092ce3247a25379f8bc7a534, type: 3}
+  - _key: GuangZhiXiaoJingLing
+    _asset: {fileID: 2674135870893880689, guid: ad44dbc9154e0e34d8545f2c52fe9c57, type: 3}
+  - _key: XiaoShuYao
+    _asset: {fileID: 2674135870893880689, guid: 936b3095605e12e4fa1a4710515a9ef4, type: 3}
   - _key: ShiTouRen
     _asset: {fileID: 2674135870893880689, guid: a3f896f9528bdff4088da5efdfff4136, type: 3}
   _enumGenerate: 0

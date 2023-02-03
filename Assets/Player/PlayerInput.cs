@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using DG.Tweening;
+using NaughtyAttributes;
 
 namespace Adv
 {
@@ -51,7 +52,7 @@ namespace Adv
             RollFrame = null;
             AttackFrame = null;
         }
-
+        [Button]
         public void EnableGameplayInput() => playerInput.Gameplay.Enable();
 
         public void DisableAllInputs()

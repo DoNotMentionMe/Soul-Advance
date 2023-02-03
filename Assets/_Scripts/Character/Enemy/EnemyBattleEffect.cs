@@ -29,9 +29,9 @@ namespace Adv
         [Foldout("被击中表现设置")][ShowIf("受伤闪烁")][SerializeField] float FlashTime = 0.13f;
         [Space]
         [Foldout("被击中表现设置")][SerializeField] bool 可以被击退 = true;
-        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Front;//正面
-        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Back;//背面
-        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackDececleration;
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Front = 6;//正面
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackStartSpeed_Back = 6;//背面
+        [Foldout("被击中表现设置")][ShowIf("可以被击退")][SerializeField] float HitBackDececleration = 25f;
         [Space]
         [Foldout("被击中表现设置")][SerializeField] Vector2 PushPlayerForce_Front;//正面
         [Foldout("被击中表现设置")][SerializeField] Vector2 PushPlayerForce_Back;//背面
@@ -46,7 +46,17 @@ namespace Adv
         [Foldout("组件")][SerializeField] Transform 动画;
         [Foldout("组件")][ShowIf("可以被击退")][SerializeField] Rigidbody2D mRigidbody;
 
-        [Button] public void AnimInitialize() => mApPortrait.Initialize();
+        [Button]
+        public void Initialization()
+        {
+            mBehaviorTree = GetComponent<BehaviorTree>();
+            if (使用官方动画)
+                animator = GetComponentInChildren<Animator>();
+            else if (使用骨骼动画)
+                mApPortrait = GetComponentInChildren<apPortrait>();
+            动画 = transform.GetChild(0);
+            mRigidbody = GetComponent<Rigidbody2D>();
+        }
         private PlayerEffectPerformance playerEffect;
         private PlayerController playerController;
         private SharedBool FreezeFrameing;//敌人行为树必带变量
@@ -216,9 +226,9 @@ namespace Adv
                 animator.speed = AnimFreezeFrameRange;
             yield return waitForFreezeTime;
             if (使用骨骼动画)
-                mApPortrait?.SetAnimationSpeed(1);
+                mApPortrait?.SetAnimationSpeed(1);//TODO 如果设置了敌人加速状态 这里恢复速度是需要恢复为指定倍数
             else if (使用官方动画)
-                animator.speed = AnimFreezeFrameRange;
+                animator.speed = 1;
             FreezeFrameing.Value = false;
 
             HittedFreezeTimeCoroutine = null;

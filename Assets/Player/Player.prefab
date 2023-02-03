@@ -39411,8 +39411,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   "\u72EC\u7ACB\u653B\u51FB\u529B": 0
+  "\u73A9\u5BB6\u653B\u51FB\u76D2": 1
   "\u653B\u51FB\u529B": 0
   property: {fileID: 9117152492469156044}
+  "On\u73A9\u5BB6\u53D7\u4F24Event": {fileID: 0}
+  Attacker: {fileID: 0}
   AttackLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -63320,7 +63323,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 1
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63347,7 +63349,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 2
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63374,7 +63375,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 3
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63401,7 +63401,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 4
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63428,7 +63427,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 5
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63455,7 +63453,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 6
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63482,7 +63479,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 0
     _depth: 7
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63509,7 +63505,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 8
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63536,7 +63531,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 9
-    _level: 1
     _shaderType: 0
     _isCustomShader: 0
     _customShader: {fileID: 0}
@@ -63999,7 +63993,6 @@ MonoBehaviour:
     _meshColor2X_Default: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     _isVisible_Default: 1
     _depth: 0
-    _level: 0
     _isSocket: 0
   _modifierStack:
     _modifiers_Volume: []

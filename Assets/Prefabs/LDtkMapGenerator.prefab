@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   "DTMS\u5730\u56FE\u6A21\u5F0F": 0
-  "DTS\u5730\u56FE\u6570": 5
+  "DTS\u5730\u56FE\u6570": 15
   PlayerEnterLevel: {fileID: 11400000, guid: 2a1198f1e0ddc7c46840dad603cd563d, type: 2}
   PlayerLeaveLevel: {fileID: 11400000, guid: 75772d9a7895fdd44b43bd26817338c0, type: 2}
   EntranceList:
@@ -56,10 +56,14 @@ MonoBehaviour:
   LeftRightList:
   - {fileID: 8413632138130464098, guid: 476a1232de84bdc44b1500feadf1c71b, type: 3}
   - {fileID: 7075149208227800644, guid: a3abbb98e8e4ab04fb7230b8ca8e3086, type: 3}
+  - {fileID: -4538261215649888849, guid: 1d5d0b213b76b204d8d293d57cfcb861, type: 3}
+  - {fileID: -3337962214667196992, guid: 4affde72d2c1157488a6116a077234b8, type: 3}
   - {fileID: -8287524654455775904, guid: bc955ad1149959a44b51ef8ca918419a, type: 3}
   - {fileID: 8414210366902282658, guid: afd657ebc91d7e94da399330d9be45c3, type: 3}
   - {fileID: -5411766676139365970, guid: e5024a292f5070e428ada2b5cbcde7f2, type: 3}
   - {fileID: 3735827315059965886, guid: a3f2a741854b27b4091a6dbaee6fa747, type: 3}
   - {fileID: 1607808677836583495, guid: 85c6364727630554ba80c9acc80b3cbc, type: 3}
   - {fileID: -739805428464022227, guid: 9ec60a404a785324fb6689b05bdae3e7, type: 3}
+  - {fileID: 8697382150470480425, guid: ee3f3393afa468c49947162112a39c78, type: 3}
+  - {fileID: -2100190664906943979, guid: 3450c1f2c340fd1489c5b2d0cafe9217, type: 3}
   "Level_BOSS\u5DE8\u77F3\u5B88\u62A4\u8005": {fileID: 5484760006380903189, guid: 688b98f254174f44d9f0d474a05b3726, type: 3}

@@ -246,7 +246,10 @@ namespace Adv
         public void StartHurt()
         {
             SetVelocity(SetCoord.Y, HurtJumpForce);
-            SetVelocity(SetCoord.X, Math.Sign(transform.position.x - Attacker.transform.position.x) * HurtHoriontalForce);
+            var direction = transform.position.x - Attacker.transform.position.x;
+            if (direction == 0)
+                direction = -1;
+            SetVelocity(SetCoord.X, Mathf.Sign(direction) * HurtHoriontalForce);
             //mRigidbody.velocity += Vector2.right * Math.Sign(transform.position.x - Attacker.transform.position.x) * HurtHoriontalForce;
         }
 

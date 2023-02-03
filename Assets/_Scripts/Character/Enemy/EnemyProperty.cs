@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using BehaviorDesigner.Runtime;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -62,6 +63,13 @@ namespace Adv
         private void OnDestroy()
         {
             On玩家受伤Event.RemoveListenner(HFXL回复血量);
+        }
+
+        [Button]
+        public void Initialization()
+        {
+            mTree = GetComponent<BehaviorTree>();
+            On玩家受伤Event = Resources.Load<GameObjectEventChannel>("EventChannels/On玩家受伤Event");
         }
 
     }
