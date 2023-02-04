@@ -104,9 +104,17 @@ namespace Adv
             waitForFlashInterval = new WaitForSeconds(FlashInterval);
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            AttackHittedEffectCorotine = null;
+        }
+
         private void OnDestroy()
         {
+            StopAllCoroutines();
             mTransform = null;
+            AttackHittedEffectCorotine = null;
         }
 
         /// <summary>

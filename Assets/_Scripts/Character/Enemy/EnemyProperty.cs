@@ -30,7 +30,7 @@ namespace Adv
             base.BeAttacked(damage);
             if (HP <= 0)
             {
-                BeHittedEvent.Invoke();
+                //BeHittedEvent.Invoke();
                 DiedEvent.Invoke();
                 mTree?.SendEvent(死亡事件);
             }

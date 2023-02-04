@@ -141,6 +141,10 @@ namespace Adv
 
         private void OnEnable()
         {
+            StopAllCoroutines();
+            AttackHittedEffectCorotine = null;
+            HurtNotInjuryCoroutine = null;
+
             FullControlVelocitying = false;
             if (HasGetEnablePos)
             {
@@ -151,6 +155,9 @@ namespace Adv
 
         private void OnDestroy()
         {
+            StopAllCoroutines();
+            AttackHittedEffectCorotine = null;
+            HurtNotInjuryCoroutine = null;
             mTransform = null;
             mRigidbody = null;
             effect = null;

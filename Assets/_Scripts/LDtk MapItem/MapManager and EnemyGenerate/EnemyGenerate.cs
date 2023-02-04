@@ -162,6 +162,12 @@ namespace Adv
             // right = transform.position + Vector3.right * halfDistance;
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            生成敌人协程 = null;
+        }
+
         private void OnDestroy()
         {
             //StopAllCoroutines();

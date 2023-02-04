@@ -61,6 +61,18 @@ namespace Adv
             WaitForCD清空连击数时间 = new WaitForSeconds(property.CD清空连击数时间);
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            DQS清空连击数Coroutine = null;
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            DQS清空连击数Coroutine = null;
+        }
+
         IEnumerator DQS倒计时清空连击数()
         {
             //Debug.Log($"开始清零");

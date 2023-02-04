@@ -43,6 +43,18 @@ namespace Adv
             waitForSecondFreezeTime = new WaitForSecondsRealtime(playerFSM.effect.SecondFreezeTime);
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            AttackHittedEffectCorotine = null;
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            AttackHittedEffectCorotine = null;
+        }
+
         #region 控制函数
 
         /// <summary>
