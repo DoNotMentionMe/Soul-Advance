@@ -19,6 +19,12 @@ namespace Adv
             waitForWaitTime = new WaitForSeconds(waitTime);
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            coroutine = null;
+        }
+
         public void Execute()
         {
             if (coroutine != null)

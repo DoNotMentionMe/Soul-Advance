@@ -29,8 +29,8 @@ namespace Adv
             setting.SetLDtkLevelLayerAndTag(root);
             //设置LDtkLevel组件
             setting.SetLDtkLevel(root.GetComponent<LDtkLevel>());
-            //根对象Trigger四个叫缩小一个单位
-            setting.ResetLevelTrigger(root.GetComponent<PolygonCollider2D>());
+            //根对象Trigger四个角缩小一个单位
+            //setting.ResetLevelTrigger(root.GetComponent<PolygonCollider2D>());
             //把地图块的排序图层改为对应位置
             setting.SetRenderer(root.GetComponentInChildren<TilemapRenderer>());
 

@@ -51,6 +51,10 @@ namespace Adv
                 else
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
+            else if (input.AttackFrame.Value || input.AttackFrame.IntervalWithLastTrue <= ctler.AttackBufferTime)
+            {
+                FSM.SwitchState(typeof(PlayerState_Attack));
+            }
 
 
             //移出墙壁，判定是否WallJump，其他逻辑应该写在上面

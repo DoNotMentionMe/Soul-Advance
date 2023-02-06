@@ -67,7 +67,7 @@ MonoBehaviour:
       variableStartIndex: 
       JSONSerialization: '{"EntryTask":{"Type":"BehaviorDesigner.Runtime.Tasks.EntryTask","NodeData":{"Offset":"(613,185)"},"ID":0,"Name":"Entry","Instant":true},"RootTask":{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(3,115)"},"ID":1,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"Adv.GetPlayerTransform","NodeData":{"Offset":"(-380.5,180)"},"ID":2,"Name":"Get
         Player Transform","Instant":true,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":"player","IsShared":true}},{"Type":"Adv.SetPosition","NodeData":{"Offset":"(-222.5,184)"},"ID":3,"Name":"Set
-        Position","Instant":true,"Coordcoord":"Y","SetModesetMode":"\u53e0\u52a0","SharedVector2SetValue":{"Type":"BehaviorDesigner.Runtime.SharedVector2","Name":null,"Vector2mValue":"(0,0.192)"},"SharedTransformSetTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null}},{"Type":"Adv.SetPosition","NodeData":{"Offset":"(-60,180)"},"ID":4,"Name":"Set
+        Position","Instant":true,"Coordcoord":"Y","SetModesetMode":"\u53e0\u52a0","SharedVector2SetValue":{"Type":"BehaviorDesigner.Runtime.SharedVector2","Name":null,"Vector2mValue":"(0,0.599)"},"SharedTransformSetTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null}},{"Type":"Adv.SetPosition","NodeData":{"Offset":"(-60,180)"},"ID":4,"Name":"Set
         Position","Instant":true,"Coordcoord":"X","SetModesetMode":"\u540c\u6b65","SharedVector2SetValue":{"Type":"BehaviorDesigner.Runtime.SharedVector2","Name":null,"Vector2mValue":"(0,0)"},"SharedTransformSetTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":"player","IsShared":true}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.UnityAnimator.Play","NodeData":{"Offset":"(87.5,194)"},"ID":5,"Name":"Play","Instant":true,"SharedGameObjecttargetGameObject":{"Type":"BehaviorDesigner.Runtime.SharedGameObject","Name":null,"GameObjectmValue":0},"SharedStringstateName":{"Type":"BehaviorDesigner.Runtime.SharedString","Name":null,"StringmValue":"Up"},"Int32layer":-1,"SinglenormalizedTime":0},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(231.5,165)"},"ID":6,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":"LiteTime","IsShared":true,"SinglemValue":1},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.UnityAnimator.Play","NodeData":{"Offset":"(350,170)"},"ID":7,"Name":"Play","Instant":true,"SharedGameObjecttargetGameObject":{"Type":"BehaviorDesigner.Runtime.SharedGameObject","Name":null,"GameObjectmValue":1},"SharedStringstateName":{"Type":"BehaviorDesigner.Runtime.SharedString","Name":null,"StringmValue":"Down"},"Int32layer":-1,"SinglenormalizedTime":0},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(467.446777,169.36171)"},"ID":8,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":0.4},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}},{"Type":"BehaviorDesigner.Runtime.Tasks.Unity.UnityGameObject.SetActive","NodeData":{"Offset":"(606.7554,184.424911)"},"ID":9,"Name":"Set
         Active","Instant":true,"SharedGameObjecttargetGameObject":{"Type":"BehaviorDesigner.Runtime.SharedGameObject","Name":null,"GameObjectmValue":2},"SharedBoolactive":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false}}]},"Variables":[{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":"LiteTime","IsShared":true,"SinglemValue":1},{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":"player","IsShared":true}]}'
       fieldSerializationData:
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   "\u72EC\u7ACB\u653B\u51FB\u529B": 1
   "\u73A9\u5BB6\u653B\u51FB\u76D2": 0
-  "\u653B\u51FB\u529B": 100
+  "\u653B\u51FB\u529B": 1
   property: {fileID: 0}
   "On\u73A9\u5BB6\u53D7\u4F24Event": {fileID: 11400000, guid: 24685cae7e7c0d742910e8414711f491, type: 2}
   Attacker: {fileID: 8277996584998484217}
@@ -208,7 +208,7 @@ SpriteRenderer:
   m_SortingLayerID: 723934289
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1587511605, guid: 747877783fe719e4e865de892df4b7bc, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -216,7 +216,7 @@ SpriteRenderer:
   m_Size: {x: 1.375, y: 1.1875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &8277996584998484211

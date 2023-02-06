@@ -164,6 +164,52 @@ Material:
     m_Colors:
     - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_BuildTextureStacks: []
+--- !u!1 &31670371
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31670373}
+  - component: {fileID: 31670372}
+  m_Layer: 0
+  m_Name: Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &31670372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31670371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f16b444fee4a64daa2d53a9d122a8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemy: {fileID: 4136104350689509127, guid: 2ef669246ec754e428fdeb812970acfa, type: 3}
+  releasePos: {x: 5.27, y: -0.407, z: 0}
+--- !u!4 &31670373
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31670371}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 25
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &74443177
 GameObject:
   m_ObjectHideFlags: 0
@@ -21674,6 +21720,10 @@ MonoBehaviour:
   - prefab: {fileID: 8530858300361370732, guid: 162b8e52b157fbc48b992ba07191198b, type: 3}
     size: 20
   - prefab: {fileID: 2510641180252735797, guid: 8684971e89f451b468a76c5412e71506, type: 3}
+    size: 10
+  - prefab: {fileID: 4136104350689509127, guid: 2ef669246ec754e428fdeb812970acfa, type: 3}
+    size: 10
+  - prefab: {fileID: 5644654341941831574, guid: 9199fdd7c45ac2b46ba02dd57ddb0106, type: 3}
     size: 10
   EnemyItem:
   - prefab: {fileID: 1840490654497554363, guid: 1dabcf7011e8e6f40adfc79442213558, type: 3}

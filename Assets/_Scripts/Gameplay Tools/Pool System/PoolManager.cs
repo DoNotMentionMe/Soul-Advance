@@ -171,6 +171,10 @@ namespace Adv
         /// <param name="prefab"></param>
         /// <param name="position"></param>
         /// <returns></returns>
+        public EnemyGeneratedData ReleaseEnemy(EnemyGeneratedData prefab)
+        {
+            return enemyPools[string.Concat(prefab.name, Clone)].PreparedEnemy();
+        }
         public EnemyGeneratedData ReleaseEnemy(EnemyGeneratedData prefab, Vector3 position)
         {
             return enemyPools[string.Concat(prefab.name, Clone)].PreparedEnemy(position);

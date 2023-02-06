@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LDtkUnity;
+using NaughtyAttributes;
 
 namespace Adv
 {
@@ -25,6 +26,7 @@ namespace Adv
         /// <summary>
         /// 重置左右两点的坐标位置并开始开始生成敌人
         /// </summary>
+        [Button]
         public void StartGenerateEnemy()
         {
             //Debug.Log($"开始生成敌人，总数{可生成敌人总数},当前数{当前可生成数}");

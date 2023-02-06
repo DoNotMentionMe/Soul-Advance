@@ -62,6 +62,15 @@ namespace Adv
             return availableEnemy;
         }
 
+        public EnemyGeneratedData PreparedEnemy()
+        {
+            EnemyGeneratedData preparedEnemy = AvailableEnemy();
+
+            preparedEnemy.gameObject.SetActive(true);
+
+            return preparedEnemy;
+        }
+
         public EnemyGeneratedData PreparedEnemy(Vector3 position)
         {
             EnemyGeneratedData preparedEnemy = AvailableEnemy();

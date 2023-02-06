@@ -70,14 +70,11 @@ SpriteAtlas:
     - {fileID: 7008952458067801766, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
     - {fileID: 6797378461766794274, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
     - {fileID: -5807227422602502515, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
-    - {fileID: 181938103868111727, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
-    - {fileID: -1257690592202999930, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
-  - {fileID: 181938103868111727, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: -1376440692007532094, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 5479401263202125453, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 1005806010583121191, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
@@ -97,7 +94,6 @@ SpriteAtlas:
   - {fileID: 7030751621761663416, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 3634455612839581583, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: -120039486380356067, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
-  - {fileID: -1257690592202999930, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 701037264790579359, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 76631552481150365, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: 2947441768844939813, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
@@ -105,7 +101,6 @@ SpriteAtlas:
   - {fileID: 8098596267376903610, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   - {fileID: -3373708170043754795, guid: 663cdc2bae42859428ac9e82df5a3aeb, type: 3}
   m_PackedSpriteNamesToIndex:
-  - TilesTest 1_96_160_16_16
   - TilesTest 1_64_48_16_16
   - TilesTest 1_32_160_16_16
   - TilesTest 1_48_80_16_16
@@ -125,7 +120,6 @@ SpriteAtlas:
   - TilesTest 1_64_160_16_16
   - TilesTest 1_16_80_16_16
   - TilesTest 1_32_112_16_16
-  - TilesTest 1_112_160_16_16
   - TilesTest 1_32_144_16_16
   - TilesTest 1_64_112_16_16
   - TilesTest 1_96_80_16_16
