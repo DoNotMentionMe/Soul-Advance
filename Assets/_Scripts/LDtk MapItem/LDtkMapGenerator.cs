@@ -39,7 +39,7 @@ namespace Adv
         private int PlayerLocalIndex;//当前玩家所在currentLevels中的位置
 
         /// <summary>
-        /// 玩家位置变动时调用，激活玩家附近五个地图块
+        /// 玩家位置变动（进入新地图集）时调用，激活玩家附近五个地图块
         /// </summary>
         private void ResetShowingLevels()
         {
