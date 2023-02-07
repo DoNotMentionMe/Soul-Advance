@@ -43,6 +43,8 @@ namespace Adv
             Register(new PlayerState_Roll());
             Register(new PlayerState_Attack());
             Register(new PlayerState_Hurt());
+            Register(new PlayerState_UpAttack());
+            Register(new PlayerState_DownAttack());
             //Register(new PlayerState_StabAttack());
         }
 

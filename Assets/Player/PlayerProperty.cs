@@ -24,14 +24,18 @@ namespace Adv
                     BL攻击增长倍率 = BLONE攻击倍率;
                     BL能量提升速度倍率 = BLONE能量提升速度倍率;
                     BL移速增加倍率 = BLONE移速增加倍率;
-                    BL动画倍率 = BLONE动画倍率;
+                    BL攻速倍率 = BLONE攻速倍率;
+                    On移动动画速度变更Event.Broadcast(BL移速增加倍率);
+                    On攻击动画速度变更Event.Broadcast(BL攻速倍率);
                 }
                 else if (当前连击数 >= 进入第二阶段连击数)
                 {
                     BL攻击增长倍率 = BLTWO攻击倍率;
                     BL能量提升速度倍率 = BLTWO能量提升速度倍率;
                     BL移速增加倍率 = BLTWO移速增加倍率;
-                    BL动画倍率 = BLTWO动画倍率;
+                    BL攻速倍率 = BLTWO攻速倍率;
+                    On移动动画速度变更Event.Broadcast(BL移速增加倍率);
+                    On攻击动画速度变更Event.Broadcast(BL攻速倍率);
                 }
             }
         }
@@ -40,8 +44,10 @@ namespace Adv
         [ShowNativeProperty] public float BL攻击增长倍率 { get; private set; } = 1;
         [ShowNativeProperty] public float BL能量提升速度倍率 { get; set; } = 1;
         [ShowNativeProperty] public float BL移速增加倍率 { get; set; } = 1;
-        [ShowNativeProperty] public float BL动画倍率 { get; set; } = 1;
+        [ShowNativeProperty] public float BL攻速倍率 { get; set; } = 1;
         [SerializeField] FloatEventChannel On玩家连击Event;
+        [SerializeField] FloatEventChannel On攻击动画速度变更Event;
+        [SerializeField] FloatEventChannel On移动动画速度变更Event;
         #region 连击加成倍率数据
         [Foldout("倍率数据")][SerializeField] int 进入第二阶段连击数 = 50;
         [Foldout("倍率数据")][Header("攻击力")][SerializeField] float BLONE攻击倍率 = 1f;
@@ -50,8 +56,8 @@ namespace Adv
         [Foldout("倍率数据")][SerializeField] float BLTWO能量提升速度倍率 = 2f;
         [Foldout("倍率数据")][Header("移速增加")][SerializeField] float BLONE移速增加倍率 = 1f;
         [Foldout("倍率数据")][SerializeField] float BLTWO移速增加倍率 = 1.5f;
-        [Foldout("倍率数据")][Header("动画速度增加")][SerializeField] float BLONE动画倍率 = 1f;
-        [Foldout("倍率数据")][SerializeField] float BLTWO动画倍率 = 1.5f;
+        [Foldout("倍率数据")][Header("攻速增加")][SerializeField] float BLONE攻速倍率 = 1f;
+        [Foldout("倍率数据")][SerializeField] float BLTWO攻速倍率 = 1.5f;
         #endregion
         [Header("角色数据")]
         public int Attack;

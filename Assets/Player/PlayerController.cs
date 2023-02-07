@@ -12,10 +12,11 @@ namespace Adv
     {
         #region 共有属性
 
-        public float PlayerFace => mTransform.localScale.x;
+        public float PlayerFace => transform.localScale.x;
         public float PlayerVectoryX => mRigidbody.velocity.x;
         public float AttackPostDelay => attackPostDelay;
         public float AttackBufferTime => attackBufferTime;
+        public float DownAttackTime => downAttackTime;
         public float RollBufferTime => rollBufferTime;
         public float JumpBufferTime => jumpBufferTime;
         public float LeaveGroundJumpBufferTime => leaveGroundJumpBufferTime;
@@ -23,6 +24,7 @@ namespace Adv
         public float WallJumpBufferTimeWithnOnAir => wallJumpBufferTimeWithOnAir;
         public float WallJumpBufferTimeWithWallSlide => wallJumpBufferTimeWithWallSlide;
         public float HurtStateTime => hurtStateTime;
+        public bool IsUpAttackEnd => transform.position.y - upAttackStartPosY >= upAttackDistance || mRigidbody.velocity.y < 0;
         public bool ChangeableJump => changeableJump;
         public bool JumpDown => mRigidbody.velocity.y <= 0;
         public bool Grounded => GroundCheck.IsTriggered || OneWayGroundCheck.IsTriggered;
@@ -37,6 +39,8 @@ namespace Adv
 
         #endregion
 
+        [HideInInspector] public bool Attacking = false;
+
         #region 序列化变量
         [Foldout("能力开启")][SerializeField] bool wallFunction;
         [Foldout("能力开启")][SerializeField] bool changeableJump;
@@ -44,9 +48,13 @@ namespace Adv
         [Foldout("基本物理属性")][SerializeField] float MaxFallSpeed;
         [Foldout("玩家物理属性：攻击")][SerializeField] float attackMoveSpeed;
         [Foldout("玩家物理属性：攻击")][SerializeField] float attackExtraMoveSpeed;
-        [Foldout("玩家物理属性：攻击")][SerializeField] float attackPostDelay;
-        [Foldout("玩家物理属性：攻击")][SerializeField] float attackBufferTime;
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackPostDelay;//攻击后停顿时间
+        [Foldout("玩家物理属性：攻击")][SerializeField] float attackBufferTime;//指令缓存时间
         [Foldout("玩家物理属性：攻击")][SerializeField] float AttackDeceleration;
+        [Foldout("玩家物理属性：上挑攻击")][SerializeField] float upAttackSpeed;
+        [Foldout("玩家物理属性：上挑攻击")][SerializeField] float upAttackDistance;
+        [Foldout("玩家物理属性：下劈攻击")][SerializeField] float downAttackSpeed;
+        [Foldout("玩家物理属性：下劈攻击")][SerializeField] float downAttackTime;
         [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float MoveSpeed;
         [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float MoveAcceleration;
         [Foldout("玩家物理属性：移动，翻滚")][SerializeField] float Movedeceleration;
@@ -101,7 +109,6 @@ namespace Adv
         #region 私有变量声明和获取、周期函数
 
         private Rigidbody2D mRigidbody;
-        private Transform mTransform;
         private PlayerEffectPerformance effect;
         private Vector2 WallClimbPos;
         private Vector2 EndWallClimbPos;
@@ -112,6 +119,7 @@ namespace Adv
         private bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
         private float currentHittedBackForce;
+        private float upAttackStartPosY;
         private enum SetCoord { X, Y }
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
@@ -125,7 +133,6 @@ namespace Adv
         private void Awake()
         {
             mRigidbody = GetComponent<Rigidbody2D>();
-            mTransform = transform;
             effect = GetComponent<PlayerEffectPerformance>();
             waitForFixedDeltatime = new WaitForSeconds(Time.fixedDeltaTime);
             waitForHurtNotInjuryTime = new WaitForSeconds(HurtNotInjuryTime);
@@ -148,7 +155,7 @@ namespace Adv
             FullControlVelocitying = false;
             if (HasGetEnablePos)
             {
-                mTransform.position = OnEnablePos;
+                transform.position = OnEnablePos;
             }
 
         }
@@ -158,7 +165,6 @@ namespace Adv
             StopAllCoroutines();
             AttackHittedEffectCorotine = null;
             HurtNotInjuryCoroutine = null;
-            mTransform = null;
             mRigidbody = null;
             effect = null;
             On玩家受伤Event.RemoveListenner(HurtHitBack);
@@ -167,7 +173,7 @@ namespace Adv
         private void FixedUpdate()
         {
             //重力计算
-            if (FullControlVelocitying) return;
+            if (FullControlVelocitying || Attacking) return;
             if (mRigidbody.velocity.y > -MaxFallSpeed)
             {
                 mRigidbody.velocity += Vector2.down * Gravity * Time.fixedDeltaTime;
@@ -189,7 +195,7 @@ namespace Adv
         public void GetOnEnablePos()
         {
             HasGetEnablePos = true;
-            OnEnablePos = mTransform.position;
+            OnEnablePos = transform.position;
         }
 
         /// <summary>
@@ -224,10 +230,10 @@ namespace Adv
             // if (FullControlVelocitying)
             //     mRigidbody.velocity = force;
             //StartCoroutine(GetAPushCoroutine(force));
-            if (FullControlVelocitying && currentHittedBackForce < force)
+            if (FullControlVelocitying && currentHittedBackForce < force && mRigidbody.velocity.x < force)
             {
                 currentHittedBackForce = force;
-                SetVelocity(SetCoord.X, -mTransform.localScale.x * currentHittedBackForce);
+                SetVelocity(SetCoord.X, -transform.localScale.x * currentHittedBackForce);
             }
         }
 
@@ -253,7 +259,7 @@ namespace Adv
         public void StartHurt()
         {
             SetVelocity(SetCoord.Y, HurtJumpForce);
-            var direction = transform.position.x - Attacker.transform.position.x;
+            var direction = base.transform.position.x - Attacker.transform.position.x;
             if (direction == 0)
                 direction = -1;
             SetVelocity(SetCoord.X, Mathf.Sign(direction) * HurtHoriontalForce);
@@ -272,6 +278,8 @@ namespace Adv
 
         public void Attack(float AxesX)
         {
+            Attacking = true;
+
             if (AxesX == 0)
                 SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed);
             //SetVelocity(SetCoord.X, SetScale(AxesX) * attackMoveSpeed * property.BL移速增加倍率);
@@ -281,19 +289,48 @@ namespace Adv
                 //SetVelocity(SetCoord.X, SetScale(AxesX) * (attackMoveSpeed * property.BL移速增加倍率 + attackExtraMoveSpeed));
             }
 
-            if (mRigidbody.velocity.y < -0.1f)
-                SetVelocity(SetCoord.Y, 4f);
+            //if (mRigidbody.velocity.y < -0.1f)
+            SetVelocity(SetCoord.Y, 0f);
         }
 
+        /// <summary>
+        /// 在两个地方调用，
+        /// </summary>
         public void AttackEnd()
         {
             currentHittedBackForce = 0;
+            Attacking = false;
         }
 
         public void MoveWhenAttack(float AxesX)
         {
-            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * property.BL移速增加倍率 * speedRatio * Time.fixedDeltaTime);
+            //var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * property.BL移速增加倍率 * speedRatio * Time.fixedDeltaTime);
+            var VelocityX = Mathf.MoveTowards(mRigidbody.velocity.x, 0, AttackDeceleration * speedRatio * Time.fixedDeltaTime);
             SetVelocity(SetCoord.X, VelocityX);
+        }
+
+        public void UpAttackStart()
+        {
+            //Attacking = true;
+            upAttackStartPosY = transform.position.y;
+            SetVelocity(SetCoord.Y, upAttackSpeed);
+        }
+
+        public void UpAttackEnd()
+        {
+            SetVelocity(SetCoord.Y, 0);
+            //Attacking = false;
+        }
+
+        public void DownAttackStart()
+        {
+            //Attacking = true;
+            SetVelocity(SetCoord.Y, -downAttackSpeed);
+        }
+
+        public void DownAttackEnd()
+        {
+            //Attacking = false;
         }
 
         public void RollStart(float AxesX)
@@ -311,9 +348,9 @@ namespace Adv
         public void Rolling(float AxesX)
         {
             float acceleration = 0;
-            if (mTransform.localScale.x * AxesX > 0)
+            if (transform.localScale.x * AxesX > 0)
                 acceleration = RollDeceleration - RollExtraAcceleration;
-            else if (mTransform.localScale.x * AxesX < 0)
+            else if (transform.localScale.x * AxesX < 0)
                 acceleration = RollDeceleration + RollExtraDeceleration;
             else
                 acceleration = RollDeceleration;
@@ -323,7 +360,7 @@ namespace Adv
 
         public void RollHold()
         {
-            SetVelocity(SetCoord.X, mTransform.localScale.x * RollHoldSpeed * property.BL移速增加倍率);
+            SetVelocity(SetCoord.X, transform.localScale.x * RollHoldSpeed * property.BL移速增加倍率);
         }
 
         public void Jump()
@@ -336,7 +373,7 @@ namespace Adv
         {
             mRigidbody.velocity = Vector2.zero;
             NotInjury(true);
-            if (mTransform.localScale.x > 0)//向右
+            if (transform.localScale.x > 0)//向右
             {
                 WallClimbPos = new Vector2(Mathf.Floor(WallSlideCheck_Font.Pos.x + WallSlideCheck_Font.Length / 2 + 0.05f) - WallClimbXOffset1,
                                             Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset1);
@@ -365,9 +402,9 @@ namespace Adv
             mRigidbody.velocity = Vector2.zero;
             NotInjury(true);
 
-            WallClimbPos = new Vector2(mTransform.position.x,
+            WallClimbPos = new Vector2(transform.position.x,
                                         Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset1);
-            EndWallClimbPos = new Vector2(mTransform.position.x + mTransform.localScale.x * WallClimbXOffset2,
+            EndWallClimbPos = new Vector2(transform.position.x + transform.localScale.x * WallClimbXOffset2,
                                         Mathf.Floor(WallSlideCheck_Font.Pos.y - 0.05f) + WallClimbYOffset2);
             IsFixToWallClimbPos = true;
 #if UNITY_EDITOR
@@ -382,13 +419,13 @@ namespace Adv
         public void EndWallClimb()
         {
             IsFixToWallClimbPos = false;
-            mTransform.position = EndWallClimbPos;
+            transform.position = EndWallClimbPos;
         }
 
         public void FixPosToWallClimbPos()
         {
             if (IsFixToWallClimbPos)
-                mTransform.position = WallClimbPos;
+                transform.position = WallClimbPos;
         }
 
         public void HasWallClimbedEnd()
@@ -408,12 +445,13 @@ namespace Adv
                 OneWayCheck.SetCollEnable(true);
                 onCompleted?.Invoke();
             }, false);
-            mTransform.position -= Vector3.up * DownFallOffsetY;
-            SetVelocity(SetCoord.Y, -5f);
+            transform.position -= Vector3.up * DownFallOffsetY;
+            SetVelocity(SetCoord.Y, -6f);
         }
 
         public void DecelerationWhenChangeableJump()
         {
+            //Debug.Log($"{mRigidbody.velocity.y}");
             var speed = mRigidbody.velocity.y * ScaleChangeableJump;
             SetVelocity(SetCoord.Y, speed);
         }
@@ -422,14 +460,14 @@ namespace Adv
         {
             mRigidbody.velocity = Vector2.zero;
             var wallJumpSpeed = WallJumpSpeed;
-            wallJumpSpeed.x *= mTransform.localScale.x * property.BL移速增加倍率;
+            wallJumpSpeed.x *= transform.localScale.x * property.BL移速增加倍率;
             mRigidbody.velocity += wallJumpSpeed;
         }
 
         public void WallLeave()
         {
             var wallLeaveSpeed = WallLeaveSpeed;
-            wallLeaveSpeed.x *= mTransform.localScale.x * property.BL移速增加倍率;
+            wallLeaveSpeed.x *= transform.localScale.x * property.BL移速增加倍率;
             mRigidbody.velocity = wallLeaveSpeed;
         }
 
@@ -445,7 +483,7 @@ namespace Adv
 
         public void FlipPlayer()
         {
-            SetScale(-(int)mTransform.localScale.x);
+            SetScale(-(int)transform.localScale.x);
         }
 
         #endregion
@@ -491,14 +529,14 @@ namespace Adv
         /// <returns>返回当前玩家朝向</returns>
         public float SetScale(float direction)
         {
-            if (direction == 0) return mTransform.localScale.x;
-            if (mTransform.localScale.x * direction < 0)
+            if (direction == 0) return transform.localScale.x;
+            if (transform.localScale.x * direction < 0)
             {
-                var Scale = mTransform.localScale;
+                var Scale = transform.localScale;
                 Scale.x *= -1;
-                mTransform.localScale = Scale;
+                transform.localScale = Scale;
             }
-            return mTransform.localScale.x;
+            return transform.localScale.x;
         }
 
         /// <summary>

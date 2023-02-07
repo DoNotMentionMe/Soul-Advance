@@ -11,6 +11,7 @@ namespace Adv
     public class PlayerInput : MonoBehaviour,
                                 PlayerInputActions.IGameplayActions
     {
+        public bool EnableInputOnEnable = false;
         private PlayerInputActions playerInput;
 
         public Bool JumpFrame = new Bool(false);//只有按下瞬间那一帧为true
@@ -36,7 +37,8 @@ namespace Adv
 
         private void OnEnable()
         {
-            //EnableGameplayInput();
+            if (EnableInputOnEnable)
+                EnableGameplayInput();
         }
 
         private void OnDisable()

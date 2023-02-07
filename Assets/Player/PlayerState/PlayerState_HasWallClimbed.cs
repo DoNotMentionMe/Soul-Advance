@@ -34,6 +34,10 @@ namespace Adv
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
             //攻击
+            else if (input.AttackFrame.Value && input.AxesY > 0.3f)
+            {
+                FSM.SwitchState(typeof(PlayerState_UpAttack));
+            }
             else if (input.AttackFrame.Value)
             {
                 FSM.SwitchState(typeof(PlayerState_Attack));

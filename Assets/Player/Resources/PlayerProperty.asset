@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: PlayerProperty
   m_EditorClassIdentifier: 
   "On\u73A9\u5BB6\u8FDE\u51FBEvent": {fileID: 11400000, guid: eac30826015c1b7489279ce412270663, type: 2}
+  "On\u653B\u51FB\u52A8\u753B\u901F\u5EA6\u53D8\u66F4Event": {fileID: 11400000, guid: 2c58f78b53b587c4c930ea1f10131cce, type: 2}
+  "On\u79FB\u52A8\u52A8\u753B\u901F\u5EA6\u53D8\u66F4Event": {fileID: 11400000, guid: f511866e8f636714895e0419236bc6d2, type: 2}
   "\u8FDB\u5165\u7B2C\u4E8C\u9636\u6BB5\u8FDE\u51FB\u6570": 40
   "BLONE\u653B\u51FB\u500D\u7387": 1
   "BLTWO\u653B\u51FB\u500D\u7387": 1.2
@@ -20,8 +22,8 @@ MonoBehaviour:
   "BLTWO\u80FD\u91CF\u63D0\u5347\u901F\u5EA6\u500D\u7387": 5
   "BLONE\u79FB\u901F\u589E\u52A0\u500D\u7387": 1
   "BLTWO\u79FB\u901F\u589E\u52A0\u500D\u7387": 1.25
-  "BLONE\u52A8\u753B\u500D\u7387": 1
-  "BLTWO\u52A8\u753B\u500D\u7387": 1.5
+  "BLONE\u653B\u901F\u500D\u7387": 1
+  "BLTWO\u653B\u901F\u500D\u7387": 1.5
   Attack: 100
   InitialHP: 9999
   ExtraHP: 0

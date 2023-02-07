@@ -55,6 +55,10 @@ namespace Adv
             {
                 FSM.SwitchState(typeof(PlayerState_Attack));
             }
+            else if (input.AttackFrame.Value && input.AxesY > 0.3f)
+            {
+                FSM.SwitchState(typeof(PlayerState_UpAttack));
+            }
 
 
             //移出墙壁，判定是否WallJump，其他逻辑应该写在上面

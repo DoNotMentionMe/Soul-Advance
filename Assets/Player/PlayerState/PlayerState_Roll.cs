@@ -66,6 +66,10 @@ namespace Adv
                     FSM.SwitchState(typeof(PlayerState_JumpUp));
                 }
             }
+            else if (input.AttackFrame.Value && input.AxesY > 0.3f)
+            {
+                FSM.SwitchState(typeof(PlayerState_UpAttack));
+            }
             else if (input.AttackFrame.Value && !ctler.HeadTouchGround)
             {
                 FSM.SwitchState(typeof(PlayerState_Attack));
