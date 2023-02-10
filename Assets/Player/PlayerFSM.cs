@@ -8,6 +8,9 @@ namespace Adv
 {
     public class PlayerFSM : StateMachine
     {
+        /// <summary>
+        /// 获取当前场景激活的玩家对象
+        /// </summary>
         public static PlayerFSM Player;
 
         public PlayerState lastState;
@@ -45,6 +48,7 @@ namespace Adv
             Register(new PlayerState_Hurt());
             Register(new PlayerState_UpAttack());
             Register(new PlayerState_DownAttack());
+            Register(new PlayerState_DashAttack());
             //Register(new PlayerState_StabAttack());
         }
 

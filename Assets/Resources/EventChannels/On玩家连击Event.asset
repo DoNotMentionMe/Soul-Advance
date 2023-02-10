@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059ffda6a6fe91344adbd9c27c488b2e, type: 3}
   m_Name: "On\u73A9\u5BB6\u8FDE\u51FBEvent"
   m_EditorClassIdentifier: 
-  comment: 
+  comment: "\u4F20\u5165\u53C2\u6570\u662F\u5F53\u524D\u8FDE\u51FB\u6570"

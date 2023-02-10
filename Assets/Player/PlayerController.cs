@@ -8,6 +8,7 @@ using System;
 
 namespace Adv
 {
+    public enum RollType { Roll, DashAttack, }
     public class PlayerController : MonoBehaviour
     {
         #region 共有属性
@@ -23,7 +24,7 @@ namespace Adv
         public float ClimbUpJumpBufferTime => climbUpJumpBufferTime;
         public float WallJumpBufferTimeWithnOnAir => wallJumpBufferTimeWithOnAir;
         public float WallJumpBufferTimeWithWallSlide => wallJumpBufferTimeWithWallSlide;
-        public float HurtStateTime => hurtStateTime;
+        public float HurtStateTime => hurtStateTime * HurtStateFactor;
         public bool IsUpAttackEnd => transform.position.y - upAttackStartPosY >= upAttackDistance || mRigidbody.velocity.y < 0;
         public bool ChangeableJump => changeableJump;
         public bool JumpDown => mRigidbody.velocity.y <= 0;
@@ -39,11 +40,17 @@ namespace Adv
 
         #endregion
 
+        public float HurtBackFactor { get; set; } = 1;//受伤击退因数
+        public float HurtStateFactor { get; set; } = 1;//受伤僵直时间因数
         [HideInInspector] public bool Attacking = false;
+        [HideInInspector] public bool CanotHitBack = false;
+        public RollType rollType = RollType.Roll;
 
         #region 序列化变量
         [Foldout("能力开启")][SerializeField] bool wallFunction;
         [Foldout("能力开启")][SerializeField] bool changeableJump;
+        [Foldout("能力开启")] public bool CanUpAttack = false;
+        [Foldout("能力开启")] public bool CanDownAttack = false;
         [Foldout("基本物理属性")][SerializeField] float Gravity;
         [Foldout("基本物理属性")][SerializeField] float MaxFallSpeed;
         [Foldout("玩家物理属性：攻击")][SerializeField] float attackMoveSpeed;
@@ -116,11 +123,11 @@ namespace Adv
         private Vector2 OnEnablePos;
         private bool HasGetEnablePos;
         private bool IsFixToWallClimbPos;
-        private bool FullControlVelocitying = false;
+        [HideInInspector] public bool FullControlVelocitying = false;
         private float speedRatio = 1;//用来控制攻击时移动减速度的比例
         private float currentHittedBackForce;
         private float upAttackStartPosY;
-        private enum SetCoord { X, Y }
+        public enum SetCoord { X, Y }
         private List<float> AttackHittedEffectList = new List<float>();//用来记录执行间隔和执行特效次数
         private Coroutine AttackHittedEffectCorotine;//攻击命中顺序执行协程
         private Coroutine HurtNotInjuryCoroutine;
@@ -157,6 +164,9 @@ namespace Adv
             {
                 transform.position = OnEnablePos;
             }
+
+            HurtBackFactor = 1;//受伤击退因数
+            HurtStateFactor = 1;//受伤僵直时间因数
 
         }
 
@@ -227,17 +237,18 @@ namespace Adv
         /// </summary>
         public void GetHittedBackForce(float force)
         {
+            if (CanotHitBack) return;
             // if (FullControlVelocitying)
             //     mRigidbody.velocity = force;
             //StartCoroutine(GetAPushCoroutine(force));
-            if (FullControlVelocitying && currentHittedBackForce < force && mRigidbody.velocity.x < force)
+            if (FullControlVelocitying && currentHittedBackForce < force)
             {
                 currentHittedBackForce = force;
                 SetVelocity(SetCoord.X, -transform.localScale.x * currentHittedBackForce);
             }
         }
 
-        private void StopFullControlVelocity()
+        public void StopFullControlVelocity()
         {
             if (AttackHittedEffectCorotine != null)
             {
@@ -258,11 +269,11 @@ namespace Adv
 
         public void StartHurt()
         {
-            SetVelocity(SetCoord.Y, HurtJumpForce);
+            SetVelocity(SetCoord.Y, HurtJumpForce * HurtBackFactor);
             var direction = base.transform.position.x - Attacker.transform.position.x;
             if (direction == 0)
                 direction = -1;
-            SetVelocity(SetCoord.X, Mathf.Sign(direction) * HurtHoriontalForce);
+            SetVelocity(SetCoord.X, Mathf.Sign(direction) * HurtHoriontalForce * HurtBackFactor);
             //mRigidbody.velocity += Vector2.right * Math.Sign(transform.position.x - Attacker.transform.position.x) * HurtHoriontalForce;
         }
 
@@ -512,7 +523,7 @@ namespace Adv
         /// <summary>
         /// 设置单个坐标方向的速度
         /// </summary>
-        private void SetVelocity(SetCoord coord, float value)
+        public void SetVelocity(SetCoord coord, float value)
         {
             var velocity = mRigidbody.velocity;
             if (coord == SetCoord.X)
@@ -543,7 +554,7 @@ namespace Adv
         /// 使用这个函数进行玩家无敌操作
         /// </summary>
         /// <param name="Enable"></param>
-        private void NotInjury(bool Enable)
+        public void NotInjury(bool Enable)
         {
             if (Enable)
                 StopHurtNorInjury();

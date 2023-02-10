@@ -51,13 +51,13 @@ namespace Adv
                 else
                     FSM.SwitchState(typeof(PlayerState_Idle));
             }
+            else if (ctler.CanUpAttack && input.AttackFrame.Value && input.AxesY > 0.3f)
+            {
+                FSM.SwitchState(typeof(PlayerState_UpAttack));
+            }
             else if (input.AttackFrame.Value || input.AttackFrame.IntervalWithLastTrue <= ctler.AttackBufferTime)
             {
                 FSM.SwitchState(typeof(PlayerState_Attack));
-            }
-            else if (input.AttackFrame.Value && input.AxesY > 0.3f)
-            {
-                FSM.SwitchState(typeof(PlayerState_UpAttack));
             }
 
 

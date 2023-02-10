@@ -21,10 +21,10 @@ namespace Adv
             get
             {
                 //连击数加一
-                property.DQLJS当前连击数 += 1;
-                StartDQS清空连击数();
+                // property.DQLJS当前连击数 += 1;
+                // StartDQS清空连击数();
                 //能量增加
-                property.NLTS能量提升();
+                //property.NLTS能量提升();
                 return (int)(property.Attack * property.BL攻击增长倍率);
             }
             protected set => property.Attack = value;
@@ -48,6 +48,8 @@ namespace Adv
 
         public void StartDQS清空连击数()
         {
+            if (!gameObject.activeSelf) return;
+
             if (DQS清空连击数Coroutine != null)
                 StopCoroutine(DQS清空连击数Coroutine);
             DQS清空连击数Coroutine = StartCoroutine(nameof(DQS倒计时清空连击数));
@@ -59,6 +61,8 @@ namespace Adv
         private void Awake()
         {
             WaitForCD清空连击数时间 = new WaitForSeconds(property.CD清空连击数时间);
+            property.ResetProperty();
+            property.Add加载默认连击阶段模块();
         }
 
         private void OnDisable()
@@ -69,6 +73,7 @@ namespace Adv
 
         private void OnDestroy()
         {
+            property.Remove卸载默认连击阶段模块();
             StopAllCoroutines();
             DQS清空连击数Coroutine = null;
         }

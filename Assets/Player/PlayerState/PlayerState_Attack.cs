@@ -113,12 +113,12 @@ namespace Adv
                     FSM.SwitchState(typeof(PlayerState_JumpUp));
                 }
             }
-            else if (input.AttackFrame.Value && ctler.Grounded && input.AxesY > 0.3f)
+            else if (ctler.CanUpAttack && input.AttackFrame.Value && ctler.Grounded && input.AxesY > 0.3f)
             {
                 ResetAttackState();
                 FSM.SwitchState(typeof(PlayerState_UpAttack));
             }
-            else if (input.AttackFrame.Value && !ctler.Grounded && input.AxesY < -0.3f)
+            else if (ctler.CanDownAttack && input.AttackFrame.Value && !ctler.Grounded && input.AxesY < -0.3f)
             {
                 ResetAttackState();
                 FSM.SwitchState(typeof(PlayerState_DownAttack));

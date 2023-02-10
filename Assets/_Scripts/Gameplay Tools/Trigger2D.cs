@@ -17,6 +17,7 @@ public class Trigger2D : MonoBehaviour
     [SerializeField] UnityEvent OnTriggerEnter = new UnityEvent();
     // public UnityEvent OnTriggerExit = new UnityEvent();
     [SerializeField] UnityEvent<Collider2D> OnTriggerEnterWithCollider = new UnityEvent<Collider2D>();
+    [SerializeField] UnityEvent OnSetCollFalse = new UnityEvent();
     //public UnityEvent<Collider2D> OnTriggerExitWithCollider = new UnityEvent<Collider2D>();
 
     private Collider2D mCol;
@@ -54,7 +55,17 @@ public class Trigger2D : MonoBehaviour
         isTriggeredWithLayer = false;
     }
 
-    public void SetCollEnable(bool enable) => mCol.enabled = enable;
+    /// <summary>
+    /// 玩家的每次攻击状态结束后调用，代表单次攻击的结束
+    /// </summary>
+    public void SetCollEnable(bool enable)
+    {
+        mCol.enabled = enable;
+        if (!enable)
+        {
+            OnSetCollFalse?.Invoke();
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D col)
     {

@@ -9,6 +9,7 @@ namespace Adv
         public override void Enter()
         {
             base.Enter();
+            ctler.CanotHitBack = true;
             animManager.Play(AnimName.DownAttack);
             animManager.effectAnim.Play("DownAttack");
             ctler.DownAttackStart();
@@ -37,6 +38,7 @@ namespace Adv
         public override void Exit()
         {
             base.Exit();
+            ctler.CanotHitBack = false;
             ctler.攻击碰撞体.SetCollEnable(false);
             ctler.DownAttackEnd();
             animManager.effectAnim.Play("Idle");

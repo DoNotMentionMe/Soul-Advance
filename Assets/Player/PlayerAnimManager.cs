@@ -280,5 +280,6 @@ namespace Adv
         GAttack4,
         UpAttack,
         DownAttack,
+        DashAttack,
     }
 }

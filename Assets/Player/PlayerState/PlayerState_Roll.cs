@@ -13,6 +13,8 @@ namespace Adv
 
         public override void Enter()
         {
+            if (ctler.rollType != RollType.Roll) return;
+
             base.Enter();
             animManager.CrossFade(AnimName.Roll);
             effect.Release落地灰尘();
@@ -27,6 +29,12 @@ namespace Adv
 
         public override void LogicUpdate()
         {
+            if (ctler.rollType == RollType.DashAttack)
+            {
+                FSM.SwitchState(typeof(PlayerState_DashAttack));
+                return;
+            }
+
             base.LogicUpdate();
             if (!CountJumpBuffering && !ctler.Grounded)//模拟土狼跳
             {
@@ -66,7 +74,7 @@ namespace Adv
                     FSM.SwitchState(typeof(PlayerState_JumpUp));
                 }
             }
-            else if (input.AttackFrame.Value && input.AxesY > 0.3f)
+            else if (ctler.CanUpAttack && input.AttackFrame.Value && input.AxesY > 0.3f)
             {
                 FSM.SwitchState(typeof(PlayerState_UpAttack));
             }
@@ -95,6 +103,8 @@ namespace Adv
 
         public override void PhysicUpdate()
         {
+            if (ctler.rollType != RollType.Roll) return;
+
             base.PhysicUpdate();
 
             //翻滚移速判定
@@ -104,6 +114,8 @@ namespace Adv
 
         public override void Exit()
         {
+            if (ctler.rollType != RollType.Roll) return;
+
             base.Exit();
             CountJumpBuffering = false;
             RollEnd = false;

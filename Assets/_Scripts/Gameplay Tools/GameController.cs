@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using Cinemachine;
+using UnityEngine.UI;
 
 namespace Adv
 {
@@ -13,21 +14,25 @@ namespace Adv
     {
         [SerializeField] LDtkMapGenerator MapGenerator;
         [SerializeField] UIController UIController;
+        [SerializeField] ExternalAbilitySystem abilitySystem;
         [SerializeField] CinemachineVirtualCamera VirtualCamera;
         [SerializeField] PlayerProperty playerProperty;
         [SerializeField] VoidEventChannel OnBOSS被击杀Event;
+        [SerializeField] VoidEventChannel On玩家死亡Event;
 
         protected override void Awake()
         {
             base.Awake();
             UIController.StartGame.onClick.AddListener(StartGame);
             UIController.PlayAgain.onClick.AddListener(StartGame);
-            OnBOSS被击杀Event.AddListener(QKCJ清空场景);
+            OnBOSS被击杀Event.AddListener(SL胜利Event);
+            On玩家死亡Event.AddListener(SB失败Event);
         }
 
         private void OnDestroy()
         {
-            OnBOSS被击杀Event.RemoveListenner(QKCJ清空场景);
+            OnBOSS被击杀Event.RemoveListenner(SL胜利Event);
+            On玩家死亡Event.RemoveListenner(SB失败Event);
         }
 
         /// <summary>
@@ -47,16 +52,31 @@ namespace Adv
             playerProperty.DQLJS当前连击数 = 0;
             //设置相机跟随
             VirtualCamera.Follow = PlayerFSM.Player.transform;//TODO暂时直接跟随玩家 后面通过相机控制器进行设置
+            //应用局外道具
+            abilitySystem.EffectAllItem();
             //启动输入控制
             PlayerFSM.Player.input.EnableGameplayInput();
             //结束加载
             UIController.DisableJZZ加载中UI();
         }
 
+        public void SL胜利Event()
+        {
+            QKCJ清空场景();
+            UIController.EnableJS结算UI();
+        }
+
+        public void SB失败Event()
+        {
+            QKCJ清空场景();
+            UIController.EnableJS结算UI();
+        }
+
         public void QKCJ清空场景()
         {
+            //删除角色的局外能力
+            abilitySystem.RemoveAllItem();
             MapGenerator.QKCJ清空场景();
-            UIController.EnableJS结算UI();
         }
 
         public void StartGame()
