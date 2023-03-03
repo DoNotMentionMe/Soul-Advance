@@ -19,6 +19,7 @@ namespace Adv
         [Foldout("连击阶段数据")] public LJSJ连击阶段数据 三阶段数据;
 
         private LJJD连击阶段 ljjd连击阶段;
+        private const string Index索引 = "LJJD连击多阶段";
 
         protected override void OnEnable()
         {
@@ -52,10 +53,14 @@ namespace Adv
 
         private void ProcessLJSJ连击阶段数据(LJSJ连击阶段数据 ljsj)
         {
-            playerProperty.BL攻击增长倍率 = ljsj.BL攻击倍率;
-            playerProperty.BL能量提升速度倍率 = ljsj.BL能量提升速度倍率;
-            playerProperty.BL移速增加倍率 = ljsj.BL移速增加倍率;
-            playerProperty.BL攻速倍率 = ljsj.BL攻速倍率;
+            // playerProperty.BL攻击增长倍率 = ljsj.BL攻击倍率;
+            // playerProperty.BL能量提升速度倍率 = ljsj.BL能量提升速度倍率;
+            // playerProperty.BL移速增加倍率 = ljsj.BL移速增加倍率;
+            // playerProperty.BL攻速倍率 = ljsj.BL攻速倍率;
+            playerProperty.属性增长修改(SXLX属性类型.GJL攻击力, Index索引, ljsj.BL攻击倍率);
+            playerProperty.属性增长修改(SXLX属性类型.NLTSSD能量提升速度, Index索引, ljsj.BL能量提升速度倍率);
+            playerProperty.属性增长修改(SXLX属性类型.YS移速, Index索引, ljsj.BL移速增加倍率);
+            playerProperty.属性增长修改(SXLX属性类型.GS攻速, Index索引, ljsj.BL攻速倍率);
             On移动动画速度变更Event.Broadcast(playerProperty.BL移速增加倍率);
             On攻击动画速度变更Event.Broadcast(playerProperty.BL攻速倍率);
         }
