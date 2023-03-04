@@ -27,6 +27,7 @@ namespace Adv
         [ShowNativeProperty] public float BL能量提升速度倍率 { get => 获取增长后属性(能量提升速度倍率, 能量提升速度倍率增长值); }
         [ShowNativeProperty] public float BL移速增加倍率 { get => 获取增长后属性(移速增加倍率, 移速增加倍率增长值); }
         [ShowNativeProperty] public float BL攻速倍率 { get => 获取增长后属性(攻速倍率, 攻速倍率增长值); }
+        public int MaxHP => InitialHP + ExtraHP;
         [SerializeField] VoidEventChannel On玩家死亡Event;
         [SerializeField] FloatEventChannel On玩家连击Event;
         [SerializeField] FloatEventChannel On攻击动画速度变更Event;
@@ -47,6 +48,7 @@ namespace Adv
         [SerializeField] int InitialHP;//初始血量
         [SerializeField] int ExtraHP;//额外血量
         [ReadOnly] public int HP;//当前血量
+        public float 吸血率 = 0;
         [SerializeField] int Max能量值 = 100;
         [SerializeField] int NLTS能量提升速度 = 5;
         public float CD清空连击数时间 = 3;
@@ -118,7 +120,7 @@ namespace Adv
             {
                 newValue *= zzz.Value;
             }
-                Debug.Log($"{newValue}");
+            //Debug.Log($"{newValue}");
             return newValue;
         }
 
@@ -218,6 +220,13 @@ namespace Adv
             }
             else
                 return false;
+        }
+
+        public void IncreaseHP(int HPUp)
+        {
+            HP += HPUp;
+            if (HP > MaxHP)
+                HP = MaxHP;
         }
 
         [Button]
